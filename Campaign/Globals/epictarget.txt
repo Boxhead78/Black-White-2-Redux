@@ -1,0 +1,50 @@
+define script EpicTargeter(whichTown,EpicPos,Volcano)
+
+global ET_FireEpicLocation = 0
+
+
+begin script EpicTargeter(whichTown,EpicPos,Volcano)
+
+    CounterEpic = 0
+    Building = 0
+    Influence = 0
+    InfluencePos = 0
+    minNumber = 0
+    maxNumber = 0
+    ExitLoop = 0
+    Villager = 0
+    TownOK = 0
+
+start
+
+begin loop
+    CounterEpic = 0
+    while CounterEpic < 25 and ExitLoop == 0
+        if Volcano == 0
+            InfluencePos = get player 0 influence at {EpicPos}
+            if InfluencePos < 1
+                ET_FireEpicLocation = marker at {EpicPos}
+            else
+                Building = get random home in town whichTown
+                if Building not exists
+                    ET_FireEpicLocation = marker at {whichTown} + {number from minNumber to maxNumber, number from minNumber to maxNumber}
+                else
+                    ET_FireEpicLocation = marker at {Building} + {number from minNumber to maxNumber, number from minNumber to maxNumber}
+                end if
+            end if
+        else
+            //Try Volcano nearest EpicPos (Due to scripted platoon behaivor in land 11)
+            ET_FireEpicLocation = marker at {EpicPos} + {number from minNumber to maxNumber, number from minNumber to maxNumber}
+        end if
+        Influence = get player 0 influence at {ET_FireEpicLocation}
+        if Influence < 1 and not {ET_FireEpicLocation} under water and not {whichTown} near {ET_FireEpicLocation} radius 30
+            ExitLoop = 1
+        end if
+        CounterEpic++
+    end while
+    minNumber -= 10
+    maxNumber += 10
+    until ExitLoop == 1
+end loop
+
+end script EpicTargeter

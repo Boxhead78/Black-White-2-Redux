@@ -1,0 +1,107 @@
+///////////////////////////////////////////////////////////////////////////////
+//        Persistent data Script
+//    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//  This script is used to save all persistent data
+//  after closing/loading the game. First it stores
+//  all persistent data in a local script which gets
+//  saved after saving the game. After loading the save
+//  this script will store it from the local variable back
+//  into the persistent data.
+//
+//    Start date:        23.12.18            By: Boxhead
+//    Update date:    17.02.19            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+define script SavePersistentDataGetData
+define script SavePersistentDataSetData
+
+global PD_DifficultyID = 0
+global PD_LandID = 0
+global PD_AbortedLand4 = 0
+global PD_PrevLandOver = 0
+global PD_VisitedLand20 = 0
+global PD_SecondPlaythrough = 0
+global PD_SKPExtras = 0
+global PD_SKPAIEpics = 0
+global PD_SKPTutorials = 0
+global PD_SKPAIDifficulty = 0
+global PD_MeleeExperience = 0
+global PD_RangedExperience = 0
+global PD_SiegeExperience = 0
+global PD_Land4Method = 0
+global PD_PlayerCreatureType = 0
+global PD_ForcedSaving = 1
+
+global PD_EpicSpells = 0
+
+global PD_FirstTime = 1
+
+run script SavePersistentDataGetData
+
+begin script SavePersistentDataGetData
+
+start
+
+    if PD_FirstTime == 1
+        PD_FirstTime = 0
+        wait 5 seconds
+    end if
+
+    //Store everything in local variables
+    PD_DifficultyID = persistent data "DIFFICULTY_ID"
+    PD_LandID = persistent data "LAND_ID"
+    PD_AbortedLand4 = persistent data "ABORTED_LAND4"
+    PD_PrevLandOver = persistent data "PREVLAND_OVER"
+    PD_VisitedLand20 = persistent data "VISTED_LAND20"
+    PD_SecondPlaythrough = persistent data "SECOND_PLAYTHROUGH"
+
+    PD_SKPExtras = persistent data "SKP_Extras"
+    PD_SKPAIEpics = persistent data "SKP_AIEpics"
+    PD_SKPTutorials = persistent data "SKP_Tutorials"
+    PD_SKPAIDifficulty = persistent data "SKP_AIDifficulty"
+
+    PD_MeleeExperience = persistent data "MELEE_EXPERIENCE"
+    PD_RangedExperience = persistent data "RANGED_EXPERIENCE"
+    PD_SiegeExperience = persistent data "SIEGE_EXPERIENCE"
+    PD_Land4Method = persistent data "PD_Land4MethodOFCONVERSION"
+    PD_PlayerCreatureType = persistent data "PLAYER_CREATURE_TYPE"
+
+    PD_EpicSpells = persistent data "EPICSPELLS_CHECK"
+
+    run background script SavePersistentDataSetData
+
+end script SavePersistentDataGetData
+
+
+begin script SavePersistentDataSetData
+
+start
+
+begin loop
+    //if bindable action BINDABLE_ACTION_TYPE_ACTION performed or bindable action BINDABLE_ACTION_TYPE_MOVE performed
+        set persistent data "DIFFICULTY_ID" to PD_DifficultyID
+        set persistent data "LAND_ID" to PD_LandID
+        set persistent data "ABORTED_LAND4" to PD_AbortedLand4
+        set persistent data "PREVLAND_OVER" to PD_PrevLandOver
+        set persistent data "VISTED_LAND20" to PD_VisitedLand20
+        set persistent data "SECOND_PLAYTHROUGH" to PD_SecondPlaythrough
+
+        set persistent data "SKP_Extras" to PD_SKPExtras
+        set persistent data "SKP_AIEpics" to PD_SKPAIEpics
+        set persistent data "SKP_Tutorials" to PD_SKPTutorials
+        set persistent data "SKP_AIDifficulty" to PD_SKPAIDifficulty
+
+        set persistent data "MELEE_EXPERIENCE" to PD_MeleeExperience
+        set persistent data "RANGED_EXPERIENCE" to PD_RangedExperience
+        set persistent data "SIEGE_EXPERIENCE" to PD_SiegeExperience
+        set persistent data "PD_Land4MethodOFCONVERSION" to PD_Land4Method
+        set persistent data "PLAYER_CREATURE_TYPE" to PD_PlayerCreatureType
+
+        set persistent data "EPICSPELLS_CHECK" to PD_EpicSpells
+
+        PD_ForcedSaving = 0
+        wait until PD_ForcedSaving == 1 or 300 seconds
+    //end if
+end loop
+
+end script SavePersistentDataSetData

@@ -1,0 +1,256 @@
+define NUMBER_OF_HURRICANES = 11
+define EPIC_OFFSETX_POS = 6
+define EPIC_OFFSETZ_POS = 3
+define ROTATION_OF_EPIC = 8
+
+define script HurricaneCinemaControl(oHurricane)
+define script HurricaneScript
+
+global CinemaFinish = 0
+global hEpic2[NUMBER_OF_HURRICANES]
+global CntH = 0
+global Light255 = 0
+global hEpic = 0
+
+run script Hurrmain
+begin script Hurrmain
+
+start
+    CntH = 0
+    Town[0] = get town with id 0
+    Town[3] = get town with id 3
+    Town[4] = get town with id 4
+    Town[6] = get town with id 6
+    Town[7] = get town with id 7
+    Town[8] = get town with id 8
+    Town[9] = get town with id 9
+    Town[10] = get town with id 10
+    Town[11] = get town with id 11
+    Town[12] = get town with id 12
+    Town[13] = get town with id 13
+    begin loop
+        hEpic2[0] = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_HURRICANE in Town[0]
+        hEpic2[3] = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_HURRICANE in Town[3]
+        hEpic2[4] = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_HURRICANE in Town[4]
+        hEpic2[6] = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_HURRICANE in Town[6]
+        hEpic2[7] = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_HURRICANE in Town[7]
+        hEpic2[8] = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_HURRICANE in Town[8]
+        hEpic2[9] = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_HURRICANE in Town[9]
+        hEpic2[10] = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_HURRICANE in Town[10]
+        hEpic2[11] = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_HURRICANE in Town[11]
+        hEpic2[12] = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_HURRICANE in Town[12]
+        hEpic2[13] = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_HURRICANE in Town[13]
+        if CntH == NUMBER_OF_HURRICANES
+            CntH = 0
+        end if
+        if hEpic2[CntH] left clicked or hEpic2[CntH] right clicked
+            hEpic = hEpic2[CntH] 
+            run background script HurricaneScript
+        end if
+        CntH++
+    end loop
+
+end script Hurrmain
+
+begin script HurricaneCinemaControl(oHurricane)
+          hEpicFoc = marker at {hEpic}+{0,-0,0}
+          HurricanePos = marker at hand position
+          Hurricane = marker at future position of epic miracle oHurricane with time 0 seconds
+          EpicZOffsetHur = marker at (EPIC_OFFSETZ_POS * {hEpic})
+start
+    begin loop
+   if CinemaFinish == 0
+         begin cinema
+                           
+            wait 2 seconds
+                                move camera focus to {HurricanePos} time 5
+                                move camera position to {HurricanePos} time 5
+            wait 2 seconds
+                                set fade red 255 green 255 blue 255 time 2
+                                Light255 = 1
+            wait 2 seconds
+                                set fade in time 1
+                                Light255 = 0
+                                set camera focus to {hEpicFoc}+{0,10,0}
+                                set camera position to {hEpic}+{EPIC_OFFSETX_POS * ROTATION_OF_EPIC/2, 10,EpicZOffsetHur}
+            wait 7 seconds
+                                move camera focus to {hEpic}+{0,30,0} time 13
+                                move camera position to {hEpic}+{EPIC_OFFSETX_POS * ROTATION_OF_EPIC/2,30,EpicZOffsetHur} time 13
+            wait 14 seconds
+                                move camera focus to {hEpic}+{0,140,3} time 1
+            wait 2 seconds
+                                set fade red 255 green 255 blue 255 time 1
+                                Light255 = 1
+            wait 1 second
+                                set camera focus to {HurricanePos}
+                                set camera position to {HurricanePos}+{0,250,180}
+                set fade in time 1
+                Light255 = 0
+            wait 4 seconds
+                                set camera focus follow oHurricane offset {0,240,0}
+                                set camera position follow oHurricane offset {80,240,130}
+            wait 5 seconds
+                                set camera focus follow oHurricane
+                                set camera position follow oHurricane offset {40,100,60}
+            wait 6 seconds
+                                set camera position to {oHurricane}+{80,30,0}
+                                set camera focus to {oHurricane}+{10,30,0}
+            wait 4 seconds
+                                set camera focus follow oHurricane
+                                set camera position follow oHurricane offset {40,200,-150}
+            wait 5 seconds
+                                set camera focus follow oHurricane
+                                set camera position follow oHurricane offset {40,100,60}
+            wait 12 seconds
+                                
+                           enable predefined sky "mainsky" time 5
+            wait 5 seconds
+                    end cinema
+        CinemaFinish = 1
+    else
+        CinemaFinish = 0
+    end if
+        until CinemaFinish == 1 or key KB_ESC down
+
+    if key KB_ESC down
+        skip current cutscene
+        wait 2 seconds
+        if Light255 == 1
+            set fade in time 1
+            Light255 = 0
+        end if
+    end if    
+    end loop
+end script HurricaneCinemaControl
+
+
+begin script HurricaneScript
+
+// Other Variables
+oVisual = 0
+oVisual2 = 0
+oVisual3 = 0
+
+// Hurricane Specific variables
+HurricanePhysics = 0
+HurricanePos = 0
+HurricaneReady = 0
+oHurricane = 0
+HurricaneHeld = 0
+
+// Visual effects to replace wonder's miracle
+Rock1 = 0
+HurricaneSeed = 0
+
+// Camera variables to put cam directly in front of wonder
+RelativePos = 0
+hEpicPos = 0
+hEpicFoc = 0
+
+
+start
+
+begin loop
+    oHurricane = 0
+        RelativePos = marker at get world position from hEpic to {hEpic}
+        hEpicPos = marker at {hEpic}+(hEpic * {RelativePos}+{-20,10,hEpic})
+        hEpicFoc = marker at {hEpic}+{0,-0,0}
+    if hEpic left clicked or hEpic right clicked
+        clear right clicked object
+        clear left clicked object
+        clear right button clicked
+        clear left button clicked
+        wait 1 second
+        if wonder in hand
+            begin loop
+                if bindable action BINDABLE_ACTION_TYPE_ACTION performed
+                    HurricanePos = marker at hand position
+                    oHurricane = create hurricane at {HurricanePos} player 0 direction {125,0,223}
+                    clear player 0 spell charging
+                    run background script HurricaneCinemaControl(oHurricane)
+                    wait 7 seconds
+                    play string sound "SCRIPT1_VEPIC_FLAMETHROWERWHOOSH4"
+                    start music "egypt_chant"
+                    wait 5 seconds
+                    invoke hEpic EPIC_WONDER_STAGE_1
+                    play string sound "SCRIPT3_HEPIC_SYNTH3"
+                    play string sound "SCRIPT1_VEPIC_BEAMOFLIGHTLOOP10"
+                    wait 5 seconds
+                    invoke hEpic EPIC_WONDER_STAGE_2
+                    play string sound "SCRIPT3_HEPIC_SYNTH3"
+                    play string sound "SCRIPT1_VEPIC_BEAMOFLIGHTLOOP10"
+                    wait 1 second
+                    wait 3 seconds
+                    play string sound "SCRIPT3_HEPIC_SYNTH3"
+                    play string sound "SCRIPT1_VEPIC_BEAMOFLIGHTLOOP10"
+                    invoke hEpic EPIC_WONDER_STAGE_3
+                    invoke hEpic EPIC_WONDER_STAGE_4
+                    invoke hEpic EPIC_WONDER_STAGE_5
+                    invoke hEpic EPIC_WONDER_STAGE_6
+                    invoke hEpic EPIC_WONDER_STAGE_7
+                    invoke hEpic EPIC_WONDER_STAGE_8
+                    play string sound "SCRIPT4_SEPIC_BEAMOFLIGHTLOOP7"
+                    wait 2 seconds
+                    play string sound "HURRICANELIGHTNING3"
+                    play string sound "SCRIPT3_HEPIC_SYNTH3"
+                    invoke hEpic EPIC_WONDER_STAGE_9
+                    invoke hEpic EPIC_WONDER_STAGE_10
+                    wait 3 seconds
+                    stop sound "SCRIPT4_SEPIC_BEAMOFLIGHTLOOP7"
+                    wait 1 second
+                    oVisual = create visual effect VISUAL_EFFECT_HURRICANE_BEAM on hEpic time 1
+                    oVisual2 = create visual effect VISUAL_EFFECT_HURRICANE_PULSE on hEpic time 1
+                    play string sound "SCRIPT3_HEPIC_HURRICANELIGHTNING1"
+                    stop sound "HURRICANELIGHTNING2"
+                    wait 2 seconds
+                    wait 1 second
+                    set fade in time 1
+                    invoke oHurricane EPIC_WONDER_STAGE_START_BEAM
+                    oVisual3 = create visual effect VISUAL_EFFECT_HURRICANE_BEAM at {HurricanePos} time -1
+                    play string sound "SCRIPT2_EEPIC_BEAMOFLIGHTSTART1"
+                    stop sound "SCRIPT3_HEPIC_SYNTH2"
+                    stop sound "SCRIPT3_HEPIC_SYNTH3"
+                    stop sound "SCRIPT1_VEPIC_BEAMOFLIGHTLOOP10"
+                    invoke oHurricane EPIC_WONDER_STAGE_END_BEAM
+                    stop music with fadetime 1
+                    start music "hurricane_music"
+                    invoke oHurricane EPIC_CREATE_CLOUDS
+                    invoke oHurricane EPIC_SET_CLOUDS_STORM
+                    invoke oHurricane EPIC_ENTER_TORNADO
+                    wait 0.3 seconds
+                    invoke oHurricane EPIC_START_GROUND_SWIRL
+                    invoke oHurricane EPIC_START_TOP_SWIRL
+                    stop visual effect oVisual3
+                    wait 9 seconds
+                    invoke oHurricane EPIC_MOVE_TORNADO
+                    invoke oHurricane EPIC_CRUMBLE_BUILDINGS
+                    invoke oHurricane EPIC_ENABLE_TORNADO_DESTRUCTION
+                    wait 28 seconds                                
+                    invoke oHurricane EPIC_DISABLE_TORNADO_DESTRUCTION
+                    invoke oHurricane EPIC_STOP_TORNADO
+                    invoke oHurricane EPIC_EXIT_TORNADO
+                    invoke oHurricane EPIC_CLEAR_CLOUDS
+                    invoke oHurricane EPIC_END_TORNADO
+                    delete oHurricane
+                    wait 5 seconds
+                    stop music with fadetime 2
+                    delete oHurricane
+                    invoke hEpic EPIC_WONDER_STAGE_LAST
+                    clear right clicked object
+                    clear right clicked position
+                    clear left clicked object
+                    clear left clicked position
+                    oHurricane = 1
+                else 
+                    oHurricane = 0
+                end if
+                until oHurricane == 1
+            end loop
+        end if
+    end if
+    if oHurricane == 1
+        release loop
+    end if
+end loop
+
+end script HurricaneScript

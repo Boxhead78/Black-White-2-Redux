@@ -1,0 +1,54 @@
+define script RecalculatePlatoonExperienceLevels
+define script LandExit
+
+begin script RecalculatePlatoonExperienceLevels
+    MeleeExperience = 0        
+    RangedExperience = 0    
+    SiegeExperience = 0
+    MeleePlatoon = 0
+    RangedPlatoon = 0
+    SiegePlatoon = 0
+start
+    //Store the best platoon experience the player has.
+    MeleePlatoon = get player 0 most experienced melee platoon 
+    RangedPlatoon = get player 0 most experienced ranged platoon
+    SiegePlatoon = get player 0 most experienced siege weapon
+
+    if MeleePlatoon exists
+        MeleeExperience = get platoon MeleePlatoon experience
+        if MeleeExperience > persistent data "MELEE_EXPERIENCE"
+            PD_ForcedSaving = 1
+            wait until PD_ForcedSaving == 1 or 10 seconds
+            stop script "SavePersistentDataSetData"
+            set persistent data "MELEE_EXPERIENCE" to MeleeExperience
+            run script SavePersistentDataGetData
+        end if
+    end if
+
+    if RangedPlatoon exists
+        RangedExperience = get platoon RangedPlatoon experience
+        if RangedExperience > persistent data "RANGED_EXPERIENCE"
+            PD_ForcedSaving = 1
+            wait until PD_ForcedSaving == 1 or 10 seconds
+            stop script "SavePersistentDataSetData"
+            set persistent data "RANGED_EXPERIENCE" to RangedExperience
+            run script SavePersistentDataGetData
+        end if
+    end if
+
+    if SiegePlatoon exists
+        SiegeExperience = get platoon SiegePlatoon experience
+        if SiegeExperience > persistent data "SIEGE_EXPERIENCE"
+            PD_ForcedSaving = 1
+            wait until PD_ForcedSaving == 1 or 10 seconds
+            stop script "SavePersistentDataSetData"
+            set persistent data "SIEGE_EXPERIENCE" to SiegeExperience
+            run script SavePersistentDataGetData
+        end if
+    end if
+end script RecalculatePlatoonExperienceLevels
+
+begin script LandExit
+start
+    run script RecalculatePlatoonExperienceLevels
+end script LandExit

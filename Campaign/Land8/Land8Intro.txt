@@ -1,0 +1,129 @@
+///////////////////////////////////////////////////////////////////////////////
+//    Land 8 Intro
+//    ~~~~~~~~~~~~~~
+//
+//    Start date:        28.03.18            By: Boxhead
+//    Update date:    01.04.18            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+define False = 0
+define True = 1
+define script LC8_Intro
+
+begin script LC8_Intro
+
+JapaneseL = 0
+JapaneseR = 0
+
+CSMixer = 0
+WindMixer = 0
+
+start
+
+    PD_ForcedSaving = 1
+    wait until PD_ForcedSaving == 1 or 10 seconds
+    stop script "SavePersistentDataSetData"
+    set persistent data "PREVLAND_OVER" to 0
+    run script SavePersistentDataGetData
+
+    WindMixer = create mixer
+    set mixer WindMixer channel AUDIO_MIXER_CHANNEL_GLOBAL to 0.0
+    wait 5 seconds
+    set mixer WindMixer channel AUDIO_MIXER_CHANNEL_GLOBAL to 1.0 with fadetime 2
+    wait 2 seconds
+    destroy mixer WindMixer
+
+    JapaneseL = create VILLAGER VILLAGER_INFO_TARANAGA at {1837.52,239.01,2162.98}
+    JapaneseR = create VILLAGER VILLAGER_INFO_HIROKU at {1842.00,240.36,2161.31}
+    
+    CSMixer = create mixer
+    set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 0.7
+    
+    set JapaneseL focus to {1763.50,156.49,1977.96}
+    set JapaneseR focus to {1763.50,156.49,1977.96}
+    
+    play anim "a_p_chatting_paired01_a" on JapaneseL loop -1
+    play anim "a_p_talk2_male" on JapaneseR loop -1
+    
+    set fade red 0 green 0 blue 0 time 0
+    set game time 05.00
+
+    wait 1 seconds
+    wait 5 seconds
+    set mixer WindMixer channel AUDIO_MIXER_CHANNEL_GLOBAL to 1.0 with fadetime 2
+    wait 2 seconds
+    destroy mixer WindMixer
+    begin cinema
+        wait 2 seconds
+        start music "creaturefightmain_01" loop -1
+        
+        reset camera path
+        queue camera move with position {1959.41,248.00,2322.70} focus {1839.37,243.00,2157.42} time 0.0
+        queue camera move with position {1825.22,242.00,2150.58} focus {1797.44,243.30,2105.48} time 30.0
+        queue camera move with position {1556.44,150.92,1984.73} focus {1465.94,111.65,1984.40} time 8.0
+        
+        //queue camera move with position {1348.470, 366.409, 1969.029} focus {1307.137, 331.830, 1884.801} time 24.0
+        //queue camera move with position {1196.033, 306.546, 1807.846} focus {1129.749, 287.851, 1735.337} time 8.0
+        //queue camera move with position {756.330, 390.260, 1345.381} focus {741.333, 363.694, 1250.142} time 8.0
+        //queue camera move with position {965.262, 390.265, 839.872} focus {1047.262, 353.278, 796.189} time 8.0
+            
+        queue camera move with position {953.29,170.05,2064.86} focus {861.02,155.00,2047.87} time 7.5
+        queue camera move with position {702.17,167.00,2121.46} focus {764.22,149.82,1985.35} time 5.0
+        queue camera move with position {896.54,140.00,1565.43} focus {930.79,105.00,1428.19} time 7.0
+        queue camera move with position {913.85,149.00,1123.01} focus {988.94,103.12,787.80} time 7.0
+        queue camera move with position {1031.35,155.00,781.47} focus {1022.67,103.25,718.85} time 7.0
+        
+        queue camera move with position {1221.95,200.00,739.60} focus {1300.64,161.56,732.46} time 6.0
+        queue camera move with position {PlayerTown} + {-40,20,30} focus {PlayerTown} time 5.0
+        play camera path with easein 4 easeout 8 method SCRIPT_CAMERAPATH_EQUALDISTANCE
+        disable load screen
+        wait 2 seconds
+        set fade in time 2
+        
+        wait 5 seconds
+        //Gen of war:As we ready ourselves, we will let the Greeks prepare for our storm to come.        
+        say "BW2T_SCRIPT_08FINAL_PDM_STARTLAND_10"
+        wait until read
+        //Gen of war:You are right. They have divine help. But the Prophesy says they will rise against those who nearly destroyed them. The Aztecs.        
+        say "BW2T_SCRIPT_08FINAL_PDM_STARTLAND_20"
+        wait until read
+        //Gen of war:If they can triumph over us, we will have no option but to offer ourselves to their side.        
+        say "BW2T_SCRIPT_08FINAL_PDM_STARTLAND_30"
+        wait until read
+        //Gen of city:You speak sense brother. We have both seen what these Greeks can do. But we must make a stand here first.        
+        say "BW2T_SCRIPT_08FINAL_PDM_STARTLAND_40"
+        wait until read
+        
+        eject good spirit
+        eject evil spirit
+        
+        make good spirit play across 0.5 down 0.5 HELPDUDE_KM_08FINAL_ADVISORS_INTRO_G_10_20_30_40_50
+        make evil spirit play across 0.5 down 0.5 HELPDUDE_KM_08FINAL_ADVISORS_INTRO_E_10_20_30_40_50
+        wait until read
+        
+        
+        /*say "BW2T_SCRIPT_08FINAL_ADVISORS_INTRO_10"
+        wait until read
+        say "BW2T_SCRIPT_08FINAL_ADVISORS_INTRO_20"
+        wait until read
+        say "BW2T_SCRIPT_08FINAL_ADVISORS_INTRO_30"
+        wait until read
+        say "BW2T_SCRIPT_08FINAL_ADVISORS_INTRO_40"
+        wait until read
+        say "BW2T_SCRIPT_08FINAL_ADVISORS_INTRO_50"
+        wait until read*/
+        
+
+        send evil spirit home
+        send good spirit home
+        wait until camera ready
+        delete JapaneseL
+        delete JapaneseR
+        stop music with fadetime 4
+
+    end cinema
+    set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 1.0
+
+    IntroFinished = 1
+
+end script LC8_Intro

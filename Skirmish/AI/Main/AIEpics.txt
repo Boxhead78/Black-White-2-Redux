@@ -1,0 +1,155 @@
+///////////////////////////////////////////////////////////////////////////////
+//          Skirmish AI Epics
+//    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//    Start date:        20.10.18            By: Boxhead
+//    Update date:    24.10.18            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+define script SK_AIEpics(PlayerID,Wonder,Type)
+define script SK_AIEpicFireLocation(PlayerID,whichEpic,Wonder)
+
+global FireEpicLocation[SK_MaxPlayers]
+
+begin script SK_AIEpics(PlayerID,Wonder,Type)
+
+    Building = 0
+    Counter = 0
+    EnemyPlatoon = 0
+    NumberofPlatoons = 0
+    EnemyInfluence = 0
+    Siren = 0
+
+start
+
+//begin loop
+if EpicScriptRunning[PlayerID] == 0
+    Counter = 0
+    if Wonder exists
+        //say "Exists = 1.0"
+        //say "Epic exists"
+        if CHARGE of Wonder >= 1.0
+            EpicScriptRunning[PlayerID] = 1
+            //say "Charge = 1.0"
+            if Type == 0
+                begin loop
+                    EnemyPlatoon = get platoon of player Counter nearest {Wonder} radius 1050
+                    NumberofPlatoons = get number of platoon of player Counter at {Wonder} radius 1000
+                    if Counter != PlayerID
+                        if get number of villagers in platoon EnemyPlatoon > 79 or NumberofPlatoons >= 3
+                            FireEpicLocation[PlayerID] = marker at {EnemyPlatoon} + {number from -10 to 10, number from -10 to 10}
+                            EnemyInfluence = get player EnemyIDFinal[PlayerID] influence at {FireEpicLocation[PlayerID]}
+                            Siren = create siren at {FireEpicLocation[PlayerID]} player PlayerID
+                            CHARGE of Wonder = 0.0
+                            run script SirenSpell(Wonder,Siren)
+                        end if
+                    end if
+                    Counter++
+                    until Counter > SK_MaxPlayers
+                end loop
+            elsif Type == 1
+                //say "Fire Epic"
+                run script SK_AIEpicFireLocation(PlayerID,1,Wonder)
+            elsif Type == 2
+                //say "Fire Epic"
+                run script SK_AIEpicFireLocation(PlayerID,2,Wonder)
+            elsif Type == 3
+                //say "Fire Epic"
+                run script SK_AIEpicFireLocation(PlayerID,3,Wonder)
+            end if
+            EpicScriptRunning[PlayerID] = 0
+        end if
+    end if
+    wait number from 45 to 75 seconds
+end if
+
+//end loop
+
+end script SK_AIEpics
+
+//For Hurricane, Earthquake and Volcano
+begin script SK_AIEpicFireLocation(PlayerID,whichEpic,Wonder)
+
+    Building = 0
+    Counter = 0
+    CounterEpic = 0
+    EnemyTown = 0
+    ExitLoop = 0
+    Influence = 0
+    minNumber = -10
+    maxNumber = 10
+    NumberOfTowns = 0
+    TownCentre = 0
+    Platoon = 0
+    Villager = 0
+
+    Hurricane = 0
+    Earthquake = 0
+    Volcano = 0
+
+start
+
+    NumberOfTowns = 0
+    NumberOfTowns = get player PlayerID town total
+    //Get the town
+    begin loop
+        Counter += number from 0 to NumberOfTowns
+        if Counter > SK_MaxTowns
+            Counter = 0
+        end if
+        EnemyTown = get town with id Counter
+        TownCentre = get building ABODE_NUMBER_TOWN_CENTRE in EnemyTown min built 1.0
+        Platoon = get platoon of player PlayerID nearest {EnemyTown} radius 300
+        if PLAYER of EnemyTown == EnemyIDFinal[PlayerID] and TownCentre exists and not town EnemyTown is under takeover from player PlayerID and not Platoon exists and size of EnemyTown > 175
+            ExitLoop = 1
+        end if
+        until ExitLoop == 1
+    end loop
+    
+    ExitLoop = 0
+    //Determine the position
+    begin loop
+        CounterEpic = 0
+        while CounterEpic < 25 and ExitLoop == 0
+            Building = get random abode in town EnemyTown
+            if Building not exists
+                FireEpicLocation[PlayerID] = marker at {EnemyTown} + {number from minNumber to maxNumber, number from minNumber to maxNumber}
+            else
+                FireEpicLocation[PlayerID] = marker at {Building} + {number from minNumber to maxNumber, number from minNumber to maxNumber}
+            end if
+            Influence = get player EnemyIDFinal[PlayerID] influence at {FireEpicLocation[PlayerID]}
+            if 1 == 2//whichEpic == 1 or whichEpic == 3 DEACTIVATED
+                if Influence < 1 and not {FireEpicLocation[PlayerID]} under water and not {EnemyTown} near {FireEpicLocation[PlayerID]} radius 30
+                    ExitLoop = 1
+                end if
+            elsif whichEpic == 1 or whichEpic == 2 or whichEpic == 3
+                Villager = get VILLAGER at {FireEpicLocation[PlayerID]} radius 500
+                if Influence < 1 and not {FireEpicLocation[PlayerID]} under water and Villager exists and not {EnemyTown} near {FireEpicLocation[PlayerID]} radius 30
+                    if Villager can navigate to {FireEpicLocation[PlayerID]}
+                        ExitLoop = 1
+                    end if
+                end if
+            end if
+            CounterEpic++
+        end while
+        minNumber -= 10
+        maxNumber += 10
+        until ExitLoop == 1
+    end loop
+
+    if whichEpic == 1
+        SK_EpicIsRunning[PlayerID] = 1
+        Hurricane = create hurricane at {FireEpicLocation[PlayerID]} player PlayerID direction {EnemyTown}
+        CHARGE of Wonder = 0.0
+        run background script HurricaneSpell(Wonder,Hurricane)
+    elsif whichEpic == 2
+        Earthquake = create earthquake start {EnemyTown} end {FireEpicLocation[PlayerID]} player PlayerID
+        CHARGE of Wonder = 0.0
+        run background script EarthquakeSpell(Wonder,Earthquake)
+    elsif whichEpic == 3
+        Volcano = create volcano at {FireEpicLocation[PlayerID]} player PlayerID
+        CHARGE of Wonder = 0.0
+        run background script VolcanoSpell(Wonder,Volcano)
+    end if
+
+end script SK_AIEpicFireLocation

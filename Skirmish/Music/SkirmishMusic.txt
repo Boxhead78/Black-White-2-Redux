@@ -1,0 +1,445 @@
+///////////////////////////////////////////////////////////////////////////////
+//          Skirmish Music System
+//    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//    This file controls when which music plays during a skirmish match.
+//
+//    Start date:        08.05.18            By: Boxhead
+//    Update date:    07.07.18            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+define script SK_Music
+
+begin script SK_Music
+
+    Number = 0
+    NumberOfPlatoons = 0
+    Platoon = 0
+    musicmixer = 0
+
+    Counter = 0
+    Town_ID[16]
+
+    MusicIsRunning = 0
+
+    PlayerAlignment = 0
+    IntroMusic = 0
+
+start
+
+wait until LoadingScreenOver == 1
+
+Number = number from 1 to 5
+
+if Number == 5
+    start music "creaturefightbuildup_01" loop -1
+    wait 2 seconds
+    SK_MusicIsRunning = 1
+    wait 30 seconds
+    SK_MusicIsRunning = 0
+    wait 2.5 seconds
+    if SK_AltarMusicCounter == 0 stop music with fadetime 9 end if
+    wait 90 seconds
+end if
+
+PlayerAlignment = get player 0 alignment
+if PlayerAlignment < 0
+    Number = number from 1 to 5
+    if Number == 1
+        start music "cut_scene_end_battle 1" loop -1
+        wait 2 seconds
+        SK_MusicIsRunning = 1
+        wait 114 seconds
+        SK_MusicIsRunning = 0
+        wait 2.5 seconds
+        if SK_AltarMusicCounter == 0 stop music with fadetime 9 end if
+        wait 15 seconds
+
+    elsif Number == 2
+        start music "cut_scene_mystery_01" loop -1
+        wait 2 seconds
+        SK_MusicIsRunning = 1
+        wait 54 seconds
+        SK_MusicIsRunning = 0
+        wait 2.5 seconds
+        if SK_AltarMusicCounter == 0 stop music with fadetime 9 end if
+        wait 15 seconds
+
+    elsif Number == 3
+        start music "cut_scene_sinister_01" loop -1
+        wait 2 seconds
+        SK_MusicIsRunning = 1
+        wait 74 seconds
+        SK_MusicIsRunning = 0
+        wait 2.5 seconds
+        if SK_AltarMusicCounter == 0 stop music with fadetime 9 end if
+        wait 15 seconds
+
+    elsif Number == 4
+        start music "cut_scene_sinister_03" loop -1
+        wait 2 seconds
+        SK_MusicIsRunning = 1
+        wait 57 seconds
+        SK_MusicIsRunning = 0
+        wait 2.5 seconds
+        if SK_AltarMusicCounter == 0 stop music with fadetime 9 end if
+        wait 15 seconds
+
+    else
+        start music "nemesis" loop -1
+        wait 2 seconds
+        SK_MusicIsRunning = 1
+        wait 90 seconds
+        SK_MusicIsRunning = 0
+        wait 2.5 seconds
+        if SK_AltarMusicCounter == 0 stop music with fadetime 9 end if
+        wait 15 seconds
+
+    end if
+
+elsif PlayerAlignment >= 0
+    Number = number from 1 to 5
+    if Number == 1
+        start music "cut_scene_celtic_air" loop -1
+        wait 2 seconds
+        SK_MusicIsRunning = 1
+        wait 120 seconds
+        SK_MusicIsRunning = 0
+        wait 2.5 seconds
+        if SK_AltarMusicCounter == 0 stop music with fadetime 9 end if
+        wait 15 seconds
+
+    elsif Number == 2
+        start music "cut_scene_mystery_01" loop -1
+        wait 2 seconds
+        SK_MusicIsRunning = 1
+        wait 54 seconds
+        SK_MusicIsRunning = 0
+        wait 2.5 seconds
+        if SK_AltarMusicCounter == 0 stop music with fadetime 9 end if
+        wait 15 seconds
+
+    elsif Number == 3
+        start music "cut_scene_sad_100_01" loop -1
+        wait 2 seconds
+        SK_MusicIsRunning = 1
+        wait 50 seconds
+        SK_MusicIsRunning = 0
+        wait 2.5 seconds
+        if SK_AltarMusicCounter == 0 stop music with fadetime 9 end if
+        wait 15 seconds
+
+    elsif Number == 4
+        start music "cut_scene_the_awakening" loop -1
+        wait 2 seconds
+        SK_MusicIsRunning = 1
+        wait 120 seconds
+        SK_MusicIsRunning = 0
+        wait 2.5 seconds
+        if SK_AltarMusicCounter == 0 stop music with fadetime 9 end if
+        wait 15 seconds
+
+    else
+        start music "khazar" loop -1
+        wait 2 seconds
+        SK_MusicIsRunning = 1
+        wait 54 seconds
+        SK_MusicIsRunning = 0
+        wait 2.5 seconds
+        if SK_AltarMusicCounter == 0 stop music with fadetime 9 end if
+        wait 15 seconds
+
+    end if
+
+end if
+IntroMusic = 1
+
+wait 120 seconds
+
+begin loop
+
+    if Counter >= 15
+        Counter = 0
+    end if
+
+    Town_ID[Counter] = get town with id Counter
+
+    if MusicIsRunning == 0
+        if PLAYER of Town_ID[Counter] == 0
+            Platoon = 0
+            NumberOfPlatoons = 0
+            Platoon = get platoon of player 1 nearest {Town_ID[Counter]} radius 400
+            NumberOfPlatoons = get number of platoon of player 1 at {Town_ID[Counter]} radius 400
+
+            if Platoon exists and get number of villagers in platoon Platoon > 100 and MusicIsRunning == 0
+                MusicIsRunning = 1
+                Number = number from 0 to 3
+                start dynamic music
+                set dynamic music "small" loop -1 urgent
+                wait 2 seconds
+                SK_MusicIsRunning = 1
+                SK_DynamicMusicIsRunning = 1
+                wait 40 seconds
+                if Number == 0
+                    set dynamic music "largeevent1" loop -1 urgent
+                    wait 30 seconds
+                    set dynamic music "medium" loop -1
+
+                elsif Number == 1
+                    set dynamic music "smallevent4" loop 0 urgent
+                    wait 8 seconds
+                    set dynamic music "medium" loop -1
+
+                elsif Number == 2
+                    set dynamic music "medium" loop -1
+
+                elsif Number == 3
+                    set dynamic music "large" loop -1
+                    wait 45 seconds
+                    set dynamic music "medium" loop -1
+
+                end if
+            elsif NumberOfPlatoons >= 4 and MusicIsRunning == 0
+                MusicIsRunning = 1
+                Number = number from 0 to 3
+                start dynamic music
+                set dynamic music "small" loop -1 urgent
+                wait 2 seconds
+                SK_MusicIsRunning = 1
+                SK_DynamicMusicIsRunning = 1
+                wait 40 seconds
+                if Number == 0
+                    set dynamic music "largeevent1" loop -1 urgent
+                    wait 30 seconds
+                    set dynamic music "medium" loop -1
+
+                elsif Number == 1
+                    set dynamic music "smallevent4" loop 0 urgent
+                    wait 8 seconds
+                    set dynamic music "medium" loop -1
+
+                elsif Number == 2
+                    set dynamic music "medium" loop -1
+
+                elsif Number == 3
+                    set dynamic music "large" loop -1
+                    wait 45 seconds
+                    set dynamic music "medium" loop -1
+
+                end if
+            end if
+
+            Platoon = 0
+            NumberOfPlatoons = 0
+            Platoon = get platoon of player 2 nearest {Town_ID[Counter]} radius 400
+            NumberOfPlatoons = get number of platoon of player 2 at {Town_ID[Counter]} radius 400
+
+            if Platoon exists and get number of villagers in platoon Platoon > 100 and MusicIsRunning == 0
+                MusicIsRunning = 1
+                Number = number from 0 to 3
+                start dynamic music
+                set dynamic music "small" loop -1 urgent
+                wait 2 seconds
+                SK_MusicIsRunning = 1
+                SK_DynamicMusicIsRunning = 1
+                wait 40 seconds
+                if Number == 0
+                    set dynamic music "largeevent1" loop -1 urgent
+                    wait 30 seconds
+                    set dynamic music "medium" loop -1
+
+                elsif Number == 1
+                    set dynamic music "smallevent4" loop 0 urgent
+                    wait 8 seconds
+                    set dynamic music "medium" loop -1
+
+                elsif Number == 2
+                    set dynamic music "medium" loop -1
+
+                elsif Number == 3
+                    set dynamic music "large" loop -1
+                    wait 45 seconds
+                    set dynamic music "medium" loop -1
+
+                end if
+            elsif NumberOfPlatoons >= 4 and MusicIsRunning == 0
+                MusicIsRunning = 1
+                Number = number from 0 to 3
+                start dynamic music
+                set dynamic music "small" loop -1 urgent
+                wait 2 seconds
+                SK_MusicIsRunning = 1
+                SK_DynamicMusicIsRunning = 1
+                wait 40 seconds
+                if Number == 0
+                    set dynamic music "largeevent1" loop -1 urgent
+                    wait 30 seconds
+                    set dynamic music "medium" loop -1
+
+                elsif Number == 1
+                    set dynamic music "smallevent4" loop 0 urgent
+                    wait 8 seconds
+                    set dynamic music "medium" loop -1
+
+                elsif Number == 2
+                    set dynamic music "medium" loop -1
+
+                elsif Number == 3
+                    set dynamic music "large" loop -1
+                    wait 45 seconds
+                    set dynamic music "medium" loop -1
+
+                end if
+            end if
+
+            Platoon = 0
+            NumberOfPlatoons = 0
+            Platoon = get platoon of player 3 nearest {Town_ID[Counter]} radius 400
+            NumberOfPlatoons = get number of platoon of player 3 at {Town_ID[Counter]} radius 400
+
+            if Platoon exists and get number of villagers in platoon Platoon > 100 and MusicIsRunning == 0
+                MusicIsRunning = 1
+                Number = number from 0 to 3
+                start dynamic music
+                set dynamic music "small" loop -1 urgent
+                wait 2 seconds
+                SK_MusicIsRunning = 1
+                SK_DynamicMusicIsRunning = 1
+                wait 40 seconds
+                if Number == 0
+                    set dynamic music "largeevent1" loop -1 urgent
+                    wait 30 seconds
+                    set dynamic music "medium" loop -1
+
+                elsif Number == 1
+                    set dynamic music "smallevent4" loop 0 urgent
+                    wait 8 seconds
+                    set dynamic music "medium" loop -1
+
+                elsif Number == 2
+                    set dynamic music "medium" loop -1
+
+                elsif Number == 3
+                    set dynamic music "large" loop -1
+                    wait 45 seconds
+                    set dynamic music "medium" loop -1
+
+                end if
+            elsif NumberOfPlatoons >= 4 and MusicIsRunning == 0
+                MusicIsRunning = 1
+                Number = number from 0 to 3
+                start dynamic music
+                set dynamic music "small" loop -1 urgent
+                wait 2 seconds
+                SK_MusicIsRunning = 1
+                SK_DynamicMusicIsRunning = 1
+                wait 40 seconds
+                if Number == 0
+                    set dynamic music "largeevent1" loop -1 urgent
+                    wait 30 seconds
+                    set dynamic music "medium" loop -1
+
+                elsif Number == 1
+                    set dynamic music "smallevent4" loop 0 urgent
+                    wait 8 seconds
+                    set dynamic music "medium" loop -1
+
+                elsif Number == 2
+                    set dynamic music "medium" loop -1
+
+                elsif Number == 3
+                    set dynamic music "large" loop -1
+                    wait 45 seconds
+                    set dynamic music "medium" loop -1
+
+                end if
+            end if
+
+        end if
+
+        if PLAYER of Town_ID[Counter] == 1 or PLAYER of Town_ID[Counter] == 2 or PLAYER of Town_ID[Counter] == 3
+            Platoon = 0
+            NumberOfPlatoons = 0
+            Platoon = get platoon of player 0 nearest {Town_ID[Counter]} radius 400
+            NumberOfPlatoons = get number of platoon of player 0 at {Town_ID[Counter]} radius 400
+
+            if Platoon exists and get number of villagers in platoon Platoon > 50 and MusicIsRunning == 0
+                MusicIsRunning = 1
+                Number = number from 0 to 3
+                start dynamic music
+                set dynamic music "small" loop -1 urgent
+                wait 2 seconds
+                SK_MusicIsRunning = 1
+                SK_DynamicMusicIsRunning = 1
+                wait 40 seconds
+                if Number == 0
+                    set dynamic music "largeevent1" loop -1 urgent
+                    wait 30 seconds
+                    set dynamic music "medium" loop -1
+
+                elsif Number == 1
+                    set dynamic music "smallevent4" loop 0 urgent
+                    wait 8 seconds
+                    set dynamic music "medium" loop -1
+
+                elsif Number == 2
+                    set dynamic music "medium" loop -1
+
+                elsif Number == 3
+                    set dynamic music "large" loop -1
+                    wait 45 seconds
+                    set dynamic music "medium" loop -1
+
+                end if
+            elsif NumberOfPlatoons > 3 and MusicIsRunning == 0
+                MusicIsRunning = 1
+                Number = number from 0 to 3
+                start dynamic music
+                set dynamic music "small" loop -1 urgent
+                wait 2 seconds
+                SK_MusicIsRunning = 1
+                SK_DynamicMusicIsRunning = 1
+                wait 40 seconds
+                if Number == 0
+                    set dynamic music "largeevent1" loop -1 urgent
+                    wait 30 seconds
+                    set dynamic music "medium" loop -1
+
+                elsif Number == 1
+                    set dynamic music "smallevent4" loop 0 urgent
+                    wait 8 seconds
+                    set dynamic music "medium" loop -1
+
+                elsif Number == 2
+                    set dynamic music "medium" loop -1
+
+                elsif Number == 3
+                    set dynamic music "large" loop -1
+                    wait 45 seconds
+                    set dynamic music "medium" loop -1
+
+                end if
+            end if
+
+        end if
+    end if
+
+    if MusicIsRunning == 1
+        MusicIsRunning = 0
+        wait 300 seconds
+        musicmixer = create mixer
+        set mixer musicmixer channel AUDIO_MIXER_CHANNEL_MUSIC to 0.0 with fadetime 10
+        wait 10 seconds 
+        SK_MusicIsRunning = 0
+        SK_DynamicMusicIsRunning = 0
+        wait 2 seconds
+        stop dynamic music
+        destroy mixer musicmixer with fadetime 3
+        wait number from 100 to 250 seconds
+    end if
+
+    Counter++
+
+end loop
+
+end script SK_Music

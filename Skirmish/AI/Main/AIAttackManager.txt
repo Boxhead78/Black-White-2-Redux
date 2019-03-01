@@ -1,0 +1,2120 @@
+///////////////////////////////////////////////////////////////////////////////
+//        Skirmish AI Attack Manager
+//    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//    Start date:        07.10.18            By: Boxhead
+//    Update date:    07.10.18            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+//-----------------------------------------------------------------------------
+//    Globals
+//-----------------------------------------------------------------------------
+
+//Army Types
+define Melee                             = 0
+define Ranged                            = 1
+define Random                           = 2
+//Army Behaivours
+define Attacker                            = 0
+define Escort                            = 1
+define Conqueror                        = 2 //Nearest Settlement Attacker
+define Patrol                            = 3
+define Special                            = 4
+
+define PlatoonWaitTime                    = 30 //Wait for other Platoons
+
+define script SK_ChooseEnemy(PlayerID,EnemyID)
+define script SK_AttackLogic(PlayerID)
+define script SK_ArmyBehaivours(PlayerID,Platoon,Type,Task,AttackImmediately,Waypoint1,Waypoint2,Waypoint3,Waypoint4,AICapital)
+define script SK_SiegeWeaponBehaivours(PlayerID,SiegeWeapon,AttackImmediately,Waypoint1,Waypoint2,Waypoint3,Waypoint4,AICapital)
+define script SK_ArmyTimers(PlayerID)
+
+global AttackPathCenterPlayer1[4]
+global AttackPathFlankPlayer1[4]
+global AttackPathBackdoorPlayer1[4]
+global AttackPathCenterPlayer2[4]
+global AttackPathFlankPlayer2[4]
+global AttackPathBackdoorPlayer2[4]
+global AttackPathCenterPlayer3[4]
+global AttackPathFlankPlayer3[4]
+global AttackPathBackdoorPlayer3[4]
+global EnemyIDFinal[SK_MaxPlayers]
+
+global PlatoonMoveTimer1[SK_MaxPlayers]
+global PlatoonMoveTimer2[SK_MaxPlayers]
+global PlatoonMoveTimer3[SK_MaxPlayers]
+global PlatoonMoveTimer4[SK_MaxPlayers]
+global PlatoonWaitTimer[SK_MaxPlayers]
+global ReadyToAttack[SK_MaxPlayers]
+
+global script1[SK_MaxPlayers]
+global script2[SK_MaxPlayers]
+global script3[SK_MaxPlayers]
+global script4[SK_MaxPlayers]
+global script5[SK_MaxPlayers]
+
+//-----------------------------------------------------------------------------
+
+//Choose random neighbor player
+begin script SK_ChooseEnemy(PlayerID,EnemyID)
+
+    AbortLoop = 0
+    EnemySet = 0
+    EnemySuccessful = 0
+    Number = 0
+    NumberOfTowns = 0
+    Timer = create timer for number from 900 to 1800 seconds
+
+start
+
+run background script SK_ArmyTimers(PlayerID)
+
+begin loop
+
+    //say "Get Enemy"
+    if EnemyID == 4
+        EnemyID = 0
+    end if
+
+    if PlayerID == 1 and EnemyID == 3
+        NumberOfTowns = get player 0 town total
+        if NumberOfTowns == 0
+            NumberOfTowns = get player 2 town total
+            if NumberOfTowns == 0
+                //Neighbors are dead, so set enemy
+                EnemySet = 1
+            else
+                run background script SK_ChooseEnemy(PlayerID,number from 0 to 3)
+                AbortLoop = 1
+            end if
+        else
+            run background script SK_ChooseEnemy(PlayerID,number from 0 to 3)
+            AbortLoop = 1
+        end if
+
+    elsif PlayerID == 2 and EnemyID == 0
+        NumberOfTowns = get player 1 town total
+        if NumberOfTowns == 0
+            NumberOfTowns = get player 3 town total
+            if NumberOfTowns == 0
+                //Neighbors are dead, so set enemy
+                EnemySet = 1
+            else
+                run background script SK_ChooseEnemy(PlayerID,number from 0 to 3)
+                AbortLoop = 1
+            end if
+        else
+            run background script SK_ChooseEnemy(PlayerID,number from 0 to 3)
+            AbortLoop = 1
+        end if
+
+    elsif PlayerID == 3 and EnemyID == 1
+        NumberOfTowns = get player 0 town total
+        if NumberOfTowns == 0
+            NumberOfTowns = get player 2 town total
+            if NumberOfTowns == 0
+                //Neighbors are dead, so set enemy
+                EnemySet = 1
+            else
+                run background script SK_ChooseEnemy(PlayerID,number from 0 to 3)
+                AbortLoop = 1
+            end if
+        else
+            run background script SK_ChooseEnemy(PlayerID,number from 0 to 3)
+            AbortLoop = 1
+        end if
+    end if
+
+    if EnemySet == 0 and AbortLoop == 0
+        NumberOfTowns = get player EnemyID town total
+        if PlayerID == EnemyID
+            run background script SK_ChooseEnemy(PlayerID,number from 0 to 3)
+            AbortLoop = 1
+
+        elsif NumberOfTowns == 0
+            run background script SK_ChooseEnemy(PlayerID,number from 0 to 3)
+            AbortLoop = 1
+
+        end if
+    end if
+
+    if AbortLoop == 0
+        wait 2.5 seconds
+        //say "EnemyID = $d" with number EnemyID
+        SK_EnemyID[PlayerID] = EnemyID
+
+        //Set Attack Paths
+        //Confusing code ahead. It sets attack paths for players with Id 1 to 3.
+        //Look into Land**Waypoints.txt for the waypoints
+        //2 Player Maps
+        if SK_PlayerAmount == 1
+            if PlayerID == 1
+                if EnemyID == 0
+                    //Center
+                    AttackPathCenterPlayer1[0] = Center1[3]
+                    AttackPathCenterPlayer1[1] = Center1[2]
+                    AttackPathCenterPlayer1[2] = Center1[1]
+                    AttackPathCenterPlayer1[3] = Center1[0]
+                    //Flank
+                    AttackPathFlankPlayer1[0] = Flank1[3]
+                    AttackPathFlankPlayer1[1] = Flank1[2]
+                    AttackPathFlankPlayer1[2] = Flank1[1]
+                    AttackPathFlankPlayer1[3] = Flank1[0]
+                    //Backdoor
+                    AttackPathBackdoorPlayer1[0] = Backdoor1[3]
+                    AttackPathBackdoorPlayer1[1] = Backdoor1[2]
+                    AttackPathBackdoorPlayer1[2] = Backdoor1[1]
+                    AttackPathBackdoorPlayer1[3] = Backdoor1[0]
+
+                end if
+            end if
+        end if
+        //3 Player Maps
+        if SK_PlayerAmount == 2
+            if PlayerID == 1
+                if EnemyID == 0
+                    //Center
+                    AttackPathCenterPlayer1[0] = Center1[3]
+                    AttackPathCenterPlayer1[1] = Center1[2]
+                    AttackPathCenterPlayer1[2] = Center1[1]
+                    AttackPathCenterPlayer1[3] = Center1[0]
+                    //Flank
+                    AttackPathFlankPlayer1[0] = Flank1[3]
+                    AttackPathFlankPlayer1[1] = Flank1[2]
+                    AttackPathFlankPlayer1[2] = Flank1[1]
+                    AttackPathFlankPlayer1[3] = Flank1[0]
+                    //Backdoor
+                    AttackPathBackdoorPlayer1[0] = Backdoor1[3]
+                    AttackPathBackdoorPlayer1[1] = Backdoor1[2]
+                    AttackPathBackdoorPlayer1[2] = Backdoor1[1]
+                    AttackPathBackdoorPlayer1[3] = Backdoor1[0]
+
+                elsif EnemyID == 2
+                    //Center
+                    AttackPathCenterPlayer1[0] = Center2[0]
+                    AttackPathCenterPlayer1[1] = Center2[1]
+                    AttackPathCenterPlayer1[2] = Center2[2]
+                    AttackPathCenterPlayer1[3] = Center2[3]
+                    //Flank
+                    AttackPathFlankPlayer1[0] = Flank2[0]
+                    AttackPathFlankPlayer1[1] = Flank2[1]
+                    AttackPathFlankPlayer1[2] = Flank2[2]
+                    AttackPathFlankPlayer1[3] = Flank2[3]
+                    //Backdoor
+                    AttackPathBackdoorPlayer1[0] = Backdoor2[0]
+                    AttackPathBackdoorPlayer1[1] = Backdoor2[1]
+                    AttackPathBackdoorPlayer1[2] = Backdoor2[2]
+                    AttackPathBackdoorPlayer1[3] = Backdoor2[3]
+
+                end if
+
+            elsif PlayerID == 2
+                if EnemyID == 0
+                    //Center
+                    AttackPathCenterPlayer2[0] = Center3[0]
+                    AttackPathCenterPlayer2[1] = Center3[1]
+                    AttackPathCenterPlayer2[2] = Center3[2]
+                    AttackPathCenterPlayer2[3] = Center3[3]
+                    //Flank
+                    AttackPathFlankPlayer2[0] = Flank3[0]
+                    AttackPathFlankPlayer2[1] = Flank3[1]
+                    AttackPathFlankPlayer2[2] = Flank3[2]
+                    AttackPathFlankPlayer2[3] = Flank3[3]
+                    //Backdoor
+                    AttackPathBackdoorPlayer2[0] = Backdoor3[0]
+                    AttackPathBackdoorPlayer2[1] = Backdoor3[1]
+                    AttackPathBackdoorPlayer2[2] = Backdoor3[2]
+                    AttackPathBackdoorPlayer2[3] = Backdoor3[3]
+                    
+                elsif EnemyID == 1
+                    //Center
+                    AttackPathCenterPlayer2[0] = Center2[3]
+                    AttackPathCenterPlayer2[1] = Center2[2]
+                    AttackPathCenterPlayer2[2] = Center2[1]
+                    AttackPathCenterPlayer2[3] = Center2[0]
+                    //Flank
+                    AttackPathFlankPlayer2[0] = Flank2[3]
+                    AttackPathFlankPlayer2[1] = Flank2[2]
+                    AttackPathFlankPlayer2[2] = Flank2[1]
+                    AttackPathFlankPlayer2[3] = Flank2[0]
+                    //Backdoor
+                    AttackPathBackdoorPlayer2[0] = Backdoor2[3]
+                    AttackPathBackdoorPlayer2[1] = Backdoor2[2]
+                    AttackPathBackdoorPlayer2[2] = Backdoor2[1]
+                    AttackPathBackdoorPlayer2[3] = Backdoor2[0]
+                    
+                end if
+            end if
+        end if
+
+        //4 Player Maps
+        if SK_PlayerAmount == 3
+            if PlayerID == 1
+                if EnemyID == 0
+                    //Center
+                    AttackPathCenterPlayer1[0] = Center1[3]
+                    AttackPathCenterPlayer1[1] = Center1[2]
+                    AttackPathCenterPlayer1[2] = Center1[1]
+                    AttackPathCenterPlayer1[3] = Center1[0]
+                    //Flank
+                    AttackPathFlankPlayer1[0] = Flank1[3]
+                    AttackPathFlankPlayer1[1] = Flank1[2]
+                    AttackPathFlankPlayer1[2] = Flank1[1]
+                    AttackPathFlankPlayer1[3] = Flank1[0]
+                    //Backdoor
+                    AttackPathBackdoorPlayer1[0] = Backdoor1[3]
+                    AttackPathBackdoorPlayer1[1] = Backdoor1[2]
+                    AttackPathBackdoorPlayer1[2] = Backdoor1[1]
+                    AttackPathBackdoorPlayer1[3] = Backdoor1[0]
+
+                elsif EnemyID == 2
+                    //Center
+                    AttackPathCenterPlayer1[0] = Center2[0]
+                    AttackPathCenterPlayer1[1] = Center2[1]
+                    AttackPathCenterPlayer1[2] = Center2[2]
+                    AttackPathCenterPlayer1[3] = Center2[3]
+                    //Flank
+                    AttackPathFlankPlayer1[0] = Flank2[0]
+                    AttackPathFlankPlayer1[1] = Flank2[1]
+                    AttackPathFlankPlayer1[2] = Flank2[2]
+                    AttackPathFlankPlayer1[3] = Flank2[3]
+                    //Backdoor
+                    AttackPathBackdoorPlayer1[0] = Backdoor2[0]
+                    AttackPathBackdoorPlayer1[1] = Backdoor2[1]
+                    AttackPathBackdoorPlayer1[2] = Backdoor2[2]
+                    AttackPathBackdoorPlayer1[3] = Backdoor2[3]
+
+                elsif EnemyID == 3
+                    Number = number from 1 to 2
+                    if Number == 1
+                        //Center
+                        AttackPathCenterPlayer1[0] = Center4[3]
+                        AttackPathCenterPlayer1[1] = Center4[2]
+                        AttackPathCenterPlayer1[2] = Center4[1]
+                        AttackPathCenterPlayer1[3] = Center4[0]
+                        //Flank
+                        AttackPathFlankPlayer1[0] = Flank4[3]
+                        AttackPathFlankPlayer1[1] = Flank4[2]
+                        AttackPathFlankPlayer1[2] = Flank4[1]
+                        AttackPathFlankPlayer1[3] = Flank4[0]
+                        //Backdoor
+                        AttackPathBackdoorPlayer1[0] = Backdoor4[3]
+                        AttackPathBackdoorPlayer1[1] = Backdoor4[2]
+                        AttackPathBackdoorPlayer1[2] = Backdoor4[1]
+                        AttackPathBackdoorPlayer1[3] = Backdoor4[0]
+
+                    else
+                        //Center
+                        AttackPathCenterPlayer1[0] = Center3[0]
+                        AttackPathCenterPlayer1[1] = Center3[1]
+                        AttackPathCenterPlayer1[2] = Center3[2]
+                        AttackPathCenterPlayer1[3] = Center3[3]
+                        //Flank
+                        AttackPathFlankPlayer1[0] = Flank3[0]
+                        AttackPathFlankPlayer1[1] = Flank3[1]
+                        AttackPathFlankPlayer1[2] = Flank3[2]
+                        AttackPathFlankPlayer1[3] = Flank3[3]
+                        //Backdoor
+                        AttackPathBackdoorPlayer1[0] = Backdoor3[0]
+                        AttackPathBackdoorPlayer1[1] = Backdoor3[1]
+                        AttackPathBackdoorPlayer1[2] = Backdoor3[2]
+                        AttackPathBackdoorPlayer1[3] = Backdoor3[3]
+
+                    end if
+                end if
+
+            elsif PlayerID == 2
+                if EnemyID == 0
+                    Number = number from 1 to 2
+                    if Number == 1
+                        //Center
+                        AttackPathCenterPlayer2[0] = Center4[0]
+                        AttackPathCenterPlayer2[1] = Center4[1]
+                        AttackPathCenterPlayer2[2] = Center4[2]
+                        AttackPathCenterPlayer2[3] = Center4[3]
+                        //Flank
+                        AttackPathFlankPlayer2[0] = Flank4[0]
+                        AttackPathFlankPlayer2[1] = Flank4[1]
+                        AttackPathFlankPlayer2[2] = Flank4[2]
+                        AttackPathFlankPlayer2[3] = Flank4[3]
+                        //Backdoor
+                        AttackPathBackdoorPlayer2[0] = Backdoor4[0]
+                        AttackPathBackdoorPlayer2[1] = Backdoor4[1]
+                        AttackPathBackdoorPlayer2[2] = Backdoor4[2]
+                        AttackPathBackdoorPlayer2[3] = Backdoor4[3]
+
+                    else
+                        //Center
+                        AttackPathCenterPlayer2[0] = Center1[3]
+                        AttackPathCenterPlayer2[1] = Center1[2]
+                        AttackPathCenterPlayer2[2] = Center1[1]
+                        AttackPathCenterPlayer2[3] = Center1[0]
+                        //Flank
+                        AttackPathFlankPlayer2[0] = Flank1[3]
+                        AttackPathFlankPlayer2[1] = Flank1[2]
+                        AttackPathFlankPlayer2[2] = Flank1[1]
+                        AttackPathFlankPlayer2[3] = Flank1[0]
+                        //Backdoor
+                        AttackPathBackdoorPlayer2[0] = Backdoor1[3]
+                        AttackPathBackdoorPlayer2[1] = Backdoor1[2]
+                        AttackPathBackdoorPlayer2[2] = Backdoor1[1]
+                        AttackPathBackdoorPlayer2[3] = Backdoor1[0]
+
+                    end if
+                    
+                elsif EnemyID == 1
+                    //Center
+                    AttackPathCenterPlayer2[0] = Center2[3]
+                    AttackPathCenterPlayer2[1] = Center2[2]
+                    AttackPathCenterPlayer2[2] = Center2[1]
+                    AttackPathCenterPlayer2[3] = Center2[0]
+                    //Flank
+                    AttackPathFlankPlayer2[0] = Flank2[3]
+                    AttackPathFlankPlayer2[1] = Flank2[2]
+                    AttackPathFlankPlayer2[2] = Flank2[1]
+                    AttackPathFlankPlayer2[3] = Flank2[0]
+                    //Backdoor
+                    AttackPathBackdoorPlayer2[0] = Backdoor2[3]
+                    AttackPathBackdoorPlayer2[1] = Backdoor2[2]
+                    AttackPathBackdoorPlayer2[2] = Backdoor2[1]
+                    AttackPathBackdoorPlayer2[3] = Backdoor2[0]
+
+                elsif EnemyID == 3
+                    //Center
+                    AttackPathCenterPlayer2[0] = Center3[0]
+                    AttackPathCenterPlayer2[1] = Center3[1]
+                    AttackPathCenterPlayer2[2] = Center3[2]
+                    AttackPathCenterPlayer2[3] = Center3[3]
+                    //Flank
+                    AttackPathFlankPlayer2[0] = Flank3[0]
+                    AttackPathFlankPlayer2[1] = Flank3[1]
+                    AttackPathFlankPlayer2[2] = Flank3[2]
+                    AttackPathFlankPlayer2[3] = Flank3[3]
+                    //Backdoor
+                    AttackPathBackdoorPlayer2[0] = Backdoor3[0]
+                    AttackPathBackdoorPlayer2[1] = Backdoor3[1]
+                    AttackPathBackdoorPlayer2[2] = Backdoor3[2]
+                    AttackPathBackdoorPlayer2[3] = Backdoor3[3]
+
+                end if
+
+            elsif PlayerID == 3
+                if EnemyID == 0
+                    //Center
+                    AttackPathCenterPlayer3[0] = Center4[0]
+                    AttackPathCenterPlayer3[1] = Center4[1]
+                    AttackPathCenterPlayer3[2] = Center4[2]
+                    AttackPathCenterPlayer3[3] = Center4[3]
+                    //Flank
+                    AttackPathFlankPlayer3[0] = Flank4[0]
+                    AttackPathFlankPlayer3[1] = Flank4[1]
+                    AttackPathFlankPlayer3[2] = Flank4[2]
+                    AttackPathFlankPlayer3[3] = Flank4[3]
+                    //Backdoor
+                    AttackPathBackdoorPlayer3[0] = Backdoor4[0]
+                    AttackPathBackdoorPlayer3[1] = Backdoor4[1]
+                    AttackPathBackdoorPlayer3[2] = Backdoor4[2]
+                    AttackPathBackdoorPlayer3[3] = Backdoor4[3]
+                    
+                elsif EnemyID == 1
+                    Number = number from 1 to 2
+                    if Number == 1
+                        //Center
+                        AttackPathCenterPlayer3[0] = Center1[0]
+                        AttackPathCenterPlayer3[1] = Center1[1]
+                        AttackPathCenterPlayer3[2] = Center1[2]
+                        AttackPathCenterPlayer3[3] = Center1[3]
+                        //Flank
+                        AttackPathFlankPlayer3[0] = Flank1[0]
+                        AttackPathFlankPlayer3[1] = Flank1[1]
+                        AttackPathFlankPlayer3[2] = Flank1[2]
+                        AttackPathFlankPlayer3[3] = Flank1[3]
+                        //Backdoor
+                        AttackPathBackdoorPlayer3[0] = Backdoor1[0]
+                        AttackPathBackdoorPlayer3[1] = Backdoor1[1]
+                        AttackPathBackdoorPlayer3[2] = Backdoor1[2]
+                        AttackPathBackdoorPlayer3[3] = Backdoor1[3]
+
+                    else
+                        //Center
+                        AttackPathCenterPlayer3[0] = Center2[3]
+                        AttackPathCenterPlayer3[1] = Center2[2]
+                        AttackPathCenterPlayer3[2] = Center2[1]
+                        AttackPathCenterPlayer3[3] = Center2[0]
+                        //Flank
+                        AttackPathFlankPlayer3[0] = Flank2[3]
+                        AttackPathFlankPlayer3[1] = Flank2[2]
+                        AttackPathFlankPlayer3[2] = Flank2[1]
+                        AttackPathFlankPlayer3[3] = Flank2[0]
+                        //Backdoor
+                        AttackPathBackdoorPlayer3[0] = Backdoor2[3]
+                        AttackPathBackdoorPlayer3[1] = Backdoor2[2]
+                        AttackPathBackdoorPlayer3[2] = Backdoor2[1]
+                        AttackPathBackdoorPlayer3[3] = Backdoor2[0]
+                    
+                    end if
+
+                elsif EnemyID == 2
+                    //Center
+                    AttackPathCenterPlayer3[0] = Center3[3]
+                    AttackPathCenterPlayer3[1] = Center3[2]
+                    AttackPathCenterPlayer3[2] = Center3[1]
+                    AttackPathCenterPlayer3[3] = Center3[0]
+                    //Flank
+                    AttackPathFlankPlayer3[0] = Flank3[3]
+                    AttackPathFlankPlayer3[1] = Flank3[2]
+                    AttackPathFlankPlayer3[2] = Flank3[1]
+                    AttackPathFlankPlayer3[3] = Flank3[0]
+                    //Backdoor
+                    AttackPathBackdoorPlayer3[0] = Backdoor3[3]
+                    AttackPathBackdoorPlayer3[1] = Backdoor3[2]
+                    AttackPathBackdoorPlayer3[2] = Backdoor3[1]
+                    AttackPathBackdoorPlayer3[3] = Backdoor3[0]
+
+                end if
+            end if
+        end if
+
+        EnemyIDFinal[PlayerID] = EnemyID
+
+        begin loop
+            NumberOfTowns = get player EnemyID town total
+            if get Timer time remaining <= 0 or NumberOfTowns == 0
+                run background script SK_ChooseEnemy(PlayerID,number from 0 to 3)
+                AbortLoop = 1    
+            end if
+            until AbortLoop == 1
+        end loop
+    end if
+    until AbortLoop == 1
+end loop
+
+end script SK_ChooseEnemy
+
+begin script SK_AttackLogic(PlayerID)
+
+    AttackTimer = 0
+    Counter = 0
+    PlayerCounter = 0
+    AITown[SK_MaxTowns]
+
+start
+
+if SK_AIPersonality[PlayerID] == 1
+    AttackTimer = create timer for number from 600 to 1200 seconds
+elsif SK_AIPersonality[PlayerID] == 2
+    AttackTimer = create timer for number from 750 to 1500 seconds
+elsif SK_AIPersonality[PlayerID] == 3
+    AttackTimer = create timer for number from 1200 to 2100 seconds
+end if
+
+SK_ALLOWED_TO_ATTACK[PlayerID] = 0
+
+begin loop
+    if Counter >= SK_MaxTowns
+        Counter = 0
+    end if
+
+    if PlayerCounter >= SK_MaxPlayers
+        PlayerCounter = 0
+    end if
+
+    AITown[Counter] = get town with id Counter
+    if PLAYER of AITown[Counter] == PlayerID
+        while PlayerCounter < SK_MaxPlayers
+            if get AttackTimer time remaining <= 0 or town AITown[Counter] is under takeover from player PlayerCounter or SK_PlatoonCounter[PlayerID] >= 8
+                SK_ALLOWED_TO_ATTACK[PlayerID] = 1
+                wait 12 seconds
+                SK_ALLOWED_TO_ATTACK[PlayerID] = 0
+                if SK_AIPersonality[PlayerID] == 1
+                    AttackTimer = create timer for number from 600 to 900 seconds
+                elsif SK_AIPersonality[PlayerID] == 2
+                    AttackTimer = create timer for number from 600 to 1200 seconds
+                elsif SK_AIPersonality[PlayerID] == 3
+                    AttackTimer = create timer for 2400 seconds
+                end if
+            end if
+
+            PlayerCounter++
+        end while
+    end if
+
+    Counter++
+end loop
+
+end script SK_AttackLogic
+
+begin script SK_ArmyBehaivours(PlayerID,Platoon,Type,Task,AttackImmediately,Waypoint1,Waypoint2,Waypoint3,Waypoint4,AICapital)
+
+    AttackMode = 0
+    AttackRadius = 200
+    AttackRadiusTown = 500
+    Building = 0
+    Counter = 0
+    EnemyCreature = 0
+    EnemyCreatureDist = 0
+    EnemyPlatoon = 0
+    EnemyPlayer = 0
+    EnemyCatapult = 0
+    EnemySettlement = 0
+    EnemyTownCentre = 0
+    locAttack = 0
+    myPlatoon = 0
+    Number = 0
+    PlatoonSize = 0
+    PlatoonSizeEnemy = 0
+    PointOn = 0
+    RecalculateTimer = create timer for 0 seconds
+    ResetTimer = create timer for 0 seconds
+    Timer = create timer for 0 seconds
+    TownCaptureStarted = 0
+    TownsTemp = 0
+    CurrTowns = 0
+    VariableA = 0
+    VariableB = 0
+    WaypointNew1 = 0
+    WaypointNew2 = 0
+    WaypointNew3 = 0
+    WaypointNewLast = 0
+    WaypointTown = 0
+    WaypointTimer = create timer for 0 seconds
+
+start
+
+PointOn = 0
+wait 5 seconds
+TownsTemp = get player PlayerID town total
+
+begin loop
+
+    //Group up before Attack
+    if SK_AIPersonality[PlayerID] == 1 and SK_AIOpeningMoves[PlayerID] == 2 and script1[PlayerID] == 0
+        wait until SK_PlatoonCounter[PlayerID] >= 4
+        wait 5 seconds
+        script1[PlayerID] = 1
+    end if
+
+    if SK_AIPersonality[PlayerID] == 1 and SK_AIOpeningMoves[PlayerID] == 5 and script2[PlayerID] == 0
+        wait until SK_PlatoonCounter[PlayerID] >= 2
+        wait 5 seconds
+        script2[PlayerID] = 1
+    end if
+    if SK_AIPersonality[PlayerID] == 2 and SK_AIOpeningMoves[PlayerID] == 5 and script2[PlayerID] == 0
+        wait until SK_PlatoonCounter[PlayerID] >= 2
+        wait 5 seconds
+        script2[PlayerID] = 1
+    end if
+
+    if Counter >= SK_MaxPlayers
+        Counter = 0
+    end if
+
+    if PlayerID != Counter
+        //say "PlayerID != Counter"
+        if Type == 1//Melee
+            EnemyCreature = get player Counter creature
+            EnemyCreatureDist = get distance from {Platoon} to {EnemyCreature}
+            if EnemyCreatureDist <= AttackRadius and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of EnemyCreature > 0.00 and Platoon can navigate to {EnemyCreature}
+                clear Platoon action queue
+                begin loop
+                    EnemyCreatureDist = get distance from {Platoon} to {EnemyCreature}
+                    if get size of Platoon action queue < 1
+                        add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_MOVING_OBJECT using EnemyCreature to Platoon action queue
+                    end if
+                    PlatoonSize = get number of villagers in platoon Platoon
+                    until PlatoonSize == 0 or SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of EnemyCreature == 0.00 or not Platoon can navigate to {EnemyCreature} or EnemyCreatureDist > AttackRadius
+                end loop
+                clear Platoon action queue
+            end if
+            
+            EnemyPlatoon = get platoon of player Counter nearest {Platoon} radius AttackRadius
+            EnemyCatapult = get siege weapon of player Counter nearest {Platoon} radius AttackRadius
+            if EnemyPlatoon exists and Platoon can navigate to {EnemyPlatoon}
+                clear Platoon action queue
+                begin loop
+                    EnemyPlatoon = get platoon of player Counter nearest {Platoon} radius AttackRadius
+                    if get size of Platoon action queue < 1
+                        add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_PLATOON using EnemyPlatoon to Platoon action queue
+                    end if
+                    PlatoonSize = get number of villagers in platoon Platoon
+                    PlatoonSizeEnemy = get number of villagers in platoon EnemyPlatoon
+                    until PlatoonSize == 0 or PlatoonSizeEnemy == 0 or not Platoon can navigate to {EnemyPlatoon} or EnemyPlatoon not exists
+                end loop
+                clear Platoon action queue
+
+            elsif EnemyCatapult exists and Platoon can navigate to {EnemyCatapult}
+                clear Platoon action queue
+                VariableA = 0
+                begin loop
+                    EnemyCatapult = get siege weapon of player Counter nearest {Platoon} radius AttackRadius
+                    if get size of Platoon action queue < 1
+                        add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using EnemyCatapult to Platoon action queue
+                    end if
+                    PlatoonSize = get number of villagers in platoon Platoon
+                    EnemyPlatoon = get platoon of player Counter nearest {Platoon} radius AttackRadius
+                    if EnemyPlatoon exists and Platoon can navigate to {EnemyPlatoon}
+                        VariableA = 1
+                    end if
+                    until PlatoonSize == 0 or EnemyCatapult not exists or not Platoon can navigate to {EnemyCatapult} or VariableA == 1 or EnemyCatapult not exists
+                end loop
+                clear Platoon action queue
+                VariableA = 0
+            end if
+
+        elsif Type == 2//Ranged
+            EnemyCreature = get player Counter creature
+            EnemyCreatureDist = get distance from {Platoon} to {EnemyCreature}
+            if EnemyCreatureDist <= AttackRadius and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of EnemyCreature > 0.00 and Platoon can navigate to {EnemyCreature}
+                clear Platoon action queue
+                begin loop
+                    EnemyCreatureDist = get distance from {Platoon} to {EnemyCreature}
+                    if get size of Platoon action queue < 1
+                        if SK_AIDifficulty[PlayerID] < 66
+                            add action PLATOON_AGENDA_ACTION_RANGED_ATTACK using EnemyCreature to Platoon action queue
+                        else
+                            add action PLATOON_AGENDA_ACTION_RANGED_ATTACK_MAINTAINING_DISTANCE using EnemyCreature to Platoon action queue
+                        end if
+                    end if
+                    PlatoonSize = get number of villagers in platoon Platoon
+                    until PlatoonSize == 0 or SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of EnemyCreature == 0.00 or not Platoon can navigate to {EnemyCreature} or EnemyCreatureDist > AttackRadius
+                end loop
+                clear Platoon action queue
+            end if
+            
+            EnemyPlatoon = get platoon of player Counter nearest {Platoon} radius AttackRadius
+            EnemyCatapult = get siege weapon of player Counter nearest {Platoon} radius AttackRadius
+            if EnemyPlatoon exists and Platoon can navigate to {EnemyPlatoon}
+                clear Platoon action queue
+                begin loop
+                    EnemyPlatoon = get platoon of player Counter nearest {Platoon} radius AttackRadius
+                    if get size of Platoon action queue < 1
+                        if SK_AIDifficulty[PlayerID] < 66
+                            add action PLATOON_AGENDA_ACTION_RANGED_ATTACK using EnemyPlatoon to Platoon action queue
+                        else
+                            add action PLATOON_AGENDA_ACTION_RANGED_ATTACK_MAINTAINING_DISTANCE using EnemyPlatoon to Platoon action queue
+                        end if
+                    end if
+                    PlatoonSize = get number of villagers in platoon Platoon
+                    PlatoonSizeEnemy = get number of villagers in platoon EnemyPlatoon
+                    until PlatoonSize == 0 or PlatoonSizeEnemy == 0 or not Platoon can navigate to {EnemyPlatoon} or EnemyPlatoon not exists
+                end loop
+                clear Platoon action queue
+
+            elsif EnemyCatapult exists and Platoon can navigate to {EnemyCatapult}
+                clear Platoon action queue
+                VariableA = 0
+                begin loop
+                    EnemyCatapult = get siege weapon of player Counter nearest {Platoon} radius AttackRadius
+                    if get size of Platoon action queue < 1
+                        if SK_AIDifficulty[PlayerID] < 66
+                            add action PLATOON_AGENDA_ACTION_RANGED_ATTACK using EnemyCatapult to Platoon action queue
+                        else
+                            add action PLATOON_AGENDA_ACTION_RANGED_ATTACK_MAINTAINING_DISTANCE using EnemyCatapult to Platoon action queue
+                        end if
+                    end if
+                    PlatoonSize = get number of villagers in platoon Platoon
+                    EnemyPlatoon = get platoon of player Counter nearest {Platoon} radius AttackRadius
+                    if EnemyPlatoon exists and Platoon can navigate to {EnemyPlatoon}
+                        VariableA = 1
+                    end if
+                    until PlatoonSize == 0 or EnemyCatapult not exists or not Platoon can navigate to {EnemyCatapult} or VariableA == 1 or EnemyCatapult not exists
+                end loop
+                clear Platoon action queue
+                VariableA = 0
+            end if
+
+        end if
+
+        //Normal Behaivor | With SK_AllowedToAttack
+        if Task == 0
+            if SK_ALLOWED_TO_ATTACK[PlayerID] == 1 or locAttack == 1
+                locAttack = 1
+                EnemySettlement = get nearest town at {Platoon} for player Counter radius AttackRadiusTown
+                EnemyTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in EnemySettlement min built 1.0
+                if EnemyTownCentre exists and PLAYER of EnemySettlement == Counter// and EpicScriptRunning[PlayerID] == 0
+                    if Platoon can navigate to object EnemyTownCentre
+                        //wait number from 5 to 25 seconds
+                        if Platoon can navigate to object EnemyTownCentre
+                            VariableB = 1
+                            clear Platoon action queue
+                            Number = number from 1 to 4
+                            if Number == 2 and HEALTH of EnemyCreature > 0 //Hunt down platoons or destroy buildings
+                                AttackMode = 1
+                                set Platoon attack EnemySettlement with severity 0.2
+                            elsif Number == 3 or Number == 4 //Destroy value buildings
+                                AttackMode = 2
+                                Building = 0
+                                Timer = create timer for 2 seconds
+                                begin loop
+                                    Number = number from 1 to 8
+                                    if Number == 1 or Number == 2 or Number == 3
+                                        Building = get building ALTAR in EnemySettlement min built 0.75
+                                        if Building exists
+                                            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                        else
+                                            Building = 0
+                                        end if
+                                    elsif Number == 4
+                                        Building = get building TEMPLE in EnemySettlement min built 0.75
+                                        if Building exists
+                                            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                        else
+                                            Building = 0
+                                        end if
+                                    elsif Number == 5
+                                        Building = get building CREATURE_PEN in EnemySettlement min built 0.75
+                                        if Building exists
+                                            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                        else
+                                            Building = 0
+                                        end if
+                                    elsif Number == 6
+                                        Building = get building UNIVERSITY in EnemySettlement min built 0.75
+                                        if Building exists
+                                            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                        else
+                                            Building = 0
+                                        end if
+                                    elsif Number == 7
+                                        Building = get building BATHHOUSE in EnemySettlement min built 0.75
+                                        if Building exists
+                                            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                        else
+                                            Building = 0
+                                        end if
+                                    elsif Number == 8
+                                        Building = get building AMPITHEATRE in EnemySettlement min built 0.75
+                                        if Building exists
+                                            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                        else
+                                            Building = 0
+                                        end if
+                                    end if
+                                    until Building != 0 or get Timer time remaining <= 0
+                                end loop
+                            else //Capture Town
+                                AttackMode = 0
+                                set Platoon attack EnemySettlement with severity 0.3 for takeover
+                            end if
+                            RecalculateTimer = create timer for 40 seconds
+                            begin loop
+                                if Counter >= SK_MaxPlayers
+                                    Counter = 0
+                                end if
+                                EnemyCreature = get player Counter creature
+                                EnemyPlatoon = get platoon of player Counter nearest {Platoon} radius 150
+                                EnemyCreatureDist = get distance from {Platoon} to {EnemyCreature}
+                                //if PlayerPlatoon1 exists or TestCreature2 <= 150 or not Platoon can navigate to object EnemySettlementCentre
+                                    if EnemyPlatoon exists and not town EnemySettlement is under takeover from player PlayerID and Counter != PlayerID
+                                        VariableB = 0
+                                    elsif EnemyCreatureDist <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of EnemyCreature > 0.00 and not town EnemySettlement is under takeover from player PlayerID and Counter != PlayerID
+                                        VariableB = 0
+                                    elsif not Platoon can navigate to object EnemyTownCentre
+                                        VariableB = 0
+                                    elsif Platoon not exists
+                                        VariableB = 0
+                                    elsif AttackMode == 1 and HEALTH of EnemyCreature == 0
+                                        VariableB = 0
+                                    elsif AttackMode == 2 and Building not exists
+                                        VariableB = 0
+                                    elsif AttackMode == 2 and HEALTH of Building < 0.1
+                                        VariableB = 0
+                                    elsif AttackMode == 2 and Building == 0
+                                        VariableB = 0
+                                    elsif not town EnemySettlement is under takeover from player PlayerID and get RecalculateTimer time remaining <= 0
+                                        VariableB = 0
+                                    end if
+                                //end if
+                                Counter++
+                                until VariableB == 0 or Platoon not exists
+                            end loop
+                            clear Platoon action queue
+                        end if
+                    end if
+                end if
+            
+                if get PlatoonMoveTimer1[PlayerID] time remaining <= 0 or get PlatoonMoveTimer2[PlayerID] time remaining <= 0 or get PlatoonMoveTimer3[PlayerID] time remaining <= 0 or get PlatoonMoveTimer4[PlayerID] time remaining <= 0
+                    if PointOn != 4 and get PlatoonWaitTimer[PlayerID] time remaining <= 0
+                        if get size of Platoon action queue < 1
+                            //say "Get Waypoint"
+                            if PointOn == 0 and get PlatoonMoveTimer1[PlayerID] time remaining <= 0
+                                begin loop
+                                    WaypointNew1 = marker at {Waypoint1} + {number from -50 to 50,number from -50 to 50}
+                                    until Platoon can navigate to {WaypointNew1}
+                                end loop
+                                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {WaypointNew1} to Platoon action queue
+                    
+                            elsif PointOn == 1 and get PlatoonMoveTimer2[PlayerID] time remaining <= 0
+                                begin loop
+                                    WaypointNew2 = marker at {Waypoint2} + {number from -50 to 50,number from -50 to 50}
+                                    until Platoon can navigate to {WaypointNew2}
+                                end loop
+                                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {WaypointNew2} to Platoon action queue
+
+                            elsif PointOn == 2 and get PlatoonMoveTimer3[PlayerID] time remaining <= 0
+                                begin loop
+                                    WaypointNew3 = marker at {Waypoint3} + {number from -50 to 50,number from -50 to 50}
+                                    until Platoon can navigate to {WaypointNew3}
+                                end loop
+                                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {WaypointNew3} to Platoon action queue
+
+                            elsif PointOn == 3 and get PlatoonMoveTimer4[PlayerID] time remaining <= 0
+                                begin loop
+                                    WaypointNewLast = marker at {Waypoint4} + {number from -50 to 50,number from -50 to 50}
+                                    until Platoon can navigate to {WaypointNewLast}
+                                end loop
+                                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {WaypointNewLast} to Platoon action queue
+
+                            end if
+                        end if
+                    end if
+                end if
+
+                if {Platoon} near {WaypointNew1} radius 30 and PointOn != 1
+                    PlatoonWaitTimer[PlayerID] = create timer for PlatoonWaitTime seconds
+                    clear Platoon action queue
+                    PointOn = 1
+                elsif {Platoon} near {WaypointNew2} radius 30 and PointOn != 2
+                    PlatoonWaitTimer[PlayerID] = create timer for PlatoonWaitTime seconds
+                    clear Platoon action queue
+                    PointOn = 2
+                elsif {Platoon} near {WaypointNew3} radius 30 and PointOn != 3
+                    ReadyToAttack[PlayerID] += 1
+                    PlatoonWaitTimer[PlayerID] = create timer for PlatoonWaitTime seconds
+                    clear Platoon action queue
+                    PointOn = 3
+                elsif {Platoon} near {WaypointNewLast} radius 30 and PointOn != 4
+                    PlatoonWaitTimer[PlayerID] = create timer for PlatoonWaitTime seconds
+                    clear Platoon action queue
+                    PointOn = 4
+                    ResetTimer = create timer for 600 seconds
+                end if
+
+            elsif AttackImmediately == 1
+                EnemySettlement = get nearest town at {Platoon} for player Counter radius AttackRadiusTown
+                EnemyTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in EnemySettlement min built 1.0
+                if EnemyTownCentre exists and PLAYER of EnemySettlement == Counter// and EpicScriptRunning[PlayerID] == 0
+                    if Platoon can navigate to object EnemyTownCentre
+                        //wait number from 5 to 25 seconds
+                        if Platoon can navigate to object EnemyTownCentre
+                            VariableB = 1
+                            clear Platoon action queue
+                            Number = number from 1 to 4
+                            if Number == 2 and HEALTH of EnemyCreature > 0 //Hunt down platoons or destroy buildings
+                                AttackMode = 1
+                                set Platoon attack EnemySettlement with severity 0.2
+                            elsif Number == 3 or Number == 4 //Destroy value buildings
+                                AttackMode = 2
+                                Building = 0
+                                Timer = create timer for 2 seconds
+                                begin loop
+                                    Number = number from 1 to 8
+                                    if Number == 1 or Number == 2 or Number == 3
+                                        Building = get building ALTAR in EnemySettlement min built 0.75
+                                        if Building exists
+                                            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                        else
+                                            Building = 0
+                                        end if
+                                    elsif Number == 4
+                                        Building = get building TEMPLE in EnemySettlement min built 0.75
+                                        if Building exists
+                                            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                        else
+                                            Building = 0
+                                        end if
+                                    elsif Number == 5
+                                        Building = get building CREATURE_PEN in EnemySettlement min built 0.75
+                                        if Building exists
+                                            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                        else
+                                            Building = 0
+                                        end if
+                                    elsif Number == 6
+                                        Building = get building UNIVERSITY in EnemySettlement min built 0.75
+                                        if Building exists
+                                            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                        else
+                                            Building = 0
+                                        end if
+                                    elsif Number == 7
+                                        Building = get building BATHHOUSE in EnemySettlement min built 0.75
+                                        if Building exists
+                                            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                        else
+                                            Building = 0
+                                        end if
+                                    elsif Number == 8
+                                        Building = get building AMPITHEATRE in EnemySettlement min built 0.75
+                                        if Building exists
+                                            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                        else
+                                            Building = 0
+                                        end if
+                                    end if
+                                    until Building != 0 or get Timer time remaining <= 0
+                                end loop
+                            else //Capture Town
+                                AttackMode = 0
+                                set Platoon attack EnemySettlement with severity 0.3 for takeover
+                            end if
+                            RecalculateTimer = create timer for 40 seconds
+                            begin loop
+                                if Counter >= SK_MaxPlayers
+                                    Counter = 0
+                                end if
+                                EnemyCreature = get player Counter creature
+                                EnemyPlatoon = get platoon of player Counter nearest {Platoon} radius 150
+                                EnemyCreatureDist = get distance from {Platoon} to {EnemyCreature}
+                                //if PlayerPlatoon1 exists or TestCreature2 <= 150 or not Platoon can navigate to object EnemySettlementCentre
+                                    if EnemyPlatoon exists and not town EnemySettlement is under takeover from player PlayerID and Counter != PlayerID
+                                        VariableB = 0
+                                    elsif EnemyCreatureDist <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of EnemyCreature > 0.00 and not town EnemySettlement is under takeover from player PlayerID and Counter != PlayerID
+                                        VariableB = 0
+                                    elsif not Platoon can navigate to object EnemyTownCentre
+                                        VariableB = 0
+                                    elsif Platoon not exists
+                                        VariableB = 0
+                                    elsif AttackMode == 1 and HEALTH of EnemyCreature == 0
+                                        VariableB = 0
+                                    elsif AttackMode == 2 and Building not exists
+                                        VariableB = 0
+                                    elsif AttackMode == 2 and HEALTH of Building < 0.1
+                                        VariableB = 0
+                                    elsif AttackMode == 2 and Building == 0
+                                        VariableB = 0
+                                    elsif not town EnemySettlement is under takeover from player PlayerID and get RecalculateTimer time remaining <= 0
+                                        VariableB = 0
+                                    end if
+                                //end if
+                                Counter++
+                                until VariableB == 0 or Platoon not exists
+                            end loop
+                            clear Platoon action queue
+                        end if
+                    end if
+                end if
+
+                if get PlatoonMoveTimer1[PlayerID] time remaining <= 0 or get PlatoonMoveTimer2[PlayerID] time remaining <= 0 or get PlatoonMoveTimer3[PlayerID] time remaining <= 0 or get PlatoonMoveTimer4[PlayerID] time remaining <= 0
+                    if PointOn != 4 and get PlatoonWaitTimer[PlayerID] time remaining <= 0
+                        if get size of Platoon action queue < 1
+                            //say "Get Waypoint"
+                            if PointOn == 0 and get PlatoonMoveTimer1[PlayerID] time remaining <= 0
+                                begin loop
+                                    WaypointNew1 = marker at {Waypoint1} + {number from -50 to 50,number from -50 to 50}
+                                    until Platoon can navigate to {WaypointNew1}
+                                end loop
+                                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {WaypointNew1} to Platoon action queue
+                    
+                            elsif PointOn == 1 and get PlatoonMoveTimer2[PlayerID] time remaining <= 0
+                                begin loop
+                                    WaypointNew2 = marker at {Waypoint2} + {number from -50 to 50,number from -50 to 50}
+                                    until Platoon can navigate to {WaypointNew2}
+                                end loop
+                                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {WaypointNew2} to Platoon action queue
+
+                            elsif PointOn == 2 and get PlatoonMoveTimer3[PlayerID] time remaining <= 0
+                                begin loop
+                                    WaypointNew3 = marker at {Waypoint3} + {number from -50 to 50,number from -50 to 50}
+                                    until Platoon can navigate to {WaypointNew3}
+                                end loop
+                                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {WaypointNew3} to Platoon action queue
+
+                            elsif PointOn == 3 and get PlatoonMoveTimer4[PlayerID] time remaining <= 0
+                                begin loop
+                                    WaypointNewLast = marker at {Waypoint4} + {number from -50 to 50,number from -50 to 50}
+                                    until Platoon can navigate to {WaypointNewLast}
+                                end loop
+                                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {WaypointNewLast} to Platoon action queue
+
+                            end if
+                        end if
+                    end if
+                end if
+
+                if {Platoon} near {WaypointNew1} radius 30 and PointOn != 1
+                    PlatoonWaitTimer[PlayerID] = create timer for PlatoonWaitTime seconds
+                    clear Platoon action queue
+                    PointOn = 1
+                elsif {Platoon} near {WaypointNew2} radius 30 and PointOn != 2
+                    PlatoonWaitTimer[PlayerID] = create timer for PlatoonWaitTime seconds
+                    clear Platoon action queue
+                    PointOn = 2
+                elsif {Platoon} near {WaypointNew3} radius 30 and PointOn != 3
+                    ReadyToAttack[PlayerID] += 1
+                    PlatoonWaitTimer[PlayerID] = create timer for PlatoonWaitTime seconds
+                    clear Platoon action queue
+                    PointOn = 3
+                elsif {Platoon} near {WaypointNewLast} radius 30 and PointOn != 4
+                    PlatoonWaitTimer[PlayerID] = create timer for PlatoonWaitTime seconds
+                    clear Platoon action queue
+                    PointOn = 4
+                    ResetTimer = create timer for 600 seconds
+                end if
+            elsif SK_ALLOWED_TO_ATTACK[PlayerID] == 0 and locAttack == 0 and get WaypointTimer time remaining <= 0
+                if not Platoon can navigate to {WaypointTown} or WaypointTown == 0
+                    begin loop
+                        WaypointTown = marker at {SK_AIHomeTown[PlayerID]} + {number from -150 to 150,number from -150 to 150}
+                        until Platoon can navigate to {WaypointTown}
+                    end loop
+                end if
+                WaypointTimer = create timer for 75 seconds
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {WaypointTown} to Platoon action queue
+            end if
+
+        // Capture nearest town. Basically the same as 0 but with different town searching | With SK_AllowedToAttack
+        elsif Task == 1
+            //say "Task = 1"
+            EnemySettlement = get TOWN at {Platoon} radius AttackRadiusTown
+            EnemyTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in EnemySettlement min built 1.0
+            if EnemyTownCentre exists and PLAYER of EnemySettlement != PlayerID and size of EnemySettlement > 0
+                //say "Town Center"
+                if Platoon can navigate to object EnemyTownCentre
+                    //wait number from 5 to 25 seconds
+                    if Platoon can navigate to object EnemyTownCentre
+                        VariableB = 1
+                        clear Platoon action queue
+                        if PLAYER of EnemySettlement >= 0 and PLAYER of EnemySettlement <= 5 and PLAYER of EnemySettlement != PlayerID
+                            Number = number from 1 to 4
+                        else
+                            Number = 1
+                        end if
+                        if Number == 2 and HEALTH of EnemyCreature > 0 //Hunt down platoons or destroy buildings
+                            AttackMode = 1
+                            set Platoon attack EnemySettlement with severity 0.2
+                        elsif Number == 3 or Number == 4 //Destroy value buildings
+                            AttackMode = 2
+                            Building = 0
+                            Timer = create timer for 2 seconds
+                            begin loop
+                                Number = number from 1 to 8
+                                if Number == 1 or Number == 2 or Number == 3
+                                    Building = get building ALTAR in EnemySettlement min built 0.75
+                                    if Building exists
+                                        add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 4
+                                    Building = get building TEMPLE in EnemySettlement min built 0.75
+                                    if Building exists
+                                        add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 5
+                                    Building = get building CREATURE_PEN in EnemySettlement min built 0.75
+                                    if Building exists
+                                        add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 6
+                                    Building = get building UNIVERSITY in EnemySettlement min built 0.75
+                                    if Building exists
+                                        add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 7
+                                    Building = get building BATHHOUSE in EnemySettlement min built 0.75
+                                    if Building exists
+                                        add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 8
+                                    Building = get building AMPITHEATRE in EnemySettlement min built 0.75
+                                    if Building exists
+                                        add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                end if
+                                until Building != 0 or get Timer time remaining <= 0
+                            end loop
+                        else //Capture Town
+                            CurrTowns = get player PlayerID town total
+                            if CurrTowns <= TownsTemp
+                                AttackMode = 0
+                                set Platoon attack EnemySettlement with severity 0.3 for takeover
+                            end if
+                            if PLAYER of EnemySettlement >= 0 and PLAYER of EnemySettlement <= 5 and PLAYER of EnemySettlement != PlayerID
+                                AttackMode = 0
+                                set Platoon attack EnemySettlement with severity 0.3 for takeover
+                            end if
+                        end if
+                        RecalculateTimer = create timer for 40 seconds
+                        begin loop
+                            if Counter >= SK_MaxPlayers
+                                Counter = 0
+                            end if
+                            EnemyCreature = get player Counter creature
+                            EnemyPlatoon = get platoon of player Counter nearest {Platoon} radius 150
+                            EnemyCreatureDist = get distance from {Platoon} to {EnemyCreature}
+                            //if PlayerPlatoon1 exists or TestCreature2 <= 150 or not Platoon can navigate to object EnemySettlementCentre
+                                if EnemyPlatoon exists and not town EnemySettlement is under takeover from player PlayerID and Counter != PlayerID
+                                    VariableB = 0
+                                elsif EnemyCreatureDist <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of EnemyCreature > 0.00 and not town EnemySettlement is under takeover from player PlayerID and Counter != PlayerID
+                                    VariableB = 0
+                                elsif not Platoon can navigate to object EnemyTownCentre
+                                    VariableB = 0
+                                elsif Platoon not exists
+                                    VariableB = 0
+                                elsif AttackMode == 1 and HEALTH of EnemyCreature == 0
+                                    VariableB = 0
+                                elsif AttackMode == 2 and Building not exists
+                                    VariableB = 0
+                                elsif AttackMode == 2 and HEALTH of Building < 0.1
+                                    VariableB = 0
+                                elsif AttackMode == 2 and Building == 0
+                                    VariableB = 0
+                                elsif not town EnemySettlement is under takeover from player PlayerID and get RecalculateTimer time remaining <= 0
+                                    VariableB = 0
+                                end if
+                            //end if
+                            Counter++
+                            until VariableB == 0 or Platoon not exists
+                        end loop
+                        clear Platoon action queue
+                    end if
+                end if
+            end if
+
+            if get PlatoonMoveTimer1[PlayerID] time remaining <= 0 or get PlatoonMoveTimer2[PlayerID] time remaining <= 0 or get PlatoonMoveTimer3[PlayerID] time remaining <= 0 or get PlatoonMoveTimer4[PlayerID] time remaining <= 0
+                if PointOn != 4 and get PlatoonWaitTimer[PlayerID] time remaining <= 0
+                    if get size of Platoon action queue < 1
+                        //say "Get Waypoint"
+                        if PointOn == 0 and get PlatoonMoveTimer1[PlayerID] time remaining <= 0
+                            begin loop
+                                WaypointNew1 = marker at {Waypoint1} + {number from -50 to 50,number from -50 to 50}
+                                until Platoon can navigate to {WaypointNew1}
+                            end loop
+                            add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {WaypointNew1} to Platoon action queue
+                
+                        elsif PointOn == 1 and get PlatoonMoveTimer2[PlayerID] time remaining <= 0
+                            begin loop
+                                WaypointNew2 = marker at {Waypoint2} + {number from -50 to 50,number from -50 to 50}
+                                until Platoon can navigate to {WaypointNew2}
+                            end loop
+                            add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {WaypointNew2} to Platoon action queue
+
+                        elsif PointOn == 2 and get PlatoonMoveTimer3[PlayerID] time remaining <= 0
+                            begin loop
+                                WaypointNew3 = marker at {Waypoint3} + {number from -50 to 50,number from -50 to 50}
+                                until Platoon can navigate to {WaypointNew3}
+                            end loop
+                            add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {WaypointNew3} to Platoon action queue
+
+                        elsif PointOn == 3 and get PlatoonMoveTimer4[PlayerID] time remaining <= 0
+                            begin loop
+                                WaypointNewLast = marker at {Waypoint4} + {number from -50 to 50,number from -50 to 50}
+                                until Platoon can navigate to {WaypointNewLast}
+                            end loop
+                            add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {WaypointNewLast} to Platoon action queue
+
+                        end if
+                    end if
+                end if
+            end if
+
+            if {Platoon} near {WaypointNew1} radius 30 and PointOn != 1
+                PlatoonWaitTimer[PlayerID] = create timer for PlatoonWaitTime seconds
+                clear Platoon action queue
+                PointOn = 1
+            elsif {Platoon} near {WaypointNew2} radius 30 and PointOn != 2
+                PlatoonWaitTimer[PlayerID] = create timer for PlatoonWaitTime seconds
+                clear Platoon action queue
+                PointOn = 2
+            elsif {Platoon} near {WaypointNew3} radius 30 and PointOn != 3
+                ReadyToAttack[PlayerID] += 1
+                PlatoonWaitTimer[PlayerID] = create timer for PlatoonWaitTime seconds
+                clear Platoon action queue
+                PointOn = 3
+            elsif {Platoon} near {WaypointNewLast} radius 30 and PointOn != 4
+                PlatoonWaitTimer[PlayerID] = create timer for PlatoonWaitTime seconds
+                clear Platoon action queue
+                PointOn = 4
+                ResetTimer = create timer for 600 seconds
+            end if
+
+        // Capture special objective | Without SK_AllowedToAttack || TODO TESTING
+        elsif Task == 2
+            //say "Task = 2"
+            AttackRadiusTown = 1500
+            if SpecTown3 != 0 and PLAYER of SpecTown3 != PlayerID
+                //say "SpecTown3"
+                EnemySettlement = get TOWN at {SpecTown3} radius AttackRadiusTown
+                EnemyTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in EnemySettlement min built 1.0
+
+            elsif SpecTown2 != 0 and PLAYER of SpecTown2 != PlayerID
+                //say "SpecTown2"
+                EnemySettlement = get TOWN at {SpecTown2} radius AttackRadiusTown
+                EnemyTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in EnemySettlement min built 1.0
+
+            elsif SpecTown1 != 0 and PLAYER of SpecTown1 != PlayerID
+                //say "SpecTown1"
+                EnemySettlement = get TOWN at {SpecTown1} radius AttackRadiusTown
+                EnemyTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in EnemySettlement min built 1.0
+
+            else
+                //say "Else"
+                EnemySettlement = get TOWN at {Platoon} radius AttackRadiusTown
+                EnemyTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in EnemySettlement min built 1.0
+            end if
+            if EnemyTownCentre exists and PLAYER of EnemySettlement != PlayerID and SK_Extra == 1
+                //say "Town Center"
+                if EnemySettlement == SpecTown1 or EnemySettlement == SpecTown2 or EnemySettlement == SpecTown3
+                    if Platoon can navigate to object EnemyTownCentre
+                        //wait number from 5 to 25 seconds
+                        if Platoon can navigate to object EnemyTownCentre
+                            VariableB = 1
+                            clear Platoon action queue
+                            if PLAYER of EnemySettlement >= 0 and PLAYER of EnemySettlement <= 5 and PLAYER of EnemySettlement != PlayerID
+                                Number = number from 1 to 4
+                            else
+                                Number = 1
+                            end if
+                            if Number == 2 and HEALTH of EnemyCreature > 0 //Hunt down platoons or destroy buildings
+                                AttackMode = 1
+                                set Platoon attack EnemySettlement with severity 0.2
+                            elsif Number == 3 or Number == 4 //Destroy value buildings
+                                AttackMode = 2
+                                Building = 0
+                                Timer = create timer for 2 seconds
+                                begin loop
+                                    Number = number from 1 to 8
+                                    if Number == 1 or Number == 2 or Number == 3
+                                        Building = get building ALTAR in EnemySettlement min built 0.75
+                                        if Building exists
+                                            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                        else
+                                            Building = 0
+                                        end if
+                                    elsif Number == 4
+                                        Building = get building TEMPLE in EnemySettlement min built 0.75
+                                        if Building exists
+                                            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                        else
+                                            Building = 0
+                                        end if
+                                    elsif Number == 5
+                                        Building = get building CREATURE_PEN in EnemySettlement min built 0.75
+                                        if Building exists
+                                            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                        else
+                                            Building = 0
+                                        end if
+                                    elsif Number == 6
+                                        Building = get building UNIVERSITY in EnemySettlement min built 0.75
+                                        if Building exists
+                                            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                        else
+                                            Building = 0
+                                        end if
+                                    elsif Number == 7
+                                        Building = get building BATHHOUSE in EnemySettlement min built 0.75
+                                        if Building exists
+                                            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                        else
+                                            Building = 0
+                                        end if
+                                    elsif Number == 8
+                                        Building = get building AMPITHEATRE in EnemySettlement min built 0.75
+                                        if Building exists
+                                            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                        else
+                                            Building = 0
+                                        end if
+                                    end if
+                                    until Building != 0 or get Timer time remaining <= 0
+                                end loop
+                            else //Capture Town
+                                CurrTowns = get player PlayerID town total
+                                if CurrTowns <= TownsTemp
+                                    AttackMode = 0
+                                    set Platoon attack EnemySettlement with severity 0.3 for takeover
+                                end if
+                                if PLAYER of EnemySettlement >= 0 and PLAYER of EnemySettlement <= 5 and PLAYER of EnemySettlement != PlayerID
+                                    AttackMode = 0
+                                    set Platoon attack EnemySettlement with severity 0.3 for takeover
+                                end if
+                            end if
+                            RecalculateTimer = create timer for 40 seconds
+                            begin loop
+                                if Counter >= SK_MaxPlayers
+                                    Counter = 0
+                                end if
+                                EnemyCreature = get player Counter creature
+                                EnemyPlatoon = get platoon of player Counter nearest {Platoon} radius 150
+                                EnemyCreatureDist = get distance from {Platoon} to {EnemyCreature}
+                                //if PlayerPlatoon1 exists or TestCreature2 <= 150 or not Platoon can navigate to object EnemySettlementCentre
+                                    if EnemyPlatoon exists and not town EnemySettlement is under takeover from player PlayerID and Counter != PlayerID
+                                        VariableB = 0
+                                    elsif EnemyCreatureDist <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of EnemyCreature > 0.00 and not town EnemySettlement is under takeover from player PlayerID and Counter != PlayerID
+                                        VariableB = 0
+                                    elsif not Platoon can navigate to object EnemyTownCentre
+                                        VariableB = 0
+                                    elsif Platoon not exists
+                                        VariableB = 0
+                                    elsif AttackMode == 1 and HEALTH of EnemyCreature == 0
+                                        VariableB = 0
+                                    elsif AttackMode == 2 and Building not exists
+                                        VariableB = 0
+                                    elsif AttackMode == 2 and HEALTH of Building < 0.1
+                                        VariableB = 0
+                                    elsif AttackMode == 2 and Building == 0
+                                        VariableB = 0
+                                    elsif not town EnemySettlement is under takeover from player PlayerID and get RecalculateTimer time remaining <= 0
+                                        VariableB = 0
+                                    end if
+                                //end if
+                                Counter++
+                                until VariableB == 0 or Platoon not exists
+                            end loop
+                            clear Platoon action queue
+                        end if
+                    end if
+                end if
+            end if
+
+            if get PlatoonMoveTimer1[PlayerID] time remaining <= 0 or get PlatoonMoveTimer2[PlayerID] time remaining <= 0 or get PlatoonMoveTimer3[PlayerID] time remaining <= 0 or get PlatoonMoveTimer4[PlayerID] time remaining <= 0
+                if PointOn != 4 and get PlatoonWaitTimer[PlayerID] time remaining <= 0
+                    if get size of Platoon action queue < 1
+                        //say "Get Waypoint"
+                        if PointOn == 0 and get PlatoonMoveTimer1[PlayerID] time remaining <= 0
+                            begin loop
+                                WaypointNew1 = marker at {Waypoint1} + {number from -50 to 50,number from -50 to 50}
+                                until Platoon can navigate to {WaypointNew1}
+                            end loop
+                            add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {WaypointNew1} to Platoon action queue
+                
+                        elsif PointOn == 1 and get PlatoonMoveTimer2[PlayerID] time remaining <= 0
+                            begin loop
+                                WaypointNew2 = marker at {Waypoint2} + {number from -50 to 50,number from -50 to 50}
+                                until Platoon can navigate to {WaypointNew2}
+                            end loop
+                            add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {WaypointNew2} to Platoon action queue
+
+                        elsif PointOn == 2 and get PlatoonMoveTimer3[PlayerID] time remaining <= 0
+                            begin loop
+                                WaypointNew3 = marker at {Waypoint3} + {number from -50 to 50,number from -50 to 50}
+                                until Platoon can navigate to {WaypointNew3}
+                            end loop
+                            add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {WaypointNew3} to Platoon action queue
+
+                        elsif PointOn == 3 and get PlatoonMoveTimer4[PlayerID] time remaining <= 0
+                            begin loop
+                                WaypointNewLast = marker at {Waypoint4} + {number from -50 to 50,number from -50 to 50}
+                                until Platoon can navigate to {WaypointNewLast}
+                            end loop
+                            add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {WaypointNewLast} to Platoon action queue
+
+                        end if
+                    end if
+                end if
+            end if
+
+            if {Platoon} near {WaypointNew1} radius 30 and PointOn != 1
+                PlatoonWaitTimer[PlayerID] = create timer for PlatoonWaitTime seconds
+                clear Platoon action queue
+                PointOn = 1
+            elsif {Platoon} near {WaypointNew2} radius 30 and PointOn != 2
+                PlatoonWaitTimer[PlayerID] = create timer for PlatoonWaitTime seconds
+                clear Platoon action queue
+                PointOn = 2
+            elsif {Platoon} near {WaypointNew3} radius 30 and PointOn != 3
+                ReadyToAttack[PlayerID] += 1
+                PlatoonWaitTimer[PlayerID] = create timer for PlatoonWaitTime seconds
+                clear Platoon action queue
+                PointOn = 3
+            elsif {Platoon} near {WaypointNewLast} radius 30 and PointOn != 4
+                PlatoonWaitTimer[PlayerID] = create timer for PlatoonWaitTime seconds
+                clear Platoon action queue
+                PointOn = 4
+                ResetTimer = create timer for 600 seconds
+            end if
+
+        end if
+
+        if SK_AIPersonality[PlayerID] == 1 or SK_AIPersonality[PlayerID] == 2
+            if SK_Escalation[PlayerID] >= 55 and SK_Extra == 1
+                EnemySettlement = get TOWN at {Platoon} radius AttackRadiusTown
+                EnemyTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in EnemySettlement min built 1.0
+                if EnemyTownCentre exists and PLAYER of EnemySettlement != PlayerID
+                    //say "Town Center"
+                    if EnemySettlement == SpecTown1 or EnemySettlement == SpecTown2 or EnemySettlement == SpecTown3
+                        if Platoon can navigate to object EnemyTownCentre
+                            //wait number from 5 to 25 seconds
+                            if Platoon can navigate to object EnemyTownCentre
+                                VariableB = 1
+                                clear Platoon action queue
+                                if PLAYER of EnemySettlement >= 0 and PLAYER of EnemySettlement <= 5 and PLAYER of EnemySettlement != PlayerID
+                                    Number = number from 1 to 4
+                                else
+                                    Number = 1
+                                end if
+                                if Number == 2 and HEALTH of EnemyCreature > 0 //Hunt down platoons or destroy buildings
+                                    AttackMode = 1
+                                    set Platoon attack EnemySettlement with severity 0.2
+                                elsif Number == 3 or Number == 4 //Destroy value buildings
+                                    AttackMode = 2
+                                    Building = 0
+                                    Timer = create timer for 2 seconds
+                                    begin loop
+                                        Number = number from 1 to 8
+                                        if Number == 1 or Number == 2 or Number == 3
+                                            Building = get building ALTAR in EnemySettlement min built 0.75
+                                            if Building exists
+                                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                            else
+                                                Building = 0
+                                            end if
+                                        elsif Number == 4
+                                            Building = get building TEMPLE in EnemySettlement min built 0.75
+                                            if Building exists
+                                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                            else
+                                                Building = 0
+                                            end if
+                                        elsif Number == 5
+                                            Building = get building CREATURE_PEN in EnemySettlement min built 0.75
+                                            if Building exists
+                                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                            else
+                                                Building = 0
+                                            end if
+                                        elsif Number == 6
+                                            Building = get building UNIVERSITY in EnemySettlement min built 0.75
+                                            if Building exists
+                                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                            else
+                                                Building = 0
+                                            end if
+                                        elsif Number == 7
+                                            Building = get building BATHHOUSE in EnemySettlement min built 0.75
+                                            if Building exists
+                                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                            else
+                                                Building = 0
+                                            end if
+                                        elsif Number == 8
+                                            Building = get building AMPITHEATRE in EnemySettlement min built 0.75
+                                            if Building exists
+                                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                            else
+                                                Building = 0
+                                            end if
+                                        end if
+                                        until Building != 0 or get Timer time remaining <= 0
+                                    end loop
+                                else //Capture Town
+                                    CurrTowns = get player PlayerID town total
+                                    if CurrTowns <= TownsTemp
+                                        AttackMode = 0
+                                        set Platoon attack EnemySettlement with severity 0.3 for takeover
+                                    end if
+                                    if PLAYER of EnemySettlement >= 0 and PLAYER of EnemySettlement <= 5 and PLAYER of EnemySettlement != PlayerID
+                                        AttackMode = 0
+                                        set Platoon attack EnemySettlement with severity 0.3 for takeover
+                                    end if
+                                end if
+                                RecalculateTimer = create timer for 40 seconds
+                                begin loop
+                                    if Counter >= SK_MaxPlayers
+                                        Counter = 0
+                                    end if
+                                    EnemyCreature = get player Counter creature
+                                    EnemyPlatoon = get platoon of player Counter nearest {Platoon} radius 150
+                                    EnemyCreatureDist = get distance from {Platoon} to {EnemyCreature}
+                                    //if PlayerPlatoon1 exists or TestCreature2 <= 150 or not Platoon can navigate to object EnemySettlementCentre
+                                        if EnemyPlatoon exists and not town EnemySettlement is under takeover from player PlayerID and Counter != PlayerID
+                                            VariableB = 0
+                                        elsif EnemyCreatureDist <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of EnemyCreature > 0.00 and not town EnemySettlement is under takeover from player PlayerID and Counter != PlayerID
+                                            VariableB = 0
+                                        elsif not Platoon can navigate to object EnemyTownCentre
+                                            VariableB = 0
+                                        elsif Platoon not exists
+                                            VariableB = 0
+                                        elsif AttackMode == 1 and HEALTH of EnemyCreature == 0
+                                            VariableB = 0
+                                        elsif AttackMode == 2 and Building not exists
+                                            VariableB = 0
+                                        elsif AttackMode == 2 and HEALTH of Building < 0.1
+                                            VariableB = 0
+                                        elsif AttackMode == 2 and Building == 0
+                                            VariableB = 0
+                                        elsif not town EnemySettlement is under takeover from player PlayerID and get RecalculateTimer time remaining <= 0
+                                            VariableB = 0
+                                        end if
+                                    //end if
+                                    Counter++
+                                    until VariableB == 0 or Platoon not exists
+                                end loop
+                                clear Platoon action queue
+                            end if
+                        end if
+                    end if
+                end if
+            end if
+        end if
+
+        if PointOn >= 4
+            AttackRadiusTown = 1500
+            if EnemyIDFinal[PlayerID] == 0
+                EnemySettlement = PlayerTown1
+            elsif EnemyIDFinal[PlayerID] == 1
+                EnemySettlement = PlayerTown2
+            elsif EnemyIDFinal[PlayerID] == 2
+                EnemySettlement = PlayerTown3
+            elsif EnemyIDFinal[PlayerID] == 3
+                EnemySettlement = PlayerTown4
+            end if
+            EnemyTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in EnemySettlement min built 1.0
+            if EnemyTownCentre exists and PLAYER of EnemySettlement == Counter// and EpicScriptRunning[PlayerID] == 0
+                if Platoon can navigate to object EnemyTownCentre
+                    //wait number from 5 to 25 seconds
+                    if Platoon can navigate to object EnemyTownCentre
+                        VariableB = 1
+                        clear Platoon action queue
+                        Number = number from 1 to 4
+                        if Number == 2 and HEALTH of EnemyCreature > 0 //Hunt down platoons or destroy buildings
+                            AttackMode = 1
+                            set Platoon attack EnemySettlement with severity 0.2
+                        elsif Number == 3 or Number == 4 //Destroy value buildings
+                            AttackMode = 2
+                            Building = 0
+                            Timer = create timer for 2 seconds
+                            begin loop
+                                Number = number from 1 to 8
+                                if Number == 1 or Number == 2 or Number == 3
+                                    Building = get building ALTAR in EnemySettlement min built 0.75
+                                    if Building exists
+                                        add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 4
+                                    Building = get building TEMPLE in EnemySettlement min built 0.75
+                                    if Building exists
+                                        add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 5
+                                    Building = get building CREATURE_PEN in EnemySettlement min built 0.75
+                                    if Building exists
+                                        add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 6
+                                    Building = get building UNIVERSITY in EnemySettlement min built 0.75
+                                    if Building exists
+                                        add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 7
+                                    Building = get building BATHHOUSE in EnemySettlement min built 0.75
+                                    if Building exists
+                                        add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 8
+                                    Building = get building AMPITHEATRE in EnemySettlement min built 0.75
+                                    if Building exists
+                                        add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                end if
+                                until Building != 0 or get Timer time remaining <= 0
+                            end loop
+                        else //Capture Town
+                            AttackMode = 0
+                            set Platoon attack EnemySettlement with severity 0.3 for takeover
+                        end if
+                        RecalculateTimer = create timer for 100 seconds
+                        begin loop
+                            if Counter >= SK_MaxPlayers
+                                Counter = 0
+                            end if
+                            EnemyCreature = get player Counter creature
+                            EnemyPlatoon = get platoon of player Counter nearest {Platoon} radius 150
+                            EnemyCreatureDist = get distance from {Platoon} to {EnemyCreature}
+                            //if PlayerPlatoon1 exists or TestCreature2 <= 150 or not Platoon can navigate to object EnemySettlementCentre
+                                if EnemyPlatoon exists and not town EnemySettlement is under takeover from player PlayerID and Counter != PlayerID
+                                    VariableB = 0
+                                elsif EnemyCreatureDist <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of EnemyCreature > 0.00 and not town EnemySettlement is under takeover from player PlayerID and Counter != PlayerID
+                                    VariableB = 0
+                                elsif not Platoon can navigate to object EnemyTownCentre
+                                    VariableB = 0
+                                elsif Platoon not exists
+                                    VariableB = 0
+                                elsif AttackMode == 1 and HEALTH of EnemyCreature == 0
+                                    VariableB = 0
+                                elsif AttackMode == 2 and Building not exists
+                                    VariableB = 0
+                                elsif AttackMode == 2 and HEALTH of Building < 0.1
+                                    VariableB = 0
+                                elsif AttackMode == 2 and Building == 0
+                                    VariableB = 0
+                                elsif not town EnemySettlement is under takeover from player PlayerID and get RecalculateTimer time remaining <= 0
+                                    VariableB = 0
+                                end if
+                            //end if
+                            Counter++
+                            until VariableB == 0 or Platoon not exists
+                        end loop
+                        clear Platoon action queue
+                    end if
+                end if
+            end if
+        end if
+    end if
+
+    myPlatoon = get platoon of player PlayerID nearest {Platoon} radius 200
+    if myPlatoon exists
+        if platoon myPlatoon current action is PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building or platoon myPlatoon current action is PLATOON_AGENDA_ACTION_ATTACK_TOWN_CENTRE_FOR_TAKE_OVER using EnemyTownCentre
+            AttackRadius = 400
+        else
+            AttackRadius = 200
+        end if
+    end if
+    Counter++
+    until Platoon not exists
+end loop
+
+//say "Platoon Script Ended"
+
+end script SK_ArmyBehaivours
+
+begin script SK_SiegeWeaponBehaivours(PlayerID,SiegeWeapon,AttackImmediately,Waypoint1,Waypoint2,Waypoint3,Waypoint4,AICapital)
+
+    ActionTimer = create timer for 0 seconds
+    AttackMode = 0
+    AttackRadius = 200
+    AttackRadiusTown = 650
+    Building = 0
+    Counter = 0
+    EnemyCreature = 0
+    EnemyCreatureDist = 0
+    EnemyPlatoon = 0
+    EnemyPlayer = 0
+    EnemyCatapult = 0
+    EnemySettlement = 0
+    EnemyTownCentre = 0
+    GateHouse = 0
+    House = 0
+    locAttack = 0
+    myPlatoon = 0
+    Number = 0
+    PlatoonSize = 0
+    PlatoonSizeEnemy = 0
+    PointOn = 0
+    Rand = 0
+    RecalculateTimer = create timer for 0 seconds
+    ResetTimer = create timer for 0 seconds
+    Target = 0
+    Timer = create timer for 0 seconds
+    VariableA = 0
+    VariableB = 0
+    Wall1 = 0
+    WaypointNew1 = 0
+    WaypointNew2 = 0
+    WaypointNew3 = 0
+    WaypointNewLast = 0
+    WaypointTown = 0
+    WaypointTimer = create timer for 0 seconds
+
+start
+
+PointOn = 0
+wait 5 seconds
+disable siege weapon SiegeWeapon auto attack
+
+begin loop
+
+    if SK_AIOpeningMoves[PlayerID] == 6 and script3[PlayerID] == 0
+        wait until SK_SiegeWeaponCounter[PlayerID] >= 4
+        wait 5 seconds
+        script3[PlayerID] = 1
+    end if
+
+    //say "Siege Script Running"
+
+    if Counter >= SK_MaxPlayers
+        Counter = 0
+    end if
+
+    if PlayerID != Counter
+        EnemyPlatoon = get platoon of player Counter nearest {SiegeWeapon} radius AttackRadius
+        /*if EnemyPlatoon exists and get distance from {EnemyPlatoon} to {SiegeWeapon} < 50 and SiegeWeapon can navigate to {EnemyPlatoon} and PLAYER of EnemyPlatoon != PlayerID
+            clear siege weapon SiegeWeapon action queue
+            enable siege weapon SiegeWeapon auto attack
+            begin loop
+                EnemyPlatoon = get platoon of player Counter nearest {SiegeWeapon} radius AttackRadius
+                PlatoonSizeEnemy = get number of villagers in platoon EnemyPlatoon
+                until HEALTH of SiegeWeapon == 0 or PlatoonSizeEnemy == 0 or not SiegeWeapon can navigate to {EnemyPlatoon} or EnemyPlatoon not exists
+            end loop
+            disable siege weapon SiegeWeapon auto attack
+            clear siege weapon SiegeWeapon action queue
+        end if*/
+        //Normal Behaivor | With SK_AllowedToAttack
+        if SK_ALLOWED_TO_ATTACK[PlayerID] == 1 or locAttack == 1
+            locAttack = 1
+            EnemySettlement = get nearest town at {SiegeWeapon} for player Counter radius AttackRadiusTown
+            EnemyTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in EnemySettlement min built 1.0
+            if EnemyTownCentre exists and PLAYER of EnemySettlement == Counter// and EpicScriptRunning[PlayerID] == 0
+                if get ActionTimer time remaining <= 0
+                    ActionTimer = create timer for 60 seconds
+                    Rand = number from 1 to 7
+                    if Rand == 1 or Rand == 2
+                        GateHouse = get random abode of type GATEHOUSE in town EnemySettlement
+                        if GateHouse exists
+                            clear siege weapon SiegeWeapon action queue
+                            Target = marker at get target from {SiegeWeapon} to {GateHouse} distance 10 angle 180
+                            add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using GateHouse to siege weapon SiegeWeapon action queue
+                        elsif GateHouse not exists
+                            GateHouse = get HOUSE GATEHOUSE at {SiegeWeapon} radius AttackRadiusTown
+                            if GateHouse exists
+                                clear siege weapon SiegeWeapon action queue
+                                Target = marker at get target from {SiegeWeapon} to {GateHouse} distance 10 angle 180
+                                add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using GateHouse to siege weapon SiegeWeapon action queue
+                            else
+                                ActionTimer = create timer for 2 seconds
+                            end if
+                        end if
+                    elsif Rand == 3
+                        Wall1 = get wall segment nearest {SiegeWeapon} radius AttackRadiusTown
+                        if Wall1 exists
+                            clear siege weapon SiegeWeapon action queue
+                            Target = marker at get target from {SiegeWeapon} to {Wall1} distance 10 angle 180
+                            add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Wall1 to siege weapon SiegeWeapon action queue
+                        else
+                            ActionTimer = create timer for 2 seconds
+                        end if
+                    elsif Rand == 4 or Rand == 5
+                        House = get building ALTAR in EnemySettlement min built 0.75
+                        if House exists and SiegeWeapon can navigate to object EnemyTownCentre
+                            clear siege weapon SiegeWeapon action queue
+                            Target = marker at get target from {SiegeWeapon} to {House} distance 10 angle 180
+                            add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using House to siege weapon SiegeWeapon action queue
+                        else
+                            ActionTimer = create timer for 2 seconds
+                        end if
+                    elsif Rand == 6
+                        House = get building STORAGE_YARD in EnemySettlement min built 0.75
+                        if House exists and SiegeWeapon can navigate to object EnemyTownCentre
+                            clear siege weapon SiegeWeapon action queue
+                            Target = marker at get target from {SiegeWeapon} to {House} distance 10 angle 180
+                            add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using House to siege weapon SiegeWeapon action queue
+                        else
+                            ActionTimer = create timer for 2 seconds
+                        end if
+                    elsif Rand == 7
+                        House = get building TEMPLE in EnemySettlement min built 0.75
+                        if House exists and SiegeWeapon can navigate to object EnemyTownCentre
+                            clear siege weapon SiegeWeapon action queue
+                            Target = marker at get target from {SiegeWeapon} to {House} distance 10 angle 180
+                            add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using House to siege weapon SiegeWeapon action queue
+                        else
+                            ActionTimer = create timer for 2 seconds
+                        end if
+                    end if
+                end if
+            end if
+        
+            if get PlatoonMoveTimer1[PlayerID] time remaining <= 0 or get PlatoonMoveTimer2[PlayerID] time remaining <= 0 or get PlatoonMoveTimer3[PlayerID] time remaining <= 0 or get PlatoonMoveTimer4[PlayerID] time remaining <= 0
+                if PointOn != 4 and get PlatoonWaitTimer[PlayerID] time remaining <= 0
+                    if get size of SiegeWeapon action queue < 1
+                        //say "Get Waypoint"
+                        if PointOn == 0 and get PlatoonMoveTimer1[PlayerID] time remaining <= 0
+                            begin loop
+                                WaypointNew1 = marker at {Waypoint1} + {number from -50 to 50,number from -50 to 50}
+                                until SiegeWeapon can navigate to {WaypointNew1}
+                            end loop
+                            add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {WaypointNew1} to siege weapon SiegeWeapon action queue
+                
+                        elsif PointOn == 1 and get PlatoonMoveTimer2[PlayerID] time remaining <= 0
+                            begin loop
+                                WaypointNew2 = marker at {Waypoint2} + {number from -50 to 50,number from -50 to 50}
+                                until SiegeWeapon can navigate to {WaypointNew2}
+                            end loop
+                            add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {WaypointNew2} to siege weapon SiegeWeapon action queue
+
+                        elsif PointOn == 2 and get PlatoonMoveTimer3[PlayerID] time remaining <= 0
+                            begin loop
+                                WaypointNew3 = marker at {Waypoint3} + {number from -50 to 50,number from -50 to 50}
+                                until SiegeWeapon can navigate to {WaypointNew3}
+                            end loop
+                            add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {WaypointNew3} to siege weapon SiegeWeapon action queue
+
+                        elsif PointOn == 3 and get PlatoonMoveTimer4[PlayerID] time remaining <= 0
+                            begin loop
+                                WaypointNewLast = marker at {Waypoint4} + {number from -50 to 50,number from -50 to 50}
+                                until SiegeWeapon can navigate to {WaypointNewLast}
+                            end loop
+                            add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {WaypointNewLast} to siege weapon SiegeWeapon action queue
+
+                        end if
+                    end if
+                end if
+            end if
+
+            if {SiegeWeapon} near {WaypointNew1} radius 100 and PointOn == 0
+                PlatoonWaitTimer[PlayerID] = create timer for PlatoonWaitTime seconds
+                clear siege weapon SiegeWeapon action queue
+                PointOn = 1
+            elsif {SiegeWeapon} near {WaypointNew2} radius 100 and PointOn == 1
+                PlatoonWaitTimer[PlayerID] = create timer for PlatoonWaitTime seconds
+                clear siege weapon SiegeWeapon action queue
+                PointOn = 2
+            elsif {SiegeWeapon} near {WaypointNew3} radius 100 and PointOn == 2
+                PlatoonWaitTimer[PlayerID] = create timer for PlatoonWaitTime seconds
+                clear siege weapon SiegeWeapon action queue
+                PointOn = 3
+            elsif {SiegeWeapon} near {WaypointNewLast} radius 100 and PointOn == 3
+                PlatoonWaitTimer[PlayerID] = create timer for PlatoonWaitTime seconds
+                clear siege weapon SiegeWeapon action queue
+                PointOn = 4
+                ResetTimer = create timer for 600 seconds
+            end if
+
+        elsif AttackImmediately == 1
+            EnemySettlement = get nearest town at {SiegeWeapon} for player Counter radius AttackRadiusTown
+            EnemyTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in EnemySettlement min built 1.0
+            if EnemyTownCentre exists and PLAYER of EnemySettlement == Counter// and EpicScriptRunning[PlayerID] == 0
+                if get ActionTimer time remaining <= 0
+                    ActionTimer = create timer for 60 seconds
+                    Rand = number from 1 to 7
+                    if Rand == 1 or Rand == 2
+                        GateHouse = get random abode of type GATEHOUSE in town EnemySettlement
+                        if GateHouse exists
+                            clear siege weapon SiegeWeapon action queue
+                            Target = marker at get target from {SiegeWeapon} to {GateHouse} distance 10 angle 180
+                            add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using GateHouse to siege weapon SiegeWeapon action queue
+                        elsif GateHouse not exists
+                            GateHouse = get HOUSE GATEHOUSE at {SiegeWeapon} radius AttackRadiusTown
+                            if GateHouse exists
+                                clear siege weapon SiegeWeapon action queue
+                                Target = marker at get target from {SiegeWeapon} to {GateHouse} distance 10 angle 180
+                                add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using GateHouse to siege weapon SiegeWeapon action queue
+                            else
+                                ActionTimer = create timer for 2 seconds
+                            end if
+                        end if
+                    elsif Rand == 3
+                        Wall1 = get wall segment nearest {SiegeWeapon} radius AttackRadiusTown
+                        if Wall1 exists
+                            clear siege weapon SiegeWeapon action queue
+                            Target = marker at get target from {SiegeWeapon} to {Wall1} distance 10 angle 180
+                            add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Wall1 to siege weapon SiegeWeapon action queue
+                        else
+                            ActionTimer = create timer for 2 seconds
+                        end if
+                    elsif Rand == 4 or Rand == 5
+                        House = get building ALTAR in EnemySettlement min built 0.75
+                        if House exists and SiegeWeapon can navigate to object EnemyTownCentre
+                            clear siege weapon SiegeWeapon action queue
+                            Target = marker at get target from {SiegeWeapon} to {House} distance 10 angle 180
+                            add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using House to siege weapon SiegeWeapon action queue
+                        else
+                            ActionTimer = create timer for 2 seconds
+                        end if
+                    elsif Rand == 6
+                        House = get building STORAGE_YARD in EnemySettlement min built 0.75
+                        if House exists and SiegeWeapon can navigate to object EnemyTownCentre
+                            clear siege weapon SiegeWeapon action queue
+                            Target = marker at get target from {SiegeWeapon} to {House} distance 10 angle 180
+                            add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using House to siege weapon SiegeWeapon action queue
+                        else
+                            ActionTimer = create timer for 2 seconds
+                        end if
+                    else
+                        House = get building TEMPLE in EnemySettlement min built 0.75
+                        if House exists and SiegeWeapon can navigate to object EnemyTownCentre
+                            clear siege weapon SiegeWeapon action queue
+                            Target = marker at get target from {SiegeWeapon} to {House} distance 10 angle 180
+                            add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using House to siege weapon SiegeWeapon action queue
+                        else
+                            ActionTimer = create timer for 2 seconds
+                        end if
+                    end if
+                end if
+            end if
+        
+            if get PlatoonMoveTimer1[PlayerID] time remaining <= 0 or get PlatoonMoveTimer2[PlayerID] time remaining <= 0 or get PlatoonMoveTimer3[PlayerID] time remaining <= 0 or get PlatoonMoveTimer4[PlayerID] time remaining <= 0
+                if PointOn != 4 and get PlatoonWaitTimer[PlayerID] time remaining <= 0
+                    if get size of SiegeWeapon action queue < 1
+                        //say "Get Waypoint"
+                        if PointOn == 0 and get PlatoonMoveTimer1[PlayerID] time remaining <= 0
+                            begin loop
+                                WaypointNew1 = marker at {Waypoint1} + {number from -50 to 50,number from -50 to 50}
+                                until SiegeWeapon can navigate to {WaypointNew1}
+                            end loop
+                            add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {WaypointNew1} to siege weapon SiegeWeapon action queue
+                
+                        elsif PointOn == 1 and get PlatoonMoveTimer2[PlayerID] time remaining <= 0
+                            begin loop
+                                WaypointNew2 = marker at {Waypoint2} + {number from -50 to 50,number from -50 to 50}
+                                until SiegeWeapon can navigate to {WaypointNew2}
+                            end loop
+                            add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {WaypointNew2} to siege weapon SiegeWeapon action queue
+
+                        elsif PointOn == 2 and get PlatoonMoveTimer3[PlayerID] time remaining <= 0
+                            begin loop
+                                WaypointNew3 = marker at {Waypoint3} + {number from -50 to 50,number from -50 to 50}
+                                until SiegeWeapon can navigate to {WaypointNew3}
+                            end loop
+                            add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {WaypointNew3} to siege weapon SiegeWeapon action queue
+
+                        elsif PointOn == 3 and get PlatoonMoveTimer4[PlayerID] time remaining <= 0
+                            begin loop
+                                WaypointNewLast = marker at {Waypoint4} + {number from -50 to 50,number from -50 to 50}
+                                until SiegeWeapon can navigate to {WaypointNewLast}
+                            end loop
+                            add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {WaypointNewLast} to siege weapon SiegeWeapon action queue
+
+                        end if
+                    end if
+                end if
+            end if
+
+            if {SiegeWeapon} near {WaypointNew1} radius 100 and PointOn == 0
+                PlatoonWaitTimer[PlayerID] = create timer for PlatoonWaitTime seconds
+                clear siege weapon SiegeWeapon action queue
+                PointOn = 1
+            elsif {SiegeWeapon} near {WaypointNew2} radius 100 and PointOn == 1
+                PlatoonWaitTimer[PlayerID] = create timer for PlatoonWaitTime seconds
+                clear siege weapon SiegeWeapon action queue
+                PointOn = 2
+            elsif {SiegeWeapon} near {WaypointNew3} radius 100 and PointOn == 2
+                PlatoonWaitTimer[PlayerID] = create timer for PlatoonWaitTime seconds
+                clear siege weapon SiegeWeapon action queue
+                PointOn = 3
+            elsif {SiegeWeapon} near {WaypointNewLast} radius 100 and PointOn == 3
+                PlatoonWaitTimer[PlayerID] = create timer for PlatoonWaitTime seconds
+                clear siege weapon SiegeWeapon action queue
+                PointOn = 4
+                ResetTimer = create timer for 600 seconds
+            end if
+        elsif SK_ALLOWED_TO_ATTACK[PlayerID] == 0 and locAttack == 0 and get WaypointTimer time remaining <= 0
+            if not SiegeWeapon can navigate to {WaypointTown} or WaypointTown == 0
+                begin loop
+                    WaypointTown = marker at {SK_AIHomeTown[PlayerID]} + {number from -150 to 150,number from -150 to 150}
+                    until SiegeWeapon can navigate to {WaypointTown}
+                end loop
+            end if
+            WaypointTimer = create timer for 75 seconds
+            add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {WaypointTown} to siege weapon SiegeWeapon action queue
+        end if
+
+        if PointOn >= 4
+            AttackRadiusTown = 1500
+            if EnemyIDFinal[PlayerID] == 0
+                EnemySettlement = PlayerTown1
+            elsif EnemyIDFinal[PlayerID] == 1
+                EnemySettlement = PlayerTown2
+            elsif EnemyIDFinal[PlayerID] == 2
+                EnemySettlement = PlayerTown3
+            elsif EnemyIDFinal[PlayerID] == 3
+                EnemySettlement = PlayerTown4
+            end if
+            EnemyTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in EnemySettlement min built 1.0
+            if EnemyTownCentre exists and PLAYER of EnemySettlement == Counter// and EpicScriptRunning[PlayerID] == 0
+                if get ActionTimer time remaining <= 0
+                    ActionTimer = create timer for 60 seconds
+                    Rand = number from 1 to 7
+                    if Rand == 1 or Rand == 2
+                        GateHouse = get random abode of type GATEHOUSE in town EnemySettlement
+                        if GateHouse exists
+                            clear siege weapon SiegeWeapon action queue
+                            Target = marker at get target from {SiegeWeapon} to {GateHouse} distance 10 angle 180
+                            add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using GateHouse to siege weapon SiegeWeapon action queue
+                        elsif GateHouse not exists
+                            GateHouse = get HOUSE GATEHOUSE at {SiegeWeapon} radius AttackRadius
+                            if GateHouse exists
+                                clear siege weapon SiegeWeapon action queue
+                                Target = marker at get target from {SiegeWeapon} to {GateHouse} distance 10 angle 180
+                                add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using GateHouse to siege weapon SiegeWeapon action queue
+                            else
+                                ActionTimer = create timer for 2 seconds
+                            end if
+                        end if
+                    elsif Rand == 3
+                        Wall1 = get wall segment nearest {SiegeWeapon} radius AttackRadius
+                        if Wall1 exists
+                            clear siege weapon SiegeWeapon action queue
+                            Target = marker at get target from {SiegeWeapon} to {Wall1} distance 10 angle 180
+                            add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Wall1 to siege weapon SiegeWeapon action queue
+                        else
+                            ActionTimer = create timer for 2 seconds
+                        end if
+                    elsif Rand == 4 or Rand == 5
+                        House = get building ALTAR in EnemySettlement min built 0.75
+                        if House exists and SiegeWeapon can navigate to object EnemyTownCentre
+                            clear siege weapon SiegeWeapon action queue
+                            Target = marker at get target from {SiegeWeapon} to {House} distance 10 angle 180
+                            add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using House to siege weapon SiegeWeapon action queue
+                        else
+                            ActionTimer = create timer for 2 seconds
+                        end if
+                    elsif Rand == 6
+                        House = get building STORAGE_YARD in EnemySettlement min built 0.75
+                        if House exists and SiegeWeapon can navigate to object EnemyTownCentre
+                            clear siege weapon SiegeWeapon action queue
+                            Target = marker at get target from {SiegeWeapon} to {House} distance 10 angle 180
+                            add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using House to siege weapon SiegeWeapon action queue
+                        else
+                            ActionTimer = create timer for 2 seconds
+                        end if
+                    else
+                        House = get building TEMPLE in EnemySettlement min built 0.75
+                        if House exists and SiegeWeapon can navigate to object EnemyTownCentre
+                            clear siege weapon SiegeWeapon action queue
+                            Target = marker at get target from {SiegeWeapon} to {House} distance 10 angle 180
+                            add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using House to siege weapon SiegeWeapon action queue
+                        else
+                            ActionTimer = create timer for 2 seconds
+                        end if
+                    end if
+                end if
+            end if
+        end if
+    end if
+
+    Counter++
+    until SiegeWeapon not exists
+end loop
+
+//say "Siege Script Ended"
+
+end script SK_SiegeWeaponBehaivours
+
+begin script SK_ArmyTimers(PlayerID)
+
+start
+
+PlatoonMoveTimer1[PlayerID] = create timer for 0 seconds
+PlatoonMoveTimer2[PlayerID] = create timer for 0 seconds
+PlatoonMoveTimer3[PlayerID] = create timer for 0 seconds
+PlatoonMoveTimer4[PlayerID] = create timer for 0 seconds
+
+begin loop
+    /*if get PlatoonMoveTimer1[PlayerID] time remaining <= 0 or get PlatoonMoveTimer2[PlayerID] time remaining <= 0 or get PlatoonMoveTimer3[PlayerID] time remaining <= 0
+        wait 5 seconds
+        PlatoonMoveTimer1[PlayerID] = create timer for 15 seconds
+        PlatoonMoveTimer2[PlayerID] = create timer for 15 seconds
+        PlatoonMoveTimer4[PlayerID] = create timer for 15 seconds
+    end if*/
+    if get PlatoonMoveTimer3[PlayerID] time remaining <= 0 or ReadyToAttack[PlayerID] >= 5
+        wait 100 seconds
+        ReadyToAttack[PlayerID] = 0
+        PlatoonMoveTimer3[PlayerID] = create timer for 250 seconds
+    end if
+end loop
+
+end script SK_ArmyTimers

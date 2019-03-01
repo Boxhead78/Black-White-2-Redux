@@ -1,0 +1,477 @@
+///////////////////////////////////////////////////////////////////////////////
+//    Land 20 Gods Playground
+//    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//    Start date:        16.12.18            By: Boxhead
+//    Update date:    17.12.18            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+define script MapLoader
+define script SkirmishLoader
+define script LoadSkirmishMap(myScroll, skirmishMap)
+
+
+begin script MapLoader
+
+    CurrentLand = 0
+    LandID = 0
+    GP_ScrollPos = 0
+    AreYouSureCommentSaid = 0
+    CinemaPos = 0
+    Portal = 0
+    CSMixer = 0
+    LandOver = 0
+
+start
+
+    LandID = persistent data "LAND_ID"
+    LandOver = persistent data "PREVLAND_OVER"
+
+    //If player completed the land he leaved, set the landID to the next land
+    if LandOver == 1
+        if LandID == 4
+            LandID = 6
+            
+        elsif LandID == 6
+            LandID = 7
+
+        elsif LandID == 7        
+            LandID = 8
+
+        elsif LandID == 8        
+            LandID = 9
+
+        elsif LandID == 9        
+            LandID = 10
+
+        elsif LandID == 10        
+            LandID = 11
+
+        elsif LandID == 11        
+            LandID = 4
+
+        end if
+    end if
+
+    //Initiate Gold scroll
+    GP_ScrollPos = marker at {1154.78,170.77,1057.33}
+    GP_Scroll = create highlight GOLD name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {GP_ScrollPos}
+
+    Portal = create visual effect VISUAL_EFFECT_TELEPORTER_HOOP at {GP_ScrollPos} + {0.000,1.000,0.000} time -1
+    SCALE of Portal = 1.25
+    set Portal colour red 218 green 165 blue 32
+
+    GP_ScrollBronze = create highlight BRONZE name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {GP_ScrollPos} + {20,0,20}
+
+begin loop
+
+    if GP_ScrollBronze right clicked
+        clear right clicked object
+        say "Through this portal you continue the campaign."
+    end if
+
+    if GP_Scroll right clicked and AreYouSureCommentSaid == 0
+        clear right clicked object
+        begin dialogue
+            eject good spirit
+            eject evil spirit
+            //GA: "Are you sure you wish to leave the land?"
+            say "BW2T_SCRIPT_04FINAL_ADVISORS_DEPARTURE_10"
+            wait until read
+            //EA: "Click again to confirm"
+            say "BW2T_SCRIPT_04FINAL_ADVISORS_DEPARTURE_11"
+            wait until read
+            send good spirit home
+            send evil spirit home
+        end dialogue
+        AreYouSureCommentSaid = 1
+        clear right clicked object
+    elsif GP_Scroll right clicked and AreYouSureCommentSaid == 1
+        delete GP_Scroll
+        delete GP_ScrollBronze
+    end if
+
+    until GP_Scroll not exists
+end loop
+
+CinemaPos = marker at {GP_ScrollPos}
+
+set fade red 0 green 0 blue 0 time 1
+wait 1 seconds
+begin cinema
+    start music "cut_scene_sinister_02" loop 10 
+
+    wait 2 seconds
+    queue camera move with position {CinemaPos} + {10,15,10} focus {CinemaPos} + {0,5,0} time 0.0
+    queue camera move with position {CinemaPos} + {7.5,12,7.5} focus {CinemaPos} time 6.0
+    queue camera move with position {CinemaPos} + {1,1.5,1} focus {CinemaPos} time 6.0
+    play camera path with easein 4 easeout 4 method SCRIPT_CAMERAPATH_EQUALDISTANCE
+    set fade in time 2
+    wait 7.5 seconds
+    set fade red 0 green 0 blue 0 time 3
+    set mixer CSMixer channel AUDIO_MIXER_CHANNEL_GLOBAL to 0.0 with fadetime 3
+    wait 3.5 seconds
+
+    /*
+    release MyCreature
+    MyCreature = get player 0 creature
+    if MyCreature exists
+        save my_creature
+    end if
+    */
+
+    if LandID == 4
+        disable game can be lost
+        run script LandExit
+        PD_ForcedSaving = 1
+        wait until PD_ForcedSaving == 1 or 10 seconds
+        load map "./Data/Landscape/BW2/Land4.bwe"
+        
+    elsif LandID == 6
+        disable game can be lost
+        run script LandExit
+        PD_ForcedSaving = 1
+        wait until PD_ForcedSaving == 1 or 10 seconds
+        load map "./Data/Landscape/BW2/Land6.bwe"
+
+    elsif LandID == 7        
+        disable game can be lost
+        run script LandExit
+        PD_ForcedSaving = 1
+        wait until PD_ForcedSaving == 1 or 10 seconds
+        load map "./Data/Landscape/BW2/Land7.bwe"
+
+    elsif LandID == 8        
+        disable game can be lost
+        run script LandExit
+        PD_ForcedSaving = 1
+        wait until PD_ForcedSaving == 1 or 10 seconds
+        load map "./Data/Landscape/BW2/Land8.bwe"
+    elsif LandID == 9        
+        disable game can be lost
+        run script LandExit
+        PD_ForcedSaving = 1
+        wait until PD_ForcedSaving == 1 or 10 seconds
+        load map "./Data/Landscape/BW2/Land9.bwe"
+
+    elsif LandID == 10        
+        disable game can be lost
+        run script LandExit
+        PD_ForcedSaving = 1
+        wait until PD_ForcedSaving == 1 or 10 seconds
+        load map "./Data/Landscape/BW2/Land10.bwe"
+
+    elsif LandID == 11        
+        disable game can be lost
+        run script LandExit
+        PD_ForcedSaving = 1
+        wait until PD_ForcedSaving == 1 or 10 seconds
+        load map "./Data/Landscape/BW2/Land11.bwe"
+
+    elsif LandID == 13        
+        disable game can be lost
+        run script LandExit
+        PD_ForcedSaving = 1
+        wait until PD_ForcedSaving == 1 or 10 seconds
+        load map "./Data/Landscape/BW2/Land13.bwe"
+
+    elsif LandID == 14        
+        disable game can be lost
+        run script LandExit
+        PD_ForcedSaving = 1
+        wait until PD_ForcedSaving == 1 or 10 seconds
+        load map "./Data/Landscape/BW2/Land14.bwe"
+
+    elsif LandID == 15        
+        disable game can be lost
+        run script LandExit
+        PD_ForcedSaving = 1
+        wait until PD_ForcedSaving == 1 or 10 seconds
+        load map "./Data/Landscape/BW2/Land15.bwe"
+
+    else
+        disable game can be lost
+        run script LandExit
+        PD_ForcedSaving = 1
+        wait until PD_ForcedSaving == 1 or 10 seconds
+        load map "./Data/Landscape/BW2/Land4.bwe"
+
+    end if
+
+    wait 3 seconds
+
+end cinema
+
+end script MapLoader
+
+begin script SkirmishLoader
+
+    DescriptionScroll = 0
+    MapScrolls[3]
+    SettingScrolls[6]
+    Portal = 0
+    ExtraTemp = 0
+    EpicTemp = 0
+    TutorialsTemp = 0
+    EpicSpellsTemp = 0
+
+start
+
+    MapScrolls[0] = create highlight GOLD name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {1884.53,93.00,1343.59}
+    MapScrolls[1] = create highlight GOLD name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {1953.78,106.00,1293.09}
+    MapScrolls[2] = create highlight GOLD name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {1900.48,98.00,1225.89}
+    run background script LoadSkirmishMap(MapScrolls[0],21)
+    run background script LoadSkirmishMap(MapScrolls[1],22)
+    run background script LoadSkirmishMap(MapScrolls[2],23)
+
+    Portal = create visual effect VISUAL_EFFECT_TELEPORTER_HOOP at {1895.47,75.80,1282.96} + {0.000,1.000,0.000} time -1
+    SCALE of Portal = 1.25
+    set Portal colour red 218 green 165 blue 32
+
+    DescriptionScroll = create highlight BRONZE name "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_13" remind "HELP_TEXT_CREATURE_CURRENT_SOURCE_09" at {1866.06,79.13,1278.12}
+    SettingScrolls[0] = create highlight SILVER name "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_13" remind "HELP_TEXT_CREATURE_CURRENT_SOURCE_09" at {1795.82,84.47,1273.74} + {0,3,0}
+    SettingScrolls[1] = create highlight SILVER name "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_13" remind "HELP_TEXT_CREATURE_CURRENT_SOURCE_09" at {1796.34,84.01,1229.45} + {0,3,0}
+    SettingScrolls[2] = create highlight SILVER name "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_13" remind "HELP_TEXT_CREATURE_CURRENT_SOURCE_09" at {1785.59,76.27,1199.46} + {0,3,0}
+    SettingScrolls[3] = create highlight SILVER name "HELP_TEXT_MULTIPLAYER_SETUP_CREATURE_ALLOWED_01" remind "HELP_TEXT_CREATURE_CURRENT_SOURCE_09" at {1656.58,70.75,742.31} + {0,3,0}
+    begin loop
+        if DescriptionScroll right clicked
+            clear right clicked object
+            begin dialogue
+                if Language == English
+                    say "From here you can depart to the skirmish maps. Click on silver scrolls for settings. Click on golden scrolls to load a skirmish map."
+                elsif Language == German
+                    say "Von hier werden Gefechtkarten geladen. Klicke auf silberne Schriftrollen fuer Einstellungen. Goldene, um eine Karte zu laden."
+                end if
+                wait 5 seconds
+            end dialogue
+        end if
+        //Difficulty in difficultymodifiers.txt
+        //Extra
+        if SettingScrolls[0] right clicked
+            clear right clicked object
+            ExtraTemp++
+            if ExtraTemp == 1 or ExtraTemp == 3
+                if ExtraTemp == 3
+                    ExtraTemp = 1
+                end if
+                begin dialogue
+                    if Language == English
+                        say "Skirmish Extras (Special Towns) enabled."
+                    elsif Language == German
+                        say "Gefecht Extras (Besondere Staedte) aktiviert."
+                    end if
+                    wait until SettingScrolls[0] right clicked or 2 seconds
+                end dialogue
+            elsif ExtraTemp == 2
+                begin dialogue
+                    if Language == English
+                        say "Skirmish Extras (Special Towns) disabled."
+                    elsif Language == German
+                        say "Gefecht Extras (Besondere Staedte) deaktiviert."
+                    end if
+                    wait until SettingScrolls[0] right clicked or 2 seconds
+                end dialogue
+            end if
+            PD_ForcedSaving = 1
+            wait until PD_ForcedSaving == 1 or 10 seconds
+            stop script "SavePersistentDataSetData"
+            set persistent data "SKP_Extras" to ExtraTemp
+            run script SavePersistentDataGetData
+        end if
+
+        if SettingScrolls[1] right clicked
+            clear right clicked object
+            EpicTemp++
+            if EpicTemp == 1 or EpicTemp == 3
+                if EpicTemp == 3
+                    EpicTemp = 1
+                end if
+                begin dialogue
+                    if Language == English
+                        say "Skirmish AI Epics enabled."
+                    elsif Language == German
+                        say "Gefechts-KI-Epen aktiviert."
+                    end if
+                    wait until SettingScrolls[1] right clicked or 2 seconds
+                end dialogue
+            elsif EpicTemp == 2
+                begin dialogue
+                    if Language == English
+                        say "Skirmish AI Epics disabled."
+                    elsif Language == German
+                        say "Gefechts-KI-Epen deaktiviert."
+                    end if
+                    wait until SettingScrolls[1] right clicked or 2 seconds
+                end dialogue
+            end if
+            PD_ForcedSaving = 1
+            wait until PD_ForcedSaving == 1 or 10 seconds
+            stop script "SavePersistentDataSetData"
+            set persistent data "SKP_AIEpics" to EpicTemp
+            run script SavePersistentDataGetData
+        end if
+
+        if SettingScrolls[2] right clicked
+            clear right clicked object
+            TutorialsTemp++
+            if TutorialsTemp == 1 or TutorialsTemp == 3
+                if TutorialsTemp == 3
+                    TutorialsTemp = 1
+                end if
+                begin dialogue
+                    if Language == English
+                        say "Skirmish Tutorials enabled."
+                    elsif Language == German
+                        say "Gefecht-Tutorials aktiviert."
+                    end if
+                    wait until SettingScrolls[2] right clicked or 2 seconds
+                end dialogue
+            elsif TutorialsTemp == 2
+                begin dialogue
+                    if Language == English
+                        say "Skirmish Tutorials disabled."
+                    elsif Language == German
+                        say "Gefecht-Tutorials deaktiviert."
+                    end if
+                    wait until SettingScrolls[2] right clicked or 2 seconds
+                end dialogue
+            end if
+            PD_ForcedSaving = 1
+            wait until PD_ForcedSaving == 1 or 10 seconds
+            stop script "SavePersistentDataSetData"
+            set persistent data "SKP_Tutorials" to TutorialsTemp
+            run script SavePersistentDataGetData
+        end if
+
+        if SettingScrolls[3] right clicked
+            clear right clicked object
+            EpicSpellsTemp++
+            if EpicSpellsTemp == 1 or EpicSpellsTemp == 3
+                if EpicSpellsTemp == 3
+                    EpicSpellsTemp = 1
+                end if
+                begin dialogue
+                    if Language == English
+                        say "Custom wonders enabled."
+                    elsif Language == German
+                        say "Eigene Wunder aktiviert."
+                    end if
+                    wait until SettingScrolls[2] right clicked or 2 seconds
+                end dialogue
+            elsif EpicSpellsTemp == 2
+                begin dialogue
+                    if Language == English
+                        say "Custom wonders disabled."
+                    elsif Language == German
+                        say "Eigene Wunder deaktiviert."
+                    end if
+                    wait until SettingScrolls[2] right clicked or 2 seconds
+                end dialogue
+            end if
+            PD_ForcedSaving = 1
+            wait until PD_ForcedSaving == 1 or 10 seconds
+            stop script "SavePersistentDataSetData"
+            set persistent data "EPICSPELLS_CHECK" to EpicSpellsTemp
+            run script SavePersistentDataGetData
+        end if
+    end loop
+
+end script SkirmishLoader
+
+begin script LoadSkirmishMap(myScroll,skirmishMap)
+
+    AreYouSureCommentSaid = 0
+    CinemaPos = 0
+    CSMixer = 0
+
+start
+
+CinemaPos = marker at {1895.47,76.80,1282.96}
+
+begin loop
+
+    if myScroll right clicked and AreYouSureCommentSaid == 0
+        clear right clicked object
+        if skirmishMap == 21
+            begin dialogue
+                if Language == English
+                    say "Through this portal you get to the 2 gods skirmish map. Click again to confirm."
+                elsif Language == German
+                    say "Durch dieses Portal gelangst du zur 2-Goetter Gefechtskarte."
+                end if
+                wait 5 seconds
+            end dialogue
+        elsif skirmishMap == 22
+            begin dialogue
+                if Language == English
+                    say "Through this portal you get to the 3 gods skirmish map. Click again to confirm."
+                elsif Language == German
+                    say "Durch dieses Portal gelangst du zur 3-Goetter Gefechtskarte."
+                end if
+                wait 5 seconds
+            end dialogue
+        elsif skirmishMap == 23
+            begin dialogue
+                if Language == English
+                    say "Through this portal you get to the 4 gods skirmish map. Click again to confirm."
+                elsif Language == German
+                    say "Durch dieses Portal gelangst du zur 4-Goetter Gefechtskarte."
+                end if
+                wait 5 seconds
+            end dialogue
+        end if
+        AreYouSureCommentSaid = 1
+        clear right clicked object
+    elsif myScroll right clicked and AreYouSureCommentSaid == 1
+        delete myScroll
+    end if
+
+    until myScroll not exists
+end loop
+
+set fade red 0 green 0 blue 0 time 1
+wait 1 seconds
+begin cinema
+    start music "cut_scene_sinister_02" loop 10 
+
+    wait 2 seconds
+    queue camera move with position {CinemaPos} + {10,15,10} focus {CinemaPos} + {0,5,0} time 0.0
+    queue camera move with position {CinemaPos} + {7.5,12,7.5} focus {CinemaPos} time 6.0
+    queue camera move with position {CinemaPos} + {1,1.5,1} focus {CinemaPos} time 6.0
+    play camera path with easein 4 easeout 4 method SCRIPT_CAMERAPATH_EQUALDISTANCE
+    set fade in time 2
+    wait 7.5 seconds
+    set fade red 0 green 0 blue 0 time 3
+    set mixer CSMixer channel AUDIO_MIXER_CHANNEL_GLOBAL to 0.0 with fadetime 3
+    wait 3.5 seconds
+
+    /*
+    release MyCreature
+    MyCreature = get player 0 creature
+    if MyCreature exists
+        save my_creature
+    end if
+    */
+    
+    if skirmishMap == 21
+        disable game can be lost
+        run script LandExit
+        load map "./Data/Landscape/BW2/land2002.bwe"
+        
+    elsif skirmishMap == 22
+        disable game can be lost
+        run script LandExit
+        load map "./Data/Landscape/BW2/land2003.bwe"
+
+    elsif skirmishMap == 23
+        disable game can be lost
+        run script LandExit
+        load map "./Data/Landscape/BW2/land2004.bwe"
+
+    end if
+
+    wait 3 seconds
+
+end cinema
+
+end script LoadSkirmishMap

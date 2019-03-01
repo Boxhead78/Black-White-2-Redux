@@ -1,0 +1,2110 @@
+///////////////////////////////////////////////////////////////////////////////
+//        Skirmish AI Town Building
+//    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//    Start date:        30.09.18            By: Boxhead
+//    Update date:    03.10.18            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+define script SK_AITownBuildingMaxBuildings(PlayerID)
+define script SK_AITownBuildingGetTown(PlayerID)
+define script SK_AITownBuildingGetBuildingPos(AITown,PlayerID)
+define script SK_AITownBuildingFailed(PlayerID)
+define script SK_AITownBuildingBuildBuilding(AITown,Building,PlayerID,Size)
+define script SK_AIEpicStart(PlayerID,Wonder,Type)
+define script SK_AIEpicBuild(PlayerID,Wonder,AITown)
+define script SK_AITownBuildingAltarWorkaround(PlayerID,Altar)
+define script SK_AITownBuildingStopMusic
+define script SK_AIEpicWorshippers(PlayerID,Wonder,AITown)
+
+define BuildingWaitTime = 25 //Gets divided with the difficulty multiplier
+define BuildingWaitTimeMinimum = 3
+define MaxBuildingsSim = 10
+define radiusSmall = 28 //From 20 to 28, platoons had problems navigating through towns
+define radiusMedium = 35
+define radiusLarge = 42.5
+define radiusHuge = 55 // If AI is supposed to expand influence
+
+global MaxBuildingsSimVar[SK_MaxPlayers] //How many buildings the AI builds at once. Gets relies on Escalation: 2 Escalation = MaxBuildingsSimVar + 1
+global CurrBuildings[SK_MaxPlayers]
+global CurrTries[SK_MaxPlayers]
+global NextBuildingPos[SK_MaxPlayers]
+global BuildBuilding[SK_MaxPlayers]
+global DelayAllowed[SK_MaxPlayers]
+
+begin script SK_AITownBuildingMaxBuildings(PlayerID)
+
+start
+
+begin loop
+    wait 5 seconds
+    MaxBuildingsSimVar[PlayerID] = (MaxBuildingsSim + (SK_Escalation[PlayerID] / 2))
+end loop
+
+end script SK_AITownBuildingMaxBuildings
+
+begin script SK_AITownBuildingGetTown(PlayerID)
+
+    Counter = 0
+    AITown[SK_MaxTowns]
+    NumberOfTowns = 0
+    TownCentre = 0
+
+start
+
+BuildBuilding[PlayerID] = 1
+
+run background script SK_AITownBuildingMaxBuildings(PlayerID)
+
+begin loop
+    if Counter >= SK_MaxTowns
+        Counter = 0
+    end if
+
+    AITown[Counter] = get town with id Counter
+    TownCentre = get building ABODE_NUMBER_TOWN_CENTRE in AITown[Counter] min built 1.0
+    if PLAYER of AITown[Counter] == PlayerID and TownCentre exists and CurrBuildings[PlayerID] < MaxBuildingsSimVar[PlayerID] and BuildBuilding[PlayerID] == 1
+        BuildBuilding[PlayerID] = 0
+        CurrBuildings[PlayerID]++
+        run background script SK_AITownBuildingGetBuildingPos(AITown[Counter],PlayerID)
+        //say "BuildPos"
+    end if
+
+    NumberOfTowns = get player PlayerID town total
+    Counter += number from 1 to NumberOfTowns
+end loop
+
+end script SK_AITownBuildingGetTown
+
+begin script SK_AITownBuildingGetBuildingPos(AITown,PlayerID)
+
+    Building = 0
+    BuildingCounter = 0
+    BuildRadius = 0
+    Counter = 0
+    EpicBuilt = 0
+    ExistingBuilding = 0
+    ExistingEmbellishment = 0
+    ExistingEpic = 0
+    ExistingField = 0
+    ExistingRock = 0
+    ExistingOreRock = 0
+    ExistingSpell = 0
+    Influence = 0
+    Number = 0
+    NumberofA = 0
+    NumberofB = 0
+    NumberofC = 0
+    NumberofD = 0
+    NumberOfHouses = 0
+    NumberOfEpicsA[4] 
+    NumberOfEpics = 0
+    MaxTries = 0
+    ReqBuildingsThres = 0
+    whichBuilding = 0
+    Villager = 0
+
+    myDistance = 0
+
+start
+
+    if SK_AIDifficulty[PlayerID] <= 33
+        MaxTries = 19
+        if DelayAllowed[PlayerID] == 1
+            wait 4 seconds
+        end if
+
+    elsif SK_AIDifficulty[PlayerID] <= 66
+        MaxTries = 37
+        if DelayAllowed[PlayerID] == 1
+            wait 2 seconds
+        end if
+
+    elsif SK_AIDifficulty[PlayerID] > 66
+        MaxTries = 75
+        if DelayAllowed[PlayerID] == 1
+            wait 1 seconds
+        end if
+
+    elsif SK_AIDifficulty[PlayerID] > 100
+        MaxTries = 150
+        if DelayAllowed[PlayerID] == 1
+            wait 0.5 seconds
+        end if
+
+    end if
+
+    if SK_AIPersonality[PlayerID] == 1
+        ReqBuildingsThres = 8
+
+    elsif SK_AIPersonality[PlayerID] == 2
+        ReqBuildingsThres = 4
+
+    elsif SK_AIPersonality[PlayerID] == 3
+        ReqBuildingsThres = 4
+
+    end if
+    //say "Get Position"
+
+    begin loop
+
+        //Get Houses
+        NumberofA = get number of type HOUSE ABODE_NUMBER_A in AITown min built 0.0
+        NumberofB = get number of type HOUSE ABODE_NUMBER_B in AITown min built 0.0
+        NumberofC = get number of type HOUSE ABODE_NUMBER_C in AITown min built 0.0
+        NumberofD = get number of type HOUSE ABODE_NUMBER_D in AITown min built 0.0
+        NumberOfHouses = NumberofA + NumberofB + NumberofC + NumberofD
+        //Get Epics
+        NumberOfEpicsA[0] = get number of type SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_SIREN in AITown min built 0.0
+        NumberOfEpicsA[1] = get number of type SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_HURRICANE in AITown min built 0.0
+        NumberOfEpicsA[2] = get number of type SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_EARTHQUAKE in AITown min built 0.0
+        NumberOfEpicsA[3] = get number of type SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_VOLCANO in AITown min built 0.0
+        NumberOfEpics = NumberOfEpicsA[0] + NumberOfEpicsA[1] + NumberOfEpicsA[2] + NumberOfEpicsA[3]
+
+        if PlayerID == 1
+            /* Norse Buildlist
+            whichBuilding 1-3: Houses
+            whichBuilding 4: Altar
+            whichBuilding 5: Creche
+            whichBuilding 6: Pub
+            whichBuilding 7: Lumbermill
+            whichBuilding 8: Market
+            whichBuilding 9: Melee
+            whichBuilding 10: Ranged
+            whichBuilding 11: Storage Pit
+            whichBuilding 12: Temple
+            whichBuilding 13: CPen
+            whichBuilding 14-15: Embellishments
+
+            Used from Greek Race
+            whichBuilding 20: University
+            whichBuilding 21: Ampitheathre
+            whichBuilding 22: Graveyard
+            whichBuilding 23: Rest Home
+            whichBuilding 24: Baths
+            whichBuilding 25: Prison
+
+            Epics
+            whichBuilding 30: Siren
+            whichBuilding 31: Hurricane
+            whichBuilding 32: Earthquake
+            whichBuilding 33: Volcano
+            */
+            if AITown == SK_AIHomeTown[PlayerID]
+                //Which Building should I build? Build orders here...
+                //Always Start with Storage Pit then Altar then Temple
+                if get number of type HOUSE ABODE_NUMBER_STORAGE_PIT in AITown min built 0.0 == 0
+                    whichBuilding = 11
+
+                elsif get number of type HOUSE ABODE_NUMBER_ALTAR in AITown min built 0.0 == 0
+                    whichBuilding = 4
+
+                elsif get number of type HOUSE ABODE_NUMBER_TEMPLE in AITown min built 0.0 == 0
+                    whichBuilding = 12
+
+                //Build Opening Moves
+                //Evil
+                //Opening Move 2
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 < 2 and SK_AIOpeningMoves[PlayerID] == 2 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = 9
+
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 < 2 and SK_AIOpeningMoves[PlayerID] == 2 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = 10
+
+                elsif NumberOfHouses < 20 and SK_AIOpeningMoves[PlayerID] == 2 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = number from 1 to 3
+
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 < 4 and SK_AIOpeningMoves[PlayerID] == 2 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = 9
+
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 < 4 and SK_AIOpeningMoves[PlayerID] == 2 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = 10
+
+                //Opening Move 3
+                elsif NumberOfEpics == 0 and SK_AIOpeningMoves[PlayerID] == 3 and SK_AIPersonality[PlayerID] == 1 and SK_Epics == 1
+                    if get player EnemyIDFinal[PlayerID] alignment > 0.25
+                        whichBuilding = number from 31 to 33
+                    else
+                        whichBuilding = number from 30 to 33
+                    end if
+
+                elsif get number of type HOUSE ABODE_NUMBER_TEMPLE in AITown min built 0.0 < 3 and SK_AIOpeningMoves[PlayerID] == 3 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = 12
+
+                //Opening Move 4
+                elsif get number of type HOUSE ABODE_NUMBER_ALTAR in AITown min built 0.0 < 3 and SK_AIOpeningMoves[PlayerID] == 4 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = 4
+
+                elsif NumberOfHouses < 25 and SK_AIOpeningMoves[PlayerID] == 4 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = number from 1 to 3
+
+                elsif get number of type HOUSE ABODE_NUMBER_TEMPLE in AITown min built 0.0 < 2 and SK_AIOpeningMoves[PlayerID] == 4 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = 12
+
+                elsif NumberOfEpics == 0 and SK_AIOpeningMoves[PlayerID] == 4 and SK_AIPersonality[PlayerID] == 1 and SK_Epics == 1
+                    if get player EnemyIDFinal[PlayerID] alignment > 0.25
+                        whichBuilding = number from 31 to 33
+                    else
+                        whichBuilding = number from 30 to 33
+                    end if
+
+                //Opening Move 5
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 < 3 and SK_AIOpeningMoves[PlayerID] == 5 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = 10
+
+                elsif NumberOfHouses < 25 and SK_AIOpeningMoves[PlayerID] == 5 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = number from 1 to 3
+
+                //Opening Move 6
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 < 2 and SK_AIOpeningMoves[PlayerID] == 6 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = 9
+
+                elsif NumberOfHouses < 15 and SK_AIOpeningMoves[PlayerID] == 6 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = number from 1 to 3
+
+                //Neutral
+                //Opening Move 2
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 < 1 and SK_AIOpeningMoves[PlayerID] == 2 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = 9
+
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 < 1 and SK_AIOpeningMoves[PlayerID] == 2 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = 10
+
+                //Opening Move 3
+                elsif NumberOfEpics == 0 and SK_AIOpeningMoves[PlayerID] == 3 and SK_AIPersonality[PlayerID] == 2 and SK_Epics == 1
+                    if get player EnemyIDFinal[PlayerID] alignment > 0.25
+                        whichBuilding = number from 31 to 33
+                    else
+                        whichBuilding = number from 30 to 33
+                    end if
+
+                elsif get number of type HOUSE ABODE_NUMBER_TEMPLE in AITown min built 0.0 < 3 and SK_AIOpeningMoves[PlayerID] == 3 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = 12
+
+                //Opening Move 4
+                elsif get number of type HOUSE ABODE_NUMBER_ALTAR in AITown min built 0.0 < 3 and SK_AIOpeningMoves[PlayerID] == 4 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = 4
+
+                elsif NumberOfHouses < 25 and SK_AIOpeningMoves[PlayerID] == 4 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = number from 1 to 3
+
+                elsif get number of type HOUSE ABODE_NUMBER_TEMPLE in AITown min built 0.0 < 2 and SK_AIOpeningMoves[PlayerID] == 4 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = 12
+
+                elsif NumberOfEpics == 0 and SK_AIOpeningMoves[PlayerID] == 4 and SK_AIPersonality[PlayerID] == 2 and SK_Epics == 1
+                    if get player EnemyIDFinal[PlayerID] alignment > 0.25
+                        whichBuilding = number from 31 to 33
+                    else
+                        whichBuilding = number from 30 to 33
+                    end if
+
+                //Opening Move 5
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 < 3 and SK_AIOpeningMoves[PlayerID] == 5 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = 10
+
+                elsif NumberOfHouses < 25 and SK_AIOpeningMoves[PlayerID] == 5 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = number from 1 to 3
+
+                //Opening Move 6
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 < 2 and SK_AIOpeningMoves[PlayerID] == 6 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = 9
+
+                elsif NumberOfHouses < 15 and SK_AIOpeningMoves[PlayerID] == 6 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = number from 1 to 3
+
+                //Good
+                //Opening Move 2
+                elsif get number of type HOUSE ABODE_NUMBER_TEMPLE in AITown min built 0.0 < 3 and SK_AIOpeningMoves[PlayerID] == 2 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 12
+
+                elsif get number of type HOUSE ABODE_NUMBER_AMPITHEATRE in AITown min built 0.0 < 1 and SK_AIOpeningMoves[PlayerID] == 2 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 21
+
+                elsif get number of type HOUSE ABODE_NUMBER_BATHHOUSE in AITown min built 0.0 < 1 and SK_AIOpeningMoves[PlayerID] == 2 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 24
+
+                //Opening Move 3
+                elsif NumberOfEpics == 0 and SK_AIOpeningMoves[PlayerID] == 3 and SK_AIPersonality[PlayerID] == 3 and SK_Epics == 1
+                    if get player EnemyIDFinal[PlayerID] alignment > 0.25
+                        whichBuilding = number from 31 to 33
+                    else
+                        whichBuilding = number from 30 to 33
+                    end if
+
+                elsif get number of type HOUSE ABODE_NUMBER_TEMPLE in AITown min built 0.0 < 3 and SK_AIOpeningMoves[PlayerID] == 3 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 12
+
+                //Opening Move 4
+                elsif get number of type HOUSE ABODE_NUMBER_ALTAR in AITown min built 0.0 < 3 and SK_AIOpeningMoves[PlayerID] == 4 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 4
+
+                elsif NumberOfHouses < 25 and SK_AIOpeningMoves[PlayerID] == 4 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = number from 1 to 3
+
+                elsif get number of type HOUSE ABODE_NUMBER_TEMPLE in AITown min built 0.0 < 2 and SK_AIOpeningMoves[PlayerID] == 4 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 12
+
+                elsif NumberOfEpics == 0 and SK_AIOpeningMoves[PlayerID] == 4 and SK_AIPersonality[PlayerID] == 3 and SK_Epics == 1
+                    if get player EnemyIDFinal[PlayerID] alignment > 0.25
+                        whichBuilding = number from 31 to 33
+                    else
+                        whichBuilding = number from 30 to 33
+                    end if
+
+                //Opening Move 5
+                elsif get number of type HOUSE ABODE_NUMBER_TEMPLE in AITown min built 0.0 < 2 and SK_AIOpeningMoves[PlayerID] == 5 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 12
+
+                elsif get number of type HOUSE ABODE_NUMBER_ALTAR in AITown min built 0.0 < 2 and SK_AIOpeningMoves[PlayerID] == 5 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 4
+
+                elsif NumberOfEpics < 2 and SK_AIOpeningMoves[PlayerID] == 5 and SK_AIPersonality[PlayerID] == 3 and SK_Epics == 1
+                    if get player EnemyIDFinal[PlayerID] alignment > 0.25
+                        whichBuilding = number from 31 to 33
+                    else
+                        whichBuilding = number from 30 to 33
+                    end if
+
+                //Opening Move 6
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 < 2 and SK_AIOpeningMoves[PlayerID] == 6 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 9
+
+                elsif NumberOfHouses < 15 and SK_AIOpeningMoves[PlayerID] == 6 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = number from 1 to 3
+
+                //Build Strategy Stuff
+                //Evil
+                elsif NumberOfHouses < 4 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = number from 1 to 3
+
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 < 2 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = 9
+
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 < 2 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = 10
+
+                elsif get number of type HOUSE ABODE_NUMBER_PRISON in AITown min built 0.0 < 1 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = 25
+
+                elsif get number of type HOUSE ABODE_NUMBER_GRAVEYARD in AITown min built 0.0 < 1 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = 22
+
+                elsif size of AITown * 75 / 100 > capacity of AITown and SK_Escalation[PlayerID] < 66 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = number from 1 to 3
+
+                //Neutral
+                elsif NumberOfHouses < 8 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = number from 1 to 3
+
+                elsif get number of type HOUSE ABODE_NUMBER_CREATURE_PEN in AITown min built 0.0 == 0 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = 13
+
+                elsif get number of type HOUSE ABODE_NUMBER_OLD_PERSONS_HOME in AITown min built 0.0 < 1 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = 23
+
+                elsif get number of type HOUSE ABODE_NUMBER_GRAVEYARD in AITown min built 0.0 < 1 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = 22
+
+                elsif size of AITown * 75 / 100 > capacity of AITown and SK_Escalation[PlayerID] < 66 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = number from 1 to 3
+
+                //Good
+                elsif NumberOfHouses < 12 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = number from 1 to 3
+
+                elsif get number of type HOUSE ABODE_NUMBER_TEMPLE in AITown min built 0.0 < 2 and SK_Escalation[PlayerID] > 40 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 12
+
+                elsif get number of type HOUSE ABODE_NUMBER_MARKET_POT in AITown min built 0.0 < 3 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 8
+
+                elsif get number of type HOUSE ABODE_NUMBER_UNIVERSITY in AITown min built 0.0 < 1 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 20
+
+                elsif get number of type HOUSE ABODE_NUMBER_AMPITHEATRE in AITown min built 0.0 < 1 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 21
+
+                elsif get number of type HOUSE ABODE_NUMBER_BATHHOUSE in AITown min built 0.0 < 1 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 24
+
+                elsif size of AITown * 75 / 100 > capacity of AITown and SK_Escalation[PlayerID] < 66 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = number from 1 to 3
+
+                elsif get number of type HOUSE ABODE_NUMBER_ALTAR in AITown min built 0.0 < 3 and SK_Escalation[PlayerID] > 60 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 4
+
+                //Build Escalation Stuff
+                elsif BuildingCounter >= ReqBuildingsThres and SK_Escalation[PlayerID] > 60
+                    BuildingCounter = 0
+                    Number = number from 1 to 2
+                    if Number == 1
+                        whichBuilding = number from 5 to 15
+
+                    elsif Number == 2
+                        whichBuilding = number from 20 to 25
+
+                    end if
+
+                elsif NumberOfEpics == 0 and SK_Escalation[PlayerID] > 75 and SK_Epics == 1
+                    if get player EnemyIDFinal[PlayerID] alignment > 0.25
+                        whichBuilding = number from 31 to 33
+                    else
+                        whichBuilding = number from 30 to 33
+                    end if
+
+                elsif get number of type HOUSE ABODE_NUMBER_BATHHOUSE in AITown min built 0.0 < 1 and SK_Escalation[PlayerID] > 80
+                    whichBuilding = 24
+
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 < 5 and SK_Escalation[PlayerID] > 80
+                    whichBuilding = 9
+
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 < 5 and SK_Escalation[PlayerID] > 80
+                    whichBuilding = 10
+
+                elsif get number of type HOUSE ABODE_NUMBER_PRISON in AITown min built 0.0 < 1 and SK_Escalation[PlayerID] > 65
+                    whichBuilding = 25
+
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 < 3 and SK_Escalation[PlayerID] > 55
+                    whichBuilding = 9
+
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 < 3 and SK_Escalation[PlayerID] > 55
+                    whichBuilding = 10
+
+                elsif get number of type HOUSE ABODE_NUMBER_AMPITHEATRE in AITown min built 0.0 < 1 and SK_Escalation[PlayerID] > 55
+                    whichBuilding = 21
+            
+                elsif get number of type HOUSE ABODE_NUMBER_GRAVEYARD in AITown min built 0.0 < 2 and SK_Escalation[PlayerID] > 55
+                    whichBuilding = 22
+
+                elsif get number of type HOUSE ABODE_NUMBER_ALTAR in AITown min built 0.0 < 2 and SK_Escalation[PlayerID] > 50
+                    whichBuilding = 4
+
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 < 2 and SK_Escalation[PlayerID] > 45
+                    whichBuilding = 9
+
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 < 2 and SK_Escalation[PlayerID] > 45
+                    whichBuilding = 10
+
+                elsif get number of type HOUSE ABODE_NUMBER_TEMPLE in AITown min built 0.0 < 3 and SK_Escalation[PlayerID] > 40
+                    whichBuilding = 12
+
+                elsif get number of type HOUSE ABODE_NUMBER_STORAGE_PIT in AITown min built 0.0 < 2 and SK_Escalation[PlayerID] > 40
+                    whichBuilding = 11
+
+                elsif get number of type HOUSE ABODE_NUMBER_UNIVERSITY in AITown min built 0.0 < 1 and SK_Escalation[PlayerID] > 35
+                    whichBuilding = 20
+
+                elsif get number of type HOUSE ABODE_NUMBER_OLD_PERSONS_HOME in AITown min built 0.0 < 1 and SK_Escalation[PlayerID] > 35
+                    whichBuilding = 23
+
+                //Build Normal Buildings
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 == 0
+                    whichBuilding = 9
+
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 == 0
+                    whichBuilding = 10
+
+                elsif get number of type HOUSE ABODE_NUMBER_CREATURE_PEN in AITown min built 0.0 == 0
+                    whichBuilding = 13
+
+                elsif size of AITown * 100 / 100 > capacity of AITown
+                    whichBuilding = number from 1 to 3
+
+                elsif get number of type HOUSE ABODE_NUMBER_MARKET_POT in AITown min built 0.0 < 2
+                    whichBuilding = 8
+
+                else
+                    if SK_AIPersonality[PlayerID] != 3
+                        Number = number from 1 to 3
+                        if Number == 1
+                            whichBuilding = number from 14 to 15
+
+                        elsif Number == 2
+                            whichBuilding = number from 1 to 12
+
+                        elsif Number == 3
+                            whichBuilding = number from 20 to 25
+
+                        end if
+                    else
+                        Number = number from 1 to 5
+                        if Number == 1
+                            whichBuilding = number from 14 to 15
+
+                        elsif Number == 2
+                            whichBuilding = number from 1 to 12
+
+                        elsif Number >= 3
+                            whichBuilding = number from 20 to 25
+
+                        end if
+                    end if
+                end if
+            elsif AITown != SK_AIHomeTown[PlayerID]
+                if get number of type HOUSE ABODE_NUMBER_STORAGE_PIT in AITown min built 0.0 == 0
+                    whichBuilding = 11
+
+                elsif get number of type HOUSE ABODE_NUMBER_ALTAR in AITown min built 0.0 == 0
+                    whichBuilding = 4
+
+                elsif get number of type HOUSE ABODE_NUMBER_TEMPLE in AITown min built 0.0 == 0
+                    whichBuilding = 12
+
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 == 0
+                    whichBuilding = 9
+
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 == 0
+                    whichBuilding = 10
+
+                elsif size of AITown * 100 / 100 > capacity of AITown
+                    whichBuilding = number from 1 to 3
+
+                elsif get number of type HOUSE ABODE_NUMBER_MARKET_POT in AITown min built 0.0 < 2
+                    whichBuilding = 8
+
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 < 2 and SK_Escalation[PlayerID] > 30
+                    whichBuilding = 9
+
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 < 2 and SK_Escalation[PlayerID] > 30
+                    whichBuilding = 10
+
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 < 3 and SK_Escalation[PlayerID] > 50
+                    whichBuilding = 9
+
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 < 3 and SK_Escalation[PlayerID] > 50
+                    whichBuilding = 10
+
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 < 3 and SK_Escalation[PlayerID] > 70
+                    whichBuilding = 9
+
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 < 3 and SK_Escalation[PlayerID] > 70
+                    whichBuilding = 10
+
+                else
+                    if SK_AIPersonality[PlayerID] != 3
+                        Number = number from 1 to 3
+                        if Number == 1
+                            whichBuilding = number from 14 to 15
+
+                        elsif Number == 2
+                            whichBuilding = number from 1 to 12
+
+                        elsif Number == 3
+                            whichBuilding = number from 20 to 25
+
+                        end if
+                        wait 2.5 seconds
+                    else
+                        Number = number from 1 to 5
+                        if Number == 1
+                            whichBuilding = number from 14 to 15
+
+                        elsif Number == 2
+                            whichBuilding = number from 1 to 12
+
+                        elsif Number >= 3
+                            whichBuilding = number from 20 to 25
+
+                        end if
+                    end if
+                end if
+            end if
+            //The larger the build radius the faster the AI will expand its influence. Also when too low it will stack up buildings --> The larger the building the larger the radius
+            if whichBuilding == 1 or whichBuilding == 2 or whichBuilding == 3 or whichBuilding == 8 or whichBuilding == 14 or whichBuilding == 15
+                BuildRadius = radiusSmall
+
+            elsif whichBuilding == 4 or whichBuilding == 5 or whichBuilding == 6 or whichBuilding == 7 or whichBuilding == 22 or whichBuilding == 23 or whichBuilding == 24 or whichBuilding == 25 or whichBuilding == 20
+                BuildRadius = radiusMedium
+
+            elsif whichBuilding == 9 or whichBuilding == 10 or whichBuilding == 11 or whichBuilding == 12 or whichBuilding == 13 or whichBuilding == 21 or whichBuilding == 30 or whichBuilding == 31 or whichBuilding == 32 or whichBuilding == 33
+                BuildRadius = radiusLarge
+
+            else //NEVER be 0
+                BuildRadius = radiusLarge
+
+            end if
+        elsif PlayerID == 2
+
+            /* Japanese Buildlist
+            whichBuilding 1-4: Houses //CHANGED from 1-3 to 1-4
+            whichBuilding 4: Altar //CHANGED from 4 to 8
+            whichBuilding 5: Creche
+            whichBuilding 6: Pub
+            whichBuilding 7: Granary
+            whichBuilding 8: Market //CHANGED from 8 to 17-19
+            whichBuilding 9: Melee
+            whichBuilding 10: Ranged
+            whichBuilding 11: Storage Pit
+            whichBuilding 12: Temple
+            whichBuilding 13: CPen
+            whichBuilding 14-16: Embellishments //CHANGED from 14-15 to 14-16
+
+            Used from Greek Race
+            whichBuilding 20: University
+            whichBuilding 21: Ampitheathre
+            whichBuilding 22: Graveyard
+            whichBuilding 23: Rest Home
+            whichBuilding 24: Baths
+            whichBuilding 25: Prison
+
+            Epics
+            whichBuilding 30: Siren
+            whichBuilding 31: Hurricane
+            whichBuilding 32: Earthquake
+            whichBuilding 33: Volcano
+            */
+
+            if AITown == SK_AIHomeTown[PlayerID]
+                //Which Building should I build? Build orders here...
+                //Always Start with Storage Pit then Altar then Temple
+                if get number of type HOUSE ABODE_NUMBER_STORAGE_PIT in AITown min built 0.0 == 0
+                    whichBuilding = 11
+
+                elsif get number of type HOUSE ABODE_NUMBER_ALTAR in AITown min built 0.0 == 0
+                    whichBuilding = 8
+
+                elsif get number of type HOUSE ABODE_NUMBER_TEMPLE in AITown min built 0.0 == 0
+                    whichBuilding = 12
+
+                //Build Opening Moves
+                //Evil
+                //Opening Move 2
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 < 2 and SK_AIOpeningMoves[PlayerID] == 2 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = 9
+
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 < 2 and SK_AIOpeningMoves[PlayerID] == 2 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = 10
+
+                elsif NumberOfHouses < 22 and SK_AIOpeningMoves[PlayerID] == 2 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = number from 1 to 4
+
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 < 4 and SK_AIOpeningMoves[PlayerID] == 2 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = 9
+
+
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 < 4 and SK_AIOpeningMoves[PlayerID] == 2 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = 10
+
+                //Opening Move 3
+                elsif NumberOfEpics == 0 and SK_AIOpeningMoves[PlayerID] == 3 and SK_AIPersonality[PlayerID] == 1 and SK_Epics == 1
+                    whichBuilding = number from 30 to 33
+
+                elsif get number of type HOUSE ABODE_NUMBER_TEMPLE in AITown min built 0.0 < 3 and SK_AIOpeningMoves[PlayerID] == 3 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = 12
+
+                //Opening Move 4
+                elsif get number of type HOUSE ABODE_NUMBER_ALTAR in AITown min built 0.0 < 3 and SK_AIOpeningMoves[PlayerID] == 4 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = 8
+
+                elsif NumberOfHouses < 25 and SK_AIOpeningMoves[PlayerID] == 4 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = number from 1 to 4
+
+                elsif get number of type HOUSE ABODE_NUMBER_TEMPLE in AITown min built 0.0 < 2 and SK_AIOpeningMoves[PlayerID] == 4 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = 12
+
+                elsif NumberOfEpics == 0 and SK_AIOpeningMoves[PlayerID] == 4 and SK_AIPersonality[PlayerID] == 1 and SK_Epics == 1
+                    if get player EnemyIDFinal[PlayerID] alignment > 0.25
+                        whichBuilding = number from 31 to 33
+                    else
+                        whichBuilding = number from 30 to 33
+                    end if
+
+                //Opening Move 5
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 < 3 and SK_AIOpeningMoves[PlayerID] == 5 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = 10
+
+                elsif NumberOfHouses < 25 and SK_AIOpeningMoves[PlayerID] == 5 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = number from 1 to 4
+
+                //Opening Move 6
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 < 2 and SK_AIOpeningMoves[PlayerID] == 6 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = 9
+
+                elsif NumberOfHouses < 15 and SK_AIOpeningMoves[PlayerID] == 6 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = number from 1 to 4
+
+                //Neutral
+                //Opening Move 2
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 < 1 and SK_AIOpeningMoves[PlayerID] == 2 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = 9
+
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 < 1 and SK_AIOpeningMoves[PlayerID] == 2 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = 10
+
+                //Opening Move 3
+                elsif NumberOfEpics == 0 and SK_AIOpeningMoves[PlayerID] == 3 and SK_AIPersonality[PlayerID] == 2 and SK_Epics == 1
+                    whichBuilding = number from 30 to 33
+
+                elsif get number of type HOUSE ABODE_NUMBER_TEMPLE in AITown min built 0.0 < 3 and SK_AIOpeningMoves[PlayerID] == 3 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = 12
+
+                //Opening Move 4
+                elsif get number of type HOUSE ABODE_NUMBER_ALTAR in AITown min built 0.0 < 3 and SK_AIOpeningMoves[PlayerID] == 4 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = 8
+
+                elsif NumberOfHouses < 25 and SK_AIOpeningMoves[PlayerID] == 4 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = number from 1 to 4
+
+                elsif get number of type HOUSE ABODE_NUMBER_TEMPLE in AITown min built 0.0 < 2 and SK_AIOpeningMoves[PlayerID] == 4 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = 12
+
+                elsif NumberOfEpics == 0 and SK_AIOpeningMoves[PlayerID] == 4 and SK_AIPersonality[PlayerID] == 2 and SK_Epics == 1
+                    if get player EnemyIDFinal[PlayerID] alignment > 0.25
+                        whichBuilding = number from 31 to 33
+                    else
+                        whichBuilding = number from 30 to 33
+                    end if
+
+                //Opening Move 5
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 < 3 and SK_AIOpeningMoves[PlayerID] == 5 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = 10
+
+                elsif NumberOfHouses < 25 and SK_AIOpeningMoves[PlayerID] == 5 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = number from 1 to 4
+
+                //Opening Move 6
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 < 2 and SK_AIOpeningMoves[PlayerID] == 6 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = 9
+
+                elsif NumberOfHouses < 15 and SK_AIOpeningMoves[PlayerID] == 6 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = number from 1 to 4
+
+                //Good
+                //Opening Move 2
+                elsif get number of type HOUSE ABODE_NUMBER_TEMPLE in AITown min built 0.0 < 3 and SK_AIOpeningMoves[PlayerID] == 2 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 12
+
+                elsif get number of type HOUSE ABODE_NUMBER_AMPITHEATRE in AITown min built 0.0 < 1 and SK_AIOpeningMoves[PlayerID] == 2 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 21
+
+                elsif get number of type HOUSE ABODE_NUMBER_BATHHOUSE in AITown min built 0.0 < 1 and SK_AIOpeningMoves[PlayerID] == 2 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 24
+
+                //Opening Move 3
+                elsif NumberOfEpics == 0 and SK_AIOpeningMoves[PlayerID] == 3 and SK_AIPersonality[PlayerID] == 3 and SK_Epics == 1
+                    whichBuilding = number from 30 to 33
+
+                elsif get number of type HOUSE ABODE_NUMBER_TEMPLE in AITown min built 0.0 < 3 and SK_AIOpeningMoves[PlayerID] == 3 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 12
+
+                //Opening Move 4
+                elsif get number of type HOUSE ABODE_NUMBER_ALTAR in AITown min built 0.0 < 3 and SK_AIOpeningMoves[PlayerID] == 4 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 8
+
+                elsif NumberOfHouses < 25 and SK_AIOpeningMoves[PlayerID] == 4 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = number from 1 to 4
+
+                elsif get number of type HOUSE ABODE_NUMBER_TEMPLE in AITown min built 0.0 < 2 and SK_AIOpeningMoves[PlayerID] == 4 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 12
+
+                elsif NumberOfEpics == 0 and SK_AIOpeningMoves[PlayerID] == 4 and SK_AIPersonality[PlayerID] == 3 and SK_Epics == 1
+                    if get player EnemyIDFinal[PlayerID] alignment > 0.25
+                        whichBuilding = number from 31 to 33
+                    else
+                        whichBuilding = number from 30 to 33
+                    end if
+
+                //Opening Move 5
+                elsif get number of type HOUSE ABODE_NUMBER_TEMPLE in AITown min built 0.0 < 2 and SK_AIOpeningMoves[PlayerID] == 5 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 12
+
+                elsif get number of type HOUSE ABODE_NUMBER_ALTAR in AITown min built 0.0 < 2 and SK_AIOpeningMoves[PlayerID] == 5 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 8
+
+                elsif NumberOfEpics < 2 and SK_AIOpeningMoves[PlayerID] == 5 and SK_AIPersonality[PlayerID] == 3 and SK_Epics == 1
+                    if get player EnemyIDFinal[PlayerID] alignment > 0.25
+                        whichBuilding = number from 31 to 33
+                    else
+                        whichBuilding = number from 30 to 33
+                    end if
+
+                //Opening Move 6
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 < 2 and SK_AIOpeningMoves[PlayerID] == 6 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 9
+
+                elsif NumberOfHouses < 15 and SK_AIOpeningMoves[PlayerID] == 6 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = number from 1 to 4
+
+                //Build Strategy Stuff
+                //Evil
+                elsif NumberOfHouses < 4 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = number from 1 to 4
+
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 < 2 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = 9
+
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 < 2 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = 10
+
+                elsif get number of type HOUSE ABODE_NUMBER_PRISON in AITown min built 0.0 < 1 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = 25
+
+                elsif get number of type HOUSE ABODE_NUMBER_GRAVEYARD in AITown min built 0.0 < 1 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = 22
+
+                elsif size of AITown * 75 / 100 > capacity of AITown and SK_Escalation[PlayerID] < 66 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = number from 1 to 4
+
+                //Neutral
+                elsif NumberOfHouses < 8 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = number from 1 to 4
+
+                elsif get number of type HOUSE ABODE_NUMBER_CREATURE_PEN in AITown min built 0.0 == 0 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = 13
+
+                elsif get number of type HOUSE ABODE_NUMBER_OLD_PERSONS_HOME in AITown min built 0.0 < 1 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = 23
+
+                elsif get number of type HOUSE ABODE_NUMBER_GRAVEYARD in AITown min built 0.0 < 1 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = 22
+
+                elsif size of AITown * 75 / 100 > capacity of AITown and SK_Escalation[PlayerID] < 66 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = number from 1 to 4
+
+                //Good
+                elsif NumberOfHouses < 12 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = number from 1 to 4
+
+                elsif get number of type HOUSE ABODE_NUMBER_TEMPLE in AITown min built 0.0 < 2 and SK_Escalation[PlayerID] > 40 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 12
+
+                elsif get number of type HOUSE ABODE_NUMBER_MARKET_POT in AITown min built 0.0 < 2 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 17
+
+                elsif get number of type HOUSE ABODE_NUMBER_MARKET_STATUE in AITown min built 0.0 < 2 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 18
+            
+                elsif get number of type HOUSE ABODE_NUMBER_MARKET_PLANT in AITown min built 0.0 < 2 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 19
+
+                elsif get number of type HOUSE ABODE_NUMBER_UNIVERSITY in AITown min built 0.0 < 1 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 20
+
+                elsif get number of type HOUSE ABODE_NUMBER_AMPITHEATRE in AITown min built 0.0 < 1 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 21
+
+                elsif get number of type HOUSE ABODE_NUMBER_BATHHOUSE in AITown min built 0.0 < 1 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 24
+
+                elsif size of AITown * 75 / 100 > capacity of AITown and SK_Escalation[PlayerID] < 66 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = number from 1 to 4
+
+                elsif get number of type HOUSE ABODE_NUMBER_ALTAR in AITown min built 0.0 < 3 and SK_Escalation[PlayerID] > 60 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 8
+
+                //Build Escalation Stuff
+                elsif BuildingCounter >= ReqBuildingsThres and SK_Escalation[PlayerID] > 60
+                    BuildingCounter = 0
+                    Number = number from 1 to 2
+                    if Number == 1
+                        whichBuilding = number from 5 to 15
+
+                    elsif Number == 2
+                        whichBuilding = number from 20 to 25
+
+                    end if
+
+                elsif NumberOfEpics == 0 and SK_Escalation[PlayerID] > 75 and SK_Epics == 1
+                    whichBuilding = number from 30 to 33
+
+                elsif get number of type HOUSE ABODE_NUMBER_BATHHOUSE in AITown min built 0.0 < 1 and SK_Escalation[PlayerID] > 80
+                    whichBuilding = 24
+
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 < 5 and SK_Escalation[PlayerID] > 80
+                    whichBuilding = 9
+
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 < 5 and SK_Escalation[PlayerID] > 80
+                    whichBuilding = 10
+
+                elsif get number of type HOUSE ABODE_NUMBER_PRISON in AITown min built 0.0 < 1 and SK_Escalation[PlayerID] > 65
+                    whichBuilding = 25
+
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 < 3 and SK_Escalation[PlayerID] > 55
+                    whichBuilding = 9
+
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 < 3 and SK_Escalation[PlayerID] > 55
+                    whichBuilding = 10
+
+                elsif get number of type HOUSE ABODE_NUMBER_AMPITHEATRE in AITown min built 0.0 < 1 and SK_Escalation[PlayerID] > 55
+                    whichBuilding = 21
+            
+                elsif get number of type HOUSE ABODE_NUMBER_GRAVEYARD in AITown min built 0.0 < 2 and SK_Escalation[PlayerID] > 55
+                    whichBuilding = 22
+
+                elsif get number of type HOUSE ABODE_NUMBER_ALTAR in AITown min built 0.0 < 2 and SK_Escalation[PlayerID] > 50
+                    whichBuilding = 8
+
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 < 2 and SK_Escalation[PlayerID] > 45
+                    whichBuilding = 9
+
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 < 2 and SK_Escalation[PlayerID] > 45
+                    whichBuilding = 10
+
+                elsif get number of type HOUSE ABODE_NUMBER_TEMPLE in AITown min built 0.0 < 3 and SK_Escalation[PlayerID] > 40
+                    whichBuilding = 12
+
+                elsif get number of type HOUSE ABODE_NUMBER_STORAGE_PIT in AITown min built 0.0 < 2 and SK_Escalation[PlayerID] > 40
+                    whichBuilding = 11
+
+                elsif get number of type HOUSE ABODE_NUMBER_UNIVERSITY in AITown min built 0.0 < 1 and SK_Escalation[PlayerID] > 35
+                    whichBuilding = 20
+
+                elsif get number of type HOUSE ABODE_NUMBER_OLD_PERSONS_HOME in AITown min built 0.0 < 1 and SK_Escalation[PlayerID] > 35
+                    whichBuilding = 23
+
+                //Build Normal Buildings
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 == 0
+                    whichBuilding = 9
+
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 == 0
+                    whichBuilding = 10
+
+                elsif get number of type HOUSE ABODE_NUMBER_CREATURE_PEN in AITown min built 0.0 == 0
+                    whichBuilding = 13
+
+                elsif size of AITown * 100 / 100 > capacity of AITown
+                    whichBuilding = number from 1 to 4
+
+                elsif get number of type HOUSE ABODE_NUMBER_MARKET_POT in AITown min built 0.0 < 1
+                    whichBuilding = 17
+
+                elsif get number of type HOUSE ABODE_NUMBER_MARKET_POT in AITown min built 0.0 < 1
+                    whichBuilding = 18
+
+                elsif get number of type HOUSE ABODE_NUMBER_MARKET_POT in AITown min built 0.0 < 1
+                    whichBuilding = 19
+
+                else
+                    if SK_AIPersonality[PlayerID] != 3
+                        Number = number from 1 to 3
+                        if Number == 1
+                            whichBuilding = number from 14 to 16
+
+                        elsif Number == 2
+                            whichBuilding = number from 1 to 12
+
+                        elsif Number == 3
+                            whichBuilding = number from 20 to 25
+
+                        end if
+                        wait 2.5 seconds
+                    else
+                        Number = number from 1 to 5
+                        if Number == 1
+                            whichBuilding = number from 14 to 16
+
+                        elsif Number == 2
+                            whichBuilding = number from 1 to 12
+
+                        elsif Number >= 3
+                            whichBuilding = number from 20 to 25
+
+                        end if
+                    end if
+                end if
+            elsif AITown != SK_AIHomeTown[PlayerID]
+                if get number of type HOUSE ABODE_NUMBER_STORAGE_PIT in AITown min built 0.0 == 0
+                    whichBuilding = 11
+
+                elsif get number of type HOUSE ABODE_NUMBER_ALTAR in AITown min built 0.0 == 0
+                    whichBuilding = 8
+
+                elsif get number of type HOUSE ABODE_NUMBER_TEMPLE in AITown min built 0.0 == 0
+                    whichBuilding = 12
+
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 == 0
+                    whichBuilding = 9
+
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 == 0
+                    whichBuilding = 10
+
+                elsif size of AITown * 100 / 100 > capacity of AITown
+                    whichBuilding = number from 1 to 4
+
+                elsif get number of type HOUSE ABODE_NUMBER_MARKET_POT in AITown min built 0.0 < 1
+                    whichBuilding = 17
+
+                elsif get number of type HOUSE ABODE_NUMBER_MARKET_POT in AITown min built 0.0 < 1
+                    whichBuilding = 18
+
+                elsif get number of type HOUSE ABODE_NUMBER_MARKET_POT in AITown min built 0.0 < 1
+                    whichBuilding = 19
+
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 < 2 and SK_Escalation[PlayerID] > 30
+                    whichBuilding = 9
+
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 < 2 and SK_Escalation[PlayerID] > 30
+                    whichBuilding = 10
+
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 < 3 and SK_Escalation[PlayerID] > 50
+                    whichBuilding = 9
+
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 < 3 and SK_Escalation[PlayerID] > 50
+                    whichBuilding = 10
+
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 < 3 and SK_Escalation[PlayerID] > 70
+                    whichBuilding = 9
+
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 < 3 and SK_Escalation[PlayerID] > 70
+                    whichBuilding = 10
+
+                else
+                    if SK_AIPersonality[PlayerID] != 3
+                        Number = number from 1 to 3
+                        if Number == 1
+                            whichBuilding = number from 14 to 16
+
+                        elsif Number == 2
+                            whichBuilding = number from 1 to 12
+
+                        elsif Number == 3
+                            whichBuilding = number from 20 to 25
+
+                        end if
+                        wait 2.5 seconds
+                    else
+                        Number = number from 1 to 5
+                        if Number == 1
+                            whichBuilding = number from 14 to 16
+
+                        elsif Number == 2
+                            whichBuilding = number from 1 to 12
+
+                        elsif Number >= 3
+                            whichBuilding = number from 20 to 25
+
+                        end if
+                    end if
+                end if
+            end if
+
+            //The larger the build radius the faster the AI will expand its influence. Also when too low it will stack up buildings --> The larger the building the larger the radius
+            if whichBuilding == 1 or whichBuilding == 2 or whichBuilding == 3 or whichBuilding == 14 or whichBuilding == 15 or whichBuilding == 16 or whichBuilding == 17 or whichBuilding == 18 or whichBuilding == 19
+                BuildRadius = radiusSmall
+
+            elsif whichBuilding == 8 or whichBuilding == 5 or whichBuilding == 4 or whichBuilding == 6 or whichBuilding == 7 or whichBuilding == 22 or whichBuilding == 23 or whichBuilding == 24 or whichBuilding == 25 or whichBuilding == 20
+                BuildRadius = radiusMedium
+
+            elsif whichBuilding == 9 or whichBuilding == 10 or whichBuilding == 11 or whichBuilding == 12 or whichBuilding == 13 or whichBuilding == 21 or whichBuilding == 30 or whichBuilding == 31 or whichBuilding == 32 or whichBuilding == 33
+                BuildRadius = radiusLarge
+
+            else //NEVER be 0
+                BuildRadius = radiusLarge
+
+            end if
+
+        elsif PlayerID == 3
+            /* Aztec Buildlist
+            whichBuilding 1-3: Houses
+            whichBuilding 4: Altar
+            whichBuilding 5: Creche
+            whichBuilding 6: Pub
+            whichBuilding 7: Smelter
+            whichBuilding 8: Prison
+            whichBuilding 9: Melee
+            whichBuilding 10: Ranged
+            whichBuilding 11: Storage Pit
+            whichBuilding 12: Temple
+            whichBuilding 13: CPen
+            whichBuilding 14-15: Embellishments
+
+            Used from Greek Race //Except Aztec have it
+            whichBuilding 20: University
+            whichBuilding 21: Ampitheathre
+            whichBuilding 22: Graveyard
+            whichBuilding 23: Rest Home
+            whichBuilding 24: Baths
+            whichBuilding 25: Prison
+
+            Epics
+            whichBuilding 30: Siren
+            whichBuilding 31: Hurricane
+            whichBuilding 32: Earthquake
+            whichBuilding 33: Volcano
+            */
+
+            if AITown == SK_AIHomeTown[PlayerID]
+                //Which Building should I build? Build orders here...
+                //Always Start with Storage Pit then Altar then Temple
+                if get number of type HOUSE ABODE_NUMBER_STORAGE_PIT in AITown min built 0.0 == 0
+                    whichBuilding = 11
+
+                elsif get number of type HOUSE ABODE_NUMBER_ALTAR in AITown min built 0.0 == 0
+                    whichBuilding = 4
+
+                elsif get number of type HOUSE ABODE_NUMBER_TEMPLE in AITown min built 0.0 == 0
+                    whichBuilding = 12
+
+                //Build Opening Moves
+                //Evil
+                //Opening Move 2
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 < 2 and SK_AIOpeningMoves[PlayerID] == 2 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = 9
+
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 < 2 and SK_AIOpeningMoves[PlayerID] == 2 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = 10
+
+                elsif NumberOfHouses < 20 and SK_AIOpeningMoves[PlayerID] == 2 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = number from 1 to 3
+
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 < 4 and SK_AIOpeningMoves[PlayerID] == 2 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = 9
+
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 < 4 and SK_AIOpeningMoves[PlayerID] == 2 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = 10
+
+                //Opening Move 3
+                elsif NumberOfEpics == 0 and SK_AIOpeningMoves[PlayerID] == 3 and SK_AIPersonality[PlayerID] == 1 and SK_Epics == 1
+                    if get player EnemyIDFinal[PlayerID] alignment > 0.25
+                        whichBuilding = number from 31 to 33
+                    else
+                        whichBuilding = number from 30 to 33
+                    end if
+
+                elsif get number of type HOUSE ABODE_NUMBER_TEMPLE in AITown min built 0.0 < 3 and SK_AIOpeningMoves[PlayerID] == 3 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = 12
+
+                //Opening Move 4
+                elsif get number of type HOUSE ABODE_NUMBER_ALTAR in AITown min built 0.0 < 3 and SK_AIOpeningMoves[PlayerID] == 4 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = 4
+
+                elsif NumberOfHouses < 25 and SK_AIOpeningMoves[PlayerID] == 4 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = number from 1 to 3
+
+                elsif get number of type HOUSE ABODE_NUMBER_TEMPLE in AITown min built 0.0 < 2 and SK_AIOpeningMoves[PlayerID] == 4 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = 12
+
+                elsif NumberOfEpics == 0 and SK_AIOpeningMoves[PlayerID] == 4 and SK_AIPersonality[PlayerID] == 1 and SK_Epics == 1
+                    if get player EnemyIDFinal[PlayerID] alignment > 0.25
+                        whichBuilding = number from 31 to 33
+                    else
+                        whichBuilding = number from 30 to 33
+                    end if
+
+                //Opening Move 5
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 < 3 and SK_AIOpeningMoves[PlayerID] == 5 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = 10
+
+                elsif NumberOfHouses < 25 and SK_AIOpeningMoves[PlayerID] == 5 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = number from 1 to 3
+
+                //Opening Move 6
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 < 2 and SK_AIOpeningMoves[PlayerID] == 6 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = 9
+
+                elsif NumberOfHouses < 15 and SK_AIOpeningMoves[PlayerID] == 6 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = number from 1 to 3
+
+                //Neutral
+                //Opening Move 2
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 < 1 and SK_AIOpeningMoves[PlayerID] == 2 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = 9
+
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 < 1 and SK_AIOpeningMoves[PlayerID] == 2 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = 10
+
+                //Opening Move 3
+                elsif NumberOfEpics == 0 and SK_AIOpeningMoves[PlayerID] == 3 and SK_AIPersonality[PlayerID] == 2 and SK_Epics == 1
+                    if get player EnemyIDFinal[PlayerID] alignment > 0.25
+                        whichBuilding = number from 31 to 33
+                    else
+                        whichBuilding = number from 30 to 33
+                    end if
+
+                elsif get number of type HOUSE ABODE_NUMBER_TEMPLE in AITown min built 0.0 < 3 and SK_AIOpeningMoves[PlayerID] == 3 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = 12
+
+                //Opening Move 4
+                elsif get number of type HOUSE ABODE_NUMBER_ALTAR in AITown min built 0.0 < 3 and SK_AIOpeningMoves[PlayerID] == 4 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = 4
+
+                elsif NumberOfHouses < 25 and SK_AIOpeningMoves[PlayerID] == 4 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = number from 1 to 3
+
+                elsif get number of type HOUSE ABODE_NUMBER_TEMPLE in AITown min built 0.0 < 2 and SK_AIOpeningMoves[PlayerID] == 4 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = 12
+
+                elsif NumberOfEpics == 0 and SK_AIOpeningMoves[PlayerID] == 4 and SK_AIPersonality[PlayerID] == 2 and SK_Epics == 1
+                    if get player EnemyIDFinal[PlayerID] alignment > 0.25
+                        whichBuilding = number from 31 to 33
+                    else
+                        whichBuilding = number from 30 to 33
+                    end if
+
+                //Opening Move 5
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 < 3 and SK_AIOpeningMoves[PlayerID] == 5 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = 10
+
+                elsif NumberOfHouses < 25 and SK_AIOpeningMoves[PlayerID] == 5 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = number from 1 to 3
+
+                //Opening Move 6
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 < 2 and SK_AIOpeningMoves[PlayerID] == 6 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = 9
+
+                elsif NumberOfHouses < 15 and SK_AIOpeningMoves[PlayerID] == 6 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = number from 1 to 3
+
+                //Good
+                //Opening Move 2
+                elsif get number of type HOUSE ABODE_NUMBER_TEMPLE in AITown min built 0.0 < 3 and SK_AIOpeningMoves[PlayerID] == 2 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 12
+
+                elsif get number of type HOUSE ABODE_NUMBER_AMPITHEATRE in AITown min built 0.0 < 1 and SK_AIOpeningMoves[PlayerID] == 2 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 21
+
+                elsif get number of type HOUSE ABODE_NUMBER_BATHHOUSE in AITown min built 0.0 < 1 and SK_AIOpeningMoves[PlayerID] == 2 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 24
+
+                //Opening Move 3
+                elsif NumberOfEpics == 0 and SK_AIOpeningMoves[PlayerID] == 3 and SK_AIPersonality[PlayerID] == 3 and SK_Epics == 1
+                    if get player EnemyIDFinal[PlayerID] alignment > 0.25
+                        whichBuilding = number from 31 to 33
+                    else
+                        whichBuilding = number from 30 to 33
+                    end if
+
+                elsif get number of type HOUSE ABODE_NUMBER_TEMPLE in AITown min built 0.0 < 3 and SK_AIOpeningMoves[PlayerID] == 3 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 12
+
+                //Opening Move 4
+                elsif get number of type HOUSE ABODE_NUMBER_ALTAR in AITown min built 0.0 < 3 and SK_AIOpeningMoves[PlayerID] == 4 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 4
+
+                elsif NumberOfHouses < 25 and SK_AIOpeningMoves[PlayerID] == 4 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = number from 1 to 3
+
+                elsif get number of type HOUSE ABODE_NUMBER_TEMPLE in AITown min built 0.0 < 2 and SK_AIOpeningMoves[PlayerID] == 4 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 12
+
+                elsif NumberOfEpics == 0 and SK_AIOpeningMoves[PlayerID] == 4 and SK_AIPersonality[PlayerID] == 3 and SK_Epics == 1
+                    if get player EnemyIDFinal[PlayerID] alignment > 0.25
+                        whichBuilding = number from 31 to 33
+                    else
+                        whichBuilding = number from 30 to 33
+                    end if
+
+                //Opening Move 5
+                elsif get number of type HOUSE ABODE_NUMBER_TEMPLE in AITown min built 0.0 < 2 and SK_AIOpeningMoves[PlayerID] == 5 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 12
+
+                elsif get number of type HOUSE ABODE_NUMBER_ALTAR in AITown min built 0.0 < 2 and SK_AIOpeningMoves[PlayerID] == 5 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 4
+
+                elsif NumberOfEpics < 2 and SK_AIOpeningMoves[PlayerID] == 5 and SK_AIPersonality[PlayerID] == 3 and SK_Epics == 1
+                    if get player EnemyIDFinal[PlayerID] alignment > 0.25
+                        whichBuilding = number from 31 to 33
+                    else
+                        whichBuilding = number from 30 to 33
+                    end if
+
+                //Opening Move 6
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 < 2 and SK_AIOpeningMoves[PlayerID] == 6 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 9
+
+                elsif NumberOfHouses < 15 and SK_AIOpeningMoves[PlayerID] == 6 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = number from 1 to 3
+
+                //Build Strategy Stuff
+                //Evil
+                elsif NumberOfHouses < 4 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = number from 1 to 3
+
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 < 2 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = 9
+
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 < 2 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = 10
+
+                elsif get number of type HOUSE ABODE_NUMBER_PRISON in AITown min built 0.0 < 1 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = 8
+
+                elsif get number of type HOUSE ABODE_NUMBER_GRAVEYARD in AITown min built 0.0 < 1 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = 22
+
+                elsif size of AITown * 75 / 100 > capacity of AITown and SK_Escalation[PlayerID] < 66 and SK_AIPersonality[PlayerID] == 1
+                    whichBuilding = number from 1 to 3
+
+                //Neutral
+                elsif NumberOfHouses < 8 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = number from 1 to 3
+
+                elsif get number of type HOUSE ABODE_NUMBER_CREATURE_PEN in AITown min built 0.0 == 0 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = 13
+
+                elsif get number of type HOUSE ABODE_NUMBER_OLD_PERSONS_HOME in AITown min built 0.0 < 1 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = 23
+
+                elsif get number of type HOUSE ABODE_NUMBER_GRAVEYARD in AITown min built 0.0 < 1 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = 22
+
+                elsif size of AITown * 75 / 100 > capacity of AITown and SK_Escalation[PlayerID] < 66 and SK_AIPersonality[PlayerID] == 2
+                    whichBuilding = number from 1 to 3
+
+                //Good
+                elsif NumberOfHouses < 12 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = number from 1 to 3
+
+                elsif get number of type HOUSE ABODE_NUMBER_TEMPLE in AITown min built 0.0 < 2 and SK_Escalation[PlayerID] > 40 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 12
+
+                elsif get number of type HOUSE ABODE_NUMBER_UNIVERSITY in AITown min built 0.0 < 1 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 20
+
+                elsif get number of type HOUSE ABODE_NUMBER_AMPITHEATRE in AITown min built 0.0 < 1 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 21
+
+                elsif get number of type HOUSE ABODE_NUMBER_BATHHOUSE in AITown min built 0.0 < 1 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 24
+
+                elsif size of AITown * 75 / 100 > capacity of AITown and SK_Escalation[PlayerID] < 66 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = number from 1 to 3
+
+                elsif get number of type HOUSE ABODE_NUMBER_ALTAR in AITown min built 0.0 < 3 and SK_Escalation[PlayerID] > 60 and SK_AIPersonality[PlayerID] == 3
+                    whichBuilding = 4
+
+                //Build Escalation Stuff
+                elsif BuildingCounter >= ReqBuildingsThres and SK_Escalation[PlayerID] > 60
+                    BuildingCounter = 0
+                    Number = number from 1 to 2
+                    if Number == 1
+                        whichBuilding = number from 5 to 15
+
+                    elsif Number == 2
+                        whichBuilding = number from 20 to 25
+
+                    end if
+
+                elsif NumberOfEpics == 0 and SK_Escalation[PlayerID] > 75 and SK_Epics == 1
+                    if get player EnemyIDFinal[PlayerID] alignment > 0.25
+                        whichBuilding = number from 31 to 33
+                    else
+                        whichBuilding = number from 30 to 33
+                    end if
+
+                elsif get number of type HOUSE ABODE_NUMBER_BATHHOUSE in AITown min built 0.0 < 1 and SK_Escalation[PlayerID] > 80
+                    whichBuilding = 24
+
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 < 5 and SK_Escalation[PlayerID] > 80
+                    whichBuilding = 9
+
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 < 5 and SK_Escalation[PlayerID] > 80
+                    whichBuilding = 10
+
+                elsif get number of type HOUSE ABODE_NUMBER_PRISON in AITown min built 0.0 < 1 and SK_Escalation[PlayerID] > 65
+                    whichBuilding = 8
+
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 < 3 and SK_Escalation[PlayerID] > 55
+                    whichBuilding = 9
+
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 < 3 and SK_Escalation[PlayerID] > 55
+                    whichBuilding = 10
+
+                elsif get number of type HOUSE ABODE_NUMBER_AMPITHEATRE in AITown min built 0.0 < 1 and SK_Escalation[PlayerID] > 55
+                    whichBuilding = 21
+            
+                elsif get number of type HOUSE ABODE_NUMBER_GRAVEYARD in AITown min built 0.0 < 2 and SK_Escalation[PlayerID] > 55
+                    whichBuilding = 22
+
+                elsif get number of type HOUSE ABODE_NUMBER_ALTAR in AITown min built 0.0 < 2 and SK_Escalation[PlayerID] > 50
+                    whichBuilding = 4
+
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 < 2 and SK_Escalation[PlayerID] > 45
+                    whichBuilding = 9
+
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 < 2 and SK_Escalation[PlayerID] > 45
+                    whichBuilding = 10
+
+                elsif get number of type HOUSE ABODE_NUMBER_TEMPLE in AITown min built 0.0 < 3 and SK_Escalation[PlayerID] > 40
+                    whichBuilding = 12
+
+                elsif get number of type HOUSE ABODE_NUMBER_STORAGE_PIT in AITown min built 0.0 < 2 and SK_Escalation[PlayerID] > 40
+                    whichBuilding = 11
+
+                elsif get number of type HOUSE ABODE_NUMBER_UNIVERSITY in AITown min built 0.0 < 1 and SK_Escalation[PlayerID] > 35
+                    whichBuilding = 20
+
+                elsif get number of type HOUSE ABODE_NUMBER_OLD_PERSONS_HOME in AITown min built 0.0 < 1 and SK_Escalation[PlayerID] > 35
+                    whichBuilding = 23
+
+                //Build Normal Buildings
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 == 0
+                    whichBuilding = 9
+
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 == 0
+                    whichBuilding = 10
+
+                elsif get number of type HOUSE ABODE_NUMBER_CREATURE_PEN in AITown min built 0.0 == 0
+                    whichBuilding = 13
+
+                elsif size of AITown * 100 / 100 > capacity of AITown
+                    whichBuilding = number from 1 to 3
+
+                else
+                    if SK_AIPersonality[PlayerID] != 3
+                        Number = number from 1 to 3
+                        if Number == 1
+                            whichBuilding = number from 14 to 15
+
+                        elsif Number == 2
+                            whichBuilding = number from 1 to 12
+
+                        elsif Number == 3
+                            whichBuilding = number from 20 to 25
+
+                        end if
+                    else
+                        Number = number from 1 to 5
+                        if Number == 1
+                            whichBuilding = number from 14 to 15
+
+                        elsif Number == 2
+                            whichBuilding = number from 1 to 12
+
+                        elsif Number >= 3
+                            whichBuilding = number from 20 to 25
+
+                        end if
+                    end if
+                end if
+            elsif AITown != SK_AIHomeTown[PlayerID]
+                if get number of type HOUSE ABODE_NUMBER_STORAGE_PIT in AITown min built 0.0 == 0
+                    whichBuilding = 11
+
+                elsif get number of type HOUSE ABODE_NUMBER_ALTAR in AITown min built 0.0 == 0
+                    whichBuilding = 4
+
+                elsif get number of type HOUSE ABODE_NUMBER_TEMPLE in AITown min built 0.0 == 0
+                    whichBuilding = 12
+
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 == 0
+                    whichBuilding = 9
+
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 == 0
+                    whichBuilding = 10
+
+                elsif size of AITown * 100 / 100 > capacity of AITown
+                    whichBuilding = number from 1 to 3
+
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 < 2 and SK_Escalation[PlayerID] > 30
+                    whichBuilding = 9
+
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 < 2 and SK_Escalation[PlayerID] > 30
+                    whichBuilding = 10
+
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 < 3 and SK_Escalation[PlayerID] > 50
+                    whichBuilding = 9
+
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 < 3 and SK_Escalation[PlayerID] > 50
+                    whichBuilding = 10
+
+                elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in AITown min built 0.0 < 3 and SK_Escalation[PlayerID] > 70
+                    whichBuilding = 9
+
+                elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in AITown min built 0.0 < 3 and SK_Escalation[PlayerID] > 70
+                    whichBuilding = 10
+
+                else
+                    if SK_AIPersonality[PlayerID] != 3
+                        Number = number from 1 to 3
+                        if Number == 1
+                            whichBuilding = number from 14 to 15
+
+                        elsif Number == 2
+                            whichBuilding = number from 1 to 12
+
+                        elsif Number == 3
+                            whichBuilding = number from 20 to 25
+
+                        end if
+                        wait 2.5 seconds
+                    else
+                        Number = number from 1 to 5
+                        if Number == 1
+                            whichBuilding = number from 14 to 15
+
+                        elsif Number == 2
+                            whichBuilding = number from 1 to 12
+
+                        elsif Number >= 3
+                            whichBuilding = number from 20 to 25
+
+                        end if
+                    end if
+                end if
+            end if
+            //The larger the build radius the faster the AI will expand its influence. Also when too low it will stack up buildings --> The larger the building the larger the radius
+            if whichBuilding == 1 or whichBuilding == 2 or whichBuilding == 3 or whichBuilding == 14 or whichBuilding == 15
+                BuildRadius = radiusSmall
+
+            elsif whichBuilding == 4 or whichBuilding == 5 or whichBuilding == 6 or whichBuilding == 7 or whichBuilding == 8 or whichBuilding == 22 or whichBuilding == 23 or whichBuilding == 24 or whichBuilding == 25 or whichBuilding == 20
+                BuildRadius = radiusMedium
+
+            elsif whichBuilding == 9 or whichBuilding == 10 or whichBuilding == 11 or whichBuilding == 12 or whichBuilding == 13 or whichBuilding == 21 or whichBuilding == 30 or whichBuilding == 31 or whichBuilding == 32 or whichBuilding == 33
+                BuildRadius = radiusLarge
+
+            else //NEVER be 0
+                BuildRadius = radiusLarge
+
+            end if
+        end if
+
+        //Determine the position
+        Building = get random abode in town AITown
+        if Building not exists
+            NextBuildingPos[PlayerID] = marker at {AITown} + {number from 50 to -50, number from 50 to -50}
+        else
+            NextBuildingPos[PlayerID] = marker at {Building} + {number from 50 to -50, number from 50 to -50}
+        end if
+
+        ExistingBuilding = get HOUSE at {NextBuildingPos[PlayerID]} radius BuildRadius
+        ExistingEmbellishment = get EMBELLISHMENT at {NextBuildingPos[PlayerID]} radius BuildRadius
+        ExistingEpic = get WONDER at {NextBuildingPos[PlayerID]} radius BuildRadius
+        ExistingField = get FIELD_OBJECT at {NextBuildingPos[PlayerID]} radius BuildRadius
+        ExistingRock = get ROCK_OBJECT at {NextBuildingPos[PlayerID]} radius BuildRadius
+        ExistingOreRock = get ORE_ROCK at {NextBuildingPos[PlayerID]} radius BuildRadius
+        ExistingSpell = get FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {NextBuildingPos[PlayerID]} radius BuildRadius
+        Influence = get player PlayerID influence at {NextBuildingPos[PlayerID]}
+        myDistance = BuildRadius / 1.5
+        Villager = get VILLAGER in AITown
+        if Influence > 0 and not {AITown} near {NextBuildingPos[PlayerID]} radius 30 and ExistingEpic not exists and ExistingBuilding not exists and ExistingEmbellishment not exists and ExistingField not exists and ExistingRock not exists and ExistingOreRock not exists and ExistingSpell not exists and not {NextBuildingPos[PlayerID]} under water and Villager exists
+            if Villager can navigate to {NextBuildingPos[PlayerID]} //Last quick check
+                //Don't place buildings near an edge, the higher myDistance the less likely the building is placed near an edge
+                if Villager can navigate to ({NextBuildingPos[PlayerID]} + {myDistance,0}) and Villager can navigate to ({NextBuildingPos[PlayerID]} + {-myDistance,0}) and Villager can navigate to ({NextBuildingPos[PlayerID]} + {0,myDistance}) and Villager can navigate to ({NextBuildingPos[PlayerID]} + {0,myDistance})
+                    ExistingBuilding = 1
+                end if
+            end if
+
+        //Don't bother with influence if too many attempts
+        elsif not {AITown} near {NextBuildingPos[PlayerID]} radius 30 and ExistingEpic not exists and ExistingBuilding not exists and ExistingEmbellishment not exists and ExistingField not exists and ExistingRock not exists and ExistingOreRock not exists and ExistingSpell not exists and not {NextBuildingPos[PlayerID]} under water and Villager exists
+            if CurrTries[PlayerID] > 5 and Villager can navigate to ({NextBuildingPos[PlayerID]} + {myDistance,0}) and Villager can navigate to ({NextBuildingPos[PlayerID]} + {-myDistance,0}) and Villager can navigate to ({NextBuildingPos[PlayerID]} + {0,myDistance}) and Villager can navigate to ({NextBuildingPos[PlayerID]} + {0,myDistance})
+                ExistingBuilding = 1
+            end if
+        end if
+
+        Counter++
+        until ExistingBuilding == 1 or Counter > MaxTries
+    end loop
+
+    if Counter > MaxTries
+        run background script SK_AITownBuildingFailed(PlayerID)
+    else
+        BuildingCounter += 1
+        run background script SK_AITownBuildingBuildBuilding(AITown,whichBuilding,PlayerID,BuildRadius)
+    end if
+
+end script SK_AITownBuildingGetBuildingPos
+
+begin script SK_AITownBuildingFailed(PlayerID)
+
+start
+
+    //say "Get Position Failed"
+    CurrBuildings[PlayerID]--
+    CurrTries[PlayerID]++
+    BuildBuilding[PlayerID] = 1
+
+end script SK_AITownBuildingFailed
+
+begin script SK_AITownBuildingBuildBuilding(AITown,Building,PlayerID,Size)
+
+    Angle = 0
+    NewBuilding = 0
+    Cnt = 0
+    Number = 0
+    NumberOfTowns = 0
+
+start
+
+    CurrTries[PlayerID] = 0
+
+    //say "Create Building"
+    //Get the Angle
+    Number = number from 1 to 4
+    if Number == 1
+        Angle = 0
+    elsif Number == 2
+        Angle = 90
+    elsif Number == 3
+        Angle = 180
+    else
+        Angle = 270
+    end if
+
+    //All buildings a AI is able to build are below | PlayerID 1 = Norse | PlayerID 2 = Japanese | PlayerID 3 = Aztec | PlayerID 4 = Greek
+    if PlayerID == 1
+        //Build the Building
+        if Building == 1
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_NORSE_HOUSE_A at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 2
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_NORSE_HOUSE_B at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 3
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_NORSE_HOUSE_C at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 4
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_GREEK_ALTAR at {NextBuildingPos[PlayerID]}
+            run background script SK_AITownBuildingAltarWorkaround(PlayerID,NewBuilding)
+        //    disable music on NewBuilding
+        //    detach music from NewBuilding
+        //    detach atmos from NewBuilding
+
+        elsif Building == 5
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_NORSE_CRECHE at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 6
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_NORSE_PUB at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 7
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_NORSE_LUMBERMILL at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 8
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_NORSE_MARKET_POT at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 9
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_NORSE_MELEE_ARMOURY at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 10
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_NORSE_RANGED_ARMOURY at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 11
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_NORSE_STORAGE_PIT at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 12
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_NORSE_TEMPLE at {NextBuildingPos[PlayerID]}
+            //They've got there basic buildings, now they delay buildings on low difficulty
+            DelayAllowed[PlayerID] = 1
+
+        elsif Building == 13
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_NORSE_CREATURE_PEN at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 14
+            NewBuilding = create with angle Angle and scale 0 EMBELLISHMENT EMBELLISHMENT_INFO_NORSE_FOUNTAIN at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 15
+            NewBuilding = create with angle Angle and scale 0 EMBELLISHMENT EMBELLISHMENT_INFO_NORSE_STATUE at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 20
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_GREEK_UNIVERSITY at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 21
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_GREEK_AMPITHEATRE at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 22
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_GREEK_GRAVEYARD at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 23
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_GREEK_OLD_PERSONS_HOME at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 24
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_GREEK_BATHHOUSE at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 25
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_GREEK_PRISON at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 30
+            NewBuilding = create WONDER EPIC_WONDER_NUMBER_SIREN at {NextBuildingPos[PlayerID]}
+            run background script SK_AIEpicWorshippers(PlayerID,NewBuilding,AITown)
+            run background script SK_AIEpicStart(PlayerID,NewBuilding,0)
+            run background script SK_AIEpicBuild(PlayerID,NewBuilding,AITown)
+            //run background script SK_AITownBuildingAltarWorkaround(PlayerID,NewBuilding)
+
+        elsif Building == 31
+            NewBuilding = create WONDER EPIC_WONDER_NUMBER_HURRICANE at {NextBuildingPos[PlayerID]}
+            run background script SK_AIEpicWorshippers(PlayerID,NewBuilding,AITown)
+            run background script SK_AIEpicStart(PlayerID,NewBuilding,1)
+            run background script SK_AIEpicBuild(PlayerID,NewBuilding,AITown)
+            //run background script SK_AITownBuildingAltarWorkaround(PlayerID,NewBuilding)
+
+        elsif Building == 32
+            NewBuilding = create WONDER EPIC_WONDER_NUMBER_EARTHQUAKE at {NextBuildingPos[PlayerID]}
+            run background script SK_AIEpicWorshippers(PlayerID,NewBuilding,AITown)
+            run background script SK_AIEpicStart(PlayerID,NewBuilding,2)
+            run background script SK_AIEpicBuild(PlayerID,NewBuilding,AITown)
+            //run background script SK_AITownBuildingAltarWorkaround(PlayerID,NewBuilding)
+
+        elsif Building == 33
+            NewBuilding = create WONDER EPIC_WONDER_NUMBER_VOLCANO at {NextBuildingPos[PlayerID]}
+            run background script SK_AIEpicWorshippers(PlayerID,NewBuilding,AITown)
+            run background script SK_AIEpicStart(PlayerID,NewBuilding,3)
+            run background script SK_AIEpicBuild(PlayerID,NewBuilding,AITown)
+            //run background script SK_AITownBuildingAltarWorkaround(PlayerID,NewBuilding)
+
+        else //NEVER be 0
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_NORSE_HOUSE_A at {NextBuildingPos[PlayerID]}
+
+        end if
+    elsif PlayerID == 2
+        //Build the Building
+        if Building == 1
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_JAPANESE_HOUSE_A at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 2
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_JAPANESE_HOUSE_B at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 3
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_JAPANESE_HOUSE_C at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 4
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_JAPANESE_HOUSE_D at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 5
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_JAPANESE_CRECHE at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 6
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_JAPANESE_PUB at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 7
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_JAPANESE_LUMBERMILL at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 8
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_GREEK_ALTAR at {NextBuildingPos[PlayerID]}
+            run background script SK_AITownBuildingAltarWorkaround(PlayerID,NewBuilding)
+        //    disable music on NewBuilding
+        //    detach music from NewBuilding
+        //    detach atmos from NewBuilding
+
+        elsif Building == 9
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_JAPANESE_MELEE_ARMOURY at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 10
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_JAPANESE_RANGED_ARMOURY at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 11
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_JAPANESE_STORAGE_PIT at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 12
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_JAPANESE_TEMPLE at {NextBuildingPos[PlayerID]}
+            //They've got there basic buildings, now they delay buildings on low difficulty
+            DelayAllowed[PlayerID] = 1
+
+        elsif Building == 13
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_JAPANESE_CREATURE_PEN at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 14
+            NewBuilding = create with angle Angle and scale 0 EMBELLISHMENT EMBELLISHMENT_INFO_JAPANESE_FOUNTAIN at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 15
+            NewBuilding = create with angle Angle and scale 0 EMBELLISHMENT EMBELLISHMENT_INFO_JAPANESE_SHRINE at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 16
+            NewBuilding = create with angle Angle and scale 0 EMBELLISHMENT EMBELLISHMENT_INFO_JAPANESE_GARDEN at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 17
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_JAPANESE_MARKET_POT at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 18
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_JAPANESE_MARKET_STATUE at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 19
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_JAPANESE_MARKET_PLANT at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 20
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_GREEK_UNIVERSITY at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 21
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_GREEK_AMPITHEATRE at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 22
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_GREEK_GRAVEYARD at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 23
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_GREEK_OLD_PERSONS_HOME at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 24
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_GREEK_BATHHOUSE at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 25
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_GREEK_PRISON at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 30
+            NewBuilding = create WONDER EPIC_WONDER_NUMBER_SIREN at {NextBuildingPos[PlayerID]}
+            run background script SK_AIEpicWorshippers(PlayerID,NewBuilding,AITown)
+            run background script SK_AIEpicStart(PlayerID,NewBuilding,0)
+            run background script SK_AIEpicBuild(PlayerID,NewBuilding,AITown)
+            //run background script SK_AITownBuildingAltarWorkaround(PlayerID,NewBuilding)
+
+        elsif Building == 31
+            NewBuilding = create WONDER EPIC_WONDER_NUMBER_HURRICANE at {NextBuildingPos[PlayerID]}
+            run background script SK_AIEpicWorshippers(PlayerID,NewBuilding,AITown)
+            run background script SK_AIEpicStart(PlayerID,NewBuilding,1)
+            run background script SK_AIEpicBuild(PlayerID,NewBuilding,AITown)
+            //run background script SK_AITownBuildingAltarWorkaround(PlayerID,NewBuilding)
+
+        elsif Building == 32
+            NewBuilding = create WONDER EPIC_WONDER_NUMBER_EARTHQUAKE at {NextBuildingPos[PlayerID]}
+            run background script SK_AIEpicWorshippers(PlayerID,NewBuilding,AITown)
+            run background script SK_AIEpicStart(PlayerID,NewBuilding,2)
+            run background script SK_AIEpicBuild(PlayerID,NewBuilding,AITown)
+            //run background script SK_AITownBuildingAltarWorkaround(PlayerID,NewBuilding)
+
+        elsif Building == 33
+            NewBuilding = create WONDER EPIC_WONDER_NUMBER_VOLCANO at {NextBuildingPos[PlayerID]}
+            run background script SK_AIEpicWorshippers(PlayerID,NewBuilding,AITown)
+            run background script SK_AIEpicStart(PlayerID,NewBuilding,3)
+            run background script SK_AIEpicBuild(PlayerID,NewBuilding,AITown)
+            //run background script SK_AITownBuildingAltarWorkaround(PlayerID,NewBuilding)
+
+        else //NEVER be 0
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_JAPANESE_HOUSE_A at {NextBuildingPos[PlayerID]}
+
+        end if
+
+    elsif PlayerID == 3
+        //Build the Building
+        if Building == 1
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_AZTEC_HOUSE_A at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 2
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_AZTEC_HOUSE_B at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 3
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_AZTEC_HOUSE_C at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 4
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_GREEK_ALTAR at {NextBuildingPos[PlayerID]}
+            run background script SK_AITownBuildingAltarWorkaround(PlayerID,NewBuilding)
+        //    disable music on NewBuilding
+        //    detach music from NewBuilding
+        //    detach atmos from NewBuilding
+
+        elsif Building == 5
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_AZTEC_CRECHE at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 6
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_AZTEC_PUB at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 7
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_AZTEC_SMELTER at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 8
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_AZTEC_PRISON at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 9
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_AZTEC_MELEE_ARMOURY at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 10
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_AZTEC_RANGED_ARMOURY at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 11
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_AZTEC_STORAGE_PIT at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 12
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_AZTEC_TEMPLE at {NextBuildingPos[PlayerID]}
+            //They've got there basic buildings, now they delay buildings on low difficulty
+            DelayAllowed[PlayerID] = 1
+
+        elsif Building == 13
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_AZTEC_CREATURE_PEN at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 14
+            NewBuilding = create with angle Angle and scale 0 EMBELLISHMENT EMBELLISHMENT_INFO_AZTEC_FOUNTAIN at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 15
+            NewBuilding = create with angle Angle and scale 0 EMBELLISHMENT EMBELLISHMENT_INFO_AZTEC_STATUE at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 20
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_AZTEC_UNIVERSITY at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 21
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_GREEK_AMPITHEATRE at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 22
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_GREEK_GRAVEYARD at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 23
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_GREEK_OLD_PERSONS_HOME at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 24
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_GREEK_BATHHOUSE at {NextBuildingPos[PlayerID]}
+
+        elsif Building == 30
+            NewBuilding = create WONDER EPIC_WONDER_NUMBER_SIREN at {NextBuildingPos[PlayerID]}
+            run background script SK_AIEpicWorshippers(PlayerID,NewBuilding,AITown)
+            run background script SK_AIEpicStart(PlayerID,NewBuilding,0)
+            run background script SK_AIEpicBuild(PlayerID,NewBuilding,AITown)
+            //run background script SK_AITownBuildingAltarWorkaround(PlayerID,NewBuilding)
+
+        elsif Building == 31
+            NewBuilding = create WONDER EPIC_WONDER_NUMBER_HURRICANE at {NextBuildingPos[PlayerID]}
+            run background script SK_AIEpicWorshippers(PlayerID,NewBuilding,AITown)
+            run background script SK_AIEpicStart(PlayerID,NewBuilding,1)
+            run background script SK_AIEpicBuild(PlayerID,NewBuilding,AITown)
+            //run background script SK_AITownBuildingAltarWorkaround(PlayerID,NewBuilding)
+
+        elsif Building == 32
+            NewBuilding = create WONDER EPIC_WONDER_NUMBER_EARTHQUAKE at {NextBuildingPos[PlayerID]}
+            run background script SK_AIEpicWorshippers(PlayerID,NewBuilding,AITown)
+            run background script SK_AIEpicStart(PlayerID,NewBuilding,2)
+            run background script SK_AIEpicBuild(PlayerID,NewBuilding,AITown)
+            //run background script SK_AITownBuildingAltarWorkaround(PlayerID,NewBuilding)
+
+        elsif Building == 33
+            NewBuilding = create WONDER EPIC_WONDER_NUMBER_VOLCANO at {NextBuildingPos[PlayerID]}
+            run background script SK_AIEpicWorshippers(PlayerID,NewBuilding,AITown)
+            run background script SK_AIEpicStart(PlayerID,NewBuilding,3)
+            run background script SK_AIEpicBuild(PlayerID,NewBuilding,AITown)
+            //run background script SK_AITownBuildingAltarWorkaround(PlayerID,NewBuilding)
+
+        else //NEVER be 0
+            NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_AZTEC_HOUSE_A at {NextBuildingPos[PlayerID]}
+
+        end if
+
+    end if
+    if NewBuilding exists
+        if camera position near {NewBuilding} radius 200.00
+            play sound "PLANTSCAFFOLD" at {NewBuilding} with volume 1.0 pitch 0.0
+        end if
+
+        PLAYER of NewBuilding = PlayerID
+        attach NewBuilding to AITown
+        BUILT of NewBuilding = 0.0
+        NumberOfTowns = get player PlayerID town total
+        wait (BuildingWaitTime / (SK_AIDifficulty[PlayerID] / 3.33) / NumberOfTowns) + BuildingWaitTimeMinimum seconds
+        BuildBuilding[PlayerID] = 1
+
+    //    BUILT of NewBuilding = 1.0
+    //    CHARGE of NewBuilding = 1.0
+
+        wait until BUILT of NewBuilding == 1.0 or NewBuilding not exists or HEALTH of NewBuilding == 1.0
+
+        if NewBuilding exists
+            if Size == radiusSmall
+                if camera position near {NewBuilding} radius 200.00
+                    play sound "SMALLBUILDINGFINISH" at {NewBuilding} with volume 1.0 pitch 0.0
+                end if
+
+            else
+                if camera position near {NewBuilding} radius 200.00
+                    play sound "MEDIUMBUILDINGFINISH" at {NewBuilding} with volume 1.0 pitch 0.0
+                end if
+
+            end if
+        end if
+    else
+        BuildBuilding[PlayerID] = 1
+    end if
+
+    CurrBuildings[PlayerID]--
+
+end script SK_AITownBuildingBuildBuilding
+
+begin script SK_AIEpicStart(PlayerID,Wonder,Type)
+
+start
+
+begin loop
+    run background script SK_AIEpics(PlayerID,Wonder,Type)
+    wait 15 seconds //Check every 15 seconds for epic
+    until Wonder not exists
+end loop
+
+end script SK_AIEpicStart
+
+begin script SK_AIEpicBuild(PlayerID,Wonder,AITown)
+
+    Counter = 0
+
+start
+
+disable Wonder hurt by fire
+    
+while Counter < 100 and HEALTH of Wonder < 1.0 and PLAYER of AITown == PlayerID
+    if not {Wonder} viewed
+        add resource ORE number from 40 to 50 to Wonder
+        add resource WOOD number from 100 to 110 to Wonder
+        
+        wait number from 2 to 6 seconds
+        
+        Counter++
+    end if
+end while
+    
+end script SK_AIEpicBuild
+
+//This scripts exists because the game crashes when the player gets near to a norse altar. To prevent this the game will play silent music
+begin script SK_AITownBuildingAltarWorkaround(PlayerID,Altar)
+
+start
+
+wait until BUILT of Altar == 1.0 or Altar not exists or HEALTH of Altar == 1.0
+
+begin loop
+    if SK_MusicIsRunning == 0 and Altar exists and get distance from camera position to {Altar} <= 125
+        SK_AltarMusicCounter += 1
+        wait until get distance from camera position to {Altar} > 150
+        SK_AltarMusicCounter -= 1
+    end if
+    until Altar not exists
+end loop
+
+end script SK_AITownBuildingAltarWorkaround
+
+begin script SK_AITownBuildingStopMusic
+
+start
+
+begin loop
+    if SK_MusicIsRunning == 0 and SK_AltarMusicCounter >= 1
+        start music "silence" loop -1
+        wait until SK_AltarMusicCounter == 0
+        stop music
+    end if
+end loop
+
+end script SK_AITownBuildingStopMusic
+
+begin script SK_AIEpicWorshippers(PlayerID,Wonder,AITown)
+
+    Counter = 0
+    LoopCounter = 0
+    Villager = 0
+    WonderCharge = 0
+
+start
+
+begin loop
+    if HEALTH of Wonder == 1.0
+        //create 5 worshippers at Wonder
+        if LoopCounter <= 8
+            while Counter < SK_AIDifficulty[PlayerID] / 10
+                if PlayerID == 1
+                    Villager = create random villager of tribe TRIBE_TYPE_NORSE at {Wonder}
+                    attach Villager to AITown
+                    set Villager disciple VILLAGER_DISCIPLE_WORSHIP with sound
+                elsif PlayerID == 2
+                    Villager = create random villager of tribe TRIBE_TYPE_JAPANESE at {Wonder}
+                    attach Villager to AITown
+                    set Villager disciple VILLAGER_DISCIPLE_WORSHIP with sound
+                elsif PlayerID == 3
+                    Villager = create random villager of tribe TRIBE_TYPE_AZTEC at {Wonder}
+                    attach Villager to AITown
+                    set Villager disciple VILLAGER_DISCIPLE_WORSHIP with sound
+                end if
+                Counter++
+            end while
+            LoopCounter++
+        end if
+        Counter = 0
+        if CHARGE of Wonder <= 1.0
+            if LoopCounter == 1
+                CHARGE of Wonder += 0.04
+            elsif LoopCounter == 2
+                CHARGE of Wonder += 0.06
+            elsif LoopCounter == 3
+                CHARGE of Wonder += 0.08
+            elsif LoopCounter == 4
+                CHARGE of Wonder += 0.1
+            elsif LoopCounter == 5
+                CHARGE of Wonder += 0.12
+            elsif LoopCounter >= 6
+                CHARGE of Wonder += 0.15
+            end if
+        end if
+    end if
+    wait number from 200 to 300 seconds
+end loop
+
+end script SK_AIEpicWorshippers

@@ -1,0 +1,103 @@
+///////////////////////////////////////////////////////////////////////////////
+//          Skirmish AI Villagers
+//    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//    Start date:        30.09.18            By: Boxhead
+//    Update date:    21.10.18            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+define script SK_AIVillagers(PlayerID,AITown)
+define WaitTime = 180
+define WaitTimeMinimum = 60
+
+begin script SK_AIVillagers(PlayerID,AITown)
+
+    HowManyVillagers = 0
+    TownCentre = 0
+    TownSize = 0
+    Villager = 0
+    VillagerCounter = 0
+    CapacityBonus = 0
+    VillagerMax = 0
+
+start
+
+wait until SK_Escalation[PlayerID] >= 16 and PLAYER of AITown == PlayerID
+
+if AITown == SK_AIHomeTown[PlayerID]
+    VillagerMax = 600
+else
+    VillagerMax = 300
+end if
+
+begin loop
+
+    TownCentre = get building ABODE_NUMBER_TOWN_CENTRE in AITown min built 1.0
+    if PLAYER of AITown == PlayerID and size of AITown < VillagerMax and TownCentre exists
+        TownSize = adult size of AITown
+        if PlayerID == 1
+            VillagerCounter = 0
+            begin loop
+                Villager = create random villager of tribe TRIBE_TYPE_NORSE at {AITown} + {number from -12 to 12, 0, number from -12 to 12}
+                attach Villager to AITown
+                release Villager
+                if capacity of AITown > TownSize
+                    CapacityBonus = size of AITown * 0.15
+                    HowManyVillagers = (SK_AIDifficulty[PlayerID] / 10) + (TownSize / 50) + (CapacityBonus)
+                else
+                    CapacityBonus = size of AITown * 0.25
+                    HowManyVillagers = (SK_AIDifficulty[PlayerID] / 10) + (TownSize / 50) - (CapacityBonus)
+                end if
+                wait number from 1 to 3 seconds
+
+                VillagerCounter++
+                until VillagerCounter > HowManyVillagers or size of AITown > capacity of AITown or size of AITown > VillagerMax
+            end loop
+            wait WaitTime - SK_AIDifficulty[PlayerID] + WaitTimeMinimum seconds
+
+        elsif PlayerID == 2
+            VillagerCounter = 0
+            begin loop
+                Villager = create random villager of tribe TRIBE_TYPE_JAPANESE at {AITown} + {number from -12 to 12, 0, number from -12 to 12}
+                attach Villager to AITown
+                release Villager
+                if capacity of AITown > TownSize
+                    CapacityBonus = capacity of AITown * 0.15
+                    HowManyVillagers = (SK_AIDifficulty[PlayerID] / 10) + (TownSize / 50) + (CapacityBonus)
+                else
+                    CapacityBonus = size of AITown * 0.25
+                    HowManyVillagers = (SK_AIDifficulty[PlayerID] / 10) + (TownSize / 50) - (CapacityBonus)
+                end if
+                wait number from 1 to 3 seconds
+
+                VillagerCounter++
+                until VillagerCounter > HowManyVillagers or size of AITown > capacity of AITown or size of AITown > VillagerMax
+            end loop
+            wait WaitTime - SK_AIDifficulty[PlayerID] + WaitTimeMinimum seconds
+
+        elsif PlayerID == 3
+            VillagerCounter = 0
+            begin loop
+                Villager = create random villager of tribe TRIBE_TYPE_AZTEC at {AITown} + {number from -12 to 12, 0, number from -12 to 12}
+                attach Villager to AITown
+                release Villager
+                if capacity of AITown > TownSize
+                    CapacityBonus = size of AITown * 0.15
+                    HowManyVillagers = (SK_Escalation[PlayerID] / 10) + (SK_AIDifficulty[PlayerID] / 10) + (TownSize / 50) + (CapacityBonus)
+                else
+                    CapacityBonus = size of AITown * 0.25
+                    HowManyVillagers = (SK_Escalation[PlayerID] / 10) + (SK_AIDifficulty[PlayerID] / 10) + (TownSize / 50) - (CapacityBonus)
+                end if
+                wait number from 1 to 3 seconds
+
+                VillagerCounter++
+                until VillagerCounter > HowManyVillagers or size of AITown > capacity of AITown or size of AITown > VillagerMax
+            end loop
+            wait WaitTime - SK_AIDifficulty[PlayerID] + WaitTimeMinimum seconds
+
+        end if
+    end if
+
+end loop
+
+end script SK_AIVillagers

@@ -1,0 +1,80 @@
+///////////////////////////////////////////////////////////////////////////////
+//    Land 8 Intro
+//    ~~~~~~~~~~~~~~
+//
+//    Start date:        19.04.18            By: Boxhead
+//    Update date:    19.04.18            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+define script LC9_Intro
+
+begin script LC9_Intro
+
+    CSMixer = 0
+    WindMixer = 0
+
+start
+
+    PD_ForcedSaving = 1
+    wait until PD_ForcedSaving == 1 or 10 seconds
+    stop script "SavePersistentDataSetData"
+    set persistent data "PREVLAND_OVER" to 0
+    run script SavePersistentDataGetData
+
+    WindMixer = create mixer
+    set mixer WindMixer channel AUDIO_MIXER_CHANNEL_GLOBAL to 0.0
+
+    wait 5 seconds
+    set mixer WindMixer channel AUDIO_MIXER_CHANNEL_GLOBAL to 1.0 with fadetime 2
+    wait 2 seconds
+    destroy mixer WindMixer
+    
+    CSMixer = create mixer
+    set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 0.7
+    begin cinema
+        
+        set fade red 0 green 0 blue 0 time 0
+        set game time 10.00
+        wait 5 seconds
+        reset camera path
+        queue camera move with position {165.60,240.45,2004.05} focus {741.45,230.00,1492.30} time 0.0
+        queue camera move with position {301.23,250.78,1867.65} focus {741.45,230.00,1492.30} time 8.0
+        queue camera move with position {771.77,120.00,1459.74} focus {1321.99,80.40,1054.05} time 7.0
+        queue camera move with position {1256.69,60.00,1101.73} focus {1509.58,50.00,1020.15} time 7.0
+        queue camera move with position {1679.19,70.00,1099.39} focus {AztecTown2} time 6.0
+        queue camera move with position {1962.81,60.00,878.14} focus {1905.77,25.34,604.54} time 6.0
+        queue camera move with position {1730.58,95.00,365.49} focus {PlayerTown} time 7.0
+        play camera path with easein 20 easeout 8 method SCRIPT_CAMERAPATH_EQUALDISTANCE    
+        start music "creaturefightmain_01" loop -1
+        disable load screen
+        set fade in time 2
+
+        //dialogue verified with james
+
+        wait 4 seconds
+        //GEN:So. The last time we Aztecs saw any Greeks they were under our swords and our volcano fires!        
+        say "BW2T_SCRIPT_09FINAL_PDM_STARTLAND_10"
+        wait until read
+
+        //GEN:Oh, and the Prophesy? Huh. Tribes make their own fate. And this time we will make yours oblivion.        
+        say "BW2T_SCRIPT_09FINAL_PDM_STARTLAND_40"
+        wait until read
+
+        // more dialogue from james about mocking creature?
+        
+        //eject good spirit
+        wait 3 seconds
+        eject evil spirit
+        
+        make evil spirit play across 0.5 down 0.5 HELPDUDE_KM_09FINAL_ADVISORS_INTRO_E_10
+        wait until read
+
+        //send good spirit home
+        send evil spirit home
+        wait until camera ready
+        stop music with fadetime 2
+    end cinema
+    IntroFinished = 1
+    wait 2 seconds
+    set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 1.0
+end script LC9_Intro

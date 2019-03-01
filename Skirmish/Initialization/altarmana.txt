@@ -1,0 +1,120 @@
+///////////////////////////////////////////////////////////////////////////////
+//       Altar Mana Balance Script
+//    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//    Start date:        22.12.18            By: Boxhead
+//    Update date:    22.12.18            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+define script PlayerMana(PlayerID)
+define script IncreasePlayerMana(PlayerID)
+
+global PlayerManaBonus[SK_MaxPlayers]
+
+
+begin script PlayerMana(PlayerID)
+
+    Counter = 0
+    PlayerAlignment = 0
+    PlayerVillagersAmount = 0
+    PlayerTownsAmount = 0
+    myAltar = 0
+    myAltarCounter = 0
+    myTown[20]
+    myTownCentre = 0
+
+start
+
+run background script IncreasePlayerMana(PlayerID)
+
+begin loop
+
+    //Reset Data
+    Counter = 0
+    myAltarCounter = 0
+    PlayerTownsAmount = 0
+    PlayerVillagersAmount = 0
+    //Store Data here
+    begin loop
+        myTown[Counter] = get town with id Counter
+        if PLAYER of myTown[Counter] == PlayerID
+            myAltar = get building ABODE_NUMBER_ALTAR in myTown[Counter] min built 1.0
+            myTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in myTown[Counter] min built 1.0
+            if myAltar exists and HEALTH of myAltar == 1.0
+                myAltarCounter += 1
+            end if
+            if myTownCentre exists and myAltarCounter > 0
+                PlayerTownsAmount += 1
+                PlayerVillagersAmount += size of myTown[Counter]
+            end if
+        end if
+        Counter++
+        until Counter >= 20
+    end loop
+
+    PlayerAlignment = get player PlayerID alignment
+    if PlayerAlignment >= 0.5
+        if PlayerVillagersAmount > 725
+            PlayerManaBonus[PlayerID] = 24
+        elsif PlayerVillagersAmount > 600
+            PlayerManaBonus[PlayerID] = 20
+        elsif PlayerVillagersAmount > 475
+            PlayerManaBonus[PlayerID] = 16
+        elsif PlayerVillagersAmount > 350
+            PlayerManaBonus[PlayerID] = 12
+        elsif PlayerVillagersAmount > 225
+            PlayerManaBonus[PlayerID] = 8
+        elsif PlayerVillagersAmount > 100
+            PlayerManaBonus[PlayerID] = 4
+        elsif PlayerVillagersAmount == 0
+            PlayerManaBonus[PlayerID] = 0
+        end if
+    elsif PlayerAlignment >= -0.5 and PlayerAlignment < 0.5
+        if PlayerVillagersAmount > 725 or PlayerTownsAmount >= 3
+            PlayerManaBonus[PlayerID] = 24
+        elsif PlayerVillagersAmount > 600
+            PlayerManaBonus[PlayerID] = 20
+        elsif PlayerVillagersAmount > 475
+            PlayerManaBonus[PlayerID] = 16
+        elsif PlayerVillagersAmount > 350 or PlayerTownsAmount >= 2
+            PlayerManaBonus[PlayerID] = 12
+        elsif PlayerVillagersAmount > 225
+            PlayerManaBonus[PlayerID] = 8
+        elsif PlayerVillagersAmount > 100 or PlayerTownsAmount >= 1
+            PlayerManaBonus[PlayerID] = 4
+        elsif PlayerVillagersAmount == 0
+            PlayerManaBonus[PlayerID] = 0
+        end if
+    else
+        if PlayerTownsAmount >= 3
+            PlayerManaBonus[PlayerID] = 24
+        elsif PlayerTownsAmount == 2
+            PlayerManaBonus[PlayerID] = 12
+        elsif PlayerTownsAmount == 1
+            PlayerManaBonus[PlayerID] = 4
+        elsif PlayerTownsAmount == 0
+            PlayerManaBonus[PlayerID] = 0
+        end if
+    end if
+
+end loop
+
+end script PlayerMana
+
+
+begin script IncreasePlayerMana(PlayerID)
+
+    ManaTimer = create timer for 0 seconds
+    PlayerMana = 0
+
+start
+
+begin loop
+    PlayerMana = get player PlayerID mana
+    if get ManaTimer time remaining <= 0 and PlayerMana < 40000
+        ManaTimer = create timer for 0.25 seconds
+        set player PlayerID mana PlayerMana + PlayerManaBonus[PlayerID]
+    end if
+end loop
+
+end script IncreasePlayerMana

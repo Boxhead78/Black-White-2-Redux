@@ -1,0 +1,1072 @@
+//================================================================
+// Land 9 Archeologists
+// Lenny (Old version) Tom (New version)
+//================================================================
+
+define AO_FALSE                        = 0
+define AO_TRUE                        = 1
+
+global Archeologists[3]
+global Scrubbers[7]
+global RuneCreated[4]
+global TombFound                    = 0
+global PositionToScrub[4]
+global MenDead                        = 0 //Used to check if men are dead - will clean up in future
+global AnimsPlaying                    = 0
+
+define script AO_Intro
+define script AO_Outro(Pos)
+define script AO_Tooltips
+define script CheckForDeath
+define script MenIdles
+define script AO_IntroDialogue
+
+
+begin script LC9_Archaeologists
+    Rune[4]
+    Scroll                    = 0
+    ScrollPos                = marker at {1526.91,55.62,1933.97}
+    Counter                    = 0
+    InfluenceTemp            = 0
+    TreePos                    = marker at {1498.55,41.77,1987.94}
+    Treeston                = 0
+    RockPos[2]
+    Rocks[2]
+    RocksMoved                = 0
+    RocksMoved2                = 0
+    LonelyRock                = 0
+    LonelyRockPos            = marker at {1610.20,42.76,1991.32}
+    CampPos                    = marker at {1541.63,56.26,1939.66}
+    Camp                    = 0
+    TombPos                    = marker at {1721.09,55.85,1950.18}
+    Tomb                    = 0
+    CurrAlpha                = 0
+    Align                    = 0
+    Skip                    = 0
+
+start
+
+    RuneCreated[0] = 0
+    RuneCreated[1] = 0
+    RuneCreated[2] = 0
+    RuneCreated[3] = 0
+
+    Skip = 0
+
+    RockPos[0] = marker at {1804.73,153.14,1938.11} + {4,0,4}
+    RockPos[1] = marker at {1800.20,153.19,1934.12} + {4,0,4}
+
+    PositionToScrub[0]        = marker at {1536.85,56.56,1957.14}
+    PositionToScrub[1]        = marker at {1506.45,44.12,1984.96}
+    PositionToScrub[2]        = marker at {1599.50,42.81,1997.73}
+    PositionToScrub[3]        = marker at {1560.24,43.00,1997.19}
+
+    LonelyRock = create OBJECT ROCK at {LonelyRockPos}
+    disable LonelyRock moveable
+    disable LonelyRock pickup
+    disable LonelyRock hurt by fire
+
+    Camp = create ROCK_OBJECT MOBILE_STATIC_INFO_SCRIPT_OBJECT at {CampPos} + {-2,0}
+    disable Camp moveable
+    disable Camp pickup
+    disable Camp hurt by fire
+    ALTITUDE of Camp = -0.53
+    override mesh for Camp with "m_greek_recruitment_tent"
+
+    Camp = create ROCK_OBJECT MOBILE_STATIC_INFO_SCRIPT_OBJECT at {CampPos} + {-5,-5}
+    disable Camp moveable
+    disable Camp pickup
+    disable Camp hurt by fire
+    ALTITUDE of Camp = 0.0
+    override mesh for Camp with "m_greek_tf_barrel01_bunched_n"
+
+    Camp = create ROCK_OBJECT MOBILE_STATIC_INFO_SCRIPT_OBJECT at {CampPos} + {5,0}
+    disable Camp moveable
+    disable Camp pickup
+    disable Camp hurt by fire
+    ALTITUDE of Camp = -0.05
+    override mesh for Camp with "m_greek_tf_barrel01_bunched_n"
+
+    Tomb = create ROCK_OBJECT MOBILE_STATIC_INFO_SCRIPT_OBJECT at {TombPos} + {97,-100,-26}
+    disable Tomb moveable
+    disable Tomb pickup
+    disable Tomb hurt by fire
+    ALTITUDE of Tomb = -9
+    ANGLE of Tomb = 215
+    override mesh for Tomb with "m_japanesetomb"
+
+    Counter = 0
+    while Counter < 2
+        Rocks[Counter] = create OBJECT ROUND_ROCK_LARGE at {RockPos[Counter]}
+        disable Rocks[Counter] moveable
+        disable Rocks[Counter] pickup
+        disable Rocks[Counter] hurt by fire
+        SCALE of Rocks[Counter] = 2.5
+        ALTITUDE of Rocks[Counter] = 1.2
+        Counter++
+    end while
+
+/*
+    Counter = 0
+    while Counter < 3
+        Archeologists[Counter] = create VILLAGER MALE at {MenPos[Counter]}
+        disable Archeologists[Counter] moveable
+        disable Archeologists[Counter] pickup
+        disable Archeologists[Counter] hurt by fire
+        SPEED of Archeologists[Counter] = 1.0    
+        Counter++
+    end while
+*/
+    Treeston = create TREE TREE_INFO_PALM at {TreePos}
+    disable Treeston moveable
+    disable Treeston pickup
+    disable Treeston hurt by fire
+
+    Scroll = create highlight SILVER name "BW2T_SCRIPT_07FINAL_CHALLENGENAME_ARCHAEOLOGISTS" remind "BW2T_SCRIPT_07FINAL_CHALLENGENAME_ARCHAEOLOGISTS" at {ScrollPos}    
+    ALTITUDE of Scroll = 5
+    
+/*
+    move villager Archeologists[1] focus to {Archeologists[0]}
+    move villager Archeologists[2] focus to {Archeologists[0]}
+    move villager Archeologists[0] focus to {Archeologists[1]}    
+    run background script MenIdles
+    AnimsPlaying = 1
+*/
+    wait until Scroll right clicked
+    delete Scroll
+
+    AnimsPlaying = 0
+
+    run script AO_Intro
+    run background script AO_Tooltips
+    run background script CheckForDeath
+
+    Scroll = create highlight SILVER name "BW2T_SCRIPT_07FINAL_CHALLENGE_ARCHAEOLOGISTS_REMINDER" remind "BW2T_SCRIPT_07FINAL_CHALLENGE_ARCHAEOLOGISTS_REMINDER" at {ScrollPos}    
+    ALTITUDE of Scroll = 5
+
+    set player 0 objective TRIBUTE_OBJECTIVE_LAND_8 with amount 1 text "BW2T_SCRIPT_07FINAL_CHALLENGENAME_ARCHAEOLOGISTS" amount 1 description "BW2T_SCRIPT_07FINAL_CHALLENGE_ARCHAEOLOGISTS_REMINDER" start value 0 reward 50000
+    L9ShowingArcheologistsObjective = 1
+
+    Counter = 0
+    while Counter < 3
+        SPEED of Archeologists[Counter] = 0.6 //Need them to speed up to get to the runes
+        disable Archeologists[Counter] can be fisted
+        Counter++
+    end while
+
+    //RUNE 1
+
+    run background script MenIdles
+    AnimsPlaying = 1
+
+    InfluenceTemp = create influence at {PositionToScrub[0]} radius 75
+
+    wait until {PositionToScrub[0]} scrubbed radius 0.7 or MenDead == 1
+
+    if MenDead != 1
+        Rune[0] =     create visual effect VISUAL_EFFECT_GROUND_RUNE at {PositionToScrub[0]} + {0,0.2,0} time -1
+        
+        CurrAlpha = 0
+        set Rune[0] alpha CurrAlpha
+
+
+        begin loop
+            
+            if {PositionToScrub[0]} scrubbed radius 0.7
+                CurrAlpha += 0.07
+                set Rune[0] alpha CurrAlpha
+            end if
+
+        until CurrAlpha >= 0.91 or MenDead == 1
+        end loop
+
+        AnimsPlaying = 0
+
+        RuneCreated[0] = 1
+
+        if MenDead != 1
+            begin cinema
+
+                set fade red 0 green 0 blue 0 time 2
+                wait 2 seconds
+
+                set camera position to {PositionToScrub[0]} + {15,10,15}
+                set camera focus to {PositionToScrub[0]}
+                move camera position to {PositionToScrub[0]} + {10,7.5,10} time 6
+                move camera focus to {PositionToScrub[0]} time 6
+            
+                set Archeologists[0] position to {PositionToScrub[0]} + {2,0}
+                set Archeologists[1] position to {PositionToScrub[0]} + {0,2}
+                set Archeologists[2] position to {PositionToScrub[0]} + {0,-2}
+
+                say "BW2T_SCRIPT_07FINAL_CHALLENGE_ARCHAEOLOGISTS_230"
+                //wait 0.2 seconds
+                //set Archeologists[1] position to {2169.534, 192.915, 365.867}
+                //set Archeologists[2] position to {2168.797, 192.915, 363.663}
+                
+                set Archeologists[2] focus to {PositionToScrub[0]}
+                set Archeologists[1] focus to {PositionToScrub[0]}
+                set Archeologists[0] focus to {PositionToScrub[0]}
+                play anim "a_p_l6forestambush_man_read_map_loop" on Archeologists[0] loop -1 blend time 0
+                disable anim events on Archeologists[1]
+                disable anim events on Archeologists[2]
+                play anim "a_p_l7archaeologist_inspect_object_2_into" on Archeologists[1] disable stand// loop -1 blend time 0
+                play anim "a_p_l7archaeologist_inspect_object_2_into" on Archeologists[2] disable stand// loop -1 blend time 0
+
+                set fade in time 2
+
+                wait until Archeologists[1] played
+                play anim "a_p_l7archaeologist_inspect_object_2_loop" on Archeologists[1] loop -1 blend time 0
+                wait until Archeologists[2] played
+                play anim "a_p_l7archaeologist_inspect_object_2_loop" on Archeologists[2] loop -1 blend time 0
+                wait 6 seconds
+
+                set camera position to {PositionToScrub[0]} + {-8,10,-8}
+                set camera focus to {PositionToScrub[0]}
+                move camera position to {PositionToScrub[0]} + {-4,7,-4} time 8
+                move camera focus to {PositionToScrub[0]} time 8
+                wait 3 seconds
+                wait until read
+
+                set fade red 0 green 0 blue 0 time 2
+                wait 2 seconds
+                set camera position to {PositionToScrub[0]} + {-40,30,40}
+                set camera focus to {PositionToScrub[0]}
+                run background script MenIdles
+                AnimsPlaying = 1
+
+                set fade in time 2
+                wait 2 seconds
+
+            end cinema
+        end if
+    end if
+    delete InfluenceTemp
+
+    //RUNE 2
+
+    
+
+    InfluenceTemp = create influence at {PositionToScrub[1]} radius 75
+    wait until {PositionToScrub[1]} scrubbed radius 0.7 or MenDead == 1
+
+    if MenDead != 1
+        Rune[1] =     create visual effect VISUAL_EFFECT_GROUND_RUNE at {PositionToScrub[1]} + {0,0.2,0} time -1
+
+        CurrAlpha = 0
+        set Rune[1] alpha CurrAlpha
+
+        run background script MenIdles
+        AnimsPlaying = 1
+
+        begin loop
+            
+            if {PositionToScrub[1]} scrubbed radius 0.7
+                CurrAlpha += 0.07
+                set Rune[1] alpha CurrAlpha
+            end if
+
+        until CurrAlpha >= 0.91 or MenDead == 1
+        end loop
+
+        AnimsPlaying = 0
+
+        RuneCreated[1] = 1
+
+        if MenDead != 1
+            begin cinema
+
+                set fade red 0 green 0 blue 0 time 2
+                wait 2 seconds
+
+                set camera position to {PositionToScrub[1]} + {5,3,5}
+                set camera focus to {PositionToScrub[1]}
+                move camera position to {PositionToScrub[1]} + {3,2.5,3} time 6
+                move camera focus to {PositionToScrub[1]} time 6
+
+                set Archeologists[0] position to {PositionToScrub[1]} + {2,0}
+                set Archeologists[1] position to {PositionToScrub[1]} + {0,2}
+                set Archeologists[2] position to {PositionToScrub[1]} + {0,-2}
+                
+                set Archeologists[1] focus to {PositionToScrub[1]}
+                set Archeologists[2] focus to {PositionToScrub[1]}
+                set Archeologists[0] focus to {PositionToScrub[1]}
+                play anim "a_p_l6forestambush_man_read_map_loop" on Archeologists[0] loop -1 blend time 0
+                disable anim events on Archeologists[1]
+                disable anim events on Archeologists[2]
+                play anim "a_p_l7archaeologist_inspect_object_2_into" on Archeologists[1] disable stand
+                play anim "a_p_l7archaeologist_inspect_object_2_into" on Archeologists[2] disable stand
+
+                set fade in time 2
+
+                say "BW2T_SCRIPT_07FINAL_CHALLENGE_ARCHAEOLOGISTS_240"
+                wait until Archeologists[1] played
+                play anim "a_p_l7archaeologist_inspect_object_2_loop" on Archeologists[1] loop -1 blend time 0
+                wait until Archeologists[2] played
+                play anim "a_p_l7archaeologist_inspect_object_2_loop" on Archeologists[2] loop -1 blend time 0
+                wait 6 seconds
+                wait until read
+
+                set camera position to {PositionToScrub[1]} + {25,15,25}
+                set camera focus to {PositionToScrub[1]}
+                move camera position to {PositionToScrub[1]} + {35,25,35} time 6
+                move camera focus to {PositionToScrub[1]} time 6
+
+                say "BW2T_SCRIPT_07FINAL_CHALLENGE_ARCHAEOLOGISTS_250"
+                wait until read
+
+                set fade red 0 green 0 blue 0 time 2
+                wait 2 seconds
+                run background script MenIdles
+                AnimsPlaying = 1
+                set fade in time 2
+                wait 2 seconds
+
+            end cinema
+        end if
+    end if
+    delete InfluenceTemp
+
+
+    //RUNE 3
+
+    InfluenceTemp = create influence at {PositionToScrub[2]} radius 75
+    wait until ({PositionToScrub[2]} scrubbed radius 0.7 and (get game time >= 22.00 or get game time <= 6.00)) or MenDead == 1
+    
+    if MenDead != 1
+        Rune[2] =     create visual effect VISUAL_EFFECT_GROUND_RUNE at {PositionToScrub[2]} + {0,0.2,0} time -1
+        
+        CurrAlpha = 0
+        set Rune[2] alpha CurrAlpha
+
+        run background script MenIdles
+        AnimsPlaying = 1
+
+        begin loop
+            
+            if {PositionToScrub[2]} scrubbed radius 0.7
+                CurrAlpha += 0.07
+                set Rune[2] alpha CurrAlpha
+            end if
+
+        until CurrAlpha >= 0.91 or MenDead == 1
+        end loop
+
+        AnimsPlaying = 0
+
+        RuneCreated[2] = 1
+
+        if MenDead != 1
+            begin cinema
+
+                set fade red 0 green 0 blue 0 time 2
+                wait 2 seconds
+
+                set camera position to {PositionToScrub[2]} + {-7,4,-7}
+                set camera focus to {PositionToScrub[2]}
+                move camera position to {PositionToScrub[2]} + {-5,2.5,-5} time 6
+                move camera focus to {PositionToScrub[2]} time 6
+            
+                set Archeologists[0] position to {PositionToScrub[2]} + {2,0}
+                set Archeologists[1] position to {PositionToScrub[2]} + {0,2}
+                set Archeologists[2] position to {PositionToScrub[2]} + {0,-2}
+
+                //set Archeologists[1] position to {2122.051, 185.132, 310.236}
+                //set Archeologists[2] position to {2122.213, 185.132, 307.186}
+                
+                set Archeologists[1] focus to {PositionToScrub[2]}
+                set Archeologists[2] focus to {PositionToScrub[2]}
+                set Archeologists[0] focus to {PositionToScrub[2]}
+                play anim "a_p_l6forestambush_man_read_map_loop" on Archeologists[0] loop -1 blend time 0
+                disable anim events on Archeologists[1]
+                disable anim events on Archeologists[2]
+                play anim "a_p_l7archaeologist_inspect_object_2_into" on Archeologists[1] disable stand
+                play anim "a_p_l7archaeologist_inspect_object_2_into" on Archeologists[2] disable stand
+
+                set fade in time 2
+
+                wait until Archeologists[1] played
+                play anim "a_p_l7archaeologist_inspect_object_2_loop" on Archeologists[1] loop -1 blend time 0
+                wait until Archeologists[2] played
+                play anim "a_p_l7archaeologist_inspect_object_2_loop" on Archeologists[2] loop -1 blend time 0
+
+                say "BW2T_SCRIPT_07FINAL_CHALLENGE_ARCHAEOLOGISTS_260"
+                wait until read
+
+                set camera position to {PositionToScrub[2]} + {26,12,26}
+                set camera focus to {PositionToScrub[2]}
+                move camera position to {PositionToScrub[2]} + {32,24,32} time 6
+                move camera focus to {PositionToScrub[2]} time 6
+
+                say "BW2T_SCRIPT_07FINAL_CHALLENGE_ARCHAEOLOGISTS_270"
+                wait until read
+
+                set fade red 0 green 0 blue 0 time 2
+                wait 2 seconds
+                set camera position to {PositionToScrub[2]} + {40,25,40}
+                set camera focus to {PositionToScrub[2]}
+                run background script MenIdles
+                AnimsPlaying = 1
+                set fade in time 2
+                wait 2 seconds
+
+            end cinema
+        end if
+    end if
+    delete InfluenceTemp
+
+    //RUNE 4    
+    
+    InfluenceTemp = create influence at {PositionToScrub[3]} radius 75
+    wait until {PositionToScrub[3]} scrubbed radius 0.7 or MenDead == 1
+
+    if MenDead != 1
+
+        run background script MenIdles
+        AnimsPlaying = 1
+    
+        Rune[3] =     create visual effect VISUAL_EFFECT_GROUND_RUNE at {PositionToScrub[3]} + {0,0.2,0} time -1
+
+        CurrAlpha = 0
+        set Rune[3] alpha CurrAlpha
+
+        begin loop
+            
+            if {PositionToScrub[3]} scrubbed radius 0.7
+                CurrAlpha += 0.07
+                set Rune[3] alpha CurrAlpha
+            end if
+
+        until CurrAlpha >= 0.91 or MenDead == 1
+        end loop
+
+        AnimsPlaying = 0
+
+        RuneCreated[3] = 1
+
+        if MenDead != 1
+            begin cinema
+
+                set fade red 0 green 0 blue 0 time 2
+                wait 2 seconds
+            
+                set Archeologists[0] position to {PositionToScrub[3]} + {2,0}
+                set Archeologists[1] position to {PositionToScrub[3]} + {0,2}
+                set Archeologists[2] position to {PositionToScrub[3]} + {0,-2}
+
+                //set Archeologists[1] position to {2141.656, 192.161, 341.697}
+                //set Archeologists[2] position to {2141.674, 192.161, 339.369}
+                
+                set Archeologists[1] focus to {PositionToScrub[3]}
+                set Archeologists[2] focus to {PositionToScrub[3]}
+                set Archeologists[0] focus to {PositionToScrub[3]}
+                play anim "a_p_l6forestambush_man_read_map_loop" on Archeologists[0] loop -1 blend time 0
+                disable anim events on Archeologists[1]
+                disable anim events on Archeologists[2]
+                set camera position to {PositionToScrub[3]} + {13,6,13}
+                set camera focus to {PositionToScrub[3]}
+                move camera position to {PositionToScrub[3]} + {12,5,12} time 6
+                move camera focus to {PositionToScrub[3]} time 6
+                play anim "a_p_l7archaeologist_inspect_object_2_into" on Archeologists[1] disable stand
+                play anim "a_p_l7archaeologist_inspect_object_2_into" on Archeologists[2] disable stand
+
+                set fade in time 2
+
+                wait until Archeologists[1] played
+                play anim "a_p_l7archaeologist_inspect_object_2_loop" on Archeologists[1] loop -1 blend time 0
+                wait until Archeologists[2] played
+                play anim "a_p_l7archaeologist_inspect_object_2_loop" on Archeologists[2] loop -1 blend time 0
+                //wait 2 seconds
+
+                say "BW2T_SCRIPT_07FINAL_CHALLENGE_ARCHAEOLOGISTS_280"
+                wait until read
+                say "BW2T_SCRIPT_07FINAL_CHALLENGE_ARCHAEOLOGISTS_290"
+                wait until read
+
+                set fade red 0 green 0 blue 0 time 1
+                wait 2 seconds
+                    
+                set Archeologists[0] position to {1787.04,152.84,1926.19}
+                set Archeologists[1] position to {1787.46,152.84,1922.28}
+                set Archeologists[2] position to {1786.69,152.86,1931.01}
+                set Archeologists[0] focus to {1808.02,152.46,1923.61}
+                set Archeologists[1] focus to {1808.02,152.46,1923.61}
+                set Archeologists[2] focus to {1808.02,152.46,1923.61}
+
+                //by rocks
+                set camera position to {1812.98,163.00,1966.70}
+                set camera focus to {1798.11,153.11,1922.08}
+            
+                play anim "a_p_l3paternitysuit_father_to_stop" on Archeologists[0]
+                play anim "a_p_l3paternitysuit_father_to_stop" on Archeologists[1]
+                play anim "a_p_l3paternitysuit_father_to_stop" on Archeologists[2]
+
+                set fade in time 2
+
+                wait until Archeologists[0] played
+                wait until Archeologists[1] played
+                wait until Archeologists[2] played
+                play anim "a_p_l7nutoil2_pointing_into" on Archeologists[0]
+                play anim "a_p_stand_fidget1" on Archeologists[1] loop -1
+                play anim "a_p_stand_fidget2" on Archeologists[2] loop -1
+
+                say "BW2T_SCRIPT_07FINAL_CHALLENGE_ARCHAEOLOGISTS_300"
+                wait until Archeologists[0] played
+                play anim "a_p_l7nutoil2_pointing_loop" on Archeologists[0]
+                wait until read
+                wait until Archeologists[0] played
+                play anim "a_p_l7nutoil2_pointing_outof" on Archeologists[0]
+                set camera position to {Archeologists[0]} + {-5,5,0.25}
+                set camera focus to {RockPos[0]} + {0,5,0}
+                eject good spirit
+                eject evil spirit
+                    say "BW2T_SCRIPT_07FINAL_CHALLENGE_ARCHAEOLOGISTS_310"
+                    wait until read
+                    say "BW2T_SCRIPT_07FINAL_CHALLENGE_ARCHAEOLOGISTS_320"
+                    wait until read
+                send good spirit home
+                send evil spirit home
+
+            end cinema
+        end if
+
+        //MOVE THE ROCKS
+
+        Counter = 0
+        while Counter < 2 and MenDead != 1
+            enable Rocks[Counter] moveable
+            enable Rocks[Counter] pickup
+            enable Rocks[Counter] hurt by fire
+            Counter++
+        end while
+    end if
+    delete InfluenceTemp
+
+    InfluenceTemp = create influence at {Rocks[1]} radius 75
+    begin loop
+        Counter = 0
+        RocksMoved = 1
+        while Counter < 2
+            if {Rocks[Counter]} near {RockPos[Counter]} radius 20 or get object held == Rocks[Counter]
+                RocksMoved = 0
+            end if
+
+            Counter++
+        end while
+
+        if RocksMoved == 1
+            RocksMoved2 = 1
+        end if
+
+    until RocksMoved2 == 1 or MenDead == 1
+    end loop
+
+    delete InfluenceTemp
+
+    if MenDead != 1
+        //ROCKS MOVED
+        
+        run script AO_Outro(RockPos[1])
+
+        TombFound = 1
+        
+        if MenDead != 1
+            //increment tribute by 50000
+            set player 0 objective TRIBUTE_OBJECTIVE_LAND_8 status to TRIBUTE_OBJECTIVE_STATE_COMPLETE
+            wait 2.5 seconds
+            set player 0 objective TRIBUTE_OBJECTIVE_LAND_8 status to TRIBUTE_OBJECTIVE_STATE_COMPLETE_HIDDEN
+            Align = get player 0 alignment
+            set player 0 alignment Align + 0.1
+        end if
+    end if
+
+    delete InfluenceTemp    
+    delete Scroll
+
+    if MenDead == 1
+        set player 0 objective TRIBUTE_OBJECTIVE_LAND_8 status to TRIBUTE_OBJECTIVE_STATE_FAILED
+        wait 2.5 seconds
+        set player 0 objective TRIBUTE_OBJECTIVE_LAND_8 status to TRIBUTE_OBJECTIVE_STATE_FAILED_HIDDEN
+        Align = get player 0 alignment
+        set player 0 alignment Align - 0.1
+    end if
+
+end script LC9_Archaeologists
+
+
+
+
+//----------------//
+//-----Intro------//
+//----------------//
+
+begin script AO_Intro
+
+
+FakeArcheologists[3]
+
+count=0
+
+Dirt[2]
+
+start
+
+
+
+    begin cinema
+
+        set fade red 0 green 0 blue 0 time 2
+
+        wait 2 seconds
+
+
+        Dirt[0] = create FEATURE FEATURE_INFO_PILE_OF_DIRT_SMALL at {1546.17,56.57,1950.91}
+        Dirt[1] = create FEATURE FEATURE_INFO_PILE_OF_DIRT_SMALL at  {1541.27,56.56,1963.45}
+
+
+        start music "cut_scene_mystery_02"
+
+
+        Scrubbers[0] = create VILLAGER GREEK_FARMER at {1546.17,56.57,1950.91} + {1.4,0,0}
+        Scrubbers[1] = create VILLAGER GREEK_FARMER at {1526.69,56.56,1950.99} + {1.4,0,0}
+        Scrubbers[2] = create VILLAGER GREEK_FARMER at {1526.69,56.56,1950.99} + {0,0,1.4}
+        Scrubbers[3] = create VILLAGER GREEK_FARMER at {1546.17,56.57,1950.91} + {0,0,1.4}
+        Scrubbers[4] = create VILLAGER GREEK_FARMER at {1546.17,56.57,1950.91} + {-1.4,0,0}
+        Scrubbers[5] = create VILLAGER GREEK_FARMER at {1541.27,56.56,1963.45} + {1.4,0,0}
+        Scrubbers[6] = create VILLAGER GREEK_FARMER at {1541.27,56.56,1963.45} + {0,0,-1.4}
+
+        set Scrubbers[0] focus to {1546.17,56.57,1950.91}//DirtPile1
+        set Scrubbers[1] focus to {1526.69,56.56,1950.99}//NoDirt1
+        set Scrubbers[2] focus to {1526.69,56.56,1950.99}//NoDirt1
+        set Scrubbers[3] focus to {1546.17,56.57,1950.91}//DirtPile1
+        set Scrubbers[4] focus to {1546.17,56.57,1950.91}//DirtPile1
+        set Scrubbers[5] focus to {1541.27,56.56,1963.45}//DirtPile2
+        set Scrubbers[6] focus to {1541.27,56.56,1963.45}//DirtPile2
+
+        /*
+        play anim "a_p_scrubbs" on Scrubbers[1] loop -1
+        play anim "a_p_scrubbs" on Scrubbers[2] loop -1
+        play anim "a_p_scrubbs" on Scrubbers[3] loop -1
+        play anim "a_p_scrubbs" on Scrubbers[4] loop -1
+        */
+
+        FakeArcheologists[0]= create VILLAGER VILLAGER_INFO_BAZMET at {1532.40,56.11,1936.11}
+        FakeArcheologists[1] = create VILLAGER GREEK_FARMER at {1534.28,56.20,1935.46}
+        FakeArcheologists[2] = create VILLAGER GREEK_FARMER at {1530.40,56.03,1936.29}
+
+        count = 0
+        while count < 3
+            disable FakeArcheologists[count] moveable
+            disable FakeArcheologists[count] pickup
+            disable FakeArcheologists[count] hurt by fire
+            disable FakeArcheologists[count] reactable
+            SPEED of FakeArcheologists[count] = 0.1
+            count++
+        end while
+
+        play anim "a_p_l7archaeologist_people_brushing" on Scrubbers[0] loop -1
+        play anim "a_p_scrubbs" on Scrubbers[1] loop -1
+        play anim "a_p_inspect_object_2" on Scrubbers[2] loop -1
+        play anim "A_P_farmer" on Scrubbers[3] loop -1
+        play anim "A_P_sledgehammer" on Scrubbers[4] loop -1
+
+        set Scrubbers[3] carrying CARRIED_OBJECT_SPADE
+        set Scrubbers[4] carrying CARRIED_OBJECT_MALLET_HEAVY
+        set Scrubbers[5] carrying CARRIED_OBJECT_MALLET_HEAVY
+        set Scrubbers[6] carrying CARRIED_OBJECT_SPADE
+
+        count = 0
+        while count < 7
+            disable Scrubbers[count] moveable
+            disable Scrubbers[count] pickup
+            disable Scrubbers[count] hurt by fire
+            disable Scrubbers[count] reactable
+            count++        
+        end while
+
+        move FakeArcheologists[0] position to {1538.20,56.56,1960.35}
+        move FakeArcheologists[1] position to {1540.11,56.56,1959.87}
+        move FakeArcheologists[2] position to {1536.12,56.56,1960.67}
+
+        set camera position to {1514.25,67.35,1933.55}
+        set camera focus to {1522.37,52.56,1952.59}
+        move camera position to {1531.72,65.35,1920.20} time 20
+        move camera focus to {1546.94,52.56,1947.86} time 20
+
+        set fade in time 2
+
+        run background script AO_IntroDialogue
+
+        wait 1 seconds
+        play anim "A_P_sledgehammer" on Scrubbers[5] loop -1
+        play anim "A_P_farmer" on Scrubbers[6] loop -1
+
+        override FakeArcheologists[0] anim "a_p_l7archaeologist_walk_talk"
+
+        wait 6 seconds
+
+        set camera position follow FakeArcheologists[0] offset {0.145, 1.340, 4.223}
+        set camera focus follow FakeArcheologists[0] offset {-3.066, 0.018, -95.715}
+
+        wait 4.4 seconds
+
+        set camera position to {1539.85,59.00,1945.19}
+        set camera focus to {Dirt[0]}
+
+        move camera position to {1532.47,59.00,1957.93} time 15
+        move camera focus to {Dirt[1]} time 15
+
+        wait 4 seconds
+
+        set camera position follow FakeArcheologists[0] offset {-0.073, 1.371, -2.308}
+        set camera focus follow FakeArcheologists[0] offset {4.877, -1.121, 97.539}
+        wait 3 seconds
+
+        set camera position to {1531.99,59.00,1955.27}
+        set camera focus to {1526.01,57.50,1950.90}
+        move camera position to {1530.27,59.00,1953.29} time 4 easein 0 easeout 0
+        move camera focus to {1526.01,57.50,1950.90} time 4 easein 0 easeout 0
+        wait 1 seconds
+        delete FakeArcheologists[0]
+        delete FakeArcheologists[1]
+        delete FakeArcheologists[2]
+
+        wait 2.5 seconds
+        Archeologists[0]= create VILLAGER VILLAGER_INFO_BAZMET at {1538.20,56.56,1960.35}
+        Archeologists[1] = create VILLAGER GREEK_FARMER at {1540.11,56.56,1959.87}
+        Archeologists[2] = create VILLAGER GREEK_FARMER at {1536.12,56.56,1960.67}
+
+        set Archeologists[0] focus to {1541.44,56.56,1963.18}//DirtPile1
+        set Archeologists[1] focus to {1541.44,56.56,1963.18}//NoDirt1
+        set Archeologists[2] focus to {1541.44,56.56,1963.18}//NoDirt1
+
+        count = 0
+        while count < 3
+            disable Archeologists[count] moveable
+            disable Archeologists[count] pickup
+            disable Archeologists[count] hurt by fire
+            disable Archeologists[count] reactable
+
+            //SPEED of Archeologists[count] = 0.15
+            count++
+        end while
+            
+        play anim "a_p_l3paternitysuit_father_to_stop" on Archeologists[0] disable stand blend time 0.0
+        wait 0.2 seconds    
+        play anim "a_p_l3paternitysuit_father_to_stop" on Archeologists[1] disable stand blend time 0.0
+        wait 0.1 seconds
+        play anim "a_p_l3paternitysuit_father_to_stop" on Archeologists[2] disable stand blend time 0.0
+        wait until camera ready
+        wait 0.25 seconds
+        
+        set camera lens 50.000
+        set camera position to {1534.98,58.00,1964.62}
+        set camera focus to {Archeologists[0]}
+        move camera position to {1537.98,59.00,1965.56} time 4
+        move camera focus to {Archeologists[0]} time 4
+
+        wait until Archeologists[0] played
+        play anim "a_p_mafiacreature_talking_gesturing_at_something" on Archeologists[0]
+        wait until Archeologists[1] played
+        play anim "a_p_looking_for_something" on Archeologists[1]
+        wait until Archeologists[2] played
+        play anim "a_p_hands_in_pockets" on Archeologists[2]
+
+        wait 3 seconds
+
+        set camera position to {1528.42,62.00,1961.39}
+        set camera focus to {1536.25,56.56,1950.75}
+
+        move camera position to {1514.20,70.00,1978.52} time 8
+        move camera focus to {1536.25,56.56,1950.75} time 8
+        wait 4 seconds
+        set fade red 0 green 0 blue 0 time 2
+        stop music with fadetime 10
+        wait 2 seconds
+        
+        set camera position to {1543.11,75.00,1994.35}
+        set camera focus to {Archeologists[0]}
+        set camera lens 70.000
+        set fade in time 2
+        wait 2 seconds
+
+    end cinema
+
+    
+    begin dialogue
+
+        eject evil spirit
+            say "BW2T_SCRIPT_07FINAL_CHALLENGE_ARCHAEOLOGISTS_210"
+            wait until read
+            
+            //Only play fisting line if fisting not bought
+            if get research ARTEFACT_HAND_FISTING available != variable RESEARCH_AVAILABILITY_RESEARCHED
+                say "BW2T_SCRIPT_07FINAL_CHALLENGE_ARCHAEOLOGISTS_220"
+                wait until read
+            end if
+        send evil spirit home
+
+    end dialogue
+
+
+end script AO_Intro
+
+
+//---------------//
+//Tooltip manager//
+//---------------//
+
+begin script AO_Tooltips
+
+Tooltimer[3]
+Tooltips[3]
+Counter = 0
+
+start
+
+    Tooltimer[0] = create timer for 0 seconds
+    Tooltimer[1] = create timer for 0 seconds
+    Tooltimer[2] = create timer for 0 seconds
+
+    begin loop
+
+        Counter = 0
+
+        while Counter < 3
+
+            if RuneCreated[Counter] == 1
+                if Tooltips[Counter] exists and get Tooltimer[Counter] time remaining <= 0 and hand position not near {PositionToScrub[Counter]} radius 5
+                    delete Tooltips[Counter]
+                elsif Tooltips[Counter] not exists and hand position near {PositionToScrub[Counter]} radius 5
+                    if Counter == 0
+                        Tooltips[0] = create tooltip at {PositionToScrub[0]} with text "BW2T_SCRIPT_07FINAL_CHALLENGE_ARCHAEOLOGISTS_230"
+                    elsif Counter == 1
+                        Tooltips[1] = create tooltip at {PositionToScrub[1]} with text "BW2T_SCRIPT_07FINAL_CHALLENGE_ARCHAEOLOGISTS_240"
+                    elsif Counter == 2
+                        Tooltips[2] = create tooltip at {PositionToScrub[2]} with text "BW2T_SCRIPT_07FINAL_CHALLENGE_ARCHAEOLOGISTS_260"
+                    end if
+
+                    Tooltimer[Counter] = create timer for 5 seconds
+                end if
+            end if
+            
+            Counter++
+        end while
+
+    until TombFound == 1 or MenDead == 1
+    end loop
+
+    Counter = 0
+    while Counter < 3
+        if Tooltips[Counter] exists
+            delete Tooltips[Counter]
+        end if
+        Counter++
+    end while
+        
+end script AO_Tooltips
+
+
+//-------------------------//
+//-Make sure men are alive-//
+//-------------------------//
+
+begin script CheckForDeath
+
+Counter = 0
+
+start
+
+    while TombFound != 1 and MenDead !=1
+
+        Counter = 0
+        while Counter < 3
+            if HEALTH of Archeologists[Counter] <= 0
+                MenDead = 1
+                begin cinema
+                    eject good spirit
+                    eject evil spirit
+                    //Say men are dead
+                    say "BW2T_HELP_TEXT_GUIDANCE_KILLING_GA_20"
+                    wait until read
+                    say "BW2T_HELP_TEXT_GUIDANCE_KILLING_EA_04"
+                    wait until read
+                    send good spirit home
+                    send evil spirit home
+                end cinema
+            //    increment tribute by 50000/2
+            end if
+            Counter++
+        end while        
+
+    end while
+
+end script CheckForDeath
+
+
+//---------------------------//
+//------Men idle anims-------//
+//---------------------------//
+
+//Play some simple anims
+
+begin script MenIdles
+
+AnimToPlay = 0
+Counter = 0
+
+start
+
+
+    //So the IdleAnims script works
+    play anim "a_p_hands_in_pockets" on Archeologists[0] loop 1 blend time 0
+    play anim "a_p_looking_for_something" on Archeologists[1] loop 1 blend time 0
+    play anim "a_p_inspect_object_1" on Archeologists[2] loop 1 blend time 0
+
+    begin loop
+
+        Counter = 0
+
+        while Counter < 3
+            if Archeologists[Counter] played
+                wait 0.5 seconds
+                AnimToPlay = number from 1 to 4
+                if AnimToPlay == 1 //Anim 1 to play
+                    play anim "a_p_look_up" on Archeologists[Counter] loop 1
+                elsif AnimToPlay == 2
+                    play anim "a_p_hands_in_pockets" on Archeologists[Counter] loop 1
+                elsif AnimToPlay == 3
+                    play anim "a_p_looking_for_something" on Archeologists[Counter] loop 1
+                else
+                    play anim "a_p_inspect_object_1" on Archeologists[Counter] loop 1
+                end if
+            end if
+            Counter++
+        end while
+                    
+
+    until AnimsPlaying == 0
+    end loop
+    
+
+end script MenIdles
+
+//OUTRO HERE---------------
+
+begin script AO_Outro(Pos)
+
+Skip = 0
+
+start
+    if MenDead != 1
+        begin cinema
+
+            set fade red 0 green 0 blue 0 time 2
+            wait 2 seconds
+
+            set Archeologists[0] position to {1787.04,152.84,1926.19}
+            set Archeologists[1] position to {1787.46,152.84,1922.28}
+            set Archeologists[2] position to {1786.69,152.86,1931.01}
+
+            move Archeologists[0] position to {Archeologists[0]}
+            move Archeologists[1] position to {Archeologists[1]}
+            move Archeologists[2] position to {Archeologists[2]}
+
+
+            set Archeologists[0] focus to {1808.02,152.46,1923.61}
+            set Archeologists[1] focus to {1808.02,152.46,1923.61}
+            set Archeologists[2] focus to {1808.02,152.46,1923.61}
+            set fade in time 2
+
+            set camera position to {1802.66,153.17,1931.79} + {-40,15,6}
+            set camera focus to {1802.66,153.17,1931.79}
+            move camera position to {1802.66,153.17,1931.79} + {-30,12,6} time 6
+            move camera focus to {1802.66,153.17,1931.79} time 6
+            wait 3 seconds
+            say "BW2T_SCRIPT_07FINAL_CHALLENGE_ARCHAEOLOGISTS_330"
+
+            
+            wait 1 seconds
+
+            play anim "a_p_l7nutoil2_pointing_into" on Archeologists[0]     disable stand    
+            play anim "A_P_expectant_good_2" on Archeologists[1] disable stand
+            play anim "A_P_expectant_good_1" on Archeologists[2] disable stand
+            wait until Archeologists[0] played
+            play anim "a_p_l7nutoil2_pointing_loop" on Archeologists[0] disable stand
+            wait until Archeologists[0] played
+            play anim "a_p_l7nutoil2_pointing_outof" on Archeologists[0] disable stand
+
+            wait 1 seconds
+            set camera position to {Archeologists[0]} + {-4,2,0}
+            set camera focus to {Archeologists[0]} + {0,2,0}
+
+            wait until Archeologists[1] played
+            play anim "a_p_stand_fidget1" on Archeologists[1] loop -1
+            wait until Archeologists[2] played
+            play anim "a_p_stand_fidget2" on Archeologists[2] loop -1
+
+            wait until Archeologists[0] played
+            play anim "a_p_celebration4" on Archeologists[0]
+            wait 1 seconds
+
+            //move camera position to {2081.491, 191.068, 339.797} time 1
+            //move camera focus to {2082.151, 190.120, 239.803} time 1
+
+            wait 3 seconds
+
+            set camera position to {1808.02,152.46,1923.61} + {-30,15,2}
+            set camera focus to {1808.02,152.46,1923.61}
+            move camera position to {1808.02,152.46,1923.61} + {-40,18,6} time 8
+            move camera focus to {1808.02,152.46,1923.61} time 8
+            wait until read
+
+            move Archeologists[0] position to {1797.36,153.15,1928.60}
+            move Archeologists[1] position to {1800.50,153.19,1933.03}
+            move Archeologists[2] position to {1795.35,153.10,1927.54}
+
+            eject good spirit
+            eject evil spirit
+                say "BW2T_SCRIPT_07FINAL_CHALLENGE_ARCHAEOLOGISTS_340"
+                wait until read
+                say "BW2T_SCRIPT_07FINAL_CHALLENGE_ARCHAEOLOGISTS_350"
+                wait until read
+            send good spirit home
+            send evil spirit home
+
+            set fade red 0 green 0 blue 0 time 2
+            wait 2 seconds
+            ///play anim "a_p_look_at_creature" on Archeologists[0] loop -1
+            //play anim "a_p_look_at_creature" on Archeologists[1] loop -1
+            //play anim "a_p_look_at_creature" on Archeologists[2] loop -1
+            set fade in time 2
+            wait 2 seconds
+
+
+        end cinema
+    end if
+
+end script AO_Outro
+
+
+begin script AO_IntroDialogue
+
+start
+
+    begin known cinema
+
+
+            say "BW2T_SCRIPT_07FINAL_CHALLENGE_ARCHAEOLOGISTS_160"
+            wait until read
+
+            say "BW2T_SCRIPT_07FINAL_CHALLENGE_ARCHAEOLOGISTS_180"
+            wait until read
+
+            say "BW2T_SCRIPT_07FINAL_CHALLENGE_ARCHAEOLOGISTS_190"
+            wait until read
+
+            say "BW2T_SCRIPT_07FINAL_CHALLENGE_ARCHAEOLOGISTS_200"
+            wait until read
+
+
+    end known cinema
+end script AO_IntroDialogue

@@ -1,0 +1,583 @@
+///////////////////////////////////////////////////////////////////////////////
+//    Missionaries
+//    ~~~~~~~~~~~~~
+//
+//    Description:
+//    A group of people decide to plan a trip.
+//    Nevertheless, they are missing a boat.
+//    In order to get the reward, the player must help the missionaries.
+//  
+//    Rewards:            30000 tribute
+//
+//    Start date:            05.11.16            By: Boxhead
+//    Update date:        29.05.17            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+define script LC4_Missionaries
+define script LC4_Missionaries_Animations_1
+define script LC4_Missionaries_Animations_2
+define script LC4_Missionaries_Animations_3
+define script LC4_Missionaries_Intro
+define script LC4_Missionaries_Objective_1
+define script LC4_Missionaries_Scene_2
+define script LC4_Missionaries_Scene_2_m
+define script LC4_Missionaries_Objective_2
+define script LC4_Missionaries_Scene_3
+define script LC4_Missionaries_Scene_3_m
+define script LC4_Missionaries_Objective_3
+define script LC4_Missionaries_Scene_4
+
+global Scroll_Missionaries = 0
+global Missionaries_Guy1 = 0
+global Missionaries_Guy2 = 0
+global Missionaries_Guy3 = 0
+global Missionaries_Fire = 0
+global Missionaries_Guy1Pos = 0
+global Missionaries_Guy2Pos = 0
+global Missionaries_Guy3Pos = 0
+global Missionaries_ScrollPos = 0
+global Missionaries_FirePos = 0
+global Missionaries_Wood_Done = 0
+global Missionaries_Food_Done = 0
+global Missionaries_Meat_Done = 0
+global LC4_Missionaries_SPit = 0
+global LC4_Missionaries_Hut = 0
+global LC4_Missionaries_Ship = 0
+global LC4_Missionaries_SPit_Influence = 0
+global LC4_Missionaries_Animal_Influence = 0
+
+begin script LC4_Missionaries
+ 
+    Missionary = 0
+
+start
+
+    wait until get distance from camera position to {Missionaries_FirePos} > 150 and not {Missionaries_FirePos} viewed
+
+    build all town MissionaryTown buildings in group 0
+    LC4_Missionaries_SPit = get HOUSE ABODE_NUMBER_STORAGE_PIT at {1635.47,13.19,489.67} radius 5
+    LC4_Missionaries_Hut = get HOUSE at {1628.98,13.59,449.12} radius 5
+    
+    SCRIPT_OBJECT_PROPERTY_TYPE_BUILT_PERCENTAGE of LC4_Missionaries_SPit = 1.0
+    SCRIPT_OBJECT_PROPERTY_TYPE_BUILT_PERCENTAGE of LC4_Missionaries_Hut = 1.0
+
+    Missionaries_ScrollPos = marker at {1614.86,16.50,475.41} + {0.00,3.00,0.00}
+
+    if Language == German
+        Scroll_Missionaries = create highlight SILVER name "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_03" remind "BW2_TEXT_CREATURE_LEARNING_SIMPLE_LESSON_1590" at {Missionaries_ScrollPos}
+    elsif Language == English
+        Scroll_Missionaries = create highlight SILVER name "HELP_TEXT_MULTIPLAYER_SETUP_SPELLSELECTION_02" remind "BW2_TEXT_CREATURE_LEARNING_SIMPLE_LESSON_1590" at {Missionaries_ScrollPos}
+    end if
+
+    Missionaries_FirePos = marker at {1633.72,13.31,462.45}
+
+    Missionaries_Guy1Pos = marker at {1630.27,13.56,468.67}
+    Missionaries_Guy2Pos = marker at {1627.90,13.77,464.97}
+    Missionaries_Guy3Pos = marker at {1628.33,13.71,461.36}
+
+    Missionaries_Fire = create SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_BONFIRE at {Missionaries_FirePos}
+
+    Missionaries_Guy1 = create VILLAGER VILLAGER_INFO_NORSE_FORESTER_MALE at {Missionaries_Guy1Pos}
+    set Missionaries_Guy1 focus to {1633.31,13.31,462.49}
+    Missionaries_Guy2 = create VILLAGER VILLAGER_INFO_NORSE_FARMER_MALE at {Missionaries_Guy2Pos}
+    set Missionaries_Guy2 focus to {1633.31,13.31,462.49}
+    Missionaries_Guy3 = create VILLAGER VILLAGER_INFO_NORSE_FISHERMAN_MALE at {Missionaries_Guy3Pos}
+    set Missionaries_Guy3 focus to {1633.31,13.31,462.49}
+
+
+    wait 2 seconds
+
+    run background script LC4_Missionaries_Animations_1
+    run background script LC4_Missionaries_Animations_2
+    run background script LC4_Missionaries_Animations_3
+
+
+    enable LC4_Missionaries_SPit indestructible
+    enable Missionaries_Guy1 indestructible
+    enable Missionaries_Guy2 indestructible
+    enable Missionaries_Guy3 indestructible
+    disable Missionaries_Guy1 pickup
+    disable Missionaries_Guy1 moveable
+    disable Missionaries_Guy2 pickup
+    disable Missionaries_Guy2 moveable
+    disable Missionaries_Guy3 pickup
+    disable Missionaries_Guy3 moveable
+
+    wait until Scroll_Missionaries right clicked
+    
+    delete Scroll_Missionaries
+
+    run background script LC4_Missionaries_Intro
+
+end script LC4_Missionaries
+
+begin script LC4_Missionaries_Animations_1
+
+start
+
+    wait 0 seconds
+    play anim "a_p_dance_celebrate01" on Missionaries_Guy1 loop -1
+
+end script LC4_Missionaries_Animations_1
+
+begin script LC4_Missionaries_Animations_2
+
+start
+
+    wait 2 seconds
+    play anim "a_p_dance_celebrate02" on Missionaries_Guy2 loop -1
+
+end script LC4_Missionaries_Animations_2
+
+begin script LC4_Missionaries_Animations_3
+
+start
+
+    wait 4 seconds
+    play anim "A_p_L4Nutoil_brother_dance1" on Missionaries_Guy3 loop -1
+
+end script LC4_Missionaries_Animations_3
+
+begin script LC4_Missionaries_Intro
+
+start
+    
+    begin cinema
+        start music "missionariesverse1" loop 1
+        move camera position to {Missionaries_FirePos} + {10.00,4.50,-12.00} time 3
+        move camera focus to {Missionaries_FirePos} + {0.00,1.50,0.00} time 3
+        wait 10 seconds
+        move camera position to {Missionaries_Guy1Pos} + {-0.75,1.25,-3.00} time 0 //{-3.30,1.25,0.00}
+        move camera focus to {Missionaries_Guy1Pos} + {0.00,1.00,0.00} time 0
+        wait 7 seconds
+        move camera position to {Missionaries_FirePos} + {-8.00,1.50,-6.00} time 0
+        move camera focus to {Missionaries_FirePos} + {0.00,1.50,0.00} time 0
+        wait 7 seconds
+        move camera position to {Missionaries_Guy3Pos} + {1.00,1.00,-1.00} time 0
+        move camera focus to {Missionaries_Guy3Pos} + {0.00,1.00,0.00} time 0
+        wait 5 seconds
+        move camera position to {Missionaries_FirePos} + {5.00,4.50,-6.00} time 0
+        move camera focus to {Missionaries_FirePos} + {2.00,1.50,-2.00} time 0
+        wait 6 seconds
+        move camera position to {Missionaries_FirePos} + {50.00,40.50,-50.00} time 5
+        move camera focus to {Missionaries_FirePos} + {2.00,15.50,-2.00} time 5
+        wait 6 seconds
+        start music "missionariesbackground" loop 1
+    end cinema
+
+    run background script LC4_Missionaries_Objective_1
+
+end script LC4_Missionaries_Intro
+
+begin script LC4_Missionaries_Objective_1
+
+    OBJ_CLICKED = 0
+    Wood = 0
+    WoodIsEnough = 0
+
+start
+
+    if Language == German
+        Scroll_Missionaries = create highlight SILVER name "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_03" remind "BW2_TEXT_CREATURE_LEARNING_SIMPLE_LESSON_1590" at {Missionaries_ScrollPos}
+        set player 0 objective TRIBUTE_OBJECTIVE_LAND_2 with amount 1 text "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_03" amount 1 description "BW2_TEXT_CREATURE_LEARNING_SIMPLE_LESSON_1590" start value 0 reward 30000
+    elsif Language == English
+        Scroll_Missionaries = create highlight SILVER name "HELP_TEXT_MULTIPLAYER_SETUP_SPELLSELECTION_02" remind "BW2_TEXT_CREATURE_LEARNING_SIMPLE_LESSON_1590" at {Missionaries_ScrollPos}
+        set player 0 objective TRIBUTE_OBJECTIVE_LAND_2 with amount 1 text "HELP_TEXT_MULTIPLAYER_SETUP_SPELLSELECTION_02" amount 1 description "BW2_TEXT_CREATURE_LEARNING_SIMPLE_LESSON_1590" start value 0 reward 30000
+    end if
+
+    LC4_Missionaries_SPit_Influence = create influence at {LC4_Missionaries_SPit} radius 15
+
+begin loop
+
+    if Scroll_Missionaries right clicked
+        run background script LC4_Missionaries_Intro
+        OBJ_CLICKED = 1
+    end if
+
+    Wood = get resource RESOURCE_TYPE_WOOD in LC4_Missionaries_SPit
+    if Wood > 4000
+        Missionaries_Wood_Done = 1
+        start music "lc4_wood_1" loop 1
+        wait 5 seconds
+        remove resource RESOURCE_TYPE_WOOD 4000 from LC4_Missionaries_SPit
+    elsif Wood > 1 and Wood <= 4000 and WoodIsEnough == 0
+        WoodIsEnough = 1
+        start music "lc4_wood_2" loop 1
+    end if
+
+    until Missionaries_Wood_Done == 1 or OBJ_CLICKED == 1
+end loop
+
+if Missionaries_Wood_Done == 1
+    run background script LC4_Missionaries_Scene_2
+    delete Scroll_Missionaries
+else
+    OBJ_CLICKED = 0
+end if
+
+end script LC4_Missionaries_Objective_1
+
+begin script LC4_Missionaries_Scene_2
+
+    Number = 0
+    Missionary = 0
+    Timer = 0
+
+start
+
+    Timer = create timer for 120 seconds
+
+    begin loop
+        Number = number from 1 to 3
+        if Number == 1
+            Missionary = Missionaries_Guy1
+        elsif Number == 2
+            Missionary = Missionaries_Guy2
+        elsif Number == 3
+            Missionary = Missionaries_Guy3
+        end if
+
+        Number = number from 1 to 3
+        if Number == 1
+            move Missionary position to {1645.30,12.79,448.99}
+        elsif Number == 2
+            move Missionary position to {1615.14,15.01,485.78}
+        elsif Number == 3
+            move Missionary position to {1620.76,14.26,455.82}
+        end if
+        wait 5 seconds
+        until get Timer time remaining == 0
+    end loop
+
+    delete Missionaries_Guy1
+    delete Missionaries_Guy2
+    delete Missionaries_Guy3
+
+    Missionaries_Guy1 = create VILLAGER VILLAGER_INFO_NORSE_FORESTER_MALE at {Missionaries_Guy1Pos}
+    set Missionaries_Guy1 focus to {1633.31,13.31,462.49}
+    Missionaries_Guy2 = create VILLAGER VILLAGER_INFO_NORSE_FARMER_MALE at {Missionaries_Guy2Pos}
+    set Missionaries_Guy2 focus to {1633.31,13.31,462.49}
+    Missionaries_Guy3 = create VILLAGER VILLAGER_INFO_NORSE_FISHERMAN_MALE at {Missionaries_Guy3Pos}
+    set Missionaries_Guy3 focus to {1633.31,13.31,462.49}
+
+    run background script LC4_Missionaries_Animations_1
+    run background script LC4_Missionaries_Animations_2
+    run background script LC4_Missionaries_Animations_3
+
+    wait until get distance from camera position to {Missionaries_FirePos} > 150 and not {Missionaries_FirePos} viewed
+
+    //Create Boat Here
+    LC4_Missionaries_Ship = create SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSESHIP at {1648.50,9.50,429.07}
+
+    disable LC4_Missionaries_Ship pickup
+    disable LC4_Missionaries_Ship moveable
+
+    if Language == German
+        Scroll_Missionaries = create highlight SILVER name "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_03" remind "BW2_TEXT_CREATURE_LEARNING_SIMPLE_LESSON_1590" at {Missionaries_ScrollPos}
+    elsif Language == English
+        Scroll_Missionaries = create highlight SILVER name "HELP_TEXT_MULTIPLAYER_SETUP_SPELLSELECTION_02" remind "BW2_TEXT_CREATURE_LEARNING_SIMPLE_LESSON_1590" at {Missionaries_ScrollPos}
+    end if
+
+    wait until Scroll_Missionaries right clicked
+
+    begin cinema
+        start music "missionariesverse2" loop 1
+        move camera position to {Missionaries_FirePos} + {10.00,4.50,-12.00} time 3
+        move camera focus to {Missionaries_FirePos} + {0.00,1.50,0.00} time 3
+        wait 10 seconds
+        move camera position to {Missionaries_Guy1Pos} + {-0.75,1.25,-3.00} time 0 //{-3.30,1.25,0.00}
+        move camera focus to {Missionaries_Guy1Pos} + {0.00,1.00,0.00} time 0
+        wait 7 seconds
+        move camera position to {Missionaries_FirePos} + {-8.00,1.50,-6.00} time 0
+        move camera focus to {Missionaries_FirePos} + {0.00,1.50,0.00} time 0
+        wait 7 seconds
+        move camera position to {Missionaries_FirePos} + {5.00,4.50,-6.00} time 3
+        move camera focus to {Missionaries_FirePos} + {2.00,1.50,-2.00} time 3
+        wait 11 seconds
+        move camera position to {Missionaries_FirePos} + {50.00,40.50,-50.00} time 5
+        move camera focus to {Missionaries_FirePos} + {2.00,15.50,-2.00} time 5
+        wait 6 seconds
+        start music "missionariesbackground" loop 1
+    end cinema
+
+    run background script LC4_Missionaries_Objective_2
+
+end script LC4_Missionaries_Scene_2
+
+begin script LC4_Missionaries_Scene_2_m
+
+start
+
+    begin cinema
+        start music "missionariesverse2" loop 1
+        move camera position to {Missionaries_FirePos} + {10.00,4.50,-12.00} time 3
+        move camera focus to {Missionaries_FirePos} + {0.00,1.50,0.00} time 3
+        wait 10 seconds
+        move camera position to {Missionaries_Guy1Pos} + {-0.75,1.25,-3.00} time 0 //{-3.30,1.25,0.00}
+        move camera focus to {Missionaries_Guy1Pos} + {0.00,1.00,0.00} time 0
+        wait 7 seconds
+        move camera position to {Missionaries_FirePos} + {-8.00,1.50,-6.00} time 0
+        move camera focus to {Missionaries_FirePos} + {0.00,1.50,0.00} time 0
+        wait 7 seconds
+        move camera position to {Missionaries_FirePos} + {5.00,4.50,-6.00} time 3
+        move camera focus to {Missionaries_FirePos} + {2.00,1.50,-2.00} time 3
+        wait 11 seconds
+        move camera position to {Missionaries_FirePos} + {50.00,40.50,-50.00} time 5
+        move camera focus to {Missionaries_FirePos} + {2.00,15.50,-2.00} time 5
+        wait 6 seconds
+        start music "missionariesbackground" loop 1
+    end cinema
+
+    run background script LC4_Missionaries_Objective_2
+
+end script LC4_Missionaries_Scene_2_m
+
+begin script LC4_Missionaries_Objective_2
+
+    OBJ_CLICKED = 0
+    Food = 0
+    FoodIsEnough = 0
+
+start
+
+    if Language == German
+        Scroll_Missionaries = create highlight SILVER name "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_03" remind "BW2_TEXT_CREATURE_LEARNING_SIMPLE_LESSON_1590" at {Missionaries_ScrollPos}
+    elsif Language == English
+        Scroll_Missionaries = create highlight SILVER name "HELP_TEXT_MULTIPLAYER_SETUP_SPELLSELECTION_02" remind "BW2_TEXT_CREATURE_LEARNING_SIMPLE_LESSON_1590" at {Missionaries_ScrollPos}
+    end if
+
+begin loop
+
+    if Scroll_Missionaries right clicked
+        run background script LC4_Missionaries_Scene_2_m
+        OBJ_CLICKED = 1
+    end if
+
+    Food = get resource RESOURCE_TYPE_FOOD in LC4_Missionaries_SPit
+    if Food > 7500
+        Missionaries_Food_Done = 1
+        start music "lc4_food_1" loop 1
+        wait 5 seconds
+        remove resource RESOURCE_TYPE_FOOD 7500 from LC4_Missionaries_SPit
+    elsif Food > 1 and Food <= 7500 and FoodIsEnough == 0
+        FoodIsEnough = 1
+        start music "lc4_food_2" loop 1
+    end if
+
+    until Missionaries_Food_Done == 1 or OBJ_CLICKED == 1
+end loop
+
+if Missionaries_Food_Done == 1
+    run background script LC4_Missionaries_Scene_3
+    delete Scroll_Missionaries
+else
+    OBJ_CLICKED = 0
+end if
+
+end script LC4_Missionaries_Objective_2
+
+begin script LC4_Missionaries_Scene_3
+
+    Number = 0
+    Missionary = 0
+    Timer = 0
+
+start
+
+    Timer = create timer for 120 seconds
+
+    begin loop
+        Number = number from 1 to 3
+        if Number == 1
+            Missionary = Missionaries_Guy1
+        elsif Number == 2
+            Missionary = Missionaries_Guy2
+        elsif Number == 3
+            Missionary = Missionaries_Guy3
+        end if
+
+        Number = number from 1 to 3
+        if Number == 1
+            move Missionary position to {1645.30,12.79,448.99}
+        elsif Number == 2
+            move Missionary position to {1615.14,15.01,485.78}
+        elsif Number == 3
+            move Missionary position to {1620.76,14.26,455.82}
+        end if
+        wait 5 seconds
+        until get Timer time remaining == 0
+    end loop
+
+    delete Missionaries_Guy1
+    delete Missionaries_Guy2
+    delete Missionaries_Guy3
+
+    Missionaries_Guy1 = create VILLAGER VILLAGER_INFO_NORSE_FORESTER_MALE at {Missionaries_Guy1Pos}
+    set Missionaries_Guy1 focus to {1633.31,13.31,462.49}
+    Missionaries_Guy2 = create VILLAGER VILLAGER_INFO_NORSE_FARMER_MALE at {Missionaries_Guy2Pos}
+    set Missionaries_Guy2 focus to {1633.31,13.31,462.49}
+    Missionaries_Guy3 = create VILLAGER VILLAGER_INFO_NORSE_FISHERMAN_MALE at {Missionaries_Guy3Pos}
+    set Missionaries_Guy3 focus to {1633.31,13.31,462.49}
+
+    run background script LC4_Missionaries_Animations_1
+    run background script LC4_Missionaries_Animations_2
+    run background script LC4_Missionaries_Animations_3
+
+    wait until get distance from camera position to {Missionaries_FirePos} > 150 and not {Missionaries_FirePos} viewed
+
+    if Language == German
+        Scroll_Missionaries = create highlight SILVER name "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_03" remind "BW2_TEXT_CREATURE_LEARNING_SIMPLE_LESSON_1590" at {Missionaries_ScrollPos}
+    elsif Language == English
+        Scroll_Missionaries = create highlight SILVER name "HELP_TEXT_MULTIPLAYER_SETUP_SPELLSELECTION_02" remind "BW2_TEXT_CREATURE_LEARNING_SIMPLE_LESSON_1590" at {Missionaries_ScrollPos}
+    end if
+
+    wait until Scroll_Missionaries right clicked
+
+    begin cinema
+        start music "missionariesverse3" loop 1
+        move camera position to {Missionaries_FirePos} + {10.00,4.50,-12.00} time 3
+        move camera focus to {Missionaries_FirePos} + {0.00,1.50,0.00} time 3
+        wait 10 seconds
+        move camera position to {Missionaries_Guy1Pos} + {-0.75,1.25,-3.00} time 0 //{-3.30,1.25,0.00}
+        move camera focus to {Missionaries_Guy1Pos} + {0.00,1.00,0.00} time 0
+        wait 7 seconds
+        move camera position to {Missionaries_FirePos} + {-8.00,1.50,-6.00} time 0
+        move camera focus to {Missionaries_FirePos} + {0.00,1.50,0.00} time 0
+        wait 7 seconds
+        move camera position to {Missionaries_Guy3Pos} + {1.00,1.00,-1.00} time 0
+        move camera focus to {Missionaries_Guy3Pos} + {0.00,1.00,0.00} time 0
+        wait 5 seconds
+        move camera position to {Missionaries_FirePos} + {5.00,4.50,-6.00} time 0
+        move camera focus to {Missionaries_FirePos} + {2.00,1.50,-2.00} time 0
+        wait 6 seconds
+        move camera position to {Missionaries_FirePos} + {50.00,40.50,-50.00} time 5
+        move camera focus to {Missionaries_FirePos} + {2.00,15.50,-2.00} time 5
+        wait 6 seconds
+        start music "missionariesbackground" loop 1
+    end cinema
+
+    run background script LC4_Missionaries_Objective_3
+
+end script LC4_Missionaries_Scene_3
+
+begin script LC4_Missionaries_Scene_3_m
+
+start
+
+    begin cinema
+        start music "missionariesverse3" loop 1
+        move camera position to {Missionaries_FirePos} + {10.00,4.50,-12.00} time 3
+        move camera focus to {Missionaries_FirePos} + {0.00,1.50,0.00} time 3
+        wait 10 seconds
+        move camera position to {Missionaries_Guy1Pos} + {-0.75,1.25,-3.00} time 0 //{-3.30,1.25,0.00}
+        move camera focus to {Missionaries_Guy1Pos} + {0.00,1.00,0.00} time 0
+        wait 7 seconds
+        move camera position to {Missionaries_FirePos} + {-8.00,1.50,-6.00} time 0
+        move camera focus to {Missionaries_FirePos} + {0.00,1.50,0.00} time 0
+        wait 7 seconds
+        move camera position to {Missionaries_Guy3Pos} + {1.00,1.00,-1.00} time 0
+        move camera focus to {Missionaries_Guy3Pos} + {0.00,1.00,0.00} time 0
+        wait 5 seconds
+        move camera position to {Missionaries_FirePos} + {5.00,4.50,-6.00} time 0
+        move camera focus to {Missionaries_FirePos} + {2.00,1.50,-2.00} time 0
+        wait 6 seconds
+        move camera position to {Missionaries_FirePos} + {50.00,40.50,-50.00} time 5
+        move camera focus to {Missionaries_FirePos} + {2.00,15.50,-2.00} time 5
+        wait 6 seconds
+        start music "missionariesbackground" loop 1
+    end cinema
+
+    run background script LC4_Missionaries_Objective_3
+
+end script LC4_Missionaries_Scene_3_m
+
+begin script LC4_Missionaries_Objective_3
+
+    OBJ_CLICKED = 0
+    Pig = 0
+    Cow = 0
+    Chicken = 0
+    Wolf = 0
+    Animal = 0
+    Number = 0
+    MeatCounter = 0
+    FirstMeatDone = 0
+    Object = 0
+
+start
+
+    if Language == German
+        Scroll_Missionaries = create highlight SILVER name "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_03" remind "BW2_TEXT_CREATURE_LEARNING_SIMPLE_LESSON_1590" at {Missionaries_ScrollPos}
+    elsif Language == English
+        Scroll_Missionaries = create highlight SILVER name "HELP_TEXT_MULTIPLAYER_SETUP_SPELLSELECTION_02" remind "BW2_TEXT_CREATURE_LEARNING_SIMPLE_LESSON_1590" at {Missionaries_ScrollPos}
+    end if
+
+    LC4_Missionaries_Animal_Influence = create influence at {Missionaries_FirePos} radius 15
+
+begin loop
+
+    if Scroll_Missionaries right clicked
+        run background script LC4_Missionaries_Scene_3_m
+        OBJ_CLICKED = 1
+    end if
+
+    if MeatCounter >= 3
+        Missionaries_Meat_Done = 1
+    end if
+
+    Object = get ANIMAL at {Missionaries_FirePos} radius 15
+
+    if Object exists and not Object is HELD
+        MeatCounter = MeatCounter + 1
+        disable Object pickup
+        if FirstMeatDone == 0
+            FirstMeatDone = 1
+            start music "lc4_meat_1"
+        else
+            start music "lc4_meat_2"
+        end if
+
+        wait 2 seconds
+
+        delete Object with fade
+
+    end if
+
+    until Missionaries_Meat_Done == 1 or OBJ_CLICKED == 1
+end loop
+
+if Missionaries_Meat_Done == 1
+    run background script LC4_Missionaries_Scene_4
+else
+    OBJ_CLICKED = 0
+end if
+
+end script LC4_Missionaries_Objective_3
+
+begin script LC4_Missionaries_Scene_4 //End Script
+
+start
+
+    wait 2.5 seconds
+
+    delete Scroll_Missionaries
+    delete LC4_Missionaries_SPit_Influence
+    delete LC4_Missionaries_Animal_Influence
+
+    set player 0 objective TRIBUTE_OBJECTIVE_LAND_2 status to TRIBUTE_OBJECTIVE_STATE_COMPLETE
+    start music "lc4_missionaries_end"
+
+    wait 100 seconds
+    wait until not camera position near {Missionaries_ScrollPos} radius 500
+
+    delete LC4_Missionaries_SPit
+    delete LC4_Missionaries_Ship
+    delete Missionaries_Guy1
+    delete Missionaries_Guy2
+    delete Missionaries_Guy3
+
+end script LC4_Missionaries_Scene_4
+
+//-----------------------------------------------------------------------------
+// Land 4 Missionaries
+//-----------------------------------------------------------------------------

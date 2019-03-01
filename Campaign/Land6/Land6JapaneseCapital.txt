@@ -1,0 +1,3757 @@
+///////////////////////////////////////////////////////////////////////////////
+//    Land 6 Japanese-Strategy
+//    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//    Start date:        05.02.17            By: Boxhead
+//    Update date:    30.09.18            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+define script LC6_Capital_Impressiveness
+define script LC6_TownConversion
+define script LC6_Tribute
+define script LC6_GatehouseManager
+define script LC6_Speeches
+define script LC6_Japanese_Capital
+define script LC6_AttackNearestTownTimer
+define script LC6_DefendPlatoons
+define script LC6_Enemy_Migrations
+define script LC6_GetNearestSettlement
+define script SpawnJapaneseTroops
+define script IncreaseCapitalImpressiveness(Building)
+define script IncreaseCapitalVillagers(VillagerCount)
+define script LC6_JapaneseCapitalRessourceManager
+define script LC6_JapaneseCapitalVillagerManager
+define script LC6_MinorJapaneseTown1RessourceManager
+define script LC6_JapaneseMinorTown1VillagerManager
+define script LC6_MinorJapaneseTown2RessourceManager
+define script LC6_JapaneseMinorTown2VillagerManager
+define script DisableLocalPlatoonResponse
+define script Armory_Builder
+define script SirenResourceManager
+define script SirenPreCutscene
+define script LC6_AltarBehavior
+
+begin script LC6_Capital_Impressiveness
+
+    Threshold = 0
+
+start
+
+    Threshold = get town MinorTown1 impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from MinorTown1 to PlayerTown MINOR_TOWN1_IMPRESSIVENESS - Threshold
+
+    Threshold = get town MinorTown2 impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from MinorTown2 to PlayerTown MINOR_TOWN2_IMPRESSIVENESS - Threshold
+
+    Threshold = get town MinorTown3 impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from MinorTown3 to PlayerTown MINOR_TOWN3_IMPRESSIVENESS - Threshold
+
+    Threshold = get town MinorTown4 impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from MinorTown4 to PlayerTown MINOR_TOWN4_IMPRESSIVENESS - Threshold
+
+    Threshold = get town MinorTown5 impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from MinorTown5 to PlayerTown MINOR_TOWN5_IMPRESSIVENESS - Threshold
+
+    Threshold = get town MinorTown6 impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from MinorTown6 to PlayerTown MINOR_TOWN6_IMPRESSIVENESS - Threshold
+
+    Threshold = get town MinorTown7 impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from MinorTown7 to PlayerTown MINOR_TOWN7_IMPRESSIVENESS - Threshold
+
+    Threshold = get town MinorTown8 impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from MinorTown8 to PlayerTown MINOR_TOWN8_IMPRESSIVENESS - Threshold
+
+    Threshold = get town MinorTown9 impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from MinorTown9 to PlayerTown MINOR_TOWN9_IMPRESSIVENESS - Threshold
+
+    Threshold = get town MinorTown10 impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from MinorTown10 to PlayerTown MINOR_TOWN10_IMPRESSIVENESS - Threshold
+
+    Threshold = get town MinorJapaneseTown1 impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from MinorJapaneseTown1 to PlayerTown MINOR_JAPTOWN1_IMPRESSIVENESS - Threshold
+
+    Threshold = get town MinorJapaneseTown2 impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from MinorJapaneseTown2 to PlayerTown MINOR_JAPTOWN2_IMPRESSIVENESS - Threshold
+
+    Threshold = get town JapaneseCapital impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from JapaneseCapital to PlayerTown MINOR_JAPCAPITAL_IMPRESSIVENESS - Threshold
+
+begin loop
+
+    if PLAYER of MinorTown1 == 0
+        enable migration from MinorTown2 to MinorTown1
+        enable migration from MinorTown3 to MinorTown1
+        enable migration from MinorTown4 to MinorTown1
+        enable migration from MinorTown5 to MinorTown1
+        enable migration from MinorTown6 to MinorTown1
+        enable migration from MinorTown7 to MinorTown1
+        enable migration from MinorTown8 to MinorTown1
+        enable migration from MinorTown9 to MinorTown1
+        enable migration from MinorTown10 to MinorTown1
+        enable migration from MinorJapaneseTown1 to MinorTown1
+        enable migration from MinorJapaneseTown2 to MinorTown1
+        enable migration from JapaneseCapital to MinorTown1
+        
+    elsif PLAYER of MinorTown1 >= 1
+        disable migration from MinorTown2 to MinorTown1
+        disable migration from MinorTown3 to MinorTown1
+        disable migration from MinorTown4 to MinorTown1
+        disable migration from MinorTown5 to MinorTown1
+        disable migration from MinorTown6 to MinorTown1
+        disable migration from MinorTown7 to MinorTown1
+        disable migration from MinorTown8 to MinorTown1
+        disable migration from MinorTown9 to MinorTown1
+        disable migration from MinorTown10 to MinorTown1
+        disable migration from MinorJapaneseTown1 to MinorTown1
+        disable migration from MinorJapaneseTown2 to MinorTown1
+        disable migration from JapaneseCapital to MinorTown1
+    end if
+    
+    if PLAYER of MinorTown2 == 0
+        enable migration from MinorTown1 to MinorTown2
+        enable migration from MinorTown3 to MinorTown2
+        enable migration from MinorTown4 to MinorTown2
+        enable migration from MinorTown5 to MinorTown2
+        enable migration from MinorTown6 to MinorTown2
+        enable migration from MinorTown7 to MinorTown2
+        enable migration from MinorTown8 to MinorTown2
+        enable migration from MinorTown9 to MinorTown2
+        enable migration from MinorTown10 to MinorTown2
+        enable migration from MinorJapaneseTown1 to MinorTown2
+        enable migration from MinorJapaneseTown2 to MinorTown2
+        enable migration from JapaneseCapital to MinorTown2
+        
+    elsif PLAYER of MinorTown2 >= 1
+        disable migration from MinorTown1 to MinorTown2
+        disable migration from MinorTown3 to MinorTown2
+        disable migration from MinorTown4 to MinorTown2
+        disable migration from MinorTown5 to MinorTown2
+        disable migration from MinorTown6 to MinorTown2
+        disable migration from MinorTown7 to MinorTown2
+        disable migration from MinorTown8 to MinorTown2
+        disable migration from MinorTown9 to MinorTown2
+        disable migration from MinorTown10 to MinorTown2
+        disable migration from MinorJapaneseTown1 to MinorTown2
+        disable migration from MinorJapaneseTown2 to MinorTown2
+        disable migration from JapaneseCapital to MinorTown2
+    end if
+    
+    if PLAYER of MinorTown3 == 0
+        enable migration from MinorTown1 to MinorTown3
+        enable migration from MinorTown2 to MinorTown3
+        enable migration from MinorTown4 to MinorTown3
+        enable migration from MinorTown5 to MinorTown3
+        enable migration from MinorTown6 to MinorTown3
+        enable migration from MinorTown7 to MinorTown3
+        enable migration from MinorTown8 to MinorTown3
+        enable migration from MinorTown9 to MinorTown3
+        enable migration from MinorTown10 to MinorTown3
+        enable migration from MinorJapaneseTown1 to MinorTown3
+        enable migration from MinorJapaneseTown2 to MinorTown3
+        enable migration from JapaneseCapital to MinorTown3
+        
+    elsif PLAYER of MinorTown3 >= 1
+        disable migration from MinorTown1 to MinorTown3
+        disable migration from MinorTown2 to MinorTown3
+        disable migration from MinorTown4 to MinorTown3
+        disable migration from MinorTown5 to MinorTown3
+        disable migration from MinorTown6 to MinorTown3
+        disable migration from MinorTown7 to MinorTown3
+        disable migration from MinorTown8 to MinorTown3
+        disable migration from MinorTown9 to MinorTown3
+        disable migration from MinorTown10 to MinorTown3
+        disable migration from MinorJapaneseTown1 to MinorTown3
+        disable migration from MinorJapaneseTown2 to MinorTown3
+        disable migration from JapaneseCapital to MinorTown3
+    end if
+    
+    if PLAYER of MinorTown4 == 0
+        enable migration from MinorTown1 to MinorTown4
+        enable migration from MinorTown2 to MinorTown4
+        enable migration from MinorTown3 to MinorTown4
+        enable migration from MinorTown5 to MinorTown4
+        enable migration from MinorTown6 to MinorTown4
+        enable migration from MinorTown7 to MinorTown4
+        enable migration from MinorTown8 to MinorTown4
+        enable migration from MinorTown9 to MinorTown4
+        enable migration from MinorTown10 to MinorTown4
+        enable migration from MinorJapaneseTown1 to MinorTown4
+        enable migration from MinorJapaneseTown2 to MinorTown4
+        enable migration from JapaneseCapital to MinorTown4
+        
+    elsif PLAYER of MinorTown4 >= 1
+        disable migration from MinorTown1 to MinorTown4
+        disable migration from MinorTown2 to MinorTown4
+        disable migration from MinorTown3 to MinorTown4
+        disable migration from MinorTown5 to MinorTown4
+        disable migration from MinorTown6 to MinorTown4
+        disable migration from MinorTown7 to MinorTown4
+        disable migration from MinorTown8 to MinorTown4
+        disable migration from MinorTown9 to MinorTown4
+        disable migration from MinorTown10 to MinorTown4
+        disable migration from MinorJapaneseTown1 to MinorTown4
+        disable migration from MinorJapaneseTown2 to MinorTown4
+        disable migration from JapaneseCapital to MinorTown4
+    end if
+    
+    if PLAYER of MinorTown5 == 0
+        enable migration from MinorTown1 to MinorTown5
+        enable migration from MinorTown2 to MinorTown5
+        enable migration from MinorTown3 to MinorTown5
+        enable migration from MinorTown4 to MinorTown5
+        enable migration from MinorTown6 to MinorTown5
+        enable migration from MinorTown7 to MinorTown5
+        enable migration from MinorTown8 to MinorTown5
+        enable migration from MinorTown9 to MinorTown5
+        enable migration from MinorTown10 to MinorTown5
+        enable migration from MinorJapaneseTown1 to MinorTown5
+        enable migration from MinorJapaneseTown2 to MinorTown5
+        enable migration from JapaneseCapital to MinorTown5
+        
+    elsif PLAYER of MinorTown5 >= 1
+        disable migration from MinorTown1 to MinorTown5
+        disable migration from MinorTown2 to MinorTown5
+        disable migration from MinorTown3 to MinorTown5
+        disable migration from MinorTown4 to MinorTown5
+        disable migration from MinorTown6 to MinorTown5
+        disable migration from MinorTown7 to MinorTown5
+        disable migration from MinorTown8 to MinorTown5
+        disable migration from MinorTown9 to MinorTown5
+        disable migration from MinorTown10 to MinorTown5
+        disable migration from MinorJapaneseTown1 to MinorTown5
+        disable migration from MinorJapaneseTown2 to MinorTown5
+        disable migration from JapaneseCapital to MinorTown5
+    end if
+    
+    if PLAYER of MinorTown6 == 0
+        enable migration from MinorTown1 to MinorTown6
+        enable migration from MinorTown2 to MinorTown6
+        enable migration from MinorTown3 to MinorTown6
+        enable migration from MinorTown4 to MinorTown6
+        enable migration from MinorTown5 to MinorTown6
+        enable migration from MinorTown7 to MinorTown6
+        enable migration from MinorTown8 to MinorTown6
+        enable migration from MinorTown9 to MinorTown6
+        enable migration from MinorTown10 to MinorTown6
+        enable migration from MinorJapaneseTown1 to MinorTown6
+        enable migration from MinorJapaneseTown2 to MinorTown6
+        enable migration from JapaneseCapital to MinorTown6
+        
+    elsif PLAYER of MinorTown6 >= 1
+        disable migration from MinorTown1 to MinorTown6
+        disable migration from MinorTown2 to MinorTown6
+        disable migration from MinorTown3 to MinorTown6
+        disable migration from MinorTown4 to MinorTown6
+        disable migration from MinorTown5 to MinorTown6
+        disable migration from MinorTown7 to MinorTown6
+        disable migration from MinorTown8 to MinorTown6
+        disable migration from MinorTown9 to MinorTown6
+        disable migration from MinorTown10 to MinorTown6
+        disable migration from MinorJapaneseTown1 to MinorTown6
+        disable migration from MinorJapaneseTown2 to MinorTown6
+        disable migration from JapaneseCapital to MinorTown6
+    end if
+    
+    if PLAYER of MinorTown7 == 0
+        enable migration from MinorTown1 to MinorTown7
+        enable migration from MinorTown2 to MinorTown7
+        enable migration from MinorTown3 to MinorTown7
+        enable migration from MinorTown4 to MinorTown7
+        enable migration from MinorTown5 to MinorTown7
+        enable migration from MinorTown6 to MinorTown7
+        enable migration from MinorTown8 to MinorTown7
+        enable migration from MinorTown9 to MinorTown7
+        enable migration from MinorTown10 to MinorTown7
+        enable migration from MinorJapaneseTown1 to MinorTown7
+        enable migration from MinorJapaneseTown2 to MinorTown7
+        enable migration from JapaneseCapital to MinorTown7
+        
+    elsif PLAYER of MinorTown7 >= 1
+        disable migration from MinorTown1 to MinorTown7
+        disable migration from MinorTown2 to MinorTown7
+        disable migration from MinorTown3 to MinorTown7
+        disable migration from MinorTown4 to MinorTown7
+        disable migration from MinorTown5 to MinorTown7
+        disable migration from MinorTown6 to MinorTown7
+        disable migration from MinorTown8 to MinorTown7
+        disable migration from MinorTown9 to MinorTown7
+        disable migration from MinorTown10 to MinorTown7
+        disable migration from MinorJapaneseTown1 to MinorTown7
+        disable migration from MinorJapaneseTown2 to MinorTown7
+        disable migration from JapaneseCapital to MinorTown7
+    end if
+    
+    if PLAYER of MinorTown8 == 0
+        enable migration from MinorTown1 to MinorTown8
+        enable migration from MinorTown2 to MinorTown8
+        enable migration from MinorTown3 to MinorTown8
+        enable migration from MinorTown4 to MinorTown8
+        enable migration from MinorTown5 to MinorTown8
+        enable migration from MinorTown6 to MinorTown8
+        enable migration from MinorTown7 to MinorTown8
+        enable migration from MinorTown9 to MinorTown8
+        enable migration from MinorTown10 to MinorTown8
+        enable migration from MinorJapaneseTown1 to MinorTown8
+        enable migration from MinorJapaneseTown2 to MinorTown8
+        enable migration from JapaneseCapital to MinorTown8
+        
+    elsif PLAYER of MinorTown8 >= 1
+        disable migration from MinorTown1 to MinorTown8
+        disable migration from MinorTown2 to MinorTown8
+        disable migration from MinorTown3 to MinorTown8
+        disable migration from MinorTown4 to MinorTown8
+        disable migration from MinorTown5 to MinorTown8
+        disable migration from MinorTown6 to MinorTown8
+        disable migration from MinorTown7 to MinorTown8
+        disable migration from MinorTown9 to MinorTown8
+        disable migration from MinorTown10 to MinorTown8
+        disable migration from MinorJapaneseTown1 to MinorTown8
+        disable migration from MinorJapaneseTown2 to MinorTown8
+        disable migration from JapaneseCapital to MinorTown8
+    end if
+    
+    if PLAYER of MinorTown9 == 0
+        enable migration from MinorTown1 to MinorTown9
+        enable migration from MinorTown2 to MinorTown9
+        enable migration from MinorTown3 to MinorTown9
+        enable migration from MinorTown4 to MinorTown9
+        enable migration from MinorTown5 to MinorTown9
+        enable migration from MinorTown6 to MinorTown9
+        enable migration from MinorTown7 to MinorTown9
+        enable migration from MinorTown8 to MinorTown9
+        enable migration from MinorTown10 to MinorTown9
+        enable migration from MinorJapaneseTown1 to MinorTown9
+        enable migration from MinorJapaneseTown2 to MinorTown9
+        enable migration from JapaneseCapital to MinorTown9
+        
+    elsif PLAYER of MinorTown9 >= 1
+        disable migration from MinorTown1 to MinorTown9
+        disable migration from MinorTown2 to MinorTown9
+        disable migration from MinorTown3 to MinorTown9
+        disable migration from MinorTown4 to MinorTown9
+        disable migration from MinorTown5 to MinorTown9
+        disable migration from MinorTown6 to MinorTown9
+        disable migration from MinorTown7 to MinorTown9
+        disable migration from MinorTown8 to MinorTown9
+        disable migration from MinorTown10 to MinorTown9
+        disable migration from MinorJapaneseTown1 to MinorTown9
+        disable migration from MinorJapaneseTown2 to MinorTown9
+        disable migration from JapaneseCapital to MinorTown9
+    end if
+    
+    if PLAYER of MinorTown10 == 0
+        enable migration from MinorTown1 to MinorTown10
+        enable migration from MinorTown2 to MinorTown10
+        enable migration from MinorTown3 to MinorTown10
+        enable migration from MinorTown4 to MinorTown10
+        enable migration from MinorTown5 to MinorTown10
+        enable migration from MinorTown6 to MinorTown10
+        enable migration from MinorTown7 to MinorTown10
+        enable migration from MinorTown8 to MinorTown10
+        enable migration from MinorTown9 to MinorTown10
+        enable migration from MinorJapaneseTown1 to MinorTown10
+        enable migration from MinorJapaneseTown2 to MinorTown10
+        enable migration from JapaneseCapital to MinorTown10
+        
+    elsif PLAYER of MinorTown10 >= 1
+        disable migration from MinorTown1 to MinorTown10
+        disable migration from MinorTown2 to MinorTown10
+        disable migration from MinorTown3 to MinorTown10
+        disable migration from MinorTown4 to MinorTown10
+        disable migration from MinorTown5 to MinorTown10
+        disable migration from MinorTown6 to MinorTown10
+        disable migration from MinorTown7 to MinorTown10
+        disable migration from MinorTown8 to MinorTown10
+        disable migration from MinorTown9 to MinorTown10
+        disable migration from MinorJapaneseTown1 to MinorTown10
+        disable migration from MinorJapaneseTown2 to MinorTown10
+        disable migration from JapaneseCapital to MinorTown10
+    end if
+
+    if PLAYER of MinorJapaneseTown1 == 0
+        enable migration from MinorTown1 to MinorJapaneseTown1
+        enable migration from MinorTown2 to MinorJapaneseTown1
+        enable migration from MinorTown3 to MinorJapaneseTown1
+        enable migration from MinorTown4 to MinorJapaneseTown1
+        enable migration from MinorTown5 to MinorJapaneseTown1
+        enable migration from MinorTown6 to MinorJapaneseTown1
+        enable migration from MinorTown7 to MinorJapaneseTown1
+        enable migration from MinorTown8 to MinorJapaneseTown1
+        enable migration from MinorTown9 to MinorJapaneseTown1
+        enable migration from MinorTown10 to MinorJapaneseTown1
+        enable migration from MinorJapaneseTown2 to MinorJapaneseTown1
+        enable migration from JapaneseCapital to MinorJapaneseTown1
+        
+    elsif PLAYER of MinorJapaneseTown1 >= 1
+        disable migration from MinorTown1 to MinorJapaneseTown1
+        disable migration from MinorTown2 to MinorJapaneseTown1
+        disable migration from MinorTown3 to MinorJapaneseTown1
+        disable migration from MinorTown4 to MinorJapaneseTown1
+        disable migration from MinorTown5 to MinorJapaneseTown1
+        disable migration from MinorTown6 to MinorJapaneseTown1
+        disable migration from MinorTown7 to MinorJapaneseTown1
+        disable migration from MinorTown8 to MinorJapaneseTown1
+        disable migration from MinorTown9 to MinorJapaneseTown1
+        disable migration from MinorTown10 to MinorJapaneseTown1
+        disable migration from MinorJapaneseTown2 to MinorJapaneseTown1
+        disable migration from JapaneseCapital to MinorJapaneseTown1
+    end if
+    
+    if PLAYER of MinorJapaneseTown2 == 0
+        enable migration from MinorTown1 to MinorJapaneseTown2
+        enable migration from MinorTown2 to MinorJapaneseTown2
+        enable migration from MinorTown3 to MinorJapaneseTown2
+        enable migration from MinorTown4 to MinorJapaneseTown2
+        enable migration from MinorTown5 to MinorJapaneseTown2
+        enable migration from MinorTown6 to MinorJapaneseTown2
+        enable migration from MinorTown7 to MinorJapaneseTown2
+        enable migration from MinorTown8 to MinorJapaneseTown2
+        enable migration from MinorTown9 to MinorJapaneseTown2
+        enable migration from MinorTown10 to MinorJapaneseTown2
+        enable migration from MinorJapaneseTown1 to MinorJapaneseTown2
+        enable migration from JapaneseCapital to MinorJapaneseTown2
+        
+    elsif PLAYER of MinorJapaneseTown2 >= 1
+        disable migration from MinorTown1 to MinorJapaneseTown2
+        disable migration from MinorTown2 to MinorJapaneseTown2
+        disable migration from MinorTown3 to MinorJapaneseTown2
+        disable migration from MinorTown4 to MinorJapaneseTown2
+        disable migration from MinorTown5 to MinorJapaneseTown2
+        disable migration from MinorTown6 to MinorJapaneseTown2
+        disable migration from MinorTown7 to MinorJapaneseTown2
+        disable migration from MinorTown8 to MinorJapaneseTown2
+        disable migration from MinorTown9 to MinorJapaneseTown2
+        disable migration from MinorTown10 to MinorJapaneseTown2
+        disable migration from MinorJapaneseTown1 to MinorJapaneseTown2
+        disable migration from JapaneseCapital to MinorJapaneseTown2
+    end if
+    
+    if PLAYER of JapaneseCapital == 0
+        enable migration from MinorTown1 to JapaneseCapital
+        enable migration from MinorTown2 to JapaneseCapital
+        enable migration from MinorTown3 to JapaneseCapital
+        enable migration from MinorTown4 to JapaneseCapital
+        enable migration from MinorTown5 to JapaneseCapital
+        enable migration from MinorTown6 to JapaneseCapital
+        enable migration from MinorTown7 to JapaneseCapital
+        enable migration from MinorTown8 to JapaneseCapital
+        enable migration from MinorTown9 to JapaneseCapital
+        enable migration from MinorTown10 to JapaneseCapital
+        enable migration from MinorJapaneseTown1 to JapaneseCapital
+        enable migration from MinorJapaneseTown2 to JapaneseCapital
+        
+    elsif PLAYER of JapaneseCapital >= 1
+        disable migration from MinorTown1 to JapaneseCapital
+        disable migration from MinorTown2 to JapaneseCapital
+        disable migration from MinorTown3 to JapaneseCapital
+        disable migration from MinorTown4 to JapaneseCapital
+        disable migration from MinorTown5 to JapaneseCapital
+        disable migration from MinorTown6 to JapaneseCapital
+        disable migration from MinorTown7 to JapaneseCapital
+        disable migration from MinorTown8 to JapaneseCapital
+        disable migration from MinorTown9 to JapaneseCapital
+        disable migration from MinorTown10 to JapaneseCapital
+        disable migration from MinorJapaneseTown1 to JapaneseCapital
+        disable migration from MinorJapaneseTown2 to JapaneseCapital
+    end if
+    
+end loop
+
+end script LC6_Capital_Impressiveness
+
+begin script LC6_TownConversion
+
+    isConverted1 = 0
+    isConverted2 = 0
+    isConverted3 = 0
+    isConverted4 = 0
+    isConverted5 = 0
+    isConverted6 = 0
+    isConverted7 = 0
+    isConverted8 = 0
+    isConverted9 = 0
+    isConverted10 = 0
+    isConverted11 = 0
+    isConverted12 = 0
+    isConverted13 = 0
+    a = 0
+    b = 0
+    c = 0
+    d = 0
+    e = 0
+    f = 0
+    g = 0
+    h = 0
+    i = 0
+    j = 0
+    k = 0
+    l = 0
+    m = 0
+    
+start
+
+begin loop
+
+    isConverted1 = variable get town MinorTown1 method of last conversion
+    isConverted2 = variable get town MinorTown2 method of last conversion
+    isConverted3 = variable get town MinorTown3 method of last conversion
+    isConverted4 = variable get town MinorTown4 method of last conversion
+    isConverted5 = variable get town MinorTown5 method of last conversion
+    isConverted6 = variable get town MinorTown6 method of last conversion
+    isConverted7 = variable get town MinorTown7 method of last conversion
+    isConverted8 = variable get town MinorTown8 method of last conversion
+    isConverted9 = variable get town MinorTown9 method of last conversion
+    isConverted10 = variable get town MinorTown10 method of last conversion
+    isConverted11 = variable get town MinorJapaneseTown1 method of last conversion
+    isConverted12 = variable get town MinorJapaneseTown2 method of last conversion
+    isConverted13 = variable get town JapaneseCapital method of last conversion
+
+    if isConverted1 != 0 and a == 0
+        if PLAYER of MinorTown1 == 0 or get town MinorTown1 is migrating to == PlayerTown
+            a = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted1 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            elsif isConverted1 == 2
+                TownsPeacefulConverted = TownsPeacefulConverted + 1
+            end if
+        end if
+    end if
+
+    if isConverted1 != 0
+        if PLAYER of JapaneseCapital == 1
+            disable migration from MinorTown1 to MinorTown2
+            disable migration from MinorTown1 to MinorTown3
+            disable migration from MinorTown1 to MinorTown4
+            disable migration from MinorTown1 to MinorTown5
+            disable migration from MinorTown1 to MinorTown6
+            disable migration from MinorTown1 to MinorTown7
+            disable migration from MinorTown1 to MinorTown8
+            disable migration from MinorTown1 to MinorTown9
+            disable migration from MinorTown1 to MinorTown10
+            disable migration from MinorTown1 to MinorJapaneseTown1
+            disable migration from MinorTown1 to MinorJapaneseTown2
+            disable migration from MinorTown1 to JapaneseCapital
+            disable migration from MinorTown1 to PlayerTown
+        else
+            enable migration from MinorTown1 to MinorTown2
+            enable migration from MinorTown1 to MinorTown3
+            enable migration from MinorTown1 to MinorTown4
+            enable migration from MinorTown1 to MinorTown5
+            enable migration from MinorTown1 to MinorTown6
+            enable migration from MinorTown1 to MinorTown7
+            enable migration from MinorTown1 to MinorTown8
+            enable migration from MinorTown1 to MinorTown9
+            enable migration from MinorTown1 to MinorTown10
+            enable migration from MinorTown1 to MinorJapaneseTown1
+            enable migration from MinorTown1 to MinorJapaneseTown2
+            enable migration from MinorTown1 to JapaneseCapital
+            enable migration from MinorTown1 to PlayerTown
+        end if
+    end if
+    
+    if isConverted2 != 0 and b == 0
+        if PLAYER of MinorTown2 == 0 or get town MinorTown2 is migrating to == PlayerTown
+            b = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted2 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            elsif isConverted2 == 2
+                TownsPeacefulConverted = TownsPeacefulConverted + 1
+            end if
+        end if
+    end if
+
+    if isConverted2 != 0
+        if PLAYER of JapaneseCapital == 1
+            disable migration from MinorTown2 to MinorTown1
+            disable migration from MinorTown2 to MinorTown3
+            disable migration from MinorTown2 to MinorTown4
+            disable migration from MinorTown2 to MinorTown5
+            disable migration from MinorTown2 to MinorTown6
+            disable migration from MinorTown2 to MinorTown7
+            disable migration from MinorTown2 to MinorTown8
+            disable migration from MinorTown2 to MinorTown9
+            disable migration from MinorTown2 to MinorTown10
+            disable migration from MinorTown2 to MinorJapaneseTown1
+            disable migration from MinorTown2 to MinorJapaneseTown2
+            disable migration from MinorTown2 to JapaneseCapital
+            disable migration from MinorTown2 to PlayerTown
+        else
+            enable migration from MinorTown2 to MinorTown1
+            enable migration from MinorTown2 to MinorTown3
+            enable migration from MinorTown2 to MinorTown4
+            enable migration from MinorTown2 to MinorTown5
+            enable migration from MinorTown2 to MinorTown6
+            enable migration from MinorTown2 to MinorTown7
+            enable migration from MinorTown2 to MinorTown8
+            enable migration from MinorTown2 to MinorTown9
+            enable migration from MinorTown2 to MinorTown10
+            enable migration from MinorTown2 to MinorJapaneseTown1
+            enable migration from MinorTown2 to MinorJapaneseTown2
+            enable migration from MinorTown2 to JapaneseCapital
+            enable migration from MinorTown2 to PlayerTown
+        end if
+    end if
+    
+    if isConverted3 != 0 and c == 0
+        if PLAYER of MinorTown3 == 0 or get town MinorTown3 is migrating to == PlayerTown
+            c = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted3 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            elsif isConverted3 == 2
+                TownsPeacefulConverted = TownsPeacefulConverted + 1
+            end if
+        end if
+    end if
+
+    if isConverted3 != 0
+        if PLAYER of JapaneseCapital == 1
+            disable migration from MinorTown3 to MinorTown1
+            disable migration from MinorTown3 to MinorTown2
+            disable migration from MinorTown3 to MinorTown4
+            disable migration from MinorTown3 to MinorTown5
+            disable migration from MinorTown3 to MinorTown6
+            disable migration from MinorTown3 to MinorTown7
+            disable migration from MinorTown3 to MinorTown8
+            disable migration from MinorTown3 to MinorTown9
+            disable migration from MinorTown3 to MinorTown10
+            disable migration from MinorTown3 to MinorJapaneseTown1
+            disable migration from MinorTown3 to MinorJapaneseTown2
+            disable migration from MinorTown3 to JapaneseCapital
+            disable migration from MinorTown3 to PlayerTown
+        else
+            enable migration from MinorTown3 to MinorTown1
+            enable migration from MinorTown3 to MinorTown2
+            enable migration from MinorTown3 to MinorTown4
+            enable migration from MinorTown3 to MinorTown5
+            enable migration from MinorTown3 to MinorTown6
+            enable migration from MinorTown3 to MinorTown7
+            enable migration from MinorTown3 to MinorTown8
+            enable migration from MinorTown3 to MinorTown9
+            enable migration from MinorTown3 to MinorTown10
+            enable migration from MinorTown3 to MinorJapaneseTown1
+            enable migration from MinorTown3 to MinorJapaneseTown2
+            enable migration from MinorTown3 to JapaneseCapital
+            enable migration from MinorTown3 to PlayerTown
+        end if
+    end if
+    
+    if isConverted4 != 0 and d == 0
+        if PLAYER of MinorTown4 == 0 or get town MinorTown4 is migrating to == PlayerTown
+            d = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted4 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            elsif isConverted4 == 2
+                TownsPeacefulConverted = TownsPeacefulConverted + 1
+            end if
+        end if
+    end if
+
+    if isConverted4 != 0
+        if PLAYER of JapaneseCapital == 1
+            disable migration from MinorTown4 to MinorTown1
+            disable migration from MinorTown4 to MinorTown2
+            disable migration from MinorTown4 to MinorTown3
+            disable migration from MinorTown4 to MinorTown5
+            disable migration from MinorTown4 to MinorTown6
+            disable migration from MinorTown4 to MinorTown7
+            disable migration from MinorTown4 to MinorTown8
+            disable migration from MinorTown4 to MinorTown9
+            disable migration from MinorTown4 to MinorTown10
+            disable migration from MinorTown4 to MinorJapaneseTown1
+            disable migration from MinorTown4 to MinorJapaneseTown2
+            disable migration from MinorTown4 to JapaneseCapital
+            disable migration from MinorTown4 to PlayerTown
+        else
+            enable migration from MinorTown4 to MinorTown1
+            enable migration from MinorTown4 to MinorTown2
+            enable migration from MinorTown4 to MinorTown3
+            enable migration from MinorTown4 to MinorTown5
+            enable migration from MinorTown4 to MinorTown6
+            enable migration from MinorTown4 to MinorTown7
+            enable migration from MinorTown4 to MinorTown8
+            enable migration from MinorTown4 to MinorTown9
+            enable migration from MinorTown4 to MinorTown10
+            enable migration from MinorTown4 to MinorJapaneseTown1
+            enable migration from MinorTown4 to MinorJapaneseTown2
+            enable migration from MinorTown4 to JapaneseCapital
+            enable migration from MinorTown4 to PlayerTown
+        end if
+    end if
+    
+    if isConverted5 != 0 and e == 0
+        if PLAYER of MinorTown5 == 0 or get town MinorTown5 is migrating to == PlayerTown
+            e = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted5 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            elsif isConverted5 == 2
+                TownsPeacefulConverted = TownsPeacefulConverted + 1
+            end if
+        end if
+    end if
+
+    if isConverted5 != 0
+        if PLAYER of JapaneseCapital == 1
+            disable migration from MinorTown5 to MinorTown1
+            disable migration from MinorTown5 to MinorTown2
+            disable migration from MinorTown5 to MinorTown3
+            disable migration from MinorTown5 to MinorTown4
+            disable migration from MinorTown5 to MinorTown6
+            disable migration from MinorTown5 to MinorTown7
+            disable migration from MinorTown5 to MinorTown8
+            disable migration from MinorTown5 to MinorTown9
+            disable migration from MinorTown5 to MinorTown10
+            disable migration from MinorTown5 to MinorJapaneseTown1
+            disable migration from MinorTown5 to MinorJapaneseTown2
+            disable migration from MinorTown5 to JapaneseCapital
+            disable migration from MinorTown5 to PlayerTown
+        else
+            enable migration from MinorTown5 to MinorTown1
+            enable migration from MinorTown5 to MinorTown2
+            enable migration from MinorTown5 to MinorTown3
+            enable migration from MinorTown5 to MinorTown4
+            enable migration from MinorTown5 to MinorTown6
+            enable migration from MinorTown5 to MinorTown7
+            enable migration from MinorTown5 to MinorTown8
+            enable migration from MinorTown5 to MinorTown9
+            enable migration from MinorTown5 to MinorTown10
+            enable migration from MinorTown5 to MinorJapaneseTown1
+            enable migration from MinorTown5 to MinorJapaneseTown2
+            enable migration from MinorTown5 to JapaneseCapital
+            enable migration from MinorTown5 to PlayerTown
+        end if
+    end if
+    
+    if isConverted6 != 0 and f == 0
+        if PLAYER of MinorTown6 == 0 or get town MinorTown6 is migrating to == PlayerTown
+            f = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted6 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            elsif isConverted6 == 2
+                TownsPeacefulConverted = TownsPeacefulConverted + 1
+            end if
+        end if
+    end if
+    
+    if isConverted6 != 0
+        if PLAYER of JapaneseCapital == 1
+            disable migration from MinorTown6 to MinorTown1
+            disable migration from MinorTown6 to MinorTown2
+            disable migration from MinorTown6 to MinorTown3
+            disable migration from MinorTown6 to MinorTown4
+            disable migration from MinorTown6 to MinorTown5
+            disable migration from MinorTown6 to MinorTown7
+            disable migration from MinorTown6 to MinorTown8
+            disable migration from MinorTown6 to MinorTown9
+            disable migration from MinorTown6 to MinorTown10
+            disable migration from MinorTown6 to MinorJapaneseTown1
+            disable migration from MinorTown6 to MinorJapaneseTown2
+            disable migration from MinorTown6 to JapaneseCapital
+            disable migration from MinorTown6 to PlayerTown
+        else
+            enable migration from MinorTown6 to MinorTown1
+            enable migration from MinorTown6 to MinorTown2
+            enable migration from MinorTown6 to MinorTown3
+            enable migration from MinorTown6 to MinorTown4
+            enable migration from MinorTown6 to MinorTown5
+            enable migration from MinorTown6 to MinorTown7
+            enable migration from MinorTown6 to MinorTown8
+            enable migration from MinorTown6 to MinorTown9
+            enable migration from MinorTown6 to MinorTown10
+            enable migration from MinorTown6 to MinorJapaneseTown1
+            enable migration from MinorTown6 to MinorJapaneseTown2
+            enable migration from MinorTown6 to JapaneseCapital
+            enable migration from MinorTown6 to PlayerTown
+        end if
+    end if
+
+    if isConverted7 != 0 and g == 0
+        if PLAYER of MinorTown7 == 0 or get town MinorTown7 is migrating to == PlayerTown
+            g = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted7 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            elsif isConverted7 == 2
+                TownsPeacefulConverted = TownsPeacefulConverted + 1
+            end if
+        end if
+    end if    
+
+    if isConverted7 != 0
+        if PLAYER of JapaneseCapital == 1
+            disable migration from MinorTown7 to MinorTown1
+            disable migration from MinorTown7 to MinorTown2
+            disable migration from MinorTown7 to MinorTown3
+            disable migration from MinorTown7 to MinorTown4
+            disable migration from MinorTown7 to MinorTown5
+            disable migration from MinorTown7 to MinorTown6
+            disable migration from MinorTown7 to MinorTown8
+            disable migration from MinorTown7 to MinorTown9
+            disable migration from MinorTown7 to MinorTown10
+            disable migration from MinorTown7 to MinorJapaneseTown1
+            disable migration from MinorTown7 to MinorJapaneseTown2
+            disable migration from MinorTown7 to JapaneseCapital
+            disable migration from MinorTown7 to PlayerTown
+        else
+            enable migration from MinorTown7 to MinorTown1
+            enable migration from MinorTown7 to MinorTown2
+            enable migration from MinorTown7 to MinorTown3
+            enable migration from MinorTown7 to MinorTown4
+            enable migration from MinorTown7 to MinorTown5
+            enable migration from MinorTown7 to MinorTown6
+            enable migration from MinorTown7 to MinorTown8
+            enable migration from MinorTown7 to MinorTown9
+            enable migration from MinorTown7 to MinorTown10
+            enable migration from MinorTown7 to MinorJapaneseTown1
+            enable migration from MinorTown7 to MinorJapaneseTown2
+            enable migration from MinorTown7 to JapaneseCapital
+            enable migration from MinorTown7 to PlayerTown
+        end if
+    end if
+    
+    if isConverted8 != 0 and h == 0
+        if PLAYER of MinorTown8 == 0 or get town MinorTown8 is migrating to == PlayerTown
+            h = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted8 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            elsif isConverted8 == 2
+                TownsPeacefulConverted = TownsPeacefulConverted + 1
+            end if
+        end if
+    end if
+    
+    if isConverted8 != 0
+        if PLAYER of JapaneseCapital == 1
+            disable migration from MinorTown8 to MinorTown1
+            disable migration from MinorTown8 to MinorTown2
+            disable migration from MinorTown8 to MinorTown3
+            disable migration from MinorTown8 to MinorTown4
+            disable migration from MinorTown8 to MinorTown5
+            disable migration from MinorTown8 to MinorTown6
+            disable migration from MinorTown8 to MinorTown7
+            disable migration from MinorTown8 to MinorTown9
+            disable migration from MinorTown8 to MinorTown10
+            disable migration from MinorTown8 to MinorJapaneseTown1
+            disable migration from MinorTown8 to MinorJapaneseTown2
+            disable migration from MinorTown8 to JapaneseCapital
+            disable migration from MinorTown8 to PlayerTown
+        else
+            enable migration from MinorTown8 to MinorTown1
+            enable migration from MinorTown8 to MinorTown2
+            enable migration from MinorTown8 to MinorTown3
+            enable migration from MinorTown8 to MinorTown4
+            enable migration from MinorTown8 to MinorTown5
+            enable migration from MinorTown8 to MinorTown6
+            enable migration from MinorTown8 to MinorTown7
+            enable migration from MinorTown8 to MinorTown9
+            enable migration from MinorTown8 to MinorTown10
+            enable migration from MinorTown8 to MinorJapaneseTown1
+            enable migration from MinorTown8 to MinorJapaneseTown2
+            enable migration from MinorTown8 to JapaneseCapital
+            enable migration from MinorTown8 to PlayerTown
+        end if
+    end if
+
+    if isConverted9 != 0 and i == 0
+        if PLAYER of MinorTown9 == 0 or get town MinorTown9 is migrating to == PlayerTown
+            i = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted9 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            elsif isConverted9 == 2
+                TownsPeacefulConverted = TownsPeacefulConverted + 1
+            end if
+        end if
+    end if
+
+    if isConverted9 != 0
+        if PLAYER of JapaneseCapital == 1
+            disable migration from MinorTown9 to MinorTown1
+            disable migration from MinorTown9 to MinorTown2
+            disable migration from MinorTown9 to MinorTown3
+            disable migration from MinorTown9 to MinorTown4
+            disable migration from MinorTown9 to MinorTown5
+            disable migration from MinorTown9 to MinorTown6
+            disable migration from MinorTown9 to MinorTown7
+            disable migration from MinorTown9 to MinorTown8
+            disable migration from MinorTown9 to MinorTown10
+            disable migration from MinorTown9 to MinorJapaneseTown1
+            disable migration from MinorTown9 to MinorJapaneseTown2
+            disable migration from MinorTown9 to JapaneseCapital
+            disable migration from MinorTown9 to PlayerTown
+        else
+            enable migration from MinorTown9 to MinorTown1
+            enable migration from MinorTown9 to MinorTown2
+            enable migration from MinorTown9 to MinorTown3
+            enable migration from MinorTown9 to MinorTown4
+            enable migration from MinorTown9 to MinorTown5
+            enable migration from MinorTown9 to MinorTown6
+            enable migration from MinorTown9 to MinorTown7
+            enable migration from MinorTown9 to MinorTown8
+            enable migration from MinorTown9 to MinorTown10
+            enable migration from MinorTown9 to MinorJapaneseTown1
+            enable migration from MinorTown9 to MinorJapaneseTown2
+            enable migration from MinorTown9 to JapaneseCapital
+            enable migration from MinorTown9 to PlayerTown
+        end if
+    end if
+    
+    if isConverted10 != 0 and j == 0
+        if PLAYER of MinorTown10 == 0 or get town MinorTown10 is migrating to == PlayerTown
+            j = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted10 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            elsif isConverted10 == 2
+                TownsPeacefulConverted = TownsPeacefulConverted + 1
+            end if
+        end if
+    end if
+
+    if isConverted10 != 0
+        if PLAYER of JapaneseCapital == 1
+            disable migration from MinorTown10 to MinorTown1
+            disable migration from MinorTown10 to MinorTown2
+            disable migration from MinorTown10 to MinorTown3
+            disable migration from MinorTown10 to MinorTown4
+            disable migration from MinorTown10 to MinorTown5
+            disable migration from MinorTown10 to MinorTown6
+            disable migration from MinorTown10 to MinorTown7
+            disable migration from MinorTown10 to MinorTown8
+            disable migration from MinorTown10 to MinorTown9
+            disable migration from MinorTown10 to MinorJapaneseTown1
+            disable migration from MinorTown10 to MinorJapaneseTown2
+            disable migration from MinorTown10 to JapaneseCapital
+            disable migration from MinorTown10 to PlayerTown
+        else
+            enable migration from MinorTown10 to MinorTown1
+            enable migration from MinorTown10 to MinorTown2
+            enable migration from MinorTown10 to MinorTown3
+            enable migration from MinorTown10 to MinorTown4
+            enable migration from MinorTown10 to MinorTown5
+            enable migration from MinorTown10 to MinorTown6
+            enable migration from MinorTown10 to MinorTown7
+            enable migration from MinorTown10 to MinorTown8
+            enable migration from MinorTown10 to MinorTown9
+            enable migration from MinorTown10 to MinorJapaneseTown1
+            enable migration from MinorTown10 to MinorJapaneseTown2
+            enable migration from MinorTown10 to JapaneseCapital
+            enable migration from MinorTown10 to PlayerTown
+        end if
+    end if
+    
+    if isConverted11 != 0 and k == 0
+        if PLAYER of MinorJapaneseTown1 == 0 or get town MinorJapaneseTown1 is migrating to == PlayerTown
+            k = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted11 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            elsif isConverted11 == 2
+                TownsPeacefulConverted = TownsPeacefulConverted + 1
+            end if
+        end if
+    end if
+
+    if isConverted11 != 0
+        if PLAYER of JapaneseCapital == 1
+            disable migration from MinorJapaneseTown1 to MinorTown1
+            disable migration from MinorJapaneseTown1 to MinorTown2
+            disable migration from MinorJapaneseTown1 to MinorTown3
+            disable migration from MinorJapaneseTown1 to MinorTown4
+            disable migration from MinorJapaneseTown1 to MinorTown5
+            disable migration from MinorJapaneseTown1 to MinorTown6
+            disable migration from MinorJapaneseTown1 to MinorTown7
+            disable migration from MinorJapaneseTown1 to MinorTown8
+            disable migration from MinorJapaneseTown1 to MinorTown9
+            disable migration from MinorJapaneseTown1 to MinorTown10
+            disable migration from MinorJapaneseTown1 to MinorJapaneseTown2
+            disable migration from MinorJapaneseTown1 to JapaneseCapital
+            disable migration from MinorJapaneseTown1 to PlayerTown
+        else
+            enable migration from MinorJapaneseTown1 to MinorTown1
+            enable migration from MinorJapaneseTown1 to MinorTown2
+            enable migration from MinorJapaneseTown1 to MinorTown3
+            enable migration from MinorJapaneseTown1 to MinorTown4
+            enable migration from MinorJapaneseTown1 to MinorTown5
+            enable migration from MinorJapaneseTown1 to MinorTown6
+            enable migration from MinorJapaneseTown1 to MinorTown7
+            enable migration from MinorJapaneseTown1 to MinorTown8
+            enable migration from MinorJapaneseTown1 to MinorTown9
+            enable migration from MinorJapaneseTown1 to MinorTown10
+            enable migration from MinorJapaneseTown1 to MinorJapaneseTown2
+            enable migration from MinorJapaneseTown1 to JapaneseCapital
+            enable migration from MinorJapaneseTown1 to PlayerTown
+        end if
+    end if
+    
+    if isConverted12 != 0 and l == 0
+        if PLAYER of MinorJapaneseTown2 == 0 or get town MinorJapaneseTown2 is migrating to == PlayerTown
+            l = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted12 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            elsif isConverted12 == 2
+                TownsPeacefulConverted = TownsPeacefulConverted + 1
+            end if
+        end if
+    end if    
+
+    if isConverted12 != 0
+        if PLAYER of JapaneseCapital == 1
+            disable migration from MinorJapaneseTown2 to MinorTown1
+            disable migration from MinorJapaneseTown2 to MinorTown2
+            disable migration from MinorJapaneseTown2 to MinorTown3
+            disable migration from MinorJapaneseTown2 to MinorTown4
+            disable migration from MinorJapaneseTown2 to MinorTown5
+            disable migration from MinorJapaneseTown2 to MinorTown6
+            disable migration from MinorJapaneseTown2 to MinorTown7
+            disable migration from MinorJapaneseTown2 to MinorTown8
+            disable migration from MinorJapaneseTown2 to MinorTown9
+            disable migration from MinorJapaneseTown2 to MinorTown10
+            disable migration from MinorJapaneseTown2 to MinorJapaneseTown1
+            disable migration from MinorJapaneseTown2 to JapaneseCapital
+            disable migration from MinorJapaneseTown2 to PlayerTown
+        else
+            enable migration from MinorJapaneseTown2 to MinorTown1
+            enable migration from MinorJapaneseTown2 to MinorTown2
+            enable migration from MinorJapaneseTown2 to MinorTown3
+            enable migration from MinorJapaneseTown2 to MinorTown4
+            enable migration from MinorJapaneseTown2 to MinorTown5
+            enable migration from MinorJapaneseTown2 to MinorTown6
+            enable migration from MinorJapaneseTown2 to MinorTown7
+            enable migration from MinorJapaneseTown2 to MinorTown8
+            enable migration from MinorJapaneseTown2 to MinorTown9
+            enable migration from MinorJapaneseTown2 to MinorTown10
+            enable migration from MinorJapaneseTown2 to MinorJapaneseTown1
+            enable migration from MinorJapaneseTown2 to JapaneseCapital
+            enable migration from MinorJapaneseTown2 to PlayerTown
+        end if
+    end if
+
+    if isConverted13 != 0 and m == 0
+        if PLAYER of JapaneseCapital == 0 or get town JapaneseCapital is migrating to == PlayerTown
+            m = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted13 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            elsif isConverted13 == 2
+                TownsPeacefulConverted = TownsPeacefulConverted + 1
+            end if
+        end if
+    end if    
+
+    if isConverted13 != 0
+        if PLAYER of JapaneseCapital == 1
+            disable migration from JapaneseCapital to MinorTown1
+            disable migration from JapaneseCapital to MinorTown2
+            disable migration from JapaneseCapital to MinorTown3
+            disable migration from JapaneseCapital to MinorTown4
+            disable migration from JapaneseCapital to MinorTown5
+            disable migration from JapaneseCapital to MinorTown6
+            disable migration from JapaneseCapital to MinorTown7
+            disable migration from JapaneseCapital to MinorTown8
+            disable migration from JapaneseCapital to MinorTown9
+            disable migration from JapaneseCapital to MinorTown10
+            disable migration from JapaneseCapital to MinorJapaneseTown1
+            disable migration from JapaneseCapital to MinorJapaneseTown2
+            disable migration from JapaneseCapital to PlayerTown
+        else
+            enable migration from JapaneseCapital to MinorTown1
+            enable migration from JapaneseCapital to MinorTown2
+            enable migration from JapaneseCapital to MinorTown3
+            enable migration from JapaneseCapital to MinorTown4
+            enable migration from JapaneseCapital to MinorTown5
+            enable migration from JapaneseCapital to MinorTown6
+            enable migration from JapaneseCapital to MinorTown7
+            enable migration from JapaneseCapital to MinorTown8
+            enable migration from JapaneseCapital to MinorTown9
+            enable migration from JapaneseCapital to MinorTown10
+            enable migration from JapaneseCapital to MinorJapaneseTown1
+            enable migration from JapaneseCapital to MinorJapaneseTown2
+            enable migration from JapaneseCapital to PlayerTown
+        end if
+    end if
+    
+end loop
+
+end script LC6_TownConversion
+
+begin script LC6_Tribute
+
+    mig1 = 0
+    mig2 = 0
+    mig3 = 0
+    mig4 = 0
+    mig5 = 0
+    mig6 = 0
+    mig7 = 0
+    mig8 = 0
+    mig9 = 0
+    mig10 = 0
+    mig11 = 0
+    mig12 = 0
+    a = 0
+
+start
+
+begin loop
+
+    if (variable get town MinorTown1 status == variable MIGRATION_MIGRATED) and mig1 == 0 and get town MinorTown1 has migrated to == PlayerTown
+        mig1 = 1
+        MigrationsAccepted = MigrationsAccepted + 1
+    end if
+    
+    if (variable get town MinorTown2 status == variable MIGRATION_MIGRATED) and mig2 == 0 and get town MinorTown2 has migrated to == PlayerTown
+        mig2 = 1
+        MigrationsAccepted = MigrationsAccepted + 1
+    end if
+    
+    if (variable get town MinorTown3 status == variable MIGRATION_MIGRATED) and mig3 == 0 and get town MinorTown3 has migrated to == PlayerTown
+        mig3 = 1
+        MigrationsAccepted = MigrationsAccepted + 1
+    end if
+    
+    if (variable get town MinorTown4 status == variable MIGRATION_MIGRATED) and mig4 == 0 and get town MinorTown4 has migrated to == PlayerTown
+        mig4 = 1
+        MigrationsAccepted = MigrationsAccepted + 1
+    end if
+    
+    if (variable get town MinorTown5 status == variable MIGRATION_MIGRATED) and mig5 == 0 and get town MinorTown5 has migrated to == PlayerTown
+        mig5 = 1
+        MigrationsAccepted = MigrationsAccepted + 1
+    end if
+    
+    if (variable get town MinorTown6 status == variable MIGRATION_MIGRATED) and mig6 == 0 and get town MinorTown6 has migrated to == PlayerTown
+        mig6 = 1
+        MigrationsAccepted = MigrationsAccepted + 1
+    end if
+    
+    if (variable get town MinorTown7 status == variable MIGRATION_MIGRATED) and mig7 == 0 and get town MinorTown7 has migrated to == PlayerTown
+        mig7 = 1
+        MigrationsAccepted = MigrationsAccepted + 1
+    end if
+    
+    if (variable get town MinorTown8 status == variable MIGRATION_MIGRATED) and mig8 == 0 and get town MinorTown8 has migrated to == PlayerTown
+        mig8 = 1
+        MigrationsAccepted = MigrationsAccepted + 1
+    end if
+    
+    if (variable get town MinorTown9 status == variable MIGRATION_MIGRATED) and mig9 == 0 and get town MinorTown9 has migrated to == PlayerTown
+        mig9 = 1
+        MigrationsAccepted = MigrationsAccepted + 1
+    end if
+    
+    if (variable get town MinorJapaneseTown1 status == variable MIGRATION_MIGRATED) and mig10 == 0 and get town MinorJapaneseTown1 has migrated to == PlayerTown
+        mig10 = 1
+        MigrationsAccepted = MigrationsAccepted + 1
+    end if
+    
+    if (variable get town MinorJapaneseTown2 status == variable MIGRATION_MIGRATED) and mig11 == 0 and get town MinorJapaneseTown2 has migrated to == PlayerTown
+        mig11 = 1
+        MigrationsAccepted = MigrationsAccepted + 1
+    end if
+    
+    if (variable get town JapaneseCapital status == variable MIGRATION_MIGRATED) and mig12 == 0 and get town JapaneseCapital has migrated to == PlayerTown
+        mig12 = 1
+        MigrationsAccepted = MigrationsAccepted + 1
+    end if
+
+    if MigrationsAccepted >= 1 and a == 0
+        a = 1
+        increment tribute by 5000
+    end if
+    
+    if MigrationsAccepted >= 2 and a == 1
+        a = 2
+        increment tribute by 5000
+    end if
+    
+    if MigrationsAccepted >= 3 and a == 2
+        a = 3
+        increment tribute by 5000
+    end if
+    
+    if MigrationsAccepted >= 4 and a == 3
+        a = 4
+        increment tribute by 5000
+    end if
+    
+    if MigrationsAccepted >= 5 and a == 4
+        a = 5
+        increment tribute by 10000
+    end if
+    
+    if MigrationsAccepted >= 6 and a == 5
+        a = 6
+        increment tribute by 10000
+    end if
+    
+    if MigrationsAccepted >= 7 and a == 6
+        a = 7
+        increment tribute by 15000
+    end if
+    
+    if MigrationsAccepted >= 8 and a == 7
+        a = 8
+        increment tribute by 15000
+    end if
+    
+    if MigrationsAccepted >= 9 and a == 8
+        a = 9
+        increment tribute by 15000
+    end if
+    
+    if MigrationsAccepted >= 10 and a == 9
+        a = 10
+        increment tribute by 20000
+    end if
+    
+    if MigrationsAccepted >= 11 and a == 10
+        a = 11
+        increment tribute by 20000
+    end if
+    
+    if MigrationsAccepted >= 12 and a == 11
+        a = 12
+        increment tribute by 25000
+    end if
+    
+end loop
+
+end script LC6_Tribute
+
+begin script LC6_GatehouseManager
+
+    GatehousePos[7]
+    GateHouseT11 = 0
+    GateHouseT12 = 0
+    GateHouseT13 = 0
+    GateHouseT14 = 0
+    Counter = 0
+    Cnt = 0
+
+
+    oCreature = get player 0 creature
+    PlayerPlatoonT11 = 0
+    CatapultT11 = 0
+    TestCreatureT11 = 0
+    PlayerPlatoonT12 = 0
+    CatapultT12 = 0
+    TestCreatureT12 = 0
+    PlayerPlatoonT13 = 0
+    CatapultT13 = 0
+    TestCreatureT13 = 0
+    PlayerPlatoonT14 = 0
+    CatapultT14 = 0
+    TestCreatureT14 = 0
+    EnemyNearDoorT11 = 0
+    EnemyNearDoorT12 = 0
+    EnemyNearDoorT13 = 0
+    EnemyNearDoorT14 = 0
+
+start
+
+begin loop
+
+    GateHouseT11 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {1451.19,67.80,1492.94} radius 15
+    GateHouseT12 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {1809.44,63.13,1454.65} radius 15
+    GateHouseT13 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {1466.75,41.04,1182.34} radius 15
+    GateHouseT14 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {1394.55,38.05,1272.88} radius 15
+    
+    oCreature = get player 0 creature
+
+    if PLAYER of JapaneseCapital == 1
+
+        if not town JapaneseCapital is under takeover from player 0
+            PlayerPlatoonT11 = get platoon of player 0 nearest {GateHouseT11} radius 100
+            CatapultT11 = get siege weapon of player 0 nearest {GateHouseT11} radius 100
+            TestCreatureT11 = get distance from {GateHouseT11} to {oCreature}
+            
+            if PlayerPlatoonT11 exists
+                EnemyNearDoorT11 = 1
+            elsif CatapultT11 exists
+                EnemyNearDoorT11 = 1
+            elsif TestCreatureT11 < 200 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+                EnemyNearDoorT11 = 1
+            else
+                EnemyNearDoorT11 = 0
+            end if
+            
+            if EnemyNearDoorT11 == 1
+                set gate GateHouseT11 close
+            else
+                set gate GateHouseT11 open
+            end if
+            
+            PlayerPlatoonT12 = get platoon of player 0 nearest {GateHouseT12} radius 100
+            CatapultT12 = get siege weapon of player 0 nearest {GateHouseT12} radius 100
+            TestCreatureT12 = get distance from {GateHouseT12} to {oCreature}
+            
+            if PlayerPlatoonT12 exists
+                EnemyNearDoorT12 = 1
+            elsif CatapultT12 exists
+                EnemyNearDoorT12 = 1
+            elsif TestCreatureT12 < 200 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+                EnemyNearDoorT12 = 1
+            else
+                EnemyNearDoorT12 = 0
+            end if
+            
+            if EnemyNearDoorT12 == 1
+                set gate GateHouseT12 close
+            else
+                set gate GateHouseT12 open
+            end if
+            
+            PlayerPlatoonT13 = get platoon of player 0 nearest {GateHouseT13} radius 100
+            CatapultT13 = get siege weapon of player 0 nearest {GateHouseT13} radius 100
+            TestCreatureT13 = get distance from {GateHouseT13} to {oCreature}
+            
+            if PlayerPlatoonT13 exists
+                EnemyNearDoorT13 = 1
+            elsif CatapultT13 exists
+                EnemyNearDoorT13 = 1
+            elsif TestCreatureT13 < 200 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+                EnemyNearDoorT13 = 1
+            else
+                EnemyNearDoorT13 = 0
+            end if
+            
+            if EnemyNearDoorT13 == 1
+                set gate GateHouseT13 close
+            else
+                set gate GateHouseT13 open
+            end if
+            
+            PlayerPlatoonT14 = get platoon of player 0 nearest {GateHouseT13} radius 100
+            CatapultT14 = get siege weapon of player 0 nearest {GateHouseT13} radius 100
+            TestCreatureT14 = get distance from {GateHouseT13} to {oCreature}
+            
+            if PlayerPlatoonT14 exists
+                EnemyNearDoorT14 = 1
+            elsif CatapultT14 exists
+                EnemyNearDoorT14 = 1
+            elsif TestCreatureT14 < 200 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+                EnemyNearDoorT14 = 1
+            else
+                EnemyNearDoorT14 = 0
+            end if
+            
+            if EnemyNearDoorT14 == 1
+                set gate GateHouseT14 close
+            else
+                set gate GateHouseT14 open
+            end if
+        else
+            set gate GateHouseT11 open
+            set gate GateHouseT12 open
+            set gate GateHouseT13 open
+            set gate GateHouseT14 open
+        end if
+        
+    end if
+    
+end loop
+
+end script LC6_GatehouseManager
+
+begin script LC6_Speeches
+
+    isConverted1 = 0
+    isConverted2 = 0
+    isConverted3 = 0
+    isConverted4 = 0
+    isConverted5 = 0
+    isConverted6 = 0
+    isConverted7 = 0
+    isConverted8 = 0
+    isConverted9 = 0
+    isConverted10 = 0
+    isConverted11 = 0
+    isConverted12 = 0
+    
+    mig1 = 0
+    mig2 = 0
+    mig3 = 0
+    mig4 = 0
+    mig5 = 0
+    mig6 = 0
+    mig7 = 0
+    mig8 = 0
+    mig9 = 0
+    mig10 = 0
+    mig11 = 0
+    mig12 = 0
+    
+    LoseDialogue1 = 0
+    
+    Number = 0
+    
+    AttackTimer = create timer for 0 seconds
+    LoseTimer = create timer for 0 seconds
+
+    Conv1 = 0
+    Conv2 = 0
+    Conv3 = 0
+    Conv4 = 0
+    Conv5 = 0
+    Conv6 = 0
+    Conv7 = 0
+    Conv8 = 0
+    Conv9 = 0
+    Conv10 = 0
+    Conv11 = 0
+    Conv12 = 0
+    
+    PlayerPlatoon = 0
+    
+    a = 0
+    b = 0
+    c = 0
+    d = 0
+    e = 0
+    f = 0
+    g = 0
+    h = 0
+    i = 0
+    j = 0
+    k = 0
+    l = 0
+    m = 0
+    n = 0
+    o = 0
+    p = 0
+    q = 0
+    r = 0
+    s = 0
+    t = 0
+    w = 0
+    v = 0
+    astory = 0
+    bstory = 0
+    
+    ab = 0
+    ac = 0
+    ad = 0
+    ae = 0
+    af = 0
+    ag = 0
+    ah = 0
+    ai = 0
+    aj = 0
+    ak = 0
+    al = 0
+    am = 0
+    
+    StoryDialogue = 0
+    StoryDialogueTimer = create timer for 200 seconds
+    
+    EvilDialogue = 0
+    GoodDialogue = 0
+    
+    LC6_DoneCreateCatapult = 0
+    LC6_DoneUsedMagic = 0
+    LC6_DonePlayerKillsCreature = 0
+    LC6_DoneHighPop = 0
+    
+    Platoon = 0
+    Catapult = 0
+
+    PlatoonKilledTimer = create timer for 0 seconds
+    CatapultDestroyedTimer = create timer for 0 seconds
+
+    ArmyComment = 0
+    TownsAggressiveComment = 0
+    TownsPassiveComment = 0
+    TownSizeComment = 0
+
+    EnemyMigrationComment = 0
+
+    AdvisorNumber = 0
+    AdvisorTimer = create timer for 200 seconds
+
+    MyCreatureRed = 0
+
+start
+
+begin loop
+
+    if EnemyMigrations >= 1
+        if EnemyMigrationComment == 0 and GB_DialogueIsRunning == 0
+            GB_DialogueIsRunning = 1
+            EnemyMigrationComment = 1
+            begin dialogue
+                say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_380"
+                wait until read
+            end dialogue
+            GB_DialogueIsRunning = 0
+        end if
+    end if
+
+    if EnemyMigrations >= 2
+        if EnemyMigrationComment == 1 and GB_DialogueIsRunning == 0
+            GB_DialogueIsRunning = 1
+            EnemyMigrationComment = 2
+            begin dialogue
+                say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_400"
+                wait until read
+            end dialogue
+            GB_DialogueIsRunning = 0
+        end if
+    end if
+
+    if EnemyMigrations >= 3
+        if EnemyMigrationComment == 2 and GB_DialogueIsRunning == 0
+            GB_DialogueIsRunning = 1
+            EnemyMigrationComment = 3
+            begin dialogue
+                say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_410"
+                wait until read
+            end dialogue
+            GB_DialogueIsRunning = 0
+        end if
+    end if
+
+    if EnemyMigrations >= 4
+        if EnemyMigrationComment == 3 and GB_DialogueIsRunning == 0
+            GB_DialogueIsRunning = 1
+            EnemyMigrationComment = 4
+            begin dialogue
+                say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_450"
+                wait until read
+            end dialogue
+            GB_DialogueIsRunning = 0
+        end if
+    end if
+
+    if get army size in town PlayerTown >= 50
+        if ArmyComment == 0 and GB_DialogueIsRunning == 0
+            GB_DialogueIsRunning = 1
+            ArmyComment = 1
+            begin dialogue
+                eject evil spirit
+                // EA: We got, lemme see, 50 warriors. Now that's nice, Boss. Real nice.
+                say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_680"
+                wait until read
+            end dialogue
+            GB_DialogueIsRunning = 0
+        end if
+    end if
+
+    if TownsAggressiveConverted >= 2
+        if TownsAggressiveComment == 0 and GB_DialogueIsRunning == 0
+            GB_DialogueIsRunning = 1
+            TownsAggressiveComment = 1
+            begin dialogue
+                eject evil spirit
+                // EA: Oh boy. We've really shed some blood. The enemy have just got to be shaking in their boots!
+                say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_650"
+                wait until read
+            end dialogue
+            GB_DialogueIsRunning = 0
+        end if
+    end if
+
+    if size of PlayerTown > 130
+        if TownSizeComment == 0 and GB_DialogueIsRunning == 0
+            GB_DialogueIsRunning = 1
+            TownSizeComment = 1
+            begin dialogue
+                eject evil spirit
+                // EA: Yes. We've got a real people factory. The more people we have, the bigger armies we can recruit!
+                say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_620"
+                wait until read
+            end dialogue
+            GB_DialogueIsRunning = 0
+        end if
+    end if
+    
+    if PlatoonKilled == 1 and GB_DialogueIsRunning == 0
+        PlatoonKilled = 0
+        if get PlatoonKilledTimer time remaining <= 0
+            PlatoonKilledTimer = create timer for 120 seconds
+            GB_DialogueIsRunning = 1
+            begin dialogue
+                say "BW2T_SCRIPT_06FINAL_ENEMY_ARMY_UNIT_DEFEATED"
+                wait until read
+            end dialogue
+            GB_DialogueIsRunning = 0
+        end if
+    end if
+
+    if CatapultDestroyed == 1 and GB_DialogueIsRunning == 0
+        CatapultDestroyed = 0
+        if get CatapultDestroyedTimer time remaining <= 0
+            CatapultDestroyedTimer = create timer for 120 seconds
+            GB_DialogueIsRunning = 1
+            begin dialogue
+                say "BW2T_SCRIPT_06FINAL_PLAYER_ARMY_DEFEAT_CATAPULT"
+                wait until read
+            end dialogue
+            GB_DialogueIsRunning = 0
+        end if
+    end if
+
+    if FireSiren == 1
+        GB_DialogueIsRunning = 1
+        FireSiren = 2
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_EPIC_SIREN_READY"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+
+    if LC6_DoneCreateCatapult == 0
+        Catapult = get number of type SCRIPT_OBJECT_TYPE_SIEGE_WEAPON in PlayerTown min built 1.0
+            
+        if Catapult >= 1
+            GB_DialogueIsRunning = 1
+            begin dialogue
+                say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_530"
+                wait until read
+            end dialogue
+            GB_DialogueIsRunning = 0
+            LC6_DoneCreateCatapult = 1
+        end if
+    end if
+
+    // Player uses magic check
+    if LC6_DoneUsedMagic == 0
+        if player 0 cast miracle SCRIPT_FIND_TYPE_ANY near {JapaneseCapital} radius 400
+            GB_DialogueIsRunning = 1
+            begin dialogue
+                say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_540"
+                wait until read
+            end dialogue
+            LC6_DoneUsedMagic = 1
+            GB_DialogueIsRunning = 0
+        end if            
+    end if
+
+    if LC6_DoneUsedCreatureOffensively == 0
+        MyCreatureRed = get player 0 creature
+        if MyCreatureRed exists and {MyCreatureRed} near {JapaneseCapital} radius 325
+            GB_DialogueIsRunning = 1
+            begin dialogue
+                say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_550"
+                wait until read
+            end dialogue
+            LC6_DoneUsedCreatureOffensively = 1
+            GB_DialogueIsRunning = 0
+        end if
+    end if
+    
+    if size of PlayerTown >= 175 and LC6_DoneHighPop == 0
+        GB_DialogueIsRunning = 1
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_560"
+            wait until read
+        end dialogue            
+        LC6_DoneHighPop = 1
+        GB_DialogueIsRunning = 0
+    end if    
+
+    if UnderAttack >= 1 and get AttackTimer time remaining <= 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        UnderAttack = 0
+        Number = number from 1 to 14
+        if Number == 1
+            begin dialogue
+                make evil spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_EA_01"
+                wait until read
+                send evil spirit home
+            end dialogue
+        end if
+        if Number == 2
+            begin dialogue
+                make evil spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_EA_02"
+                wait until read
+                send evil spirit home
+            end dialogue
+        end if
+        if Number == 3
+            begin dialogue
+                make evil spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_EA_05"
+                wait until read
+                send evil spirit home
+            end dialogue
+        end if
+        if Number == 4
+            begin dialogue
+                make evil spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_EA_06"
+                wait until read
+                send evil spirit home
+            end dialogue
+        end if
+        if Number == 5
+            begin dialogue
+                make evil spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_EA_07"
+                wait until read
+                send evil spirit home
+            end dialogue
+        end if
+        if Number == 6
+            begin dialogue
+                make evil spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_EA_08"
+                wait until read
+                send evil spirit home
+            end dialogue
+        end if
+        if Number == 7
+            begin dialogue
+                make evil spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_EA_18"
+                wait until read
+                send evil spirit home
+            end dialogue
+        end if
+        if Number == 8
+            begin dialogue
+                make good spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_GA_01"
+                wait until read
+                send good spirit home
+            end dialogue
+        end if
+        if Number == 9
+            begin dialogue
+                make good spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_GA_02"
+                wait until read
+                send good spirit home
+            end dialogue
+        end if
+        if Number == 10
+            begin dialogue
+                make good spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_GA_05"
+                wait until read
+                send good spirit home
+            end dialogue
+        end if
+        if Number == 11
+            begin dialogue
+                make good spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_GA_06"
+                wait until read
+                send good spirit home
+            end dialogue
+        end if
+        if Number == 12
+            begin dialogue
+                make good spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_GA_07"
+                wait until read
+                send good spirit home
+            end dialogue
+        end if
+        if Number == 13
+            begin dialogue
+                make good spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_GA_09"
+                wait until read
+                send good spirit home
+            end dialogue
+        end if
+        if Number == 14
+            begin dialogue
+                make good spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_GA_10"
+                wait until read
+                send good spirit home
+            end dialogue
+        end if
+        GB_DialogueIsRunning = 0
+        AttackTimer = create timer for 45 seconds
+    end if
+    
+    if (PLAYER of PlayerTown != 0 and PLAYER of MinorTown1 != 0 and PLAYER of MinorTown2 != 0 and PLAYER of MinorTown3 != 0 and PLAYER of MinorTown4 != 0 and PLAYER of MinorTown5 != 0 and PLAYER of MinorTown6 != 0 and PLAYER of MinorTown7 != 0 and PLAYER of MinorTown8 != 0 and PLAYER of MinorTown9 != 0 and PLAYER of MinorJapaneseTown1 != 0 and PLAYER of MinorJapaneseTown1 != 0 and PLAYER of JapaneseCapital != 0) and get LoseTimer time remaining <= 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        LoseDialogue1 = number from 1 to 5
+        if LoseDialogue1 == 1
+            begin dialogue
+                make good spirit appear
+                say "BW2T_SCRIPT_GENERIC_ADVISORS_SUGGEST_RESTART_10"
+                wait until read
+                send good spirit home
+            end dialogue
+        end if
+        
+        if LoseDialogue1 == 2
+            begin dialogue
+                make evil spirit appear
+                say "BW2T_SCRIPT_GENERIC_ADVISORS_SUGGEST_RESTART_20"
+                wait until read
+                send evil spirit home
+            end dialogue
+        end if
+        
+        if LoseDialogue1 == 3
+            begin dialogue
+                make good spirit appear
+                say "BW2T_SCRIPT_GENERIC_ADVISORS_SUGGEST_RESTART_30"
+                wait until read
+                send good spirit home
+            end dialogue
+        end if
+        
+        if LoseDialogue1 == 4
+            begin dialogue
+                make evil spirit appear
+                say "BW2T_SCRIPT_GENERIC_ADVISORS_SUGGEST_RESTART_40"
+                wait until read
+                send evil spirit home
+            end dialogue
+        end if
+        
+        if LoseDialogue1 == 5
+            begin dialogue
+                make evil spirit appear
+                say "BW2T_SCRIPT_GENERIC_ADVISORS_SUGGEST_RESTART_50"
+                wait until read
+                send evil spirit home
+            end dialogue
+        end if
+        
+        GB_DialogueIsRunning = 0
+        LoseTimer = create timer for 75 seconds
+    end if
+    
+    if (get building MELEE_ARMOURY in PlayerTown min built 0.0 exists or get building RANGED_ARMOURY in PlayerTown min built 0.0 exists) and ab == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        ab = 1
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_510"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building ABODE_A in JapaneseCapital min built 1.0 exists and ac == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        ac = 1
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_690"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building STORAGE_YARD in JapaneseCapital min built 1.0 exists and ac == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        ac = 1
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_710"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building TEMPLE in JapaneseCapital min built 1.0 exists and ad == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        ad = 1
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_720"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building GRANARY in JapaneseCapital min built 1.0 exists and ae == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        ae = 1
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_730"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building CRECHE in JapaneseCapital min built 1.0 exists and af == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        af = 1
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_750"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building FAMILYSTATUE in JapaneseCapital min built 1.0 exists and ag == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        ag = 1
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_760"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if (get building MARKET_POT in JapaneseCapital min built 1.0 exists or get building MARKET_PLANT in JapaneseCapital min built 1.0 exists or get building MARKET_STATUE in JapaneseCapital min built 1.0 exists) and ah == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        ah = 1
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_770"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building PUB in JapaneseCapital min built 1.0 exists and ai == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        ai = 1
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_780"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building WALLTOWER_TECH0 in JapaneseCapital min built 1.0 exists and aj == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        aj = 1
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_790"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building GATEHOUSE_F in JapaneseCapital min built 1.0 exists and ak == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        ak = 1
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_800"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building ABODE_D in JapaneseCapital min built 1.0 exists and al == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        al = 1
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_810"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if SirenBuilding == 1 and am == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        am = 1
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_STEVE_10"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    /*
+
+    if get building ABODE_A in PlayerTown min built 0.0 exists and a == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        a = 1
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_STEVE_210"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building ABODE_B in PlayerTown min built 0.0 exists and b == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        b = 1
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_STEVE_220"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building ABODE_C in PlayerTown min built 0.0 exists and c == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        c = 1
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_STEVE_230"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building ABODE_D in PlayerTown min built 0.0 exists and d == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        d = 1
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_STEVE_240"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building ABODE_E in PlayerTown min built 0.0 exists and e == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        e = 1
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_STEVE_250"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building SKYSCRAPER in PlayerTown min built 0.0 exists and f == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        f = 1
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_STEVE_260"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building STORAGE_YARD in PlayerTown min built 0.0 exists and g == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        g = 1
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_STEVE_280"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building FIELD in PlayerTown min built 0.0 exists and h == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        h = 1
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_STEVE_290"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building CREATURE_PEN in PlayerTown min built 0.0 exists and i == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        i = 1
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_STEVE_300"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if (get building WALLTOWER_TECH0 in PlayerTown max built 0.9 exists or get building WALLTOWER_TECH1 in PlayerTown max built 0.9 exists) and j == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        j = 1
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_STEVE_310"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building GRAVEYARD in PlayerTown min built 0.0 exists and k == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        k = 1
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_STEVE_320"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building PUB in PlayerTown min built 0.0 exists and l == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        l = 1
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_STEVE_330"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building CRECHE in PlayerTown min built 0.0 exists and m == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        m = 1
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_STEVE_340"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building UNIVERSITY in PlayerTown min built 0.0 exists and n == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        n = 1
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_STEVE_350"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building OLD_PERSONS_HOME in PlayerTown min built 0.0 exists and o == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        o = 1
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_STEVE_360"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building TEMPLE in PlayerTown min built 0.0 exists and p == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        p = 1
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_STEVE_380"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building LUMBERMILL in PlayerTown min built 0.0 exists and q == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        q = 1
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_STEVE_390"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building SMELTER in PlayerTown min built 0.0 exists and r == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        r = 1
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_STEVE_400"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building GRANARY in PlayerTown min built 0.0 exists and s == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        s = 1
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_STEVE_410"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building BATHHOUSE in PlayerTown min built 0.0 exists and t == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        t = 1
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_STEVE_420"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building AMPITHEATRE in PlayerTown min built 0.0 exists and w == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        w = 1
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_STEVE_430"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+
+    if get building PRISON in PlayerTown min built 0.0 exists and v == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        v = 1
+        begin dialogue
+            say "BW2T_SCRIPT_08FINAL_PLAYER_BUILDS_PRISON"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+
+    */
+    
+    if TownsAggressiveConverted >= 1 and GenSwitchedToAggressive == 0
+        GB_DialogueIsRunning = 1
+        GenSwitchedToAggressive = 1
+        EvilDialogue = 1
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_130"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if TownsAggressiveConverted >= 2 and EvilDialogue == 1
+        GB_DialogueIsRunning = 1
+        EvilDialogue = 2
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_150"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if TownsAggressiveConverted >= 4 and EvilDialogue == 2
+        GB_DialogueIsRunning = 1
+        EvilDialogue = 3
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_170"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if TownsAggressiveConverted >= 5 and EvilDialogue == 3
+        GB_DialogueIsRunning = 1
+        EvilDialogue = 4
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_190"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+
+    if TownsAggressiveConverted >= 6 and EvilDialogue == 4
+        GB_DialogueIsRunning = 1
+        EvilDialogue = 5
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_210"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if TownsPeacefulConverted >= 1 and GoodDialogue == 0
+        GB_DialogueIsRunning = 1
+        GoodDialogue = 1
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_120"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if TownsPeacefulConverted >= 2 and GoodDialogue == 1
+        GB_DialogueIsRunning = 1
+        GoodDialogue = 2
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_140"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if TownsPeacefulConverted >= 4 and GoodDialogue == 2
+        GB_DialogueIsRunning = 1
+        GoodDialogue = 3
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_160"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if TownsPeacefulConverted >= 6 and GoodDialogue == 3
+        GB_DialogueIsRunning = 1
+        GoodDialogue = 4
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_180"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if TownsPeacefulConverted >= 7 and GoodDialogue == 4
+        GB_DialogueIsRunning = 1
+        GoodDialogue = 5
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_200"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+
+end loop
+
+end script LC6_Speeches
+
+begin script LC6_Japanese_Capital_Resource_Manager
+
+start
+
+wait 120 seconds
+
+begin loop
+
+    wait 2 seconds //To evade the sound bug if storage is burning...
+
+    if PLAYER of JapaneseCapital == 1
+        if (get town JapaneseCapital RESOURCE_TYPE_ORE total < 15297)
+            add resource RESOURCE_TYPE_ORE number from 100 to 500 to JapaneseCapital
+        end if
+        wait 2 seconds
+        if (get town JapaneseCapital RESOURCE_TYPE_WOOD total < 19322)
+            add resource RESOURCE_TYPE_WOOD number from 500 to 1000 to JapaneseCapital
+        end if
+        wait 2 seconds
+        if (get town JapaneseCapital RESOURCE_TYPE_FOOD total < 23624)
+            add resource RESOURCE_TYPE_FOOD number from 500 to 1500 to JapaneseCapital
+        end if
+    end if
+    
+    until PLAYER of JapaneseCapital != 1
+end loop    
+
+end script LC6_Japanese_Capital_Resource_Manager
+
+begin script LC6_Japanese_Capital
+
+    LC6_RecruitTimer1 = create timer for 120 seconds
+    LC6_RecruitTimer2 = create timer for 120 seconds
+    LC6_RecruitTimer3 = create timer for 120 seconds
+    LC6_RecruitTimer4 = create timer for 120 seconds
+
+    Group0_Timer = create timer for 1000 seconds
+    Group1_Timer = create timer for 20 seconds
+    Group2_Timer = create timer for 175 seconds
+    Group3_Timer = create timer for 320 seconds
+    Group4_Timer = create timer for 560 * BuilderModifier seconds
+    Group5_Timer = create timer for 700 * BuilderModifier seconds
+    Group6_Timer = create timer for 1050 * BuilderModifier seconds
+    Group7_Timer = create timer for 1400 * BuilderModifier seconds
+    Group8_Timer = create timer for 1700 * BuilderModifier seconds
+    
+    Group10_Timer = create timer for 1850 * BuilderModifier seconds
+    Group11_Timer = create timer for 2000 * BuilderModifier seconds
+    Group12_Timer = create timer for 1400 * BuilderModifier seconds
+    Group13_Timer = create timer for 125 seconds
+    
+    Wall1_Timer = create timer for 420 * BuilderModifier seconds
+    Wall2_Timer = create timer for 1500 * BuilderModifier seconds
+    
+    a = 0
+    b = 0
+    c = 0
+    d = 0
+    e = 0
+    f = 0
+    g = 0
+    h = 0
+    i = 0
+    j = 0
+    k = 0
+    l = 0
+
+    RoadPos[22]
+    Road = 0
+    
+    Building = 0
+    VillagerCount = 0
+    
+    PlannedWall[12]
+    PlannedWallPos[12]
+    Wall1 = 0
+    
+    PlannedWall2[9]
+    PlannedWall2Pos[9]
+    Wall2 = 0
+    
+    WallCounter = 0
+    WallCounter2 = 0
+    
+    Wall[8]
+    
+    Test1 = 0
+    Test2 = 0
+
+    Platoon = 0
+    SirenWarning = 0
+    SirenTimer = create timer for 0 seconds
+    SIRENDELAY = 2250
+    SirenSpell = 0
+
+    MinorJapaneseTown1Buildings = 0
+    MinorJapaneseTown2Buildings = 0
+
+    AttackingPlatoons = 0
+
+    Villager1[15]
+    Villager2[15]
+    Counter1 = 0
+    Counter2 = 0
+    NearestSettlementTownCentre = 0
+
+    ScriptAttack = 0
+
+    Cnt = 0
+
+    NumberofPlatoons = 0
+
+    PlayerPlatoon = 0
+
+    AttackingPosition = 0
+    AttackingPositionFallBack = 0
+
+    Influence = 0
+
+start
+    
+    //extend town JapaneseCapital influence by 35
+
+    AttackNearestTownTimer = create timer for 0 seconds
+
+    //Reset these after land restart
+    Road = 0
+    begin loop
+        RoadPos[Cnt] = 0
+        Cnt++
+        until Cnt >= 23
+    end loop
+    
+    PlannedWallPos[0] = marker at {1461.22,77.53,1629.21}
+    PlannedWallPos[1] = marker at {1447.94,71.57,1565.38}
+    PlannedWallPos[2] = marker at {1450.62,70.09,1527.11}
+    PlannedWallPos[3] = marker at {1448.34,67.66,1509.85}
+    PlannedWallPos[4] = marker at {1454.30,65.41,1449.96}
+    PlannedWallPos[5] = marker at {1450.04,65.40,1353.42}
+    PlannedWallPos[6] = marker at {1480.35,63.91,1286.89}
+    PlannedWallPos[7] = marker at {1854.66,65.75,1544.38}
+    PlannedWallPos[8] = marker at {1840.81,63.63,1492.54}
+    PlannedWallPos[9] = marker at {1816.90,63.01,1470.09}
+    PlannedWallPos[10] = marker at {1772.57,65.03,1422.31}
+    PlannedWallPos[11] = marker at {1750.07,75.74,1375.51}
+    
+    PlannedWall2Pos[0] = marker at {1254.80,35.37,1375.21}
+    PlannedWall2Pos[1] = marker at {1298.07,34.72,1342.63}
+    PlannedWall2Pos[2] = marker at {1342.70,43.36,1303.11}
+    PlannedWall2Pos[3] = marker at {1382.56,38.10,1280.24}
+    PlannedWall2Pos[4] = marker at {1498.81,41.11,1222.10}
+    PlannedWall2Pos[5] = marker at {1474.21,41.03,1194.01}
+    PlannedWall2Pos[6] = marker at {1440.45,41.37,1133.45}
+    PlannedWall2Pos[7] = marker at {1423.87,29.19,1093.66}
+    PlannedWall2Pos[8] = marker at {1388.40,17.59,1063.67}
+    
+    RoadPos[0] = marker at {1653.84,73.16,1561.80}//Front Road 1
+    RoadPos[1] = marker at {1651.37,73.16,1559.00}//Front Road 2
+    RoadPos[2] = marker at {1659.73,73.10,1552.84}//Front Road 3
+    RoadPos[3] = marker at {1538.28,73.07,1495.67}//Group 4 Road 1
+    RoadPos[4] = marker at {1587.67,72.86,1451.82}//Group 4 Road 2
+    RoadPos[5] = marker at {1624.08,73.14,1491.34}//Group 4 Road 3
+    RoadPos[6] = marker at {1726.95,71.02,1524.36}//Group 5 Road 1
+    RoadPos[7] = marker at {1727.72,71.17,1528.61}//Group 5 Road 2
+    RoadPos[8] = marker at {1731.61,71.38,1533.21}//Group 5 Road 3
+    RoadPos[9] = marker at {1734.41,71.54,1537.09}//Group 5 Road 4
+    RoadPos[10] = marker at {1686.15,73.22,1585.32}//Group 5 Road 5
+    RoadPos[11] = marker at {1636.12,73.16,1620.86}//Group 5 Road 6
+    RoadPos[12] = marker at {1624.78,73.23,1608.01}//Group 6 Road 1
+    RoadPos[13] = marker at {1529.13,72.54,1497.36}//Group 6 Road 2
+    RoadPos[14] = marker at {1720.72,72.98,1556.19}//Group 6 Road 3
+    RoadPos[15] = marker at {1658.03,73.19,1612.90}//Group 6 Road 4
+    RoadPos[16] = marker at {1578.55,72.20,1564.79}//Group 8 Road 1
+    RoadPos[17] = marker at {1529.69,72.46,1498.93}//Group 8 Road 2
+    RoadPos[18] = marker at {1464.27,67.91,1478.77}//Group 10 Road 1
+    RoadPos[19] = marker at {1593.56,71.87,1437.08}//Group 11 Road 1
+    RoadPos[20] = marker at {1608.74,64.42,1350.75}//Group 12 Road 1
+    RoadPos[21] = marker at {1738.66,71.12,1526.47}//Group 6 Road 5
+
+    add resource WOOD 15000 to JapaneseCapital
+    add resource ORE 10000 to JapaneseCapital
+    add resource FOOD 15000 to JapaneseCapital
+    
+    add resource WOOD 2131 to MinorTown1
+    add resource ORE 431 to MinorTown1
+    add resource FOOD 1341 to MinorTown1
+    
+    add resource WOOD 3131 to MinorTown2
+    add resource ORE 670 to MinorTown2
+    add resource FOOD 1142 to MinorTown2
+
+    add resource WOOD 5135 to MinorTown6
+    add resource ORE 3070 to MinorTown6
+    add resource FOOD 4247 to MinorTown6
+    
+    add resource WOOD 6012 to MinorTown9
+    add resource ORE 5019 to MinorTown9
+    add resource FOOD 8051 to MinorTown9
+    
+    add resource WOOD 3012 to MinorTown10
+    add resource ORE 1019 to MinorTown10
+    add resource FOOD 3042 to MinorTown10
+    
+    if Difficulty >= 4
+        add resource WOOD 5000 to PlayerTown
+        add resource ORE 5000 to PlayerTown
+        add resource FOOD 5000 to PlayerTown
+    elsif Difficulty == 3
+        add resource WOOD 7500 to PlayerTown
+        add resource ORE 7500 to PlayerTown
+        add resource FOOD 7500 to PlayerTown
+    elsif Difficulty == 2
+        add resource WOOD 10000 to PlayerTown
+        add resource ORE 10000 to PlayerTown
+        add resource FOOD 10000 to PlayerTown
+    elsif Difficulty == 1
+        add resource WOOD 12500 to PlayerTown
+        add resource ORE 12500 to PlayerTown
+        add resource FOOD 12500 to PlayerTown
+    end if
+    
+    run background script SpawnJapaneseTroops
+    run background script Armory_Builder
+    
+    run background script LC6_Platoon14Actions
+    run background script LC6_Platoon15Actions
+    run background script LC6_SiegeCatapult0Actions
+    run background script LC6_SiegeCatapult1Actions
+
+begin loop
+
+//----------------------------
+//    Enemy Town Building
+//----------------------------
+
+    if get Wall1_Timer time remaining <= 0
+        if WallCounter < 12
+            PlannedWall[WallCounter] = build building at {PlannedWallPos[WallCounter]} desire 1.0
+            add resource RESOURCE_TYPE_ORE number from 8000 to 8500 to PlannedWall[WallCounter]
+            WallCounter++
+        end if
+    end if
+    
+    if get Wall2_Timer time remaining <= 0
+        if WallCounter2 < 25
+            PlannedWall2[WallCounter2] = build building at {PlannedWall2Pos[WallCounter2]} desire 1.0
+            add resource RESOURCE_TYPE_ORE number from 8000 to 8500 to PlannedWall2[WallCounter2]
+            WallCounter2++
+        end if
+    end if
+    
+    if get Group0_Timer time remaining <= 0 or TownsAggressiveConverted >= 1 or TownsConverted >= 2
+        if SirenBuilding == 0 and PLAYER of JapaneseCapital == 1
+            SirenBuilding = 1
+            build all town JapaneseCapital buildings in group 0
+            run background script SirenResourceManager
+            run background script SirenPreCutscene
+        end if
+    end if
+
+    if get Group1_Timer time remaining <= 0 and a == 0 and PLAYER of JapaneseCapital == 1
+        a = 1
+        build all town JapaneseCapital buildings in group 1
+        Building = 45
+        //run background script IncreaseCapitalImpressiveness(Building)
+    end if
+    
+    if get Group2_Timer time remaining <= 0 and b == 0 and PLAYER of JapaneseCapital == 1
+        b = 1
+        build all town JapaneseCapital buildings in group 2
+        Road = build building at {RoadPos[0]} desire 1
+        release Road
+        Road = build building at {RoadPos[1]} desire 1
+        release Road
+        Road = build building at {RoadPos[2]} desire 1
+        release Road
+        VillagerCount = number from 15 to 20
+        run background script IncreaseCapitalVillagers(VillagerCount)
+    end if
+    
+    if get Group3_Timer time remaining <= 0 and c == 0 and PLAYER of JapaneseCapital == 1
+        c = 1
+        build all town JapaneseCapital buildings in group 3
+        Building = 35
+        //run background script IncreaseCapitalImpressiveness(Building)
+    end if
+    
+    if get Group4_Timer time remaining <= 0 and d == 0 and PLAYER of JapaneseCapital == 1
+        d = 1
+        build all town JapaneseCapital buildings in group 4
+        Road = build building at {RoadPos[3]} desire 1
+        release Road
+        Road = build building at {RoadPos[4]} desire 1
+        release Road
+        Road = build building at {RoadPos[5]} desire 1
+        release Road
+        VillagerCount = number from 15 to 20
+        run background script IncreaseCapitalVillagers(VillagerCount)
+    end if
+    
+    if get Group5_Timer time remaining <= 0 and e == 0 and PLAYER of JapaneseCapital == 1
+        e = 1
+        build all town JapaneseCapital buildings in group 5
+        Road = build building at {RoadPos[6]} desire 1
+        release Road
+        Road = build building at {RoadPos[7]} desire 1
+        release Road
+        Road = build building at {RoadPos[8]} desire 1
+        release Road
+        Road = build building at {RoadPos[9]} desire 1
+        release Road
+        Road = build building at {RoadPos[10]} desire 1
+        release Road
+        Road = build building at {RoadPos[11]} desire 1
+        release Road
+        Road = build building at {RoadPos[22]} desire 1
+        release Road
+        Building = 23
+        //run background script IncreaseCapitalImpressiveness(Building)
+    end if
+    
+    if get Group6_Timer time remaining <= 0 and f == 0 and PLAYER of JapaneseCapital == 1
+        f = 1
+        build all town JapaneseCapital buildings in group 6
+        Road = build building at {RoadPos[12]} desire 1
+        release Road
+        Road = build building at {RoadPos[13]} desire 1
+        release Road
+        Road = build building at {RoadPos[14]} desire 1
+        release Road
+        Road = build building at {RoadPos[15]} desire 1
+        release Road
+        Road = build building at {RoadPos[21]} desire 1
+        release Road
+        VillagerCount = number from 15 to 20
+        run background script IncreaseCapitalVillagers(VillagerCount)
+    end if
+    
+    if get Group7_Timer time remaining <= 0 and g == 0 and PLAYER of JapaneseCapital == 1
+        g = 1
+        build all town JapaneseCapital buildings in group 7
+        Building = 18
+        //run background script IncreaseCapitalImpressiveness(Building)
+    end if
+    
+    if get Group8_Timer time remaining <= 0 and h == 0 and PLAYER of JapaneseCapital == 1
+        h = 1
+        build all town JapaneseCapital buildings in group 8
+        Road = build building at {RoadPos[16]} desire 1
+        release Road
+        Road = build building at {RoadPos[17]} desire 1
+        release Road
+        VillagerCount = number from 15 to 20
+        run background script IncreaseCapitalVillagers(VillagerCount)
+    end if
+    
+    if (get Group10_Timer time remaining <= 0 or TownsConverted >= 6)
+        if i == 0 and PLAYER of JapaneseCapital == 1
+            i = 1
+            build all town JapaneseCapital buildings in group 10
+            Road = build building at {RoadPos[18]} desire 1
+            release Road
+            Building = 7
+            //run background script IncreaseCapitalImpressiveness(Building)
+        end if
+    end if
+    
+    if (get Group11_Timer time remaining <= 0) and j == 0 and PLAYER of JapaneseCapital == 1
+        j = 1
+        build all town JapaneseCapital buildings in group 11
+        Road = build building at {RoadPos[19]} desire 1
+        release Road
+    end if
+    
+    if (get Group12_Timer time remaining <= 0 or TownsConverted >= 8)
+        if k == 0 and PLAYER of JapaneseCapital == 1
+            k = 1
+            build all town JapaneseCapital buildings in group 12
+            Road = build building at {RoadPos[20]} desire 1
+            release Road
+        end if
+    end if
+    
+    if (get Group13_Timer time remaining <= 0 or TownsConverted >= 1)
+        if l == 0 and PLAYER of JapaneseCapital == 1
+            l = 1
+            build all town JapaneseCapital buildings in group 13
+        end if
+    end if
+    
+    if TownsConverted >= 3 or PLAYER of MinorTown9 == 0 or PLAYER of MinorJapaneseTown1 == 0 or PLAYER of MinorJapaneseTown2 == 0
+        if AltarsActivated == 0 and PLAYER of JapaneseCapital == 1
+            AltarsActivated = 1
+            build all town JapaneseCapital buildings in group 15
+        end if
+    end if
+    
+    //MainWalls
+    Wall[1] = get wall segment nearest {1446.57,71.80,1544.70} radius 15
+    Wall[2] = get wall segment nearest {1442.32,59.98,1412.44} radius 15
+    Wall[3] = get wall segment nearest {1829.94,63.23,1483.53} radius 15
+    Wall[4] = get wall segment nearest {1783.74,64.12,1429.70} radius 15
+    //MainWalls
+        
+    //OffensiveWalls
+    Wall[5] = get wall segment nearest {1442.42,41.16,1133.80} radius 15
+    Wall[6] = get wall segment nearest {1423.87,29.38,1094.21} radius 15
+    Wall[7] = get wall segment nearest {1344.15,42.97,1296.93} radius 15
+    Wall[8] = get wall segment nearest {1300.72,35.44,1339.30} radius 15
+    //OffensiveWalls
+
+//----------------------------
+//    Enemy Troops
+//----------------------------
+
+    if LC6_DoneUsedCreatureOffensively == 1 and LC6_Platoon[0] not exists
+            LC6_Platoon[0] = recruit ARMY_UNIT_TYPE_RANGED_3 town JapaneseCapital platoon of size 40 * RecruitSizeModifier
+            LC6_RecruitTimer1 = create timer for 45 * RecruitModifier seconds
+            enable platoon LC6_Platoon[0] respond to town JapaneseCapital attack
+            wait until not LC6_Platoon[0] recruiting
+            LC6_DoneUsedCreatureOffensively = 2
+    end if
+
+    NearestSettlementTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in NearestSettlement min built 1.0
+    //if get LC6_RecruitTimer1 time remaining <= 0 or get LC6_RecruitTimer2 time remaining <= 0 or get LC6_RecruitTimer3 time remaining <= 0 or get LC6_RecruitTimer4 time remaining <= 0
+        if LC6_Platoon[2] not exists and PLAYER of JapaneseCapital == 1 and get LC6_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+            LC6_Platoon[2] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 20 * RecruitSizeModifier
+            LC6_RecruitTimer1 = create timer for 180 * RecruitModifier seconds
+            disable platoon LC6_Platoon[2] respond to town JapaneseCapital attack
+            wait until not LC6_Platoon[2] recruiting
+            run background script LC6_StaticPlatoonsActions(PlatoonPos[1],Melee,LC6_Platoon[2])
+            
+        elsif LC6_Platoon[3] not exists and PLAYER of JapaneseCapital == 1 and get LC6_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+            LC6_Platoon[3] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 20 * RecruitSizeModifier
+            LC6_RecruitTimer1 = create timer for 180 * RecruitModifier seconds
+            disable platoon LC6_Platoon[3] respond to town JapaneseCapital attack
+            wait until not LC6_Platoon[3] recruiting
+            run background script LC6_StaticPlatoonsActions(PlatoonPos[2],Melee,LC6_Platoon[3])
+            
+        elsif LC6_Platoon[4] not exists and PLAYER of JapaneseCapital == 1 and get LC6_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+            LC6_Platoon[4] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 20 * RecruitSizeModifier
+            LC6_RecruitTimer1 = create timer for 180 * RecruitModifier seconds
+            disable platoon LC6_Platoon[4] respond to town JapaneseCapital attack
+            wait until not LC6_Platoon[4] recruiting
+            run background script LC6_StaticPlatoonsActions(PlatoonPos[3],Melee,LC6_Platoon[4])
+            
+        elsif LC6_Platoon[5] not exists and PLAYER of JapaneseCapital == 1 and AltarsActivated == 1 and get LC6_RecruitTimer1 time remaining <= 0 and AttackingPlatoons == 0 and not town JapaneseCapital is under takeover from player 0
+            LC6_Platoon[5] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 25 * RecruitSizeModifier
+            LC6_RecruitTimer1 = create timer for 120 * RecruitModifier seconds
+            enable platoon LC6_Platoon[5] respond to town JapaneseCapital attack
+            wait until not LC6_Platoon[5] recruiting
+            run background script LC6_StaticPlatoonsActions(PlatoonPos[4],Melee,LC6_Platoon[5])
+            
+        elsif LC6_Platoon[6] not exists and PLAYER of JapaneseCapital == 1 and AltarsActivated == 1 and get LC6_RecruitTimer1 time remaining <= 0 and AttackingPlatoons == 0 and not town JapaneseCapital is under takeover from player 0
+            LC6_Platoon[6] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 25 * RecruitSizeModifier
+            LC6_RecruitTimer1 = create timer for 120 * RecruitModifier seconds
+            enable platoon LC6_Platoon[6] respond to town JapaneseCapital attack
+            wait until not LC6_Platoon[6] recruiting
+            run background script LC6_StaticPlatoonsActions(PlatoonPos[5],Melee,LC6_Platoon[6])
+            
+        elsif LC6_Platoon[7] not exists and PLAYER of JapaneseCapital == 1 and get LC6_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+            LC6_Platoon[7] = recruit ARMY_UNIT_TYPE_RANGED_2 town JapaneseCapital platoon of size 30 * RecruitSizeModifier
+            LC6_RecruitTimer1 = create timer for 120 * RecruitModifier seconds
+            disable platoon LC6_Platoon[7] respond to town JapaneseCapital attack
+            wait until not LC6_Platoon[7] recruiting
+            run background script LC6_ArmyBehaivours(LC6_Platoon[7],Ranged,Patrol,0,0,0,WaypointsD,0)
+            
+        //Capture MinorJapaneseTown1
+        elsif LC6_Platoon[14] not exists and PLAYER of JapaneseCapital == 1 and get LC6_RecruitTimer1 time remaining <= 0 and TownsConverted >= 3 and not town JapaneseCapital is under takeover from player 0
+            LC6_Platoon[14] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 30 * RecruitSizeModifier
+            LC6_RecruitTimer1 = create timer for 120 * RecruitModifier seconds
+            enable platoon LC6_Platoon[14] respond to town JapaneseCapital attack
+            wait until not LC6_Platoon[14] recruiting
+
+        //Capture MinorJapaneseTown2
+        elsif LC6_Platoon[15] not exists and PLAYER of JapaneseCapital == 1 and get LC6_RecruitTimer1 time remaining <= 0 and TownsAggressiveConverted >= 1 and not town JapaneseCapital is under takeover from player 0
+            LC6_Platoon[15] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 30 * RecruitSizeModifier
+            LC6_RecruitTimer1 = create timer for 120 * RecruitModifier seconds
+            enable platoon LC6_Platoon[15] respond to town JapaneseCapital attack
+            wait until not LC6_Platoon[15] recruiting
+
+        elsif LC6_WallArcher[0] not exists and Wall[1] exists and PLAYER of Wall[1] == 1 and HEALTH of Wall[1] == 1.0 and not town JapaneseCapital is under takeover from player 0 and get LC6_RecruitTimer1 time remaining <= 0
+            LC6_WallArcher[0] = recruit ARMY_UNIT_TYPE_RANGED_2 town JapaneseCapital platoon of size 15 * RecruitSizeModifier
+            LC6_RecruitTimer1 = create timer for 60 * RecruitModifier seconds
+            wait until not LC6_WallArcher[0] recruiting
+            disable platoon LC6_WallArcher[0] respond to town JapaneseCapital attack
+            add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[1] to LC6_WallArcher[0] action queue
+            
+        elsif LC6_WallArcher[1] not exists and Wall[2] exists and PLAYER of Wall[2] == 1 and HEALTH of Wall[2] == 1.0 and not town JapaneseCapital is under takeover from player 0 and get LC6_RecruitTimer1 time remaining <= 0
+            LC6_WallArcher[1] = recruit ARMY_UNIT_TYPE_RANGED_2 town JapaneseCapital platoon of size 15 * RecruitSizeModifier
+            LC6_RecruitTimer1 = create timer for 60 * RecruitModifier seconds
+            wait until not LC6_WallArcher[1] recruiting
+            disable platoon LC6_WallArcher[1] respond to town JapaneseCapital attack
+            add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[2] to LC6_WallArcher[1] action queue
+            
+        elsif LC6_WallArcher[2] not exists and Wall[3] exists and PLAYER of Wall[3] == 1 and HEALTH of Wall[3] == 1.0 and not town JapaneseCapital is under takeover from player 0 and get LC6_RecruitTimer1 time remaining <= 0
+            LC6_WallArcher[2] = recruit ARMY_UNIT_TYPE_RANGED_2 town JapaneseCapital platoon of size 15 * RecruitSizeModifier
+            LC6_RecruitTimer1 = create timer for 60 * RecruitModifier seconds
+            wait until not LC6_WallArcher[2] recruiting
+            disable platoon LC6_WallArcher[2] respond to town JapaneseCapital attack
+            add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[3] to LC6_WallArcher[2] action queue
+            
+        elsif LC6_WallArcher[3] not exists and Wall[4] exists and PLAYER of Wall[4] == 1 and HEALTH of Wall[4] == 1.0 and not town JapaneseCapital is under takeover from player 0 and get LC6_RecruitTimer1 time remaining <= 0
+            LC6_WallArcher[3] = recruit ARMY_UNIT_TYPE_RANGED_2 town JapaneseCapital platoon of size 15 * RecruitSizeModifier
+            LC6_RecruitTimer1 = create timer for 60 * RecruitModifier seconds
+            wait until not LC6_WallArcher[3] recruiting
+            disable platoon LC6_WallArcher[3] respond to town JapaneseCapital attack
+            add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[4] to LC6_WallArcher[3] action queue
+            
+        elsif LC6_WallArcher[4] not exists and Wall[5] exists and PLAYER of Wall[5] == 1 and HEALTH of Wall[5] == 1.0 and not town JapaneseCapital is under takeover from player 0 and get LC6_RecruitTimer1 time remaining <= 0 and AttackingPlatoons == 0
+            LC6_WallArcher[4] = recruit ARMY_UNIT_TYPE_RANGED_2 town JapaneseCapital platoon of size 15 * RecruitSizeModifier
+            LC6_RecruitTimer1 = create timer for 60 * RecruitModifier seconds
+            wait until not LC6_WallArcher[4] recruiting
+            enable platoon LC6_WallArcher[4] respond to town JapaneseCapital attack
+            add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[5] to LC6_WallArcher[4] action queue
+            
+        elsif LC6_WallArcher[5] not exists and Wall[6] exists and PLAYER of Wall[6] == 1 and HEALTH of Wall[6] == 1.0 and not town JapaneseCapital is under takeover from player 0 and get LC6_RecruitTimer1 time remaining <= 0 and AttackingPlatoons == 0
+            LC6_WallArcher[5] = recruit ARMY_UNIT_TYPE_RANGED_2 town JapaneseCapital platoon of size 15 * RecruitSizeModifier
+            LC6_RecruitTimer1 = create timer for 60 * RecruitModifier seconds
+            wait until not LC6_WallArcher[5] recruiting
+            enable platoon LC6_WallArcher[5] respond to town JapaneseCapital attack
+            add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[6] to LC6_WallArcher[5] action queue
+            
+        elsif LC6_WallArcher[6] not exists and Wall[7] exists and PLAYER of Wall[7] == 1 and HEALTH of Wall[7] == 1.0 and not town JapaneseCapital is under takeover from player 0 and get LC6_RecruitTimer1 time remaining <= 0 and AttackingPlatoons == 0
+            LC6_WallArcher[6] = recruit ARMY_UNIT_TYPE_RANGED_2 town JapaneseCapital platoon of size 15 * RecruitSizeModifier
+            LC6_RecruitTimer1 = create timer for 60 * RecruitModifier seconds
+            wait until not LC6_WallArcher[6] recruiting
+            enable platoon LC6_WallArcher[6] respond to town JapaneseCapital attack
+            add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[7] to LC6_WallArcher[6] action queue
+        
+        elsif LC6_WallArcher[7] not exists and Wall[8] exists and PLAYER of Wall[8] == 1 and HEALTH of Wall[8] == 1.0 and not town JapaneseCapital is under takeover from player 0 and get LC6_RecruitTimer1 time remaining <= 0 and AttackingPlatoons == 0
+            LC6_WallArcher[7] = recruit ARMY_UNIT_TYPE_RANGED_2 town JapaneseCapital platoon of size 15 * RecruitSizeModifier
+            LC6_RecruitTimer1 = create timer for 60 * RecruitModifier seconds
+            wait until not LC6_WallArcher[7] recruiting
+            enable platoon LC6_WallArcher[7] respond to town JapaneseCapital attack
+            add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[8] to LC6_WallArcher[7] action queue
+        
+        elsif LC6_SiegeCatapult[0] not exists and PLAYER of JapaneseCapital == 1 and get LC6_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+            LC6_SiegeCatapult[0] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseCapital siege weapon
+            LC6_RecruitTimer1 = create timer for 45 * RecruitModifier seconds
+            
+        elsif LC6_SiegeCatapult[1] not exists and PLAYER of JapaneseCapital == 1 and get LC6_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+            LC6_SiegeCatapult[1] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseCapital siege weapon
+            LC6_RecruitTimer1 = create timer for 45 * RecruitModifier seconds
+
+        //elsif LC6_SiegeCatapult[2] not exists and PLAYER of JapaneseCapital == 1 and get LC6_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+        //    LC6_SiegeCatapult[2] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseCapital siege weapon
+        //    LC6_RecruitTimer1 = create timer for 45 seconds
+
+        //Attack Nearest Settlement
+        elsif LC6_Platoon[21] not exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get AttackNearestTownTimer time remaining <= 0 and AttackingPlatoons == 1
+            LC6_Platoon[21] = recruit ARMY_UNIT_TYPE_RANGED_3 town JapaneseCapital platoon of size 50 * RecruitSizeModifier
+            LC6_RecruitTimer1 = create timer for 200 * RecruitModifier seconds
+            enable platoon LC6_Platoon[21] respond to town JapaneseCapital attack
+            wait until not LC6_Platoon[21] recruiting
+            run background script LC6_ArmyBehaivours(LC6_Platoon[21],Ranged,Conqueror,0,0,0,0,0)
+
+        elsif LC6_SiegeCatapult[5] not exists and LC6_Platoon[21] exists and {LC6_Platoon[21]} near {JapaneseCapital} radius 550 and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get AttackNearestTownTimer time remaining <= 0 and AttackingPlatoons == 1
+            LC6_SiegeCatapult[5] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseCapital siege weapon
+            LC6_RecruitTimer1 = create timer for 200 * RecruitModifier seconds
+            run background script LC6_MoveCatapultThenAttack(LC6_SiegeCatapult[5],Conqueror,0,0,0,0)
+
+        //Attack PlayerTown    
+        elsif LC6_Platoon[18] not exists and PLAYER of JapaneseCapital == 1 and get LC6_RecruitTimer1 time remaining <= 0 and TownsConverted >= 3 and not town JapaneseCapital is under takeover from player 0
+            LC6_Platoon[18] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 25 * RecruitSizeModifier
+            LC6_RecruitTimer1 = create timer for 160 * RecruitModifier seconds
+            enable platoon LC6_Platoon[18] respond to town JapaneseCapital attack
+            wait until not LC6_Platoon[18] recruiting
+            AttackingPosition = marker at {AttackPos[0]}
+            AttackingPositionFallBack = marker at {AttackPos[1]}
+            run background script LC6_ArmyBehaivours(LC6_Platoon[18],Melee,Attacker,0,AttackingPosition,AttackingPositionFallBack,0,0)
+
+
+        elsif LC6_Platoon[19] not exists and PLAYER of JapaneseCapital == 1 and get LC6_RecruitTimer1 time remaining <= 0 and TownsConverted >= 4 and not town JapaneseCapital is under takeover from player 0
+            LC6_Platoon[19] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 25 * RecruitSizeModifier
+            LC6_RecruitTimer1 = create timer for 160 * RecruitModifier seconds
+            enable platoon LC6_Platoon[19] respond to town JapaneseCapital attack
+            wait until not LC6_Platoon[19] recruiting
+            AttackingPosition = marker at {AttackPos[0]}+{40,0,40}
+            AttackingPositionFallBack = marker at {AttackPos[1]}+{40,0,40}
+            run background script LC6_ArmyBehaivours(LC6_Platoon[19],Melee,Escort,LC6_SiegeCatapult[3],AttackingPosition,AttackingPositionFallBack,0,0)
+
+        elsif LC6_SiegeCatapult[3] not exists and PLAYER of JapaneseCapital == 1 and get LC6_RecruitTimer1 time remaining <= 0 and TownsConverted >= 4 and not town JapaneseCapital is under takeover from player 0
+            LC6_SiegeCatapult[3] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseCapital siege weapon
+            LC6_RecruitTimer1 = create timer for 100 * RecruitModifier seconds
+            run background script LC6_MoveCatapultThenAttack(LC6_SiegeCatapult[3],0,SiegeRoute4[0],SiegeRoute4[1],SiegeRoute4[2],0)
+
+        elsif LC6_Platoon[20] not exists and PLAYER of JapaneseCapital == 1 and get LC6_RecruitTimer1 time remaining <= 0 and TownsConverted >= 4 and not town JapaneseCapital is under takeover from player 0
+            LC6_Platoon[20] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 25 * RecruitSizeModifier
+            LC6_RecruitTimer1 = create timer for 160 * RecruitModifier seconds
+            enable platoon LC6_Platoon[20] respond to town JapaneseCapital attack
+            wait until not LC6_Platoon[20] recruiting
+            AttackingPosition = marker at {AttackPos[0]}+{-40,0,-40}
+            AttackingPositionFallBack = marker at {AttackPos[1]}+{-40,0,-40}
+            run background script LC6_ArmyBehaivours(LC6_Platoon[20],Melee,Escort,LC6_SiegeCatapult[4],AttackingPosition,AttackingPositionFallBack,0,0)
+
+        elsif LC6_SiegeCatapult[4] not exists and PLAYER of JapaneseCapital == 1 and get LC6_RecruitTimer1 time remaining <= 0 and TownsConverted >= 4 and not town JapaneseCapital is under takeover from player 0
+            LC6_SiegeCatapult[4] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseCapital siege weapon
+            LC6_RecruitTimer1 = create timer for 100 * RecruitModifier seconds
+            run background script LC6_MoveCatapultThenAttack(LC6_SiegeCatapult[4],0,SiegeRoute5[0],SiegeRoute5[1],SiegeRoute5[2],0)
+
+        end if
+
+        if LC6_Platoon[16] not exists and PLAYER of MinorJapaneseTown1 == 1 and get LC6_RecruitTimer2 time remaining <= 0 and not town MinorJapaneseTown1 is under takeover from player 0
+            LC6_Platoon[16] = recruit ARMY_UNIT_TYPE_RANGED_3 town MinorJapaneseTown1 platoon of size 30 * RecruitSizeModifier
+            LC6_RecruitTimer2 = create timer for 180 * RecruitModifier seconds
+            enable platoon LC6_Platoon[16] respond to town MinorJapaneseTown1 attack
+            wait until not LC6_Platoon[16] recruiting
+            run background script LC6_StaticPlatoonsActions(PlatoonPos[6],Ranged,LC6_Platoon[16])
+
+        //Attack Nearest Settlement
+        elsif LC6_Platoon[22] not exists and LC6_Platoon[21] exists and {LC6_Platoon[21]} near {JapaneseCapital} radius 550 and PLAYER of MinorJapaneseTown1 == 1 and not town MinorJapaneseTown1 is under takeover from player 0 and get AttackNearestTownTimer time remaining <= 0 and AttackingPlatoons == 1
+            LC6_Platoon[22] = recruit ARMY_UNIT_TYPE_MELEE_3 town MinorJapaneseTown1 platoon of size 25 * RecruitSizeModifier
+            LC6_RecruitTimer2 = create timer for 200 * RecruitModifier seconds
+            enable platoon LC6_Platoon[22] respond to town MinorJapaneseTown1 attack
+            wait until not LC6_Platoon[22] recruiting
+            run background script LC6_ArmyBehaivours(LC6_Platoon[22],Melee,Conqueror,0,0,0,0,0)
+        end if
+
+        if LC6_Platoon[17] not exists and PLAYER of MinorJapaneseTown2 == 1 and get LC6_RecruitTimer3 time remaining <= 0 and not town MinorJapaneseTown2 is under takeover from player 0
+            LC6_Platoon[17] = recruit ARMY_UNIT_TYPE_MELEE_3 town MinorJapaneseTown2 platoon of size 25 * RecruitSizeModifier
+            LC6_RecruitTimer3 = create timer for 180 * RecruitModifier seconds
+            enable platoon LC6_Platoon[17] respond to town MinorJapaneseTown2 attack
+            wait until not LC6_Platoon[17] recruiting
+            run background script LC6_StaticPlatoonsActions(PlatoonPos[7],Melee,LC6_Platoon[17])
+        end if
+
+    //end if
+
+    if PLAYER of MinorJapaneseTown1 == 1 and MinorJapaneseTown1Buildings == 0
+        MinorJapaneseTown1Buildings = 1
+        build all town MinorJapaneseTown1 buildings in group 0
+        while Counter1 <= 10
+            if Villager1[Counter1] not exists and Counter1 != 10
+                Villager1[Counter1] = create random villager of tribe TRIBE_TYPE_JAPANESE at {MinorJapaneseTown1}
+                attach Villager1[Counter1] to MinorJapaneseTown1
+                release Villager1[Counter1]
+            end if
+            Counter1++
+        end while
+    end if
+
+    if PLAYER of MinorJapaneseTown2 == 1 and MinorJapaneseTown2Buildings == 0
+        MinorJapaneseTown2Buildings = 1
+        build all town MinorJapaneseTown2 buildings in group 0
+        Counter2 = 0
+        while Counter2 <= 10
+            if Villager2[Counter2] not exists and Counter2 != 10
+                Villager2[Counter2] = create random villager of tribe TRIBE_TYPE_JAPANESE at {MinorJapaneseTown2}
+                attach Villager2[Counter2] to MinorJapaneseTown2
+                release Villager2[Counter2]
+            end if
+            Counter2++
+        end while
+    end if
+
+    if PLAYER of MinorJapaneseTown1 == 0 or PLAYER of MinorJapaneseTown2 == 0 or PLAYER of MinorTown5 == 0 or PLAYER of MinorTown4 == 0 or PLAYER of MinorTown3 == 0 or PLAYER of MinorTown9 == 0
+        //Take over a town and start attacking the player a lot    
+        if NearestSettlement != 0 and PLAYER of NearestSettlement == 0
+            AttackingPlatoons = 1
+        end if
+
+    elsif PLAYER of NearestSettlement == 1
+        AttackingPlatoons = 0
+    end if
+
+    if get SirenTimer time remaining <= 300 and CHARGE of AIEpic != 1.0 and PLAYER of JapaneseCapital == 1
+        CHARGE of AIEpic = 1.0
+    end if
+
+    Platoon = get platoon of player 0 nearest {JapaneseCapital} radius 500
+    NumberofPlatoons = get number of platoon of player 0 at {JapaneseCapital} radius 500
+
+    if CinemaIsRunning == 0
+        if get number of villagers in platoon Platoon > 79 or NumberofPlatoons >= 3 or town MinorJapaneseTown1 is under takeover from player 0 or town MinorJapaneseTown2 is under takeover from player 0 or {Platoon} near {JapaneseCapital} radius 200
+            if HEALTH of AIEpic == 1.0 and get SirenTimer time remaining <= 0 and PLAYER of JapaneseCapital == 1
+                if town MinorJapaneseTown1 is under takeover from player 0
+                    Platoon = get platoon of player 0 nearest {MinorJapaneseTown1} radius 500
+                end if
+                if town MinorJapaneseTown2 is under takeover from player 0
+                    Platoon = get platoon of player 0 nearest {MinorJapaneseTown2} radius 500
+                end if
+                Influence = get player 0 influence at {Platoon}
+                if Influence < 1
+                    enable predefined sky "SIREN" time 9
+                    SirenTimer = create timer for SIRENDELAY * EpicModifier seconds
+                    SIRENDELAY += 500
+                    SirenWarning = create visual effect VISUAL_EFFECT_EPIC_TARGET_WARNING at {Platoon} + {0.000,10.000,0.000} time 15 target {Platoon} + {0.000,10.000,0.000}
+                    if FireSiren != 2
+                        FireSiren = 1
+                    end if
+                    SirenSpell = create siren at {Platoon} player 1
+                    run background script Land6Siren(AIEpic, SirenSpell)
+                    CHARGE of AIEpic = 0
+                end if
+            end if
+        end if
+    end if
+
+    if get player 0 impressiveness >= 8000 and ScriptAttack == 0 and Difficulty >= 2
+        ScriptAttack = 1
+        if LC6_Platoon[18] not exists
+            LC6_Platoon[18] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 50 * RecruitSizeModifier
+            AttackingPosition = marker at {AttackPos[0]}
+            AttackingPositionFallBack = marker at {AttackPos[1]}
+            run background script LC6_ArmyBehaivours(LC6_Platoon[18],Melee,Attacker,0,AttackingPosition,AttackingPositionFallBack,0,0)
+        end if
+        if LC6_Platoon[19] not exists and Difficulty >= 3
+            LC6_Platoon[19] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 20 * RecruitSizeModifier
+            AttackingPosition = marker at {AttackPos[0]}+{40,0,40}
+            AttackingPositionFallBack = marker at {AttackPos[1]}+{40,0,40}
+            run background script LC6_ArmyBehaivours(LC6_Platoon[19],Melee,Escort,LC6_SiegeCatapult[3],AttackingPosition,AttackingPositionFallBack,0,0)
+        end if
+        if LC6_SiegeCatapult[3] not exists and Difficulty >= 3
+            LC6_SiegeCatapult[3] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseCapital siege weapon
+            run background script LC6_MoveCatapultThenAttack(LC6_SiegeCatapult[3],0,SiegeRoute4[0],SiegeRoute4[1],SiegeRoute4[2],1)
+        end if
+        if LC6_Platoon[20] not exists and Difficulty >= 4
+            LC6_Platoon[20] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 20 * RecruitSizeModifier
+            AttackingPosition = marker at {AttackPos[0]}+{-40,0,-40}
+            AttackingPositionFallBack = marker at {AttackPos[1]}+{-40,0,-40}
+            run background script LC6_ArmyBehaivours(LC6_Platoon[20],Melee,Escort,LC6_SiegeCatapult[4],AttackingPosition,AttackingPositionFallBack,0,0)
+        end if
+        if LC6_SiegeCatapult[4] not exists and Difficulty >= 4
+            LC6_SiegeCatapult[4] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseCapital siege weapon
+            run background script LC6_MoveCatapultThenAttack(LC6_SiegeCatapult[4],0,SiegeRoute5[0],SiegeRoute5[1],SiegeRoute5[2],1)
+        end if
+
+
+        LC6_RecruitTimer1 = create timer for 150 * RecruitModifier seconds
+    end if
+
+end loop
+
+end script LC6_Japanese_Capital
+
+begin script LC6_AttackNearestTownTimer
+
+start
+
+begin loop
+
+    if get AttackNearestTownTimer time remaining <= 0
+        wait 45 seconds
+        AttackNearestTownTimer = create timer for 1000 * RecruitModifier seconds
+    end if
+
+end loop
+
+end script LC6_AttackNearestTownTimer
+
+begin script LC6_DefendPlatoons
+
+    PlayerPlatoon = 0
+    DefendRecruitTimer1 = create timer for 0 seconds
+    DefendRecruitTimer2 = create timer for 0 seconds
+    DefendRecruitTimer3 = create timer for 0 seconds
+
+start
+
+begin loop
+
+    PlayerPlatoon = get platoon of player 0 nearest {JapaneseCapital} radius 300
+    if PlayerPlatoon exists and LC6_Platoon[8] not exists and LC6_Platoon[9] not exists and get DefendRecruitTimer1 time remaining <= 0 and PLAYER of JapaneseCapital == 1 //Makes a couple of defend platoons
+        LC6_Platoon[8] = recruit ARMY_UNIT_TYPE_MELEE_2 town JapaneseCapital platoon of size number from 15 to 15 * RecruitSizeModifier
+        enable platoon LC6_Platoon[8] respond to town JapaneseCapital attack
+        wait until not LC6_Platoon[8] recruiting
+        
+        LC6_Platoon[9] = recruit ARMY_UNIT_TYPE_MELEE_2 town JapaneseCapital platoon of size number from 15 to 15 * RecruitSizeModifier
+        enable platoon LC6_Platoon[9] respond to town JapaneseCapital attack
+        wait until not LC6_Platoon[9] recruiting
+        
+        DefendRecruitTimer1 = create timer for 240 * RecruitModifier seconds
+    end if
+
+    PlayerPlatoon = get platoon of player 0 nearest {MinorJapaneseTown1} radius 300
+    if PlayerPlatoon exists and LC6_Platoon[10] not exists and LC6_Platoon[11] not exists and get DefendRecruitTimer2 time remaining <= 0 and PLAYER of MinorJapaneseTown1 == 1 //Makes a couple of defend platoons
+        LC6_Platoon[10] = recruit ARMY_UNIT_TYPE_MELEE_2 town MinorJapaneseTown1 platoon of size number from 15 to 15 * RecruitSizeModifier
+        enable platoon LC6_Platoon[10] respond to town MinorJapaneseTown1 attack
+        wait until not LC6_Platoon[10] recruiting
+        
+        LC6_Platoon[11] = recruit ARMY_UNIT_TYPE_MELEE_2 town MinorJapaneseTown1 platoon of size number from 15 to 15 * RecruitSizeModifier
+        enable platoon LC6_Platoon[11] respond to town MinorJapaneseTown1 attack
+        wait until not LC6_Platoon[11] recruiting
+        
+        DefendRecruitTimer2 = create timer for 240 * RecruitModifier seconds
+    end if
+
+    PlayerPlatoon = get platoon of player 0 nearest {MinorJapaneseTown2} radius 300
+    if PlayerPlatoon exists and LC6_Platoon[12] not exists and LC6_Platoon[13] not exists and get DefendRecruitTimer3 time remaining <= 0 and PLAYER of MinorJapaneseTown2 == 1 //Makes a couple of defend platoons
+        LC6_Platoon[12] = recruit ARMY_UNIT_TYPE_MELEE_2 town MinorJapaneseTown2 platoon of size number from 15 to 15 * RecruitSizeModifier
+        enable platoon LC6_Platoon[12] respond to town MinorJapaneseTown2 attack
+        wait until not LC6_Platoon[12] recruiting
+        
+        LC6_Platoon[13] = recruit ARMY_UNIT_TYPE_MELEE_2 town MinorJapaneseTown2 platoon of size number from 15 to 15 * RecruitSizeModifier
+        enable platoon LC6_Platoon[13] respond to town MinorJapaneseTown2 attack
+        wait until not LC6_Platoon[13] recruiting
+        
+        DefendRecruitTimer3 = create timer for 240 * RecruitModifier seconds
+    end if
+
+end loop
+
+end script LC6_DefendPlatoons
+
+begin script LC6_Enemy_Migrations
+
+start
+
+wait 240 seconds
+
+if not get town MinorTown8 is migrating to == PlayerTown and MinorTown8 exists and PLAYER of MinorTown8 != 1 and not town MinorTown8 is under takeover from player 0
+    EnemyMigrations = EnemyMigrations + 1
+    start migration from MinorTown8 to JapaneseCapital
+end if
+
+wait 400 seconds
+
+if not get town MinorTown10 is migrating to == PlayerTown and MinorTown10 exists and PLAYER of MinorTown10 != 1 and not town MinorTown10 is under takeover from player 0
+    EnemyMigrations = EnemyMigrations + 1
+    start migration from MinorTown10 to JapaneseCapital
+end if
+
+wait 300 seconds
+
+if not get town MinorTown9 is migrating to == PlayerTown and MinorTown9 exists and PLAYER of MinorTown9 != 1 and not town MinorTown9 is under takeover from player 0
+    EnemyMigrations = EnemyMigrations + 1
+    start migration from MinorTown9 to JapaneseCapital
+end if
+
+//if not get town MinorJapaneseTown2 is migrating to == PlayerTown and MinorJapaneseTown2 exists and not PLAYER of MinorJapaneseTown2 != 1
+//    EnemyMigrations = EnemyMigrations + 1
+//    start migration from MinorJapaneseTown2 to JapaneseCapital
+//end if
+
+wait 400 seconds
+
+if not get town MinorTown7 is migrating to == PlayerTown and MinorTown7 exists and PLAYER of MinorTown7 != 1 and not town MinorTown7 is under takeover from player 0
+    EnemyMigrations = EnemyMigrations + 1
+    start migration from MinorTown7 to JapaneseCapital
+end if
+
+end script LC6_Enemy_Migrations
+
+begin script LC6_GetNearestSettlement
+
+    NearestTown = 0
+
+start
+
+begin loop
+    if PLAYER of JapaneseCapital == 1
+        if PLAYER of MinorJapaneseTown1 == 0
+            NearestTown = MinorJapaneseTown1
+
+        elsif PLAYER of MinorJapaneseTown2 == 0
+            NearestTown = MinorJapaneseTown2
+
+        elsif PLAYER of MinorTown9 == 0
+            NearestTown = MinorTown9
+
+        elsif PLAYER of MinorTown5 == 0
+            NearestTown = MinorTown5
+
+        elsif PLAYER of MinorTown4 == 0
+            NearestTown = MinorTown4
+
+        elsif PLAYER of MinorTown3 == 0
+            NearestTown = MinorTown3
+
+        else
+            NearestTown = PlayerTown
+
+        end if
+
+        NearestSettlement = NearestTown
+        wait 45 seconds
+
+    end if
+end loop
+
+end script LC6_GetNearestSettlement
+
+begin script SpawnJapaneseTroops
+
+start
+
+    wait until IntroFinished == 1
+    
+    LC6_Platoon[0] = create platoon PLATOON_INFO_JAPANESE_RANGED_3 at {1669.44,72.88,1516.87} with 60 * RecruitSizeModifier men and 0 women
+    LC6_Platoon[1] = create platoon PLATOON_INFO_JAPANESE_MELEE_4 at {1639.27,72.78,1482.29} with 60 * RecruitSizeModifier men and 0 women
+    
+    attach LC6_Platoon[0] to JapaneseCapital
+    attach LC6_Platoon[1] to JapaneseCapital
+
+    enable platoon LC6_Platoon[0] respond to town JapaneseCapital attack
+    enable platoon LC6_Platoon[1] respond to town JapaneseCapital attack
+    
+    run background script LC6_Platoon0Actions
+    run background script LC6_Platoon1Actions
+
+end script SpawnJapaneseTroops
+
+begin script IncreaseCapitalImpressiveness(Building)
+
+    Counter = 0
+
+start
+
+Counter = 0
+
+begin loop
+    
+    while Counter < 100
+        
+        MINOR_JAPCAPITAL_IMPRESSIVENESS = MINOR_JAPCAPITAL_IMPRESSIVENESS + Building
+        
+        wait 1.5 seconds
+        
+        Counter++
+    end while
+    
+    until Counter == 100
+end loop
+
+end script IncreaseCapitalImpressiveness
+
+begin script IncreaseCapitalVillagers(VillagerCount)
+
+    Counter = 0
+    Villager = 0
+
+start
+
+Counter = 0
+
+begin loop
+    
+    while Counter < VillagerCount and not {JapaneseCapital} viewed
+        Villager = create random villager of tribe TRIBE_TYPE_JAPANESE at {JapaneseCapital} + {number from -12 to 12, 0, number from -12 to 12}//create VILLAGER VILLAGER_INFO_JAPANESE_FORESTER_MALE at {1013.581, 132.333, 2002.798} + {number from -3 to 3, 0, number from -3 to 3}
+        attach Villager to JapaneseCapital
+        release Villager
+        
+        wait number from 10 to 16 seconds
+        
+        Counter++
+    end while
+    
+    until Counter == VillagerCount
+end loop
+
+end script IncreaseCapitalVillagers
+
+begin script Armory_Builder
+
+Armory_Melee = 0
+Armory_Ranged = 0
+Counter = 0
+
+start
+    
+begin loop
+    Armory_Melee = get building ABODE_NUMBER_MELEE_ARMOURY in JapaneseCapital min built 0.0
+    Armory_Ranged = get building ABODE_NUMBER_RANGED_ARMOURY in JapaneseCapital min built 0.0
+    
+until Armory_Melee exists and Armory_Ranged exists
+end loop
+
+begin loop
+    
+    while Counter < 10 and not {Armory_Melee} viewed and not {Armory_Ranged} viewed
+        add resource ORE number from 50 to 75 to Armory_Melee
+        add resource WOOD number from 250 to 275 to Armory_Melee
+        add resource ORE number from 50 to 75 to Armory_Ranged
+        add resource WOOD number from 250 to 275 to Armory_Ranged
+        
+        wait number from 2 to 6 seconds
+        
+        Counter++
+    end while
+    
+    until Counter == 10
+end loop
+
+end script Armory_Builder
+
+begin script LC6_JapaneseCapitalVillagerManager
+
+    Counter = 0
+    Villager = 0
+    HousesBuilt = 0
+
+start
+
+begin loop
+
+    wait 900 * BuilderModifier seconds
+    Counter = 0
+
+    if PLAYER of JapaneseCapital == 1
+        if HousesBuilt == 0
+            HousesBuilt = 1
+            build all town JapaneseCapital buildings in group 20
+        end if
+        begin loop
+            Villager = create random villager of tribe TRIBE_TYPE_JAPANESE at {JapaneseCapital} + {number from -12 to 12, 0, number from -12 to 12}//create VILLAGER VILLAGER_INFO_JAPANESE_FORESTER_MALE at {1013.581, 132.333, 2002.798} + {number from -3 to 3, 0, number from -3 to 3}
+            attach Villager to JapaneseCapital
+            release Villager
+            
+            wait number from 6 to 10 seconds
+            Counter++
+            until Counter >= 25 or PLAYER of JapaneseCapital != 1
+        end loop
+    end if
+
+end loop
+
+end script LC6_JapaneseCapitalVillagerManager
+
+begin script LC6_JapaneseMinorTown1VillagerManager
+
+    Counter = 0
+    Villager = 0
+    HousesBuilt = 0
+
+start
+
+begin loop
+
+    wait 900 * BuilderModifier seconds
+    Counter = 0
+
+    if PLAYER of MinorJapaneseTown1 == 1
+        if HousesBuilt == 0
+            HousesBuilt = 1
+            build all town MinorJapaneseTown1 buildings in group 10
+        end if
+        begin loop
+            Villager = create random villager of tribe TRIBE_TYPE_JAPANESE at {MinorJapaneseTown1} + {number from -12 to 12, 0, number from -12 to 12}//create VILLAGER VILLAGER_INFO_JAPANESE_FORESTER_MALE at {1013.581, 132.333, 2002.798} + {number from -3 to 3, 0, number from -3 to 3}
+            attach Villager to MinorJapaneseTown1
+            release Villager
+            
+            wait number from 6 to 10 seconds
+            Counter++
+            until Counter >= 15 or PLAYER of MinorJapaneseTown1 != 1
+        end loop
+    end if
+
+end loop
+
+end script LC6_JapaneseMinorTown1VillagerManager
+
+begin script LC6_JapaneseMinorTown2VillagerManager
+
+    Counter = 0
+    Villager = 0
+    HousesBuilt = 0
+
+start
+
+begin loop
+
+    wait 900 * BuilderModifier seconds
+    Counter = 0
+
+    if PLAYER of MinorJapaneseTown2 == 1
+        if HousesBuilt == 0
+            HousesBuilt = 1
+            build all town MinorJapaneseTown2 buildings in group 10
+        end if
+        begin loop
+            Villager = create random villager of tribe TRIBE_TYPE_JAPANESE at {MinorJapaneseTown2} + {number from -12 to 12, 0, number from -12 to 12}//create VILLAGER VILLAGER_INFO_JAPANESE_FORESTER_MALE at {1013.581, 132.333, 2002.798} + {number from -3 to 3, 0, number from -3 to 3}
+            attach Villager to MinorJapaneseTown2
+            release Villager
+            
+            wait number from 6 to 10 seconds
+            Counter++
+            until Counter >= 15 or PLAYER of MinorJapaneseTown2 != 1
+        end loop
+    end if
+
+end loop
+
+end script LC6_JapaneseMinorTown2VillagerManager
+
+begin script LC6_JapaneseCapitalRessourceManager
+
+start
+
+begin loop
+
+    wait 5 seconds
+
+    if PLAYER of JapaneseCapital == 1
+        if (get town JapaneseCapital RESOURCE_TYPE_ORE total < 19000)
+            add resource RESOURCE_TYPE_ORE number from 100 to 500 to JapaneseCapital
+        elsif (get town JapaneseCapital RESOURCE_TYPE_WOOD total < 20000)
+            add resource RESOURCE_TYPE_WOOD number from 500 to 1000 to JapaneseCapital
+        elsif (get town JapaneseCapital RESOURCE_TYPE_FOOD total < 20000)
+            add resource RESOURCE_TYPE_FOOD number from 500 to 1500 to JapaneseCapital
+        end if
+    end if
+    
+    until PLAYER of JapaneseCapital != 1
+end loop    
+
+end script LC6_JapaneseCapitalRessourceManager
+
+begin script LC6_MinorJapaneseTown1RessourceManager
+
+start
+
+begin loop
+
+    wait 5 seconds
+
+    if PLAYER of MinorJapaneseTown1 == 1
+        if (get town MinorJapaneseTown1 RESOURCE_TYPE_ORE total < 5000)
+            add resource RESOURCE_TYPE_ORE number from 100 to 500 to MinorJapaneseTown1
+        elsif (get town MinorJapaneseTown1 RESOURCE_TYPE_WOOD total < 12000)
+            add resource RESOURCE_TYPE_WOOD number from 500 to 1000 to MinorJapaneseTown1
+        elsif (get town MinorJapaneseTown1 RESOURCE_TYPE_FOOD total < 12000)
+            add resource RESOURCE_TYPE_FOOD number from 500 to 1500 to MinorJapaneseTown1
+        end if
+    end if
+    
+    until PLAYER of MinorJapaneseTown1 != 1
+end loop    
+
+end script LC6_MinorJapaneseTown1RessourceManager
+
+begin script LC6_MinorJapaneseTown2RessourceManager
+
+start
+
+begin loop
+
+    wait 5 seconds
+
+    if PLAYER of MinorJapaneseTown2 == 1
+        if (get town MinorJapaneseTown2 RESOURCE_TYPE_ORE total < 5000)
+            add resource RESOURCE_TYPE_ORE number from 100 to 500 to MinorJapaneseTown2
+        elsif (get town MinorJapaneseTown2 RESOURCE_TYPE_WOOD total < 7500)
+            add resource RESOURCE_TYPE_WOOD number from 500 to 1000 to MinorJapaneseTown2
+        elsif (get town MinorJapaneseTown2 RESOURCE_TYPE_FOOD total < 7500)
+            add resource RESOURCE_TYPE_FOOD number from 500 to 1500 to MinorJapaneseTown2
+        end if
+    end if
+    
+    until PLAYER of MinorJapaneseTown2 != 1
+end loop    
+
+end script LC6_MinorJapaneseTown2RessourceManager
+
+begin script SirenResourceManager
+
+    Counter = 0
+    Tree = 0
+
+start
+
+begin loop
+    AIEpic = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_SIREN at {1691.79,73.22,1593.13} radius 150
+    
+until AIEpic exists
+end loop
+
+disable AIEpic hurt by fire
+
+begin loop
+    
+    while Counter < 100 and not {AIEpic} viewed
+        add resource ORE number from 40 to 50 to AIEpic
+        add resource WOOD number from 70 to 80 to AIEpic
+        
+        wait number from 2 to 6 seconds
+        
+        Counter++
+    end while
+    
+    until Counter == 100
+end loop
+
+wait until HEALTH of AIEpic >= 1.0
+
+MINOR_JAPCAPITAL_IMPRESSIVENESS = MINOR_JAPCAPITAL_IMPRESSIVENESS + 2275
+
+//Players like to destroy epics using a burning tree, so delete the tree
+begin loop
+    Tree = get MOBILE_OBJECT at {AIEpic} radius 20
+    if Tree on fire and Tree is HELD
+        empty player hand
+        delete Tree
+    end if
+end loop
+
+end script SirenResourceManager
+
+begin script SirenPreCutscene
+
+start
+
+begin loop
+    AIEpic = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_SIREN at {1691.79,73.22,1593.13} radius 150
+    
+until AIEpic exists and HEALTH of AIEpic > 0.45
+end loop
+
+CinemaIsRunning = 1
+begin cinema
+
+
+    store camera details
+    set fade red 0 green 0 blue 0 time 4
+    wait 4.1 seconds
+    set camera position to {AIEpic} + {12,7,12}
+    set camera focus to {AIEpic} + {0,7,0}
+    move camera position to {AIEpic} + {12,9,-12} time 12
+    move camera focus to {AIEpic} + {0,12,0} time 12
+    start music "cut_scene_sinister_02" loop 1
+    set fade in time 4
+    wait 3 seconds
+    say "BW2T_SCRIPT_06FINAL_EPIC_SIREN_READY_2"
+    wait until read
+    wait 2.5 seconds
+    set fade red 0 green 0 blue 0 time 4
+    wait 4 seconds
+    restore camera details
+    set fade in time 4
+
+end cinema
+CinemaIsRunning = 0
+
+end script SirenPreCutscene
+
+begin script LC6_AltarBehavior
+
+    Altar1Pos = 0
+    Altar2Pos = 0
+    Altar3Pos = 0
+
+    Altar1EffectPos = 0
+    Altar2EffectPos = 0
+    Altar3EffectPos = 0
+
+    Altar[3]
+
+    VisualEffect1 = 0
+    VisualEffect2 = 0
+    VisualEffect3 = 0
+
+    PlayerPlatoon = 0
+    PlayerCatapult = 0
+    PlayerCreature = 0
+
+    MyPlatoon = 0
+
+    RandomNumber = 0
+
+    MiracleTimer1 = 0
+    MiracleTimer2 = 0
+    MiracleTimer3 = 0
+
+    EvilWonderStart = 0
+    EvilWonderTarget = 0
+    EvilWonder = 0
+
+start
+
+    Altar1Pos = marker at {1492.38,69.59,1429.16}
+    Altar2Pos = marker at {1728.79,74.44,1454.90}
+
+    Altar1EffectPos = marker at {1499.81,70.03,1419.57}
+    Altar2EffectPos = marker at {1715.94,74.38,1454.15}
+
+    wait until AltarsActivated == 1
+
+    Altar[0] = get HOUSE ALTAR at {Altar1Pos} radius 15
+    Altar[1] = get HOUSE ALTAR at {Altar2Pos} radius 15
+
+    add resource RESOURCE_TYPE_WOOD number from 3000 to 3300 to Altar[0]
+    add resource RESOURCE_TYPE_WOOD number from 3000 to 3300 to Altar[1]
+
+    set research ARTEFACT_MAGIC_TYPE_EARTH_METEOR available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_MAGIC_TYPE_FIRE_FIRE available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_MAGIC_TYPE_FIRE_LAVA available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_MAGIC_TYPE_AIR_WIND available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_MAGIC_TYPE_AIR_TEMPEST available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+
+begin loop
+
+    set player 1 mana 75000
+
+    if HEALTH of Altar[0] == 1.0 and PLAYER of JapaneseCapital == 1
+        if not VisualEffect1 exists
+            VisualEffect1 = create visual effect VISUAL_EFFECT_SIREN_BEAM at {Altar1EffectPos} time -1 target {Altar1EffectPos} + {0,50,0}
+        end if
+
+        //Fire Wonders
+        PlayerPlatoon = get platoon of player 0 nearest {Altar1Pos} radius 150
+        PlayerCreature = get distance from {Altar1Pos} to {MyCreature}
+        PlayerCatapult = get siege weapon of player 0 nearest {Altar1Pos} radius 125
+        if PlayerPlatoon exists and get MiracleTimer1 time remaining <= 0 and CinemaIsRunning == 0
+            RandomNumber = number from 1 to 3
+            if RandomNumber <= 2
+                MiracleTimer1 = create timer for 60 * EpicModifier seconds
+                EvilWonderStart = marker at ({Altar1Pos} + {0,25,0})
+                EvilWonderTarget = marker at {PlayerPlatoon} + {number from 2 to 40,3,number from 2 to 40}
+                EvilWonder = make player 1 throw miracle MIRACLE_TYPE_FIRE from ({EvilWonderStart} + {0,-3.0,0}) heading ({EvilWonderTarget} + {0,21,0} - {EvilWonderStart})
+            else
+                MiracleTimer1 = create timer for 60 * EpicModifier seconds
+                EvilWonderStart = marker at ({Altar1Pos} + {0,25,0})
+                EvilWonderTarget = marker at {PlayerPlatoon} + {number from 2 to 40,3,number from 2 to 40}
+                EvilWonder = make player 1 throw miracle MIRACLE_TYPE_TORNADO from ({EvilWonderStart} + {0,-3.0,0}) heading ({EvilWonderTarget} + {0,21,0} - {EvilWonderStart})
+            end if
+
+        elsif PlayerCreature <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of MyCreature > 0.00 and get MiracleTimer1 time remaining <= 0
+            RandomNumber = number from 1 to 3
+            if RandomNumber <= 1
+                MiracleTimer1 = create timer for 60 * EpicModifier seconds
+                EvilWonderStart = marker at ({Altar1Pos} + {0,25,0})
+                EvilWonderTarget = marker at {MyCreature} + {number from 2 to 40,3,number from 2 to 40}
+                EvilWonder = make player 1 throw miracle MIRACLE_TYPE_FIRE from ({EvilWonderStart} + {0,-3.0,0}) heading ({EvilWonderTarget} + {0,21,0} - {EvilWonderStart})
+            else
+                MiracleTimer1 = create timer for 60 * EpicModifier seconds
+                EvilWonderStart = marker at ({Altar1Pos} + {0,25,0})
+                EvilWonderTarget = marker at {MyCreature} + {number from 1 to 5,3,number from 1 to 5}
+                EvilWonder = make player 1 throw miracle MIRACLE_TYPE_METEOR from ({EvilWonderStart} + {0,-3.0,0}) heading ({EvilWonderTarget} + {0,21,0} - {EvilWonderStart})
+            end if
+        elsif PlayerCatapult exists and get MiracleTimer1 time remaining <= 0
+            RandomNumber = number from 1 to 3
+            if RandomNumber <= 3
+                MiracleTimer1 = create timer for 60 * EpicModifier seconds
+                EvilWonderStart = marker at ({Altar1Pos} + {0,25,0})
+                EvilWonderTarget = marker at {PlayerCatapult} + {number from 2 to 40,3,number from 2 to 40}
+                EvilWonder = make player 1 throw miracle MIRACLE_TYPE_FIRE from ({EvilWonderStart} + {0,-3.0,0}) heading ({EvilWonderTarget} + {0,21,0} - {EvilWonderStart})
+            end if
+        end  if
+
+    else
+        if VisualEffect1 exists
+            delete VisualEffect1
+        end if
+    end if
+
+    if HEALTH of Altar[1] == 1.0 and PLAYER of JapaneseCapital == 1
+        if not VisualEffect2 exists
+            VisualEffect2 = create visual effect VISUAL_EFFECT_SIREN_BEAM at {Altar2EffectPos} time -1 target {Altar2EffectPos} + {0,50,0}
+        end if
+
+        //Fire Wonders
+        PlayerPlatoon = get platoon of player 0 nearest {Altar2Pos} radius 150
+        PlayerCreature = get distance from {Altar2Pos} to {MyCreature}
+        PlayerCatapult = get siege weapon of player 0 nearest {Altar2Pos} radius 125
+        if PlayerPlatoon exists and get MiracleTimer2 time remaining <= 0 and CinemaIsRunning == 0
+            RandomNumber = number from 1 to 3
+            if RandomNumber <= 2
+                MiracleTimer2 = create timer for 60 * EpicModifier seconds
+                EvilWonderStart = marker at ({Altar2Pos} + {0,25,0})
+                EvilWonderTarget = marker at {PlayerPlatoon} + {number from 2 to 40,3,number from 2 to 40}
+                EvilWonder = make player 1 throw miracle MIRACLE_TYPE_FIRE from ({EvilWonderStart} + {0,-3.0,0}) heading ({EvilWonderTarget} + {0,21,0} - {EvilWonderStart})
+            else
+                MiracleTimer2 = create timer for 60 * EpicModifier seconds
+                EvilWonderStart = marker at ({Altar2Pos} + {0,25,0})
+                EvilWonderTarget = marker at {PlayerPlatoon} + {number from 2 to 40,3,number from 2 to 40}
+                EvilWonder = make player 1 throw miracle MIRACLE_TYPE_TORNADO from ({EvilWonderStart} + {0,-3.0,0}) heading ({EvilWonderTarget} + {0,21,0} - {EvilWonderStart})
+            end if
+
+        elsif PlayerCreature <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of MyCreature > 0.00 and get MiracleTimer2 time remaining <= 0
+            RandomNumber = number from 1 to 3
+            if RandomNumber <= 1
+                MiracleTimer2 = create timer for 60 * EpicModifier seconds
+                EvilWonderStart = marker at ({Altar2Pos} + {0,25,0})
+                EvilWonderTarget = marker at {MyCreature} + {number from 2 to 40,3,number from 2 to 40}
+                EvilWonder = make player 1 throw miracle MIRACLE_TYPE_FIRE from ({EvilWonderStart} + {0,-3.0,0}) heading ({EvilWonderTarget} + {0,21,0} - {EvilWonderStart})
+            else
+                MiracleTimer2 = create timer for 60 * EpicModifier seconds
+                EvilWonderStart = marker at ({Altar2Pos} + {0,25,0})
+                EvilWonderTarget = marker at {MyCreature} + {number from 1 to 5,3,number from 1 to 5}
+                EvilWonder = make player 1 throw miracle MIRACLE_TYPE_METEOR from ({EvilWonderStart} + {0,-3.0,0}) heading ({EvilWonderTarget} + {0,21,0} - {EvilWonderStart})
+            end if
+        elsif PlayerCatapult exists and get MiracleTimer2 time remaining <= 0
+            RandomNumber = number from 1 to 3
+            if RandomNumber <= 3
+                MiracleTimer2 = create timer for 60 * EpicModifier seconds
+                EvilWonderStart = marker at ({Altar2Pos} + {0,25,0})
+                EvilWonderTarget = marker at {PlayerCatapult} + {number from 2 to 40,3,number from 2 to 40}
+                EvilWonder = make player 1 throw miracle MIRACLE_TYPE_FIRE from ({EvilWonderStart} + {0,-3.0,0}) heading ({EvilWonderTarget} + {0,21,0} - {EvilWonderStart})
+            end if
+        end  if
+
+    else
+        if VisualEffect2 exists
+            delete VisualEffect2
+        end if
+    end if
+
+end loop
+
+end script LC6_AltarBehavior
+
+begin script LC6_PlatoonBehaviors
+
+start
+
+begin loop
+    if town JapaneseCapital is under takeover from player 0
+        enable platoon LC6_Platoon[0] respond to town JapaneseCapital attack
+        enable platoon LC6_Platoon[2] respond to town JapaneseCapital attack
+        enable platoon LC6_Platoon[3] respond to town JapaneseCapital attack
+        enable platoon LC6_Platoon[4] respond to town JapaneseCapital attack
+        enable platoon LC6_Platoon[7] respond to town JapaneseCapital attack
+        enable platoon LC6_WallArcher[0] respond to town JapaneseCapital attack
+        enable platoon LC6_WallArcher[1] respond to town JapaneseCapital attack
+        enable platoon LC6_WallArcher[2] respond to town JapaneseCapital attack
+        enable platoon LC6_WallArcher[3] respond to town JapaneseCapital attack
+    else
+        disable platoon LC6_Platoon[0] respond to town JapaneseCapital attack
+        disable platoon LC6_Platoon[2] respond to town JapaneseCapital attack
+        disable platoon LC6_Platoon[3] respond to town JapaneseCapital attack
+        disable platoon LC6_Platoon[4] respond to town JapaneseCapital attack
+        disable platoon LC6_Platoon[7] respond to town JapaneseCapital attack
+        disable platoon LC6_WallArcher[0] respond to town JapaneseCapital attack
+        disable platoon LC6_WallArcher[1] respond to town JapaneseCapital attack
+        disable platoon LC6_WallArcher[2] respond to town JapaneseCapital attack
+        disable platoon LC6_WallArcher[3] respond to town JapaneseCapital attack
+    end if
+    wait number from 5 to 10 seconds
+end loop
+
+end script LC6_PlatoonBehaviors
+
+begin script DisableLocalPlatoonResponse
+
+    Counter = 0
+
+start
+
+begin loop
+    if Counter > 99
+        Counter = 0
+        wait 30 seconds
+    end if
+    if LC6_Platoon[Counter] exists
+        disable platoon LC6_Platoon[Counter] respond to local platoon attack
+    end if
+    if LC6_WallArcher[Counter] exists
+        disable platoon LC6_WallArcher[Counter] respond to local platoon attack
+    end if
+    Counter++
+end loop
+
+end script DisableLocalPlatoonResponse

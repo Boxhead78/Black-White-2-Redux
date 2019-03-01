@@ -1,0 +1,320 @@
+///////////////////////////////////////////////////////////////////////////////
+//    Land 4 Outro
+//    ~~~~~~~~~~~~~
+//
+//    Start date:            04.02.17            By: Boxhead
+//    Update date:        27.05.17            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+define script LC4_Outro
+define script LC4_EndLand
+define script Land4Departure
+define script Run_Land6
+
+begin script LC4_Outro
+
+    L4TownConversionMethod = 0
+    GateHouse = 0
+    Counter = 0
+    CreationPos = 0
+    Vagrants[100]
+    CheckWhatconversionmethodwas=0
+    PlayerAlignment = 0
+
+start
+
+    wait until PLAYER of NorseTown != 1 and PLAYER of NorseCapital != 1 and PLAYER of PlayerTown != 1
+
+    PD_ForcedSaving = 1
+    wait until PD_ForcedSaving == 1 or 10 seconds
+    stop script "SavePersistentDataSetData"
+    set persistent data "PREVLAND_OVER" to 1
+    run script SavePersistentDataGetData
+
+    set town PlayerTown capture all enemy towns
+    disable dialogue manager
+    disable game can be lost
+    set player 0 objective TRIBUTE_OBJECTIVE_SCRIPT_CONTROLLED_WIN_LAND value 1
+    //increment tribute by 120000
+    PlayerAlignment = get player 0 alignment
+    if PLAYER of NorseCapital == 0
+        L4TownConversionMethod = 1
+        PlayerAlignment = PlayerAlignment - 0.15
+        ALIGNMENT of MyCreature = ALIGNMENT of MyCreature - 0.1
+    else
+        L4TownConversionMethod = 2
+        PlayerAlignment = PlayerAlignment + 0.15
+        ALIGNMENT of MyCreature = ALIGNMENT of MyCreature + 0.1
+    end if
+    set player 0 alignment PlayerAlignment
+    wait 2 seconds
+
+    PD_ForcedSaving = 1
+    wait until PD_ForcedSaving == 1 or 10 seconds
+    stop script "SavePersistentDataSetData"
+    if PLAYER of NorseCapital == 0
+        set persistent data "LAND4METHODOFCONVERSION" to 1
+    else
+        set persistent data "LAND4METHODOFCONVERSION" to 2
+    end if
+    run script SavePersistentDataGetData
+
+    run background script LC4_EndLand
+    
+    if L4TownConversionMethod == 1 //aggressive
+
+    begin cinema
+        //AGC: Moved fade out & wait inside the cinema block
+        set fade red 0 green 0 blue 0 time 2
+        wait 2 seconds
+        
+        run background script Land4Departure
+        
+        wait 2 seconds
+        
+        reset camera path 
+           
+        set camera position to {1172.58,360.00,1851.86}
+        set camera focus to {1306.26,320.00,1968.74}
+        
+        queue camera move with position {1172.58,360.00,1851.86} focus {1306.26,320.00,1968.74} time 0.0
+        
+        queue camera move with position {1318.30,335.00,1932.80} focus {1374.38,298.69,1932.05} time 30.0
+        queue camera move with position {1309.73,410.00,2075.55} focus {1288.31,389.27,211.27} time 12.0
+        set fade in time 2
+        wait 2 seconds
+        
+        play camera path with easein 20 easeout 4 method SCRIPT_CAMERAPATH_EQUALDISTANCE
+
+        
+
+
+                
+        say "BW2T_SCRIPT_04FINAL_PDM_ENDLAND_WAR_WIN_20"
+        //My people bow low before the Greeks. 
+        wait until read
+        say "BW2T_SCRIPT_04FINAL_PDM_ENDLAND_WAR_WIN_30"
+        //Their brutality knows no equal. Not even the Aztecs.
+        wait until read
+        say "BW2T_SCRIPT_04FINAL_PDM_ENDLAND_WAR_WIN_40"
+        //We respect this power, this strength. But will the Japanese? And will our rulers, the Aztecs?
+        wait until read
+        say "BW2T_SCRIPT_04FINAL_PDM_ENDLAND_WAR_WIN_50"
+        //I wonder if the old Prophesy is true? If the Greeks are the weak race brought to strength by a god?
+        wait until read
+        say "BW2T_SCRIPT_04FINAL_PDM_ENDLAND_WAR_WIN_60"
+        //If so, will they fulfill the next chapter and go to Honshai, where their separated Greek brethren wait for them?
+        wait until read
+        
+        eject good spirit
+        eject evil spirit
+        
+        //say "BW2T_SCRIPT_04FINAL_PDM_ENDLAND_WAR_WIN_10"
+        make good spirit play across 0.5 down 0.5 HELPDUDE_KM_04FINAL_PDM_ENDLAND_WAR_WIN_G_10
+        make evil spirit play across 0.5 down 0.5 HELPDUDE_KM_04FINAL_PDM_ENDLAND_WAR_WIN_E_10
+        
+        wait until read
+        
+        
+        send evil spirit home
+        send good spirit home
+        wait until camera ready
+        wait 2 seconds
+        end cinema
+
+    elsif L4TownConversionMethod == 2 //impressiveness
+        begin cinema
+            //AGC: Moved fade out & wait inside the cinema block
+            set fade red 0 green 0 blue 0 time 2
+            wait 2 seconds
+            
+            run background script Land4Departure
+        
+            wait 2 seconds
+            
+            force while Counter < 100
+                CreationPos = marker at get target from {1227.05,125.62,823.91} to {1227.65,121.46,755.46} distance -Counter-20 angle 0
+                CreationPos = marker at {CreationPos} + {number from -3 to 3, 0, number from -3 to 3}
+                Vagrants[Counter] = create random villager of tribe TRIBE_TYPE_NORSE at {CreationPos}
+                move Vagrants[Counter] position to {1227.38,113.84,633.68}
+                SPEED of Vagrants[Counter] = 0.1
+                Counter++
+            end while
+            
+            
+            GateHouse = get HOUSE GATEHOUSE_F at {1230.16,121.12,738.84} radius 100
+            if GateHouse not exists
+                GateHouse = get HOUSE GATEHOUSE at {1230.16,121.12,738.84} radius 100
+            end if
+            set gate GateHouse open
+            
+            reset camera path 
+            queue camera move with position {1206.52,160.08,904.33} focus {1221.08,125.76,844.36} time 0.0
+            queue camera move with position {1221.02,155.00,707.28} focus {1238.95,114.49,645.96} time 30.0
+            play camera path with easein 12 easeout 4 method SCRIPT_CAMERAPATH_EQUALTIME
+            set fade in time 2
+            //GEN:I have never seen such nobility in a tribe. The Greeks have shown a way other than war.        
+            say "BW2T_SCRIPT_04FINAL_PDM_ENDLAND_IMPRESS_WIN_10"
+            wait until read
+            //GEN:I am inspired by their fairness and their civilisation.        
+            say "BW2T_SCRIPT_04FINAL_PDM_ENDLAND_IMPRESS_WIN_20"
+            wait until read
+            //GEN:I shall consider allying with these Greeks. They have culture far beyond that of the Aztecs.        
+            say "BW2T_SCRIPT_04FINAL_PDM_ENDLAND_IMPRESS_WIN_30"
+            wait until read
+            //GEN:And maybe the Prophesy is true. A returning god saving a weak tribe.        
+            say "BW2T_SCRIPT_04FINAL_PDM_ENDLAND_IMPRESS_WIN_40"
+            wait until read
+            //GEN:It will be interesting to see how they fare against the strong Japanese. And the brutal Aztecs.        
+            say "BW2T_SCRIPT_04FINAL_PDM_ENDLAND_IMPRESS_WIN_50"
+            wait until read
+            //GEN:I wonder if the Greeks will follow the Prophesy and go to Honshai, where some of their brethren survive?
+            say "BW2T_SCRIPT_04FINAL_PDM_ENDLAND_IMPRESS_WIN_60"
+            wait until read    
+            eject good spirit
+            //GA:Hurrah! Goodness and impressing has won the day!        
+            make good spirit play across 0.5 down 0.5 HELPDUDE_KM_04FINAL_PDM_ENDLAND_IMPRESS_WIN_G_70
+            wait until read
+            send good spirit home
+            
+            
+            reset camera path 
+            queue camera move with position {1221.02,155.00,707.28} focus {1238.95,114.49,645.96} time 0.0
+            queue camera move with position {1277.49,145.00,597.88} focus {1314.72,96.75,531.34} time 12.0
+            queue camera move with position {1358.60,166.00,696.63} focus {1398.69,156.50,721.47} time 6.0
+            play camera path with easein 12 easeout 4 method SCRIPT_CAMERAPATH_EQUALTIME
+            wait 18 seconds
+            Counter = 0
+            force while Counter < 100
+                delete Vagrants[Counter] 
+                Counter++
+            end while
+        end cinema
+
+    end if
+
+end script LC4_Outro
+
+begin script LC4_EndLand
+
+start
+
+    stop script "LC4_CreatureLogic"
+    stop script "GatehouseManager"
+    stop script "LC4_Speeches"
+
+end script LC4_EndLand
+
+begin script Land4Departure
+    DepartureScrollPos = marker at {1398.69,156.50,721.47}
+    DepartureScroll = 0
+    AreYouSureCommentSaid = 0
+    Random = 0
+    CommentTimer = create timer for 0 seconds
+    TeleportEffect = 0
+    
+start
+
+    enable global influence
+    
+    DepartureScroll = create highlight GOLD name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {DepartureScrollPos}
+    ALTITUDE of DepartureScroll = 3
+    set CommentTimer time to 30 seconds
+    
+    TeleportEffect = create visual effect VISUAL_EFFECT_TELEPORTER_HOOP at {DepartureScrollPos} + {0, 3, 0} time -1
+    
+    begin loop
+        if DepartureScroll right clicked and AreYouSureCommentSaid == 0
+            clear right clicked object
+            begin dialogue
+                eject good spirit
+                eject evil spirit
+            //GA: "Are you sure you wish to leave the land?"
+                say "BW2T_SCRIPT_04FINAL_ADVISORS_DEPARTURE_10"
+                wait until read
+            //EA: "Click again to confirm"
+                say "BW2T_SCRIPT_04FINAL_ADVISORS_DEPARTURE_11"
+                wait until read
+                send good spirit home
+                send evil spirit home
+            end dialogue
+            AreYouSureCommentSaid = 1
+            clear right clicked object
+        elsif DepartureScroll right clicked and AreYouSureCommentSaid == 1
+            delete DepartureScroll
+        end if
+    until DepartureScroll not exists
+    end loop
+    
+    L4Complete = 1
+    
+    run background script Run_Land6
+
+end script Land4Departure
+
+begin script Run_Land6
+
+    CSMixer = 0
+
+start
+
+CSMixer = create mixer
+
+    begin cinema
+        start music "farming_communtiy_land2" loop 2
+        set fade red 0 green 0 blue 0 time 2
+        wait 2 seconds
+        set camera position to {1389.67,170.55,699.68}
+        set camera focus to {1398.69,165.50,721.47}        
+        move camera position to {1397.00,165.53,722.36} time 27
+        move camera focus to {1398.69,160.50,721.47} time 27
+        set fade in time 2
+        eject good spirit
+        eject evil spirit
+        say "BW2T_SCRIPT_04FINAL_ADVISORS_OUTRO_10"
+        wait until read
+        say "BW2T_SCRIPT_04FINAL_ADVISORS_OUTRO_20"
+        wait until read
+        say "BW2T_SCRIPT_04FINAL_ADVISORS_OUTRO_30"
+        wait until read
+        say "BW2T_SCRIPT_04FINAL_ADVISORS_OUTRO_40"
+        wait until read
+        say "BW2T_SCRIPT_04FINAL_ADVISORS_OUTRO_50"
+        wait until read
+        say "BW2T_SCRIPT_04FINAL_ADVISORS_OUTRO_60"
+        wait until read
+        move camera position to {1398.69,158.50,721.47} time 7
+        move camera focus to {1398.69,156.50,721.47} time 7
+        send good spirit home
+        send evil spirit home
+        set fade red 0 green 0 blue 0 time 3
+        set mixer CSMixer channel AUDIO_MIXER_CHANNEL_GLOBAL to 0.0 with fadetime 3
+        wait 3.5 seconds
+        wait 1 seconds
+    end cinema            
+
+    release MyCreature
+    MyCreature = get player 0 creature
+    if MyCreature exists
+        save my_creature
+    end if
+
+    if FistingBought == 1
+        set research ARTEFACT_HAND_FISTING available to RESEARCH_AVAILABILITY_RESEARCHED
+    end if
+
+    //TRIGGER processing of land end objectives
+    process land end objectives
+    wait until land end objectives processed    
+    
+    disable game can be lost
+    run script LandExit
+
+    PD_ForcedSaving = 1
+    wait until PD_ForcedSaving == 1 or 10 seconds
+
+    load map "./Data/Landscape/BW2/Land6.bwe"
+
+    wait 3 seconds
+
+end script Run_Land6

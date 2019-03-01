@@ -1,0 +1,266 @@
+//--------------------------------------------------------------------------------------------------------------
+define script EarthquakeSpell(EnemyWonder, Earthquake)
+
+begin script EarthquakeSpell(EnemyWonder, Earthquake)
+
+RelCamPos = 0
+RelCamFoc = 0
+MeOldMateDave = 0
+MyDance = 0
+Dancer = 0
+Wonder = 0
+Count = 0
+AboveV=0
+BeamPlace=0
+Beam=0
+Beam2=0
+lastEarthquakepos=0
+MyPos=0
+MyFoc=0
+MusicEventTimer=0
+MusicEvent1=0
+MusicEvent2=0
+MusicEvent3=0
+MusicEvent4=0
+MusicEvent5=0
+MusicEvent6=0
+MusicEvent7=0
+MusicEvent8=0
+MusicEvent9=0
+MusicEvent10=0
+BadboyBuilding=0
+FuturePos=0
+FutureFoc=0
+StarDude=0
+FutureEarthQ=0
+EarthquakeMixer=0
+
+start
+
+    WhiChEpicSpellIsBeingCast = Earthquake
+
+
+    EarthquakeMixer = create mixer
+    //set mixer EarthquakeMixer channel AUDIO_MIXER_CHANNEL_PHYSICS_SFX to 0.0
+    
+    set mixer EarthquakeMixer channel AUDIO_MIXER_CHANNEL_SCRIPT_SFX to 1.0
+    set mixer EarthquakeMixer channel AUDIO_MIXER_CHANNEL_ANIMATION_VILLAGER to 0.0    
+    set mixer EarthquakeMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 1.0
+
+    disable influence
+
+    Wonder = get Earthquake creator
+    if Wonder not exists
+        Wonder = EnemyWonder
+    end if
+
+        run script SetupDancerPositions(2)
+        MyDance=get Wonder dance
+
+        //say "Set The Dancers to hands in pockets"
+        //wait until read
+        Dancer=get first in MyDance
+                            
+        while Dancer exists and Count <= 19
+            detach Dancer from MyDance     
+            run background script DancerLookAtWonder(Dancer, Wonder, Count, 2)
+            Count++
+            Dancer=get first in MyDance
+        end while
+
+        wait 1.5 seconds
+
+        wait 1 seconds
+        disable simulation sound
+        if SK_DynamicMusicIsRunning == 0
+            attach music "norse_chant_vocal" to Wonder range SK_EpicRadius
+        end if
+        detach sound "SCULLFIRE" from Earthquake
+        
+        wait 1 seconds
+        //play string sound "SCRIPT2_EEPIC_SYNTH2"
+        wait 2 seconds
+        wait 1 seconds
+
+        wait 2.5 seconds
+            
+        //set sky colour red 201 green 243 blue 29 time 10
+        enable predefined sky "EARTHQUAKE" time 10
+
+        
+        invoke Wonder EPIC_WONDER_STAGE_1
+        if camera position near {Wonder} radius SK_EpicRadius / 4
+            play string sound "SCRIPT2_EEPIC_SYNTH3"
+        end if
+        //play string sound "SCRIPT2_EEPIC_EPICTOWERELECTRIC2"
+        wait 4 seconds
+        invoke Wonder EPIC_WONDER_STAGE_2
+        if camera position near {Wonder} radius SK_EpicRadius / 4
+            play string sound "SCRIPT2_EEPIC_BEAMOFLIGHTLOOP7"
+        end if
+        wait 4 seconds
+        invoke Wonder EPIC_WONDER_STAGE_3
+        if camera position near {Wonder} radius SK_EpicRadius / 4
+            play string sound "SCRIPT2_EEPIC_HURRICANELIGHTNING6"
+        end if
+        wait 2 seconds        
+        stop sound "SCRIPT2_EEPIC_SCULLFIRE"
+
+        BeamPlace = marker at get world position from Wonder to {-0.680, 81.780, 0.719}
+        Beam = create visual effect VISUAL_EFFECT_EARTHQUAKE_BEAM at {BeamPlace}
+        Beam2 = create visual effect "ev_s_beam.ves" strength 0.3 scale 1.0 at {BeamPlace}
+        invoke Earthquake EPIC_PULSE_UP
+        //play string sound "SCRIPT2_EEPIC_BEAMOFLIGHT11"
+        if camera position near {Wonder} radius SK_EpicRadius / 4
+            play string sound "SCRIPT2_EEPIC_HURRICANELIGHTNING1"
+            play string sound "SCRIPT2_EEPIC_DECAYCHARGESPELL"
+        end if
+
+        wait 0.6 seconds
+        wait 0.6 seconds
+        if camera position near {Wonder} radius SK_EpicRadius / 4
+            play string sound "SCRIPT2_EEPIC_DECAYCHARGESPELL"
+        end if
+        stop sound "SCRIPT2_EEPIC_BEAMOFLIGHTLOOP7"
+
+        stop sound "SCRIPT2_EEPIC_FLAMETHROWERWHOOSH4"
+        stop sound "SCRIPT2_EEPIC_CASTPSELLFREEZE1"
+        stop sound "SCRIPT2_EEPIC_EPICTOWERELECTRIC2"
+        stop sound "SCRIPT2_EEPIC_EPICTOWERLOOP2"
+        stop sound "SCRIPT2_EEPIC_EPICTOWERLOOP3"
+        stop sound "SCRIPT2_EEPIC_SYNTH3"
+        stop sound "SCRIPT2_EEPIC_HURRICANELIGHTNING6"
+        stop sound "SCRIPT2_EEPIC_HURRICANELIGHTNING1"
+            
+        wait 1.5 seconds    
+
+        wait 1 seconds
+        
+        invoke Earthquake EPIC_PULSE_DOWN
+        invoke Earthquake EPIC_BEAM_DOWN
+        if camera position near {Earthquake} radius SK_EpicRadius / 4
+            play string sound "SCRIPT2_EEPIC_BEAMOFLIGHTSTART1"
+        end if
+        set mixer EarthquakeMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 1.0
+
+        detach music from Wonder
+        if SK_DynamicMusicIsRunning == 0
+            attach music "earthquake_music" to Earthquake range SK_EpicRadius
+        end if
+        MusicEventTimer=create timer for 0 seconds
+        MusicEvent1=get music "earthquake_music" event "1" time
+        MusicEvent2=get music "earthquake_music" event "2" time
+        MusicEvent3=get music "earthquake_music" event "3" time
+        MusicEvent4=get music "earthquake_music" event "4" time
+        MusicEvent5=get music "earthquake_music" event "5" time
+        MusicEvent6=get music "earthquake_music" event "6" time
+        MusicEvent7=get music "earthquake_music" event "7" time
+        MusicEvent8=get music "earthquake_music" event "8" time
+        MusicEvent9=get music "earthquake_music" event "9" time
+        MusicEvent10=get music "earthquake_music" event "10" time
+
+        attach atmos "spells" to Earthquake// range 500
+        set Earthquake atmos group 5 time 1 seconds
+
+        wait 2 seconds
+
+        FutureEarthQ = marker at future position of epic miracle Earthquake with time 3 seconds
+        BadboyBuilding = get HOUSE at {FutureEarthQ} radius 10
+        ///BODGE
+        //BadboyBuilding = get HOUSE at {1196.710, 256.250, 1323.100}
+
+        if BadboyBuilding exists
+            StarDude = get star villager near {BadboyBuilding}
+
+            if StarDude not exists
+                StarDude = create VILLAGER VILLAGER_INFO_NORSE_FARMER_MALE at get world position from BadboyBuilding to {-0.199, -0.002, 3.702}
+            end if
+            set StarDude position to get world position from BadboyBuilding to {-0.199, -0.002, 3.702}
+            set StarDude focus to {Earthquake}
+            play anim "a_p_farm_shouting_to_god_desperately" on StarDude
+        
+        
+            if camera position near {Earthquake} radius SK_EpicRadius / 4
+                play string sound "SCRIPT2_EEPIC_EARTHQSCREAM2"
+            end if
+        
+            wait 1.5 seconds
+        end if
+        invoke Earthquake EPIC_CRUMBLE_BUILDINGS
+        invoke Earthquake EPIC_START_SINKING//              - land goes diown
+        wait 1.5 seconds
+        //wait until get MusicEventTimer time since set >= MusicEvent1
+        invoke Earthquake EPIC_SHUT_DOWN_BEAM
+        invoke Earthquake EPIC_START_EXPLOSION
+        invoke Earthquake EPIC_START_CRACKING
+        if camera position near {Earthquake} radius SK_EpicRadius / 4
+            play string sound "SCRIPT2_EEPIC_EARTHQUAKECRACK"
+        end if
+        set Earthquake atmos group 6 time 1 seconds    
+        wait 2 seconds
+        if camera position near {Earthquake} radius SK_EpicRadius / 4
+            play string sound "SCRIPT2_EEPIC_EARTHQSCREAM1"
+        end if
+
+        invoke Earthquake EPIC_START_SHIFTING
+        //set camera focus follow Earthquake
+        wait until get MusicEventTimer time since set >= MusicEvent2
+        if camera position near {Earthquake} radius SK_EpicRadius / 4
+            play string sound "SCRIPT2_EEPIC_EARTHQSCREAM1"
+        end if
+        wait until get MusicEventTimer time since set >= MusicEvent3
+        if camera position near {Earthquake} radius SK_EpicRadius / 4
+            play string sound "SCRIPT2_EEPIC_EARTHQSCREAM3"
+        end if
+
+        wait until get MusicEventTimer time since set >= MusicEvent4
+
+        if camera position near {Earthquake} radius SK_EpicRadius / 4
+            play string sound "SCRIPT2_EEPIC_EARTHQSCREAM1"
+        end if
+
+        wait until get MusicEventTimer time since set >= MusicEvent5
+        wait until get MusicEventTimer time since set >= MusicEvent6
+        stop sound "SCRIPT2_EEPIC_EARTHQSCREAM2"        
+        stop sound "SCRIPT2_EEPIC_EARTHQSCREAM3"        
+        stop sound "SCRIPT2_EEPIC_EARTHQSCREAM1"        
+        stop sound "SCRIPT2_EEPIC_EARTHQSCREAM2"        
+        stop sound "SCRIPT2_EEPIC_EARTHQSCREAM3"        
+        stop sound "SCRIPT2_EEPIC_EARTHQSCREAM1"    
+        stop sound "SCRIPT2_EEPIC_EARTHQSCREAM1"    
+        
+        set Earthquake atmos group 5 time 1 seconds
+        invoke Earthquake EPIC_START_STEAM
+        wait 0.2 seconds
+        //wait until camera ready    
+        wait 15 seconds
+
+        detach atmos from Earthquake
+        stop sound "SCRIPT2_EEPIC_EARTHQUAKECRACK"
+        enable simulation sound
+        //reset sky colour 3 seconds
+        enable predefined sky "DEFAULT" time 3
+
+        wait 3 seconds
+        enable influence
+        detach music from Earthquake
+        invoke Wonder EPIC_WONDER_STAGE_LAST
+        
+        invoke Earthquake EPIC_ADD_NAVIGATION
+        
+        ATIEndFlag=0
+
+    destroy mixer EarthquakeMixer with fadetime 2
+
+    wait 120 seconds
+    
+    invoke Earthquake EPIC_START_CLOSING
+    
+    wait 20 seconds
+    
+    invoke Earthquake EPIC_END_SPELL
+
+    WhiChEpicSpellIsBeingCast = 0
+
+    
+end script EarthquakeSpell

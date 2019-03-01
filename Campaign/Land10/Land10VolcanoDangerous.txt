@@ -1,0 +1,80 @@
+///////////////////////////////////////////////////////////////////////////////
+//    Land 10 Volcano
+//    ~~~~~~~~~~~~~~~
+//
+//    Start date:     06.05.18            By: Boxhead
+//    Update date: 06.05.18            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+define script LC10_VolcanoDangerous
+
+run script LC10_VolcanoDangerous
+
+begin script LC10_VolcanoDangerous
+
+    Volcano = 0
+    TerminalVolcanoObject = 0
+    VolcanoFirstTime = 1
+
+start
+
+    Volcano = create volcano at {1336.38,342.33,513.82} player 2
+
+    invoke Volcano EPIC_START_RISING
+    wait 10 seconds
+
+    begin loop
+
+        attach atmos "spells" to Volcano range 750
+        TerminalVolcanoObject = create terminal object at {Volcano} with duration of 540 seconds
+        attach atmos "spells" to TerminalVolcanoObject// range 400
+        invoke Volcano EPIC_ADD_NAVIGATION
+        wait until TownsConverted >= 1 or get army size in town PlayerTown > 80 //Rough trigger time
+        invoke Volcano EPIC_START_PLUME
+        invoke Volcano EPIC_START_SMOKE
+        wait number from 240 to 300 seconds or LC10_LandDone == 1
+        VolcanoDangerousActive = 1
+        wait 2 seconds
+
+        play string sound "SCRIPT1_vEpic_EXPLOSION3"
+        invoke Volcano EPIC_START_EXPLOSION
+        invoke Volcano EPIC_FLASH
+        wait 4 seconds
+
+        invoke Volcano EPIC_START_EXPLOSION
+        invoke Volcano EPIC_FLASH
+        invoke Volcano EPIC_START_LAVA
+        invoke Volcano EPIC_START_LAVA_EXPLOSION
+        invoke Volcano EPIC_START_ROCK_SHOWER    
+        invoke Volcano EPIC_START_BUBBLING_LAVA        
+        invoke Volcano EPIC_START_EXPLOSION
+        play string sound "SCRIPT1_VEPIC_EXPLOSION3"
+        play string sound "SCRIPT1_VEPIC_VOLCANOSHOCKWAVHIGHPITCHED"
+
+        wait 75 seconds or LC10_LandDone == 1
+        VolcanoDangerousActive = 0
+        //Turn off Volcano for some time
+
+        invoke Volcano EPIC_STOP_EXPLOSION
+        invoke Volcano EPIC_STOP_PLUME
+        invoke Volcano EPIC_STOP_LAVA
+        invoke Volcano EPIC_STOP_BUBBLING_LAVA
+        invoke Volcano EPIC_END_ROCK_SHOWER
+
+        wait 300 seconds or LC10_LandDone == 1
+
+        invoke Volcano EPIC_STOP_SMOKE
+        invoke Volcano EPIC_STOP_ASH
+
+        wait 2000 * EpicModifier seconds or LC10_LandDone == 1
+
+        until LC10_LandDone == 1
+    end loop
+
+    invoke Volcano EPIC_START_FALLING
+        
+    wait 60 seconds
+
+    invoke Volcano EPIC_END_SPELL
+
+end script LC10_VolcanoDangerous

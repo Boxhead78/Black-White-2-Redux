@@ -1,0 +1,274 @@
+///////////////////////////////////////////////////////////////////////////////
+//    Land 11 Script-Manager
+//    ~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//    Start date:        28.03.18            By: Boxhead
+//    Update date:    17.12.18            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+define script Land11Script
+define script LC11_ScriptManager
+define script LC11_SetupCreature
+
+run script Land11Script
+
+begin script Land11Script
+
+start
+
+    AISpellsActivated = 0
+
+    //Small fix for existing saves
+    PD_ForcedSaving = 1
+    wait until PD_ForcedSaving == 1 or 10 seconds
+    stop script "SavePersistentDataSetData"
+    set persistent data "ABORTED_LAND4" to 1
+    run script SavePersistentDataGetData
+
+    set toolbar state to MENU_TOOLBAR_STATE_CLOSED
+    set interaction SCRIPT_INTERFACE_LEVEL_NORMAL
+    //disable MENU_TOOLBAR_CREATURE_TEACH menu
+    enable tribute visual
+    enable toolbar
+    enable game can be lost
+    enable personalisations
+    enable load screen
+    
+    run script DifficultyModifiers
+    run background script LC11_ScriptManager
+    
+    if DEBUG == 1
+        set player 0 alignment 1.0
+        increment tribute by 9999999999
+        set research ABODE_NUMBER_C available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ABODE_NUMBER_ALTAR available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ABODE_NUMBER_STORAGE_PIT available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ABODE_NUMBER_CREATURE_PEN available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ABODE_NUMBER_FIELD available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ABODE_NUMBER_WALLTOWER_TECH0 available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_MAGIC_TYPE_WATER_RAIN available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ABODE_NUMBER_MELEE_ARMOURY available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ABODE_NUMBER_TEMPLE available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_HAND_MULTIPICKUP available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_A available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_B available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_D available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_E available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_SKYSCRAPER available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_CRECHE available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_SHRINE available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_PUB available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_TOWN_CENTRE available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_RANGED_ARMOURY available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_WORKSHOP available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_STUDY available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_UNIVERSITY available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_PRISON available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_SMELTER available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_GRANARY available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_LUMBERMILL available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_MARKET_POT available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_MARKET_STATUE available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_MARKET_PLANT available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_AMPITHEATRE available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_GRAVEYARD available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_OLD_PERSONS_HOME available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_BATHHOUSE available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_WALLTOWER_TECH1 available to RESEARCH_AVAILABILITY_NOT_AVAILABLE
+        set research ARTEFACT_ABODE_NUMBER_GATEHOUSE available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_GATEHOUSE_F available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_EPIC_WONDER_NUMBER_HURRICANE available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_EPIC_WONDER_NUMBER_EARTHQUAKE available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_EPIC_WONDER_NUMBER_VOLCANO available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_EPIC_WONDER_NUMBER_SIREN available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_MAGIC_TYPE_LIFE_HEAL available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_MAGIC_TYPE_LIFE_LIFE available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_MAGIC_TYPE_DEATH_DECAY available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_MAGIC_TYPE_DEATH_DEATH available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_MAGIC_TYPE_FIRE_FIRE available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_MAGIC_TYPE_FIRE_LAVA available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_MAGIC_TYPE_EARTH_TREMOR available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_MAGIC_TYPE_EARTH_METEOR available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_MAGIC_TYPE_AIR_WIND available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_MAGIC_TYPE_AIR_TEMPEST available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_MAGIC_TYPE_WATER_STORM available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_MAGIC_TYPE_HEAL available to RESEARCH_AVAILABILITY_NOT_AVAILABLE
+        set research ARTEFACT_CREATURE_MAGIC_TYPE_WATER available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_MAGIC_TYPE_FIREBALL available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_MAGIC_TYPE_LIGHTNING available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_TOY_GOOD available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_TOY_NEUTRAL available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_TOY_EVIL available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_ROLE_BUILDER_1 available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_ROLE_BUILDER_2 available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_ROLE_BUILDER_3 available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_ROLE_BUILDER_4 available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_ROLE_GATHERER_1 available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_ROLE_GATHERER_2 available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_ROLE_GATHERER_3 available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_ROLE_GATHERER_4 available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_ROLE_SOLDIER_1 available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_ROLE_SOLDIER_2 available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_ROLE_SOLDIER_3 available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_ROLE_SOLDIER_4  available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_ROLE_ENTERTAINER_1 available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_ROLE_ENTERTAINER_2 available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_ROLE_ENTERTAINER_3 available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_ROLE_ENTERTAINER_4 available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_EMBELLISHMENT_INFO_GREEK_FERTILITY_STATUE available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_EMBELLISHMENT_INFO_GREEK_FOUNTAIN available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_EMBELLISHMENT_INFO_GREEK_STREETLAMP available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_EMBELLISHMENT_INFO_GREEK_TORTURE_PIT available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_EMBELLISHMENT_INFO_GREEK_COLUMN available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_EMBELLISHMENT_INFO_GREEK_GARDEN available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_EMBELLISHMENT_INFO_GREEK_WELL available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_EMBELLISHMENT_INFO_GREEK_SPIKE available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_EMBELLISHMENT_INFO_GREEK_MIRACLE_ENHANCER available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_HAND_FISTING available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_HAND_GESTURES available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_TOME_AGE_OF_GODS available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_TOME_BARREN_SEAS available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_TOME_FATE_OF_THE_EGYPTIANS available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_TOME_FRAGMENT available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_TOME_GODLESS_MIRACLES available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_TOME_IMMORTAL available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_TOME_MISSIONARIES available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_TOME_ORIGIN_OF_CREATURES available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_TOME_PARCHMENT available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_TOME_POWER_OF_THE_AZTECS available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_TOME_GREEKS available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_TOME_JAPANESE available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_TOME_NORSE available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_TOME_PROPHECY available to RESEARCH_AVAILABILITY_RESEARCHED
+    end if
+
+    wait until 1 !=1
+
+end script Land11Script
+
+begin script LC11_ScriptManager
+
+PlayerAlignment = 0
+
+    DisbelieverTownTimer = create timer for 900 seconds
+    DBPos = marker at {1185.55,98.44,1036.18}
+    GreekPlatoon[4]
+    GreekPlatoonPos[4]
+    Test = 0
+    Wall = 0
+    WallNew = 0
+    AtmosMixer = create mixer
+
+start
+
+    set atmos volume 0
+    set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_MAP to 0.6
+    set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_POSITIONAL to 0.6
+
+    set player 0 mana 50000
+
+    PD_ForcedSaving = 1
+    wait until PD_ForcedSaving == 1 or 10 seconds
+    stop script "SavePersistentDataSetData"
+    set persistent data "LAND_ID" to 11
+    run script SavePersistentDataGetData
+
+    if Intro == 0
+        disable load screen
+        set fade red 0 green 0 blue 0 time 0
+        set fade in time 4
+        wait 2 seconds
+        IntroFinished = 1
+
+        GreekPlatoonPos[0] = marker at {1373.37,307.41,1096.09}
+        GreekPlatoonPos[1] = marker at {1378.57,307.38,1043.92}
+        GreekPlatoonPos[2] = marker at {1393.38,307.54,1044.71}
+        GreekPlatoonPos[3] = marker at {1391.63,307.39,1087.10}
+
+        GreekPlatoon[0] = create platoon PLATOON_INFO_JAPANESE_MELEE_4 at {GreekPlatoonPos[0]} with 50 men and 0 women
+        PLAYER of GreekPlatoon[0] = 0
+        attach GreekPlatoon[0] to PlayerTown
+        set GreekPlatoon[0] focus to {PlayerTown}
+
+        GreekPlatoon[1] = create platoon PLATOON_INFO_JAPANESE_MELEE_4 at {GreekPlatoonPos[1]} with 50 men and 0 women
+        PLAYER of GreekPlatoon[1] = 0
+        attach GreekPlatoon[1] to PlayerTown
+        set GreekPlatoon[1] focus to {PlayerTown}
+
+        GreekPlatoon[2] = create platoon PLATOON_INFO_JAPANESE_RANGED_4 at {GreekPlatoonPos[2]} with 50 men and 0 women
+        PLAYER of GreekPlatoon[2] = 0
+        attach GreekPlatoon[2] to PlayerTown
+        set GreekPlatoon[2] focus to {PlayerTown}
+
+        GreekPlatoon[3] = create platoon PLATOON_INFO_JAPANESE_RANGED_4 at {GreekPlatoonPos[3]} with 50 men and 0 women
+        PLAYER of GreekPlatoon[3] = 0
+        attach GreekPlatoon[3] to PlayerTown
+        set GreekPlatoon[3] focus to {PlayerTown}
+    else
+        run background script LC11_Intro
+    end if
+
+    run script Globals
+    run background script PlayerMana(0)
+    run background script PlayerMana(1)
+    run background script LC11_Outro
+    run background script LC11_SetupCreature
+    run background script LC11_Aztec_Capital_Impressiveness
+    run background script LC11_Tribute
+    run background script LC11_TownConversion
+    run background script LC11_Aztec_Capital
+    run background script LC11_AICreature
+    run background script LC11_PlatoonBehaivors
+    run background script DisableLocalPlatoonResponse
+    run background script GodsPlaygroundLoader
+
+    wait until IntroFinished == 1
+
+    set atmos volume 0.45
+    set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_MAP to 0.6
+    set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_POSITIONAL to 0.6
+
+    run background script LC11_LargeSiegeManager
+    run background script LC11_AttackNearestTownTimer
+    run background script LC11_AttackPlayerTownTimer
+    run background script LC11_DefendPlatoons
+    run background script LC11_AztecCapitalRessourceManager
+    run background script LC11_AztecCapitalVillagerManager
+    run background script LC11_AztecTown1RessourceManager
+    run background script LC11_AztecTown1VillagerManager
+    run background script LC11_AztecTown2RessourceManager
+    run background script LC11_AztecTown2VillagerManager
+    run background script LC11_Speeches
+    run background script LC11_Objectives
+    run background script LC11_GatehouseManager
+    run background script LC11_GetNearestSettlement
+
+    /*
+    begin loop
+    //    get building ABODE_NUMBER_MELEE_ARMOURY in HomeTown min built 1.0
+        Wall = get random abode of type GATEHOUSE in town PlayerTown
+        if Wall exists and variable get Wall sub type == variable ABODE_INFO_JAPANESE_GATEHOUSE
+            delete Wall
+            WallNew = create ABODE_INFO_JAPANESE_GATEHOUSE at {Wall}
+        end if
+    end loop
+    */
+
+end script LC11_ScriptManager
+
+begin script LC11_SetupCreature
+    CreaturePos    = marker at {1422.96,309.52,1069.12}
+start
+
+    //Load the creature and get it into global
+    load my_creature at {CreaturePos}
+    MyCreature = get player 0 creature
+
+    if not MyCreature exists
+        MyCreature = create CREATURE CREATURE_TYPE_TIGER at {CreaturePos}
+        set player 0 creature to MyCreature
+    end if
+    wait 50 seconds
+    release MyCreature
+
+end script LC11_SetupCreature

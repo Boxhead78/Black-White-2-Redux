@@ -1,0 +1,262 @@
+define NUMBER_OF_EARTHS = 11
+
+define script EarthquakeScript
+define script EarthquakeCinema
+
+global eEpic2[NUMBER_OF_EARTHS]
+global eEpic = 0
+
+global oVisual1 = 0
+global oVisual28 = 0
+global oVisual38 = 0
+global Viz = 0
+global Viz2 = 0
+global Viz3 = 0
+global Viz4 = 0
+global Vis = 0
+global CntE = 0
+global EarhtCin = 0
+global Light3255 = 0
+global camershake7 = 0
+
+global oEarthquake = 0
+global EarthquakePos = 0
+global Rock11 = 0
+global EarthquakeSeed = 0
+global EarthquakeHeld = 0
+global oEarthquake2 = 0
+
+global RelativePos8 = 0
+global eEpicPos = 0
+global eEpicFoc = 0
+global EarthPos = 0
+
+run script Earthmain
+begin script Earthmain
+
+start
+    CntE = 0
+    Town[0] = get town with id 0
+    Town[3] = get town with id 3
+    Town[4] = get town with id 4
+    Town[6] = get town with id 6
+    Town[7] = get town with id 7
+    Town[8] = get town with id 8
+    Town[9] = get town with id 9
+    Town[10] = get town with id 10
+    Town[11] = get town with id 11
+    Town[12] = get town with id 12
+    Town[13] = get town with id 13
+    begin loop
+        eEpic2[0] = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_EARTHQUAKE in Town[0]
+        eEpic2[3] = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_EARTHQUAKE in Town[3]
+        eEpic2[4] = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_EARTHQUAKE in Town[4]
+        eEpic2[6] = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_EARTHQUAKE in Town[6]
+        eEpic2[7] = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_EARTHQUAKE in Town[7]
+        eEpic2[8] = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_EARTHQUAKE in Town[8]
+        eEpic2[9] = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_EARTHQUAKE in Town[9]
+        eEpic2[10] = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_EARTHQUAKE in Town[10]
+        eEpic2[11] = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_EARTHQUAKE in Town[11]
+        eEpic2[12] = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_EARTHQUAKE in Town[12]
+        eEpic2[13] = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_EARTHQUAKE in Town[13]
+        if CntE == NUMBER_OF_EARTHS
+            CntE = 0
+        end if
+        if eEpic2[CntE] left clicked or eEpic2[CntE] right clicked
+            eEpic = eEpic2[CntE]
+            run background script EarthquakeScript
+        end if
+        CntE++
+    end loop
+end script Earthmain
+
+begin script EarthquakeCinema
+
+start
+    if EarhtCin == 0
+        begin cinema
+            wait 2 seconds
+            move camera focus to {EarthquakePos} time 5
+            move camera position to {EarthquakePos} time 5
+            wait 2 seconds
+            set fade red 255 green 255 blue 255 time 1
+            Light3255 = 1
+            wait 1 second
+            set fade in time 1
+            Light3255 = 0
+            set camera focus to {eEpicFoc}+{0,10,0}
+            set camera position to {eEpicPos}
+            wait 7.5 seconds
+            move camera focus to {eEpic}+{0,30,0} time 13
+            move camera position to {eEpicPos}+{0,20,0} time 13
+            wait 9.5 seconds
+            move camera focus to {eEpic}+{0,140,0} time 1
+            wait 2 seconds
+            set fade red 255 green 255 blue 255 time 2
+            Light3255 = 1
+            wait 2 seconds
+            set camera focus to {oEarthquake}
+            set camera position to {oEarthquake}+{5,60,-20}
+            set fade in time 2
+            Light3255 = 0
+            wait 2.2 seconds
+            stop music with fadetime 1
+            wait 0.5 seconds
+            shake camera strength 7.2
+            camershake7 = 1
+            wait 7 second
+            set camera focus follow oEarthquake offset {0,9,0}
+            set camera position follow oEarthquake offset {0,13,-12}    
+            wait 3 second
+            set camera focus follow oEarthquake offset {0,10,0}
+            set camera position follow oEarthquake offset {14,15,4}
+            wait 2 seconds
+            set camera position to {oEarthquake}+{10,40,0}
+            wait 2 seconds
+            stop camera shake
+            camershake7 = 0
+            set camera focus follow oEarthquake offset {0,9,0}
+            set camera position follow oEarthquake offset {0,13,-12}                                
+            wait 4 seconds
+            move camera focus to {oEarthquake}+{0,-8,0} time 10
+            move camera position to {EarthquakePos}+{0,250,0} time 20
+            wait 20.7 seconds
+        end cinema
+        EarhtCin = 1
+    else
+        EarhtCin = 0
+    end if
+    until EarhtCin == 1 or key KB_ESC down
+    if key KB_ESC down
+        skip current cutscene
+        wait 2 seconds
+        if Light3255 == 1
+            set fade in time 1
+            Light3255 = 0
+        end if
+        if camershake7 == 1
+            begin cinema
+            stop camera shake
+            end cinema
+            camershake7 = 0
+        end if
+    end if
+end script EarthquakeCinema
+
+begin script EarthquakeScript
+    Hand = marker at hand position
+start
+
+begin loop
+    oEarthquake = 0
+        RelativePos8 = marker at get world position from eEpic to {eEpic}
+        eEpicPos = marker at {eEpic}+(eEpic * {RelativePos8}+{15,10,eEpic})
+        eEpicFoc = marker at {eEpic}+{0,-0,0}
+    if eEpic left clicked or eEpic right clicked
+        clear right clicked object
+        clear left clicked object
+        clear right button clicked
+        clear left button clicked
+        wait 1 second
+        if wonder in hand
+            begin loop
+                if wonder fire near hand position radius 0.5
+                    EarthquakePos = marker at hand position
+                    oEarthquake = create earthquake start {EarthquakePos} end {EarthquakePos} player 0
+                    clear player 0 spell charging
+                    run background script EarthquakeCinema
+                    // Standard Earthquake Wonder and Miracle Procedure                            
+                    wait 5 seconds
+                    play string sound "SCRIPT1_VEPIC_FLAMETHROWERWHOOSH4"
+                    start music "greek_chant"
+                    wait 0.01 seconds
+                    play string sound "BEAMOFLIGHTLOOP1"
+                    wait 5 seconds
+                    invoke eEpic EPIC_WONDER_STAGE_1
+                    play string sound "SCRIPT2_EEPIC_SYNTH3"
+                    wait 4.5 seconds
+                    play string sound "SCRIPT2_EEPIC_SYNTH3"
+                    invoke eEpic EPIC_WONDER_STAGE_2
+                    wait 3 seconds
+                    invoke eEpic EPIC_WONDER_STAGE_3
+                    invoke eEpic EPIC_WONDER_STAGE_4
+                    invoke eEpic EPIC_WONDER_STAGE_5
+                    invoke eEpic EPIC_WONDER_STAGE_6
+                    play string sound "BEAMOFLIGHTLOOP1"
+                    wait 2 seconds
+                    play string sound "BEAMOFLIGHTLOOP1"
+                    play string sound "SCRIPT2_EEPIC_SYNTH2"
+                    invoke eEpic EPIC_WONDER_STAGE_7
+                    invoke eEpic EPIC_WONDER_STAGE_8
+                    invoke eEpic EPIC_WONDER_STAGE_9
+                    invoke eEpic EPIC_WONDER_STAGE_START_BEAM
+                    invoke eEpic EPIC_START_CASTING
+                    invoke eEpic EPIC_PULSE_UP
+                    wait 2.5 seconds
+                    oVisual1 = create visual effect VISUAL_EFFECT_EARTHQUAKE_BEAM on eEpic time 1
+                    oVisual28 = create visual effect VISUAL_EFFECT_EARTHQUAKE_FLARE at {eEpic} time 1
+                    play string sound "SCRIPT3_HEPIC_HURRICANELIGHTNING1"
+                    wait 4 seconds
+                    stop visual effect oVisual1
+                    stop visual effect oVisual28 
+                    wait 2 seconds
+                    oVisual38 = create visual effect VISUAL_EFFECT_EARTHQUAKE_BEAM at {EarthquakePos} time -15
+                    stop sound "SCRIPT2_EEPIC_SYNTH3"
+                    stop sound "BEAMOFLIGHTLOOP1"
+                    play string sound "SCRIPT2_EEPIC_BEAMOFLIGHTSTART1"
+                    invoke oEarthquake EPIC_START_CASTING
+                    invoke oEarthquake EPIC_WONDER_STAGE_END_BEAM 
+                    wait 0.2 seconds
+                    invoke oEarthquake EPIC_PULSE_DOWN 
+                    wait 0.5 seconds
+                    Viz = create visual effect VISUAL_EFFECT_EARTHQUAKE_ROCKS at {oEarthquake}+{0,3,0} time -1
+                    Viz2 = create visual effect VISUAL_EFFECT_EARTHQUAKE_FLARE at {oEarthquake}+{0,3,0} time -1 
+                    start music "earthquake_music"
+                    enable oEarthquake physics tracking
+                    set oEarthquake physics balance 15
+                    set capture radius multiplier 1.5
+                    invoke oEarthquake EPIC_PULSE_DOWN 
+                    wait 3 seconds
+                    invoke oEarthquake EPIC_START_SHIFTING
+                    invoke oEarthquake EPIC_START_SINKING
+                    invoke oEarthquake EPIC_START_CRACKING
+                    invoke oEarthquake EPIC_CRUMBLE_BUILDINGS   
+                    Viz3 = create visual effect VISUAL_EFFECT_EARTHQUAKE_BANG at {oEarthquake}+{0,3,0} time 1
+                    play string sound "SCRIPT2_EEPIC_EARTHQUAKECRACK"
+                    wait 3 seconds
+                    stop visual effect oVisual38
+                    stop visual effect Viz
+                    stop visual effect Viz2
+                    wait 1 seconds
+                    stop visual effect Viz3
+                    wait 1 seconds
+                    play string sound "SCRIPT2_EEPIC_EARTHQSCREAM1"
+                    Viz4 = create visual effect VISUAL_EFFECT_EARTHQUAKE_DUST on oEarthquake time -1
+                    wait 1 seconds
+                    invoke oEarthquake EPIC_START_STEAM
+                    invoke oEarthquake EPIC_PULSE_UP
+                    stop visual effect Viz4 
+                    play string sound "SCRIPT2_EEPIC_EARTHQSCREAM1"
+                    wait 11.7 seconds
+                    stop sound "SCRIPT2_EEPIC_EARTHQUAKECRACK"
+                    invoke eEpic EPIC_WONDER_STAGE_LAST
+                    wait 55 seconds
+                    invoke oEarthquake EPIC_START_CLOSING
+                    invoke oEarthquake EPIC_ADD_NAVIGATION
+                    wait 20 seconds
+                    invoke oEarthquake EPIC_REMOVE_NAVIGATION
+                    clear right clicked object
+                    clear right clicked position
+                    delete oEarthquake
+                    oEarthquake = 1
+                end if
+                until oEarthquake == 1
+            end loop
+        end if
+    end if
+    if oEarthquake == 1
+        release loop
+    end if
+end loop
+
+end script EarthquakeScript

@@ -1,0 +1,1919 @@
+////////////////////////
+//  GOD ENGINE BODY  //
+//////////////////////
+/*##############################
+# Version:      0.9 Beta
+#
+# Description:  Low-level implementation of God Engine
+#
+# Credits:      Godplex
+#               Daxter (for original idea and a bit of his code)
+#                Boxhead78
+#
+# Notes:        You shouldn't mess with this unless you intend to
+#               modify some low-levl aspect of the way God Engine
+#               functions. Everything you need to know to use
+#               the API is conveniently documented in the header
+#               file (GodEngineH.txt) and any globals you may want
+#               to change are declared there.
+#
+# Features:     - Gathers resources based on desire
+#               ^- Will water fields if necessary
+#               - Puts out fires
+#               - Regenerates mana based on town population
+#               - Constructs new buildings
+#               - Repairs damaged buildings
+#
+###      CONVENTIONS USED      ###
+# - Public members prefix:  ge[Identifier]
+#  ^- ARE for use outside GodEngine.txt
+# - Private members prefix: ge_[Identifier]
+#  ^- ARE NOT for use outside GodEngine.txt
+# - PascalCase params, camelCase locals, prefix globals, GE_CAPS_AND_PREFIX global-constants & enums
+#  ^- Reference params prefix with "r" (ex. rMyReferenceParam)
+#  ^- Non-reference params must be stored in local variable of same name
+#       but different casing (ex. myByValParam = MyByValParam)
+# - Methods return values via reference paramaters with the prefix o
+#  ^- (ex. geMyMethod(oMethodOutput))
+# - Public methods must be fail-safe to invalid inputs
+#  ^- Validity checks needed in all public members
+#  ^- Data is assumed valid in private members
+#
+###      FILES      ###
+# GodEngineH.txt - This is the header file. Everything you need to make
+#                  full use of the API can be found here.
+#                ^- Public globals, public enums, and documentation
+#                   of public scripts goes here.
+#
+# GodEngine.txt  - This is the body/implementation file. All the cool,
+#                  behind-the-scenes stuff happens here. ONLY look in
+#                  this file if you are interested in seeing the core
+#                  implementation (not needed for API use,) or if you
+#                  want to gawk at my genius ;)
+#                ^- ge_[anything] goes here
+# 
+#
+### WARNING ###
+# Passing paramaters ByVal (that is, storing them in local variable)
+# does not prevent them from being modified when the local variable is
+# modified... it PROBABLY depends on whether the object is a pointer
+# or a value, but how to tell?
+##############################
+*/
+
+/*
+###   TODO LIST   ###
+# - Throw stuff
+*/
+
+global rGodInstance[9]
+
+// God Engine Private Globals (oxymoron? heh)
+global ge_MaxGodHandles = 9 // Needs to be same as max array index on God data
+global ge_TypeInHand[9]
+global ge_QuantityInHand[9]
+global ge_ObjectInHand[9]
+global ge_HomeTown[9]
+global ge_Player[9]
+global ge_EmergencyMode[9]
+global ge_Busy[9]
+global ge_Altar[9]
+global ge_Mana[9]
+global ge_ManaPerSecond[9]
+global ge_MiracleDelay[9]
+global ge_EpicSpellDelay[9]
+
+
+////////////////////////////
+//   GOD ENGINE ENUMS   ///
+//////////////////////////
+//    Do NOT modify.    //
+/////////////////////////
+
+// Resource Type Enum
+global GE_HT_EMPTY = 0
+global GE_HT_FOOD = 1
+global GE_HT_WOOD = 2
+global GE_HT_ORE = 3
+global GE_HT_OTHER = 4
+
+// Miracle Type Enum
+global GE_MIRACLE_TYPE_NONE                               =  0
+global GE_MIRACLE_TYPE_HEAL                               =  1
+global GE_MIRACLE_TYPE_LIFE                               =  2 // Does not work
+global GE_MIRACLE_TYPE_DECAY                              =  3 // Does not work
+global GE_MIRACLE_TYPE_DEATH                              =  4 // Does not work
+global GE_MIRACLE_TYPE_FIRE                               =  5
+global GE_MIRACLE_TYPE_LAVA                               =  6 // Does not work
+global GE_MIRACLE_TYPE_TREMOR                             =  7 // Does not work
+global GE_MIRACLE_TYPE_METEOR                             =  8
+global GE_MIRACLE_TYPE_WIND                               =  9 // Does not work
+global GE_MIRACLE_TYPE_TORNADO                            =  10
+global GE_MIRACLE_TYPE_WATER                              =  11
+global GE_MIRACLE_TYPE_STORM                              =  12
+global GE_MIRACLE_TYPE_VERDANT                            =  13
+global GE_MIRACLE_TYPE_FIRERAIN                           =  14
+global GE_MIRACLE_TYPE_THUNDERSTORM                       =  15
+global GE_MIRACLE_TYPE_METEORID                           =  16
+global GE_MIRACLE_TYPE_LAST                               =  17
+
+// Disciple Type Enum
+global GE_VILLAGER_DISCIPLE_NONE                          =  0
+global GE_VILLAGER_DISCIPLE_FARMER                        =  1
+global GE_VILLAGER_DISCIPLE_FORESTER                      =  2
+global GE_VILLAGER_DISCIPLE_FISHERMAN                     =  3 // Does not work
+global GE_VILLAGER_DISCIPLE_BUILDER                       =  4
+global GE_VILLAGER_DISCIPLE_BREEDER                       =  5
+global GE_VILLAGER_DISCIPLE_PROTECTION                    =  6 // Does not work
+global GE_VILLAGER_DISCIPLE_MISSIONARY                    =  7 // Does not work
+global GE_VILLAGER_DISCIPLE_CRAFTSMAN                     =  8 // Does not work
+global GE_VILLAGER_DISCIPLE_TRADER                        =  9 // Does not work
+global GE_VILLAGER_DISCIPLE_CHANGE_HOUSE                  =  10
+global GE_VILLAGER_DISCIPLE_WORSHIP                       =  11
+global GE_VILLAGER_DISCIPLE_PROTESTOR                     =  12 // Does not work
+global GE_VILLAGER_DISCIPLE_RESEARCHER                    =  13 // Does not work
+global GE_VILLAGER_DISCIPLE_MINER                         =  14
+global GE_VILLAGER_DISCIPLE_PILGRIM                       =  15 // Does not work
+global GE_VILLAGER_DISCIPLE_REFINER                       =  16
+
+/////////////////////////////
+//  GOD ENGINE SCRIPTS   ///
+///////////////////////////
+// These methods act as primitives for
+// creatin custom AI behavoirs.
+//////////////////////////
+
+// # PUBLIC METHODS
+// Accessors & anything that returns a value
+// (Note: Set methods don't return a value)
+define script ge_GetGodTowns(PlayerID,GodHandle)
+define script ge_GetNewGodHandle(rHomeTown,PlayerID)
+define script ge_CheckGodHandle(rTown,GodHandle,PlayerID)
+
+// # PRIVATE METHODS
+define script ge_MoveToObject(GodHandle,rObject)
+define script ge_MoveToRadiusAltitude(GodHandle,rTargetObject,Radius,Altitude)
+define script ge_PickupResource(GodHandle,rResourceObject,ResourceType,ResourceQuantity)
+define script ge_DropInStorehouse(GodHandle,rStorehouse,ResourceQuantity)
+define script ge_ThrowMiracle(GodHandle, MiracleType, rTargetObject)
+define script ge_ThrowObjectAtObject(GodHandle, rThrowObject, rTargetObject)
+define script ge_GodBuild(GodHandle,rBuilding,ResourceGatherRadius)
+define script ge_GoGetOre(GodHandle,AmountNeeded,ResourceGatherRadius)
+define script ge_GoGetWood(GodHandle,AmountNeeded,ResourceGatherRadius)
+define script ge_GetAltars(GodHandle)
+define script ge_CreateDisciple(GodHandle,DiscipleType)
+define script ge_RemoveDisciple(GodHandle,DiscipleType,TownRadius)
+
+
+/////////////////////////////
+//   GE VISUAL SCRIPTS   ///
+///////////////////////////
+// These methods determine how the god
+// will look. They may be moved to a
+// different document at a later time.
+//////////////////////////
+
+define script ge_VisualFoodUp(GodHandle,Time)
+define script ge_VisualWoodUp(GodHandle,Time)
+define script ge_VisualOreUp(GodHandle,Time)
+define script ge_VisualGodBuild(GodHandle,rTime)
+
+
+
+// ## GOD ENGINE SCRIPTS IMPLEMENTATION ##
+// # PUBLIC METHODS #
+
+//Bimbo Stuff
+// Global Constants
+global bim_ResourceGatherRadius = 500.0
+global bim_DefendRadius = 1024.0
+global bim_MinDesireToStartResource = 0.6
+global bim_MaxDesireToStopResource = 0.1
+global bim_ManaRatePerAdult = 0.5
+global bim_MaxBuiltToGodBuild = 0.5
+global bim_DamageToFirefight = 0.9
+global geChangeTown[9]
+
+// Number of Disciples
+global bim_MaleBreeders = 0 //Look in script "bim_Disciples" 
+global bim_Prayers = 0 //Look in script "bim_Disciples" 
+global bim_Miners = 0 //Look in script "bim_Disciples" 
+global bim_NumDiscipleOther = 0 //Look in script "bim_Disciples" 
+
+// Script Definitions
+define script bimNewBimbo(rTown,PlayerID)
+define script bim_BimboLoop(GodHandle,rTown,PlayerID)
+define script bim_BimboEmergency(GodHandle,rTown,PlayerID)
+define script bim_SatisfyWoodDesire(GodHandle,rTown)
+define script bim_SatisfyFoodDesire(GodHandle,rTown)
+define script bim_SatisfyOreDesire(GodHandle,rTown)
+define script bim_BuildNewBuilding(GodHandle,rTown)
+define script bim_Firefight(GodHandle,rTown)
+define script bim_Disciples(GodHandle,rTown)
+define script bim_MoveRandom(GodHandle,rTown)
+define script bim_WaterForest(GodHandle,rTown)
+define script bim_FightEnemy(GodHandle,rTown,Target,TargetType)
+define script bim_EpicSpell(GodHandle,rTown,whichSpell,Target)
+define script bim_HealMyPlatoon(godHandle,rTown)
+
+
+begin script ge_GetNewGodHandle(rHomeTown,PlayerID)
+    rGodVisualEffect = 0
+    godHandle = PlayerID
+start
+    // Returns -1 if there are no valid handles to be assigned to new god
+    if rHomeTown exists
+        godHandle = PlayerID
+        
+        rGodInstance[godHandle] = create with angle geAvatarAngle and scale geAvatarScale geAvatarScriptType geAvatarObjectType at {rHomeTown}
+        rGodVisualEffect = create visual effect geAvatarVisualEffect on rGodInstance[godHandle] time -1
+        SCALE of rGodVisualEffect = geGlowEffectScale
+        if PlayerID == 1
+            set rGodVisualEffect color red 180 green 35 blue 35
+        elsif PlayerID == 2
+            set rGodVisualEffect color red 219 green 112 blue 147
+        elsif PlayerID == 3
+            set rGodVisualEffect color red 35 green 35 blue 180
+        end if
+
+        enable rGodInstance[godHandle] moveable
+        enable rGodInstance[godHandle] indestructible
+        disable rGodInstance[godHandle] pickup
+        disable rGodInstance[godHandle] can be fisted
+        ALTITUDE of rGodInstance[godHandle] = geGodAltitude
+        SCRIPT_OBJECT_PROPERTY_TYPE_DENSITY of rGodInstance[godHandle] = 0.0
+        // TODO: NEED WAY TO SET PHYSICS PROPERTIES SO HAS NO WEIGHT
+        
+        ge_TypeInHand[godHandle] = GE_HT_EMPTY
+        ge_QuantityInHand[godHandle] = 0
+        ge_ObjectInHand[godHandle] = 0
+        ge_HomeTown[godHandle] = rHomeTown
+        ge_Player[godHandle] = PLAYER of rHomeTown
+        ge_Mana[godHandle] = geGodStartingMana
+        ge_ManaPerSecond[godHandle] = geGodStartingManaPerSecond
+        
+        run background script ge_GetGodTowns(PlayerID,godHandle)
+        run background script ge_GetAltars(godHandle)
+        run background script ge_CheckGodHandle(rHomeTown,godHandle,PlayerID)
+    else
+        godHandle = -1
+    end if
+    
+    //oGodHandle = godHandle
+    run script geReturn(godHandle)
+end script ge_GetNewGodHandle
+
+
+begin script ge_CheckGodHandle(rTown,GodHandle,PlayerID)
+
+    godHandle = GodHandle
+    DeleteGod = 0
+    GodOnPointTimer = create timer for 0 seconds
+    GodPoint = 0
+    rGodVisualEffect = 0
+
+    FakeGod = 0
+    FakeGodEffect = 0
+
+start
+
+    begin loop
+        DeleteGod = 0
+        begin loop
+            if {rGodInstance[godHandle]} under water or rGodInstance[godHandle] not exists or PLAYER of rTown != PlayerID
+                DeleteGod = 1
+            end if
+            if get GodOnPointTimer time remaining <= 0
+                GodPoint = marker at {rGodInstance[godHandle]}
+                GodOnPointTimer = create timer for 60 seconds
+            elsif get GodOnPointTimer time remaining <= 5
+                if {rGodInstance[godHandle]} near {GodPoint} radius 5
+                    DeleteGod = 1
+                end if
+            end if
+            until DeleteGod == 1
+        end loop
+
+        //say "Deleting God"
+        FakeGod = create with angle geAvatarAngle and scale geAvatarScale geAvatarScriptType geAvatarObjectType at {rGodInstance[godHandle]}
+        FakeGodEffect = create visual effect geAvatarVisualEffect on rGodInstance[godHandle] time -1
+        SCALE of FakeGodEffect = geGlowEffectScale
+        if godHandle == 1
+            set FakeGodEffect color red 180 green 35 blue 35
+        elsif godHandle == 2
+            set FakeGodEffect color red 219 green 112 blue 147
+        elsif godHandle == 3
+            set FakeGodEffect color red 35 green 35 blue 180
+        end if
+
+        delete rGodInstance[godHandle]
+
+        wait 5 seconds
+
+        delete FakeGod
+
+        //say "God Deleted"
+        if PLAYER of rTown == ge_Player[GodHandle]
+            rGodInstance[godHandle] = create with angle geAvatarAngle and scale geAvatarScale geAvatarScriptType geAvatarObjectType at {ge_HomeTown[godHandle]}
+            rGodVisualEffect = create visual effect geAvatarVisualEffect on rGodInstance[godHandle] time -1
+            SCALE of rGodVisualEffect = geGlowEffectScale
+            if godHandle == 1
+                set rGodVisualEffect color red 180 green 35 blue 35
+            elsif godHandle == 2
+                set rGodVisualEffect color red 219 green 112 blue 147
+            elsif godHandle == 3
+                set rGodVisualEffect color red 35 green 35 blue 180
+            end if
+
+            enable rGodInstance[godHandle] moveable
+            enable rGodInstance[godHandle] indestructible
+            disable rGodInstance[godHandle] pickup
+            disable rGodInstance[godHandle] can be fisted
+            ALTITUDE of rGodInstance[godHandle] = geGodAltitude
+            SCRIPT_OBJECT_PROPERTY_TYPE_DENSITY of rGodInstance[godHandle] = 0.0
+            // TODO: NEED WAY TO SET PHYSICS PROPERTIES SO HAS NO WEIGHT
+            
+            ge_TypeInHand[godHandle] = GE_HT_EMPTY
+            ge_QuantityInHand[godHandle] = 0
+            ge_ObjectInHand[godHandle] = 0
+        end if
+    end loop
+
+end script ge_CheckGodHandle
+
+
+begin script ge_GetGodTowns(PlayerID,GodHandle)
+
+    geAITown[SK_MaxTowns]
+    geCounter = 0
+    geRandomNumber = 0
+    geNumberOfTowns = 0
+    geHomeTown = 0
+    geTownCentre = 0
+    godHandle = GodHandle
+
+start
+
+begin loop
+    wait until rGodInstance[godHandle] exists
+    if geCounter >= SK_MaxTowns
+        geCounter = 0
+    end if
+
+    geAITown[geCounter] = get town with id geCounter
+    geTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in geAITown[geCounter] min built 1.0
+    if PLAYER of geAITown[geCounter] == PlayerID and geTownCentre exists
+        geHomeTown = geAITown[geCounter]
+        ge_HomeTown[godHandle] = geHomeTown
+        wait until geChangeTown[godHandle] == 1
+        geChangeTown[godHandle] = 0
+    end if
+
+    geNumberOfTowns = get player PlayerID town total
+    geCounter += number from 1 to geNumberOfTowns
+end loop
+
+end script ge_GetGodTowns
+
+// ## GOD ENGINE SCRIPTS IMPLEMENTATION ##
+// # PRIVATE METHODS #
+
+// I really wish there was a more elegant way to do this...
+begin script ge_MoveToObject(GodHandle,rTargetObject)
+    godHandle = GodHandle
+start
+    if rTargetObject exists and rGodInstance[godHandle] exists
+        while {rGodInstance[godHandle]} not near {rTargetObject} radius geArrivalRadius and rGodInstance[godHandle] exists
+            ALTITUDE of rGodInstance[godHandle] = geGodAltitude
+            if ge_ObjectInHand[godHandle] exists
+                set ge_ObjectInHand[godHandle] position to {rGodInstance[godHandle]}
+                ALTITUDE of ge_ObjectInHand[godHandle] = ALTITUDE of rGodInstance[godHandle]
+            end if
+            set rGodInstance[godHandle] velocity heading ({rTargetObject} + {0,(geGodAltitude + 1.0),0}) speed geGodSpeed
+            wait 0.05 seconds
+        end while
+        
+        set rGodInstance[godHandle] position to {rTargetObject}
+        ALTITUDE of rGodInstance[godHandle] = geGodAltitude
+        if ge_ObjectInHand[godHandle] exists
+            ALTITUDE of ge_ObjectInHand[godHandle] = ALTITUDE of rGodInstance[godHandle]
+        end if
+    end if
+end script ge_MoveToObject
+
+
+begin script ge_MoveToRadiusAltitude(GodHandle,rTargetObject,Radius,Altitude)
+    myRadius = Radius
+    targetAltitude = Altitude
+    godHandle = GodHandle
+    currentAltitude = ALTITUDE of rGodInstance[GodHandle]
+    altitudeChange = (targetAltitude - currentAltitude) * 0.05
+start
+    while {rGodInstance[godHandle]} not near {rTargetObject} radius myRadius and rTargetObject exists and rGodInstance[godHandle] exists
+        if not 0.1 < (targetAltitude - currentAltitude) or not (targetAltitude - currentAltitude) < -0.1
+            currentAltitude += altitudeChange
+        end if
+        ALTITUDE of rGodInstance[godHandle] = currentAltitude
+        set rGodInstance[godHandle] velocity heading ({rTargetObject} + {0,(targetAltitude + 1.0),0}) speed geGodSpeed
+        wait 0.01 seconds
+    end while
+
+    ALTITUDE of rGodInstance[godHandle] = targetAltitude
+end script ge_MoveToRadiusAltitude
+
+
+// Passing in a resourceQuantity greater than that available in ResourceObject will cause it to take
+// as much as it can. Passing in -1 will also cause it to take all ResourceType in ResourceObject.
+// Also, gathering a resourse with a different resourse type in hand will cause the first type to disappear.
+begin script ge_PickupResource(GodHandle,rResourceObject,ResourceType,ResourceQuantity)
+    godHandle = GodHandle
+    resourceQuantity = ResourceQuantity
+    resourceType = ResourceType
+    resourceGatherTime = 0 // resourceQuantity / (geGodResourceGatherSpeed * 10.0)
+    resourceAvailable = 0
+start
+    if rGodInstance[godHandle] exists
+        run script ge_MoveToObject(godHandle,rResourceObject)
+
+        // If holding a different resource than trying to pick up, first resource gets deleted
+        if ge_TypeInHand[godHandle] != resourceType
+            ge_QuantityInHand[godHandle] = 0
+            ge_TypeInHand[godHandle] = resourceType
+        end if
+
+        ALTITUDE of rGodInstance[godHandle] = gePickupResourceAltitude
+        
+        if rResourceObject exists
+            if resourceType == GE_HT_FOOD
+                resourceAvailable = get resource RESOURCE_TYPE_FOOD in rResourceObject
+                if resourceQuantity < 0 or resourceAvailable < resourceQuantity
+                    resourceQuantity = resourceAvailable
+                    resourceGatherTime = resourceQuantity / (geGodResourceGatherSpeed * 10.0)
+                end if
+                
+                run background script ge_VisualFoodUp(godHandle,resourceGatherTime)
+                while resourceQuantity > geGodResourceGatherSpeed
+                    ge_QuantityInHand[godHandle] += geGodResourceGatherSpeed
+                    remove resource RESOURCE_TYPE_FOOD geGodResourceGatherSpeed from rResourceObject
+                    resourceQuantity = resourceQuantity - geGodResourceGatherSpeed
+                    wait 0.1 seconds
+                end while
+                ge_QuantityInHand[godHandle] += resourceQuantity
+                remove resource RESOURCE_TYPE_FOOD resourceQuantity from rResourceObject
+                
+                
+            elsif resourceType == GE_HT_WOOD
+                resourceAvailable = get resource RESOURCE_TYPE_WOOD in rResourceObject
+                if resourceQuantity < 0 or resourceAvailable < resourceQuantity
+                    resourceQuantity = resourceAvailable
+                    resourceGatherTime = resourceQuantity / (geGodResourceGatherSpeed * 10.0)
+                end if
+                
+                run background script ge_VisualWoodUp(godHandle,resourceGatherTime)
+                while resourceQuantity > geGodResourceGatherSpeed
+                    ge_QuantityInHand[godHandle] += geGodResourceGatherSpeed
+                    remove resource RESOURCE_TYPE_WOOD geGodResourceGatherSpeed from rResourceObject
+                    resourceQuantity = resourceQuantity - geGodResourceGatherSpeed
+                    wait 0.1 seconds
+                end while
+                ge_QuantityInHand[godHandle] += resourceQuantity
+                remove resource RESOURCE_TYPE_WOOD resourceQuantity from rResourceObject
+                
+                
+            elsif resourceType == GE_HT_ORE
+                resourceAvailable = get resource RESOURCE_TYPE_ORE in rResourceObject
+                if resourceQuantity < 0 or resourceAvailable < resourceQuantity
+                    resourceQuantity = resourceAvailable
+                    resourceGatherTime = resourceQuantity / (geGodResourceGatherSpeed * 10.0)
+                end if
+                
+                run background script ge_VisualOreUp(godHandle,resourceGatherTime)
+                while resourceQuantity > geGodResourceGatherSpeed
+                    ge_QuantityInHand[godHandle] += geGodResourceGatherSpeed
+                    remove resource RESOURCE_TYPE_ORE geGodResourceGatherSpeed from rResourceObject
+                    resourceQuantity = resourceQuantity - geGodResourceGatherSpeed
+                    wait 0.1 seconds
+                end while
+                ge_QuantityInHand[godHandle] += resourceQuantity
+                remove resource RESOURCE_TYPE_ORE resourceQuantity from rResourceObject
+            end if
+        end if
+        
+        if ge_QuantityInHand[godHandle] <= 0
+            ge_TypeInHand[godHandle] = GE_HT_EMPTY
+        end if
+        ALTITUDE of rGodInstance[godHandle] = geGodAltitude
+    end if
+end script ge_PickupResource
+
+
+begin script ge_DropInStorehouse(GodHandle,rStorehouse,ResourceQuantity)
+    godHandle = GodHandle
+    resourceQuantity = ResourceQuantity
+start
+    if rGodInstance[godHandle] exists
+        run script ge_MoveToObject(godHandle,rStorehouse)
+        
+        // Passing -1 or amount greater than held will both dump full quantity
+        if resourceQuantity < 0
+            resourceQuantity = ge_QuantityInHand[godHandle]
+        elsif resourceQuantity > ge_QuantityInHand[godHandle]
+            resourceQuantity = ge_QuantityInHand[godHandle]
+        end if
+        
+        if ge_TypeInHand[godHandle] == GE_HT_FOOD
+            add resource RESOURCE_TYPE_FOOD resourceQuantity to rStorehouse
+            ge_QuantityInHand[godHandle] -= resourceQuantity
+            if camera position near {rGodInstance[godHandle]} radius 100.00
+                play sound "PILEFOOD_01" at {rGodInstance[godHandle]} with volume 1.0 pitch 0.0
+                wait 2 seconds
+                stop sound "PILEFOOD_01"
+            end if
+        elsif ge_TypeInHand[godHandle] == GE_HT_WOOD
+            add resource RESOURCE_TYPE_WOOD resourceQuantity to rStorehouse
+            ge_QuantityInHand[godHandle] -= resourceQuantity
+            if camera position near {rGodInstance[godHandle]} radius 100.00
+                play sound "PILEWOOD_01" at {rGodInstance[godHandle]} with volume 1.0 pitch 0.0
+                wait 2 seconds
+                stop sound "PILEWOOD_01"
+            end if
+        elsif ge_TypeInHand[godHandle] == GE_HT_ORE
+            add resource RESOURCE_TYPE_ORE resourceQuantity to rStorehouse
+            ge_QuantityInHand[godHandle] -= resourceQuantity
+            if camera position near {rGodInstance[godHandle]} radius 100.00
+                play sound "PILEFOOD_02" at {rGodInstance[godHandle]} with volume 1.0 pitch 0.0
+                wait 2 seconds
+                stop sound "PILEFOOD_02"
+            end if
+        end if
+        
+        set rGodInstance[godHandle] position to {rStorehouse}
+        ALTITUDE of rGodInstance[godHandle] = geGodAltitude
+    end if
+end script ge_DropInStorehouse
+
+
+begin script ge_ThrowMiracle(GodHandle, MiracleType, rTargetObject)
+    godHandle = GodHandle
+    miracleType = MiracleType
+    newMiracle = 0
+    currMana = 0
+start
+    if miracleType > GE_MIRACLE_TYPE_NONE and miracleType < GE_MIRACLE_TYPE_LAST and rGodInstance[godHandle] exists
+        run script ge_MoveToRadiusAltitude(godHandle,rTargetObject,geGodThrowRadius,geGodThrowAltitude)
+        //SCRIPT_OBJECT_PROPERTY_TYPE_YPOS of rGodInstance[godHandle] = geGodThrowAltitude
+        wait 1 seconds
+        if miracleType == GE_MIRACLE_TYPE_HEAL
+            currMana = get player ge_Player[godHandle] mana
+            set player ge_Player[godHandle] mana currMana - geManaCostHeal
+            newMiracle = make player ge_Player[godHandle] throw miracle MIRACLE_TYPE_HEAL from ({rGodInstance[godHandle]} + {0, -3.0, 0}) heading (({rTargetObject} + {0,geThrowArc,0}) - {rGodInstance[godHandle]})
+        elsif miracleType == GE_MIRACLE_TYPE_LIFE
+            currMana = get player ge_Player[godHandle] mana
+            set player ge_Player[godHandle] mana currMana - geManaCostLife
+            newMiracle = make player ge_Player[godHandle] throw miracle MIRACLE_TYPE_LIFE from ({rGodInstance[godHandle]} + {0, -3.0, 0}) heading (({rTargetObject} + {0,geThrowArc,0}) - {rGodInstance[godHandle]})
+        elsif miracleType == GE_MIRACLE_TYPE_DECAY
+            currMana = get player ge_Player[godHandle] mana
+            set player ge_Player[godHandle] mana currMana - geManaCostDecay
+            newMiracle = make player ge_Player[godHandle] throw miracle MIRACLE_TYPE_DECAY from ({rGodInstance[godHandle]} + {0, -3.0, 0}) heading (({rTargetObject} + {0,geThrowArc,0}) - {rGodInstance[godHandle]})
+        elsif miracleType == GE_MIRACLE_TYPE_DEATH
+            currMana = get player ge_Player[godHandle] mana
+            set player ge_Player[godHandle] mana currMana - geManaCostDeath
+            newMiracle = make player ge_Player[godHandle] throw miracle MIRACLE_TYPE_DEATH from ({rGodInstance[godHandle]} + {0, -3.0, 0}) heading (({rTargetObject} + {0,geThrowArc,0}) - {rGodInstance[godHandle]})
+        elsif miracleType == GE_MIRACLE_TYPE_FIRE
+            currMana = get player ge_Player[godHandle] mana
+            set player ge_Player[godHandle] mana currMana - geManaCostFire
+            newMiracle = make player ge_Player[godHandle] throw miracle MIRACLE_TYPE_FIRE from ({rGodInstance[godHandle]} + {0, -3.0, 0}) heading (({rTargetObject} + {0,geThrowArc,0}) - {rGodInstance[godHandle]})
+        elsif miracleType == GE_MIRACLE_TYPE_LAVA
+            currMana = get player ge_Player[godHandle] mana
+            set player ge_Player[godHandle] mana currMana - geManaCostLava
+            newMiracle = make player ge_Player[godHandle] throw miracle MIRACLE_TYPE_LAVA from ({rGodInstance[godHandle]} + {0, -3.0, 0}) heading (({rTargetObject} + {0,geThrowArc,0}) - {rGodInstance[godHandle]})
+        elsif miracleType == GE_MIRACLE_TYPE_TREMOR
+            currMana = get player ge_Player[godHandle] mana
+            set player ge_Player[godHandle] mana currMana - geManaCostTremor
+            newMiracle = make player ge_Player[godHandle] throw miracle MIRACLE_TYPE_TREMOR from ({rGodInstance[godHandle]} + {0, -3.0, 0}) heading (({rTargetObject} + {0,geThrowArc,0}) - {rGodInstance[godHandle]})
+        elsif miracleType == GE_MIRACLE_TYPE_METEOR
+            currMana = get player ge_Player[godHandle] mana
+            set player ge_Player[godHandle] mana currMana - geManaCostMeteor
+            newMiracle = make player ge_Player[godHandle] throw miracle MIRACLE_TYPE_METEOR from ({rGodInstance[godHandle]} + {0, -3.0, 0}) heading (({rTargetObject} + {0,geThrowArc,0}) - {rGodInstance[godHandle]})
+        elsif miracleType == GE_MIRACLE_TYPE_WIND
+            currMana = get player ge_Player[godHandle] mana
+            set player ge_Player[godHandle] mana currMana - geManaCostWind
+            newMiracle = make player ge_Player[godHandle] throw miracle MIRACLE_TYPE_WIND from ({rGodInstance[godHandle]} + {0, -3.0, 0}) heading (({rTargetObject} + {0,geThrowArc,0}) - {rGodInstance[godHandle]})
+        elsif miracleType == GE_MIRACLE_TYPE_TORNADO
+            currMana = get player ge_Player[godHandle] mana
+            set player ge_Player[godHandle] mana currMana - geManaCostTornado
+            newMiracle = make player ge_Player[godHandle] throw miracle MIRACLE_TYPE_TORNADO from ({rGodInstance[godHandle]} + {0, -3.0, 0}) heading (({rTargetObject} + {0,geThrowArc,0}) - {rGodInstance[godHandle]})
+        elsif miracleType == GE_MIRACLE_TYPE_WATER
+            currMana = get player ge_Player[godHandle] mana
+            set player ge_Player[godHandle] mana currMana - geManaCostWater
+            newMiracle = make player ge_Player[godHandle] throw miracle MIRACLE_TYPE_WATER from ({rGodInstance[godHandle]} + {0, -3.0, 0}) heading (({rTargetObject} + {0,geThrowArc,0}) - {rGodInstance[godHandle]})
+        elsif miracleType == GE_MIRACLE_TYPE_STORM
+            currMana = get player ge_Player[godHandle] mana
+            set player ge_Player[godHandle] mana currMana - geManaCostStorm
+            newMiracle = make player ge_Player[godHandle] throw miracle MIRACLE_TYPE_STORM from ({rGodInstance[godHandle]} + {0, -3.0, 0}) heading (({rTargetObject} + {0,geThrowArc,0}) - {rGodInstance[godHandle]})
+        elsif miracleType == GE_MIRACLE_TYPE_VERDANT
+            currMana = get player ge_Player[godHandle] mana
+            set player ge_Player[godHandle] mana currMana - geManaCostVerdant
+            run background script VerdantSpell(ge_Player[godHandle],rTargetObject)
+        elsif miracleType == GE_MIRACLE_TYPE_FIRERAIN
+            currMana = get player ge_Player[godHandle] mana
+            set player ge_Player[godHandle] mana currMana - geManaCostFirerain
+            run background script FirerainSpell(ge_Player[godHandle],rTargetObject)
+        elsif miracleType == GE_MIRACLE_TYPE_THUNDERSTORM
+            currMana = get player ge_Player[godHandle] mana
+            set player ge_Player[godHandle] mana currMana - geManaCostThunderstorm
+            run background script ThunderstormSpell(ge_Player[godHandle],rTargetObject)
+        elsif miracleType == GE_MIRACLE_TYPE_METEORID
+            currMana = get player ge_Player[godHandle] mana
+            set player ge_Player[godHandle] mana currMana - geManaCostMeteorid
+            run background script MeteorSpell(ge_Player[godHandle],rTargetObject)
+        end if
+        SCRIPT_OBJECT_PROPERTY_TYPE_SPEED of newMiracle = geThrowSpeed
+        wait 1 seconds
+        SCRIPT_OBJECT_PROPERTY_TYPE_YPOS of rGodInstance[godHandle] = geGodAltitude
+    end if
+end script ge_ThrowMiracle
+
+
+// BROKEN
+//  - Not calculating trajectories properly. I'm sure that density is a factor in wind resistance... I need
+//    to experiment to figure out the exact physical properties of the world, and prepare a better formula.
+begin script ge_ThrowObjectAtObject(GodHandle, rThrowObject, rTargetObject)
+    godHandle = GodHandle
+    throwObjectAltitudeMod = SCRIPT_OBJECT_PROPERTY_TYPE_ACTUAL_HEIGHT of rThrowObject * 0.8
+    velocityYmod = 0 // set to 45 degrees
+    myDistance = 0
+    // distanceOffTarget = 0.0
+    // lastDistanceOffTarget = 0.0
+    // throwDistance = get distance from {rThrowObject} to {rTargetObject}
+start
+/*
+#    God moves to object
+#    God sets object position to just above itself
+#    God moves within range (if necessary)
+#    God calculates needed velocity and fires
+#   ^- Object fires from above god to avoid knocking itself over
+#   ^- 
+*/
+    if rGodInstance[godHandle] exists
+        run script ge_MoveToRadiusAltitude(godHandle,rThrowObject,geArrivalRadius,gePickUpObjectAltitude)
+        ge_ObjectInHand[godHandle] = rThrowObject // TODO: Is this needed?
+        
+        // This will make them both move together, the object hovering above the god.
+        ALTITUDE of rGodInstance[godHandle] = geGodAltitude + 30
+        ALTITUDE of rThrowObject = geGodAltitude + throwObjectAltitudeMod + 30
+        //run background script ge_MoveToRadiusAltitude(godHandle,rThrowObject,rTargetObject,geGodThrowRadius + 60,(geGodAltitude + throwObjectAltitudeMod + 30))
+        run script ge_MoveToRadiusAltitude(godHandle,rTargetObject,geGodThrowRadius + 60,geGodAltitude + 30)
+
+        //myDistance = get distance from {rThrowObject} to {rTargetObject}
+        //myDistance -= 35
+        velocityYmod = (get distance from {rThrowObject} to {rTargetObject}) * number from 0.7 to 1
+        set rThrowObject velocity heading {rTargetObject} + {0,velocityYmod,0} speed (get distance from {rThrowObject} to {rTargetObject}) * number from 0.7 to 1 // * SCRIPT_OBJECT_PROPERTY_TYPE_DENSITY of rThrowObject
+        // set rThrowObject target {rTargetObject} time 2 // (get distance from {rThrowObject} to {rTargetObject}) * 0.1
+        ge_ObjectInHand[godHandle] = 0
+        ALTITUDE of rGodInstance[godHandle] = geGodAltitude
+        wait 2 seconds
+    end if
+end script ge_ThrowObjectAtObject
+
+
+begin script ge_GodBuild(GodHandle,rBuilding,ResourceGatherRadius)
+    godHandle = GodHandle
+    resourceGatherRadius = ResourceGatherRadius
+    builtRatio = HEALTH of rBuilding
+    myStorehouse = get building ABODE_NUMBER_STORAGE_PIT in ge_HomeTown[godHandle] min built 1.0
+    baseOreCost = 0
+    baseWoodCost = 0
+    finalOreCost = 0
+    finalWoodCost = 0
+    woodBuildTime = 0
+    buildRate = 0
+    buildTime = 0
+start
+
+    if rGodInstance[godHandle] exists
+        myStorehouse = get building ABODE_NUMBER_STORAGE_PIT in ge_HomeTown[godHandle] min built 1.0
+
+        // Get base wood cost of building type
+        run script bcGetOreCostOf(rBuilding)
+        baseOreCost = bcReturnVal
+        run script bcUnlockReturn
+        run script bcGetWoodCostOf(rBuilding)
+        baseWoodCost = bcReturnVal
+        run script bcUnlockReturn
+        
+        // Calculate cost to finish based on completion level
+        finalWoodCost = (baseWoodCost * (1.0 - builtRatio)) * geGodBuildEfficiency
+        finalOreCost = (baseOreCost * (1.0 - builtRatio)) * geGodBuildEfficiency
+        
+        if finalWoodCost > 0
+            if not ge_TypeInHand[godHandle] == GE_HT_WOOD and not ge_TypeInHand[godHandle] == GE_HT_EMPTY
+                run script ge_DropInStorehouse(godHandle,myStorehouse,-1)
+            end if
+            run script ge_GoGetWood(godHandle,finalWoodCost,resourceGatherRadius)
+        end if
+            
+        // buildRate = amount of ratio to restore every 0.1 seconds
+        buildRate = (1.0 - builtRatio) / ((finalWoodCost + finalOreCost) / geGodBuildRate)
+        // woodBuildTime = number of loop intervals spent on wood
+        woodBuildTime = (finalWoodCost / (finalWoodCost + finalOreCost)) * ((finalWoodCost + finalOreCost) / geGodBuildRate)
+        buildTime = woodBuildTime
+        
+        run script ge_MoveToRadiusAltitude(godHandle,rBuilding,4.0,geGodBuildAltitude)
+
+        //run background script ge_VisualGodBuild(godHandle,buildTime)
+        while HEALTH of rBuilding < 1.0 and 0 < woodBuildTime
+            HEALTH of rBuilding += buildRate
+            woodBuildTime -= 1
+            wait 0.1 seconds
+        end while
+        
+        ge_QuantityInHand[godHandle] = 0
+        ge_TypeInHand[godHandle] = GE_HT_EMPTY
+
+        if finalOreCost > 0
+            if not ge_TypeInHand[godHandle] == GE_HT_ORE and not ge_TypeInHand[godHandle] == GE_HT_EMPTY
+                run script ge_DropInStorehouse(godHandle,myStorehouse,-1)
+            end if
+            run script ge_GoGetOre(godHandle,finalOreCost,resourceGatherRadius)
+        end if
+        
+        run script ge_MoveToRadiusAltitude(godHandle,rBuilding,4.0,geGodBuildAltitude)
+        
+        //run background script ge_VisualGodBuild(godHandle,buildTime)
+        while HEALTH of rBuilding < 1.0
+            HEALTH of rBuilding += buildRate
+            wait 0.1 seconds
+        end while
+        
+        ge_QuantityInHand[godHandle] = 0
+        ge_TypeInHand[godHandle] = GE_HT_EMPTY
+        
+        ALTITUDE of rGodInstance[godHandle] = geGodAltitude
+    end if
+end script ge_GodBuild
+
+
+// Fist tries storehouse, then tries ore rocks
+begin script ge_GoGetOre(GodHandle,AmountNeeded,ResourceGatherRadius)
+    godHandle = GodHandle
+    amountNeeded = AmountNeeded
+    resourceGatherRadius = ResourceGatherRadius
+    myStorehouse = 0
+    maxStorehouseChecks = get number of type SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_STORAGE_PIT in ge_HomeTown[godHandle] min built 1.0
+    myOreRock = 0
+start
+    if rGodInstance[godHandle] exists
+        if ge_TypeInHand[godHandle] != GE_HT_ORE
+            ge_QuantityInHand[godHandle] = 0
+            ge_TypeInHand[godHandle] = GE_HT_ORE
+        end if
+        while ge_QuantityInHand[godHandle] < amountNeeded and 0 < maxStorehouseChecks
+            maxStorehouseChecks -= 1
+            myStorehouse = get town ge_HomeTown[godHandle] storage pit with most RESOURCE_TYPE_ORE
+            if myStorehouse exists
+                run script ge_PickupResource(godHandle,myStorehouse,GE_HT_ORE,amountNeeded)
+            end if
+        end while
+        myOreRock = get SCRIPT_OBJECT_TYPE_ORE_ROCK at {ge_HomeTown[godHandle]} radius resourceGatherRadius
+        while ge_QuantityInHand[godHandle] < amountNeeded and myOreRock exists
+            run script ge_PickupResource(godHandle,myOreRock,GE_HT_ORE,amountNeeded)
+            myOreRock = get SCRIPT_OBJECT_TYPE_ORE_ROCK at {ge_HomeTown[godHandle]} radius resourceGatherRadius
+        end while
+    end if
+end script ge_GoGetOre
+
+
+// First tries storehouse, then tries trees
+begin script ge_GoGetWood(GodHandle,AmountNeeded,ResourceGatherRadius)
+    godHandle = GodHandle
+    amountNeeded = AmountNeeded
+    resourceGatherRadius = ResourceGatherRadius
+    myStorehouse = 0
+    maxStorehouseChecks = get number of type SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_STORAGE_PIT in ge_HomeTown[godHandle] min built 1.0
+    myTree = 0
+start
+    if rGodInstance[godHandle] exists
+        if ge_TypeInHand[godHandle] != GE_HT_WOOD
+            ge_QuantityInHand[godHandle] = 0
+            ge_TypeInHand[godHandle] = GE_HT_WOOD
+        end if
+        while ge_QuantityInHand[godHandle] < amountNeeded and 0 < maxStorehouseChecks
+            maxStorehouseChecks -= 1
+            myStorehouse = get town ge_HomeTown[godHandle] storage pit with most RESOURCE_TYPE_WOOD
+            if myStorehouse exists
+                run script ge_PickupResource(godHandle,myStorehouse,GE_HT_WOOD,amountNeeded)
+            end if
+        end while
+        myTree = get SCRIPT_OBJECT_TYPE_TREE at {ge_HomeTown[godHandle]} radius resourceGatherRadius
+        while ge_QuantityInHand[godHandle] < amountNeeded and myTree exists
+            run script ge_PickupResource(godHandle,myTree,GE_HT_WOOD,amountNeeded)
+            myTree = get SCRIPT_OBJECT_TYPE_TREE at {ge_HomeTown[godHandle]} radius resourceGatherRadius
+        end while
+    end if
+end script ge_GoGetWood
+
+
+begin script ge_GetAltars(GodHandle)
+
+    godHandle = GodHandle
+    AltarCounter = 0
+    Counter = 0
+    myAltar = 0
+    myTown[20]
+
+start
+
+begin loop
+    wait until rGodInstance[godHandle] exists
+    Counter = 0
+    AltarCounter = 0
+    begin loop
+        myTown[Counter] = get town with id Counter
+        if PLAYER of myTown[Counter] == ge_Player[godHandle]
+            myAltar = get building ABODE_NUMBER_ALTAR in myTown[Counter] min built 1.0
+            if myAltar exists and HEALTH of myAltar == 1.0
+                AltarCounter += 1
+            end if
+        end if
+        Counter++
+        until Counter >= 20
+    end loop
+
+    if AltarCounter >= 1
+        ge_Altar[godHandle] = 1
+    else
+        ge_Altar[godHandle] = 0
+    end if
+end loop
+
+end script ge_GetAltars
+
+
+begin script ge_CreateDisciple(GodHandle,DiscipleType)
+    godHandle = GodHandle
+    discipleType = DiscipleType
+    villagerToMod = 0
+    randomPlace = 0
+start
+    if rGodInstance[godHandle] exists
+        while not villagerToMod exists or (discipleType == GE_VILLAGER_DISCIPLE_BREEDER and not villagerToMod is male)
+            randomPlace = get random abode in town ge_HomeTown[godHandle]
+            villagerToMod = get disciple VILLAGER_DISCIPLE_NONE at {randomPlace} radius 50.0
+        end while
+        //run script ge_MoveToRadiusAltitude(godHandle,villagerToMod,geArrivalRadius,gePickupResourceAltitude)
+
+        if discipleType == GE_VILLAGER_DISCIPLE_FARMER
+            set villagerToMod disciple VILLAGER_DISCIPLE_FARMER with sound
+        elsif discipleType == GE_VILLAGER_DISCIPLE_FORESTER
+            set villagerToMod disciple VILLAGER_DISCIPLE_FORESTER with sound
+        elsif discipleType == GE_VILLAGER_DISCIPLE_FISHERMAN
+            set villagerToMod disciple VILLAGER_DISCIPLE_FISHERMAN with sound
+        elsif discipleType == GE_VILLAGER_DISCIPLE_BUILDER
+            set villagerToMod disciple VILLAGER_DISCIPLE_BUILDER with sound
+        elsif discipleType == GE_VILLAGER_DISCIPLE_BREEDER
+            set villagerToMod disciple VILLAGER_DISCIPLE_BREEDER with sound
+        elsif discipleType == GE_VILLAGER_DISCIPLE_PROTECTION
+            set villagerToMod disciple VILLAGER_DISCIPLE_PROTECTION with sound
+        elsif discipleType == GE_VILLAGER_DISCIPLE_MISSIONARY
+            set villagerToMod disciple VILLAGER_DISCIPLE_MISSIONARY with sound
+        elsif discipleType == GE_VILLAGER_DISCIPLE_CRAFTSMAN
+            set villagerToMod disciple VILLAGER_DISCIPLE_CRAFTSMAN with sound
+        elsif discipleType == GE_VILLAGER_DISCIPLE_TRADER
+            set villagerToMod disciple VILLAGER_DISCIPLE_TRADER with sound
+        elsif discipleType == GE_VILLAGER_DISCIPLE_CHANGE_HOUSE
+            set villagerToMod disciple VILLAGER_DISCIPLE_CHANGE_HOUSE with sound
+        elsif discipleType == GE_VILLAGER_DISCIPLE_WORSHIP
+            set villagerToMod disciple VILLAGER_DISCIPLE_WORSHIP with sound
+        elsif discipleType == GE_VILLAGER_DISCIPLE_PROTESTOR
+            set villagerToMod disciple VILLAGER_DISCIPLE_PROTESTOR with sound
+        elsif discipleType == GE_VILLAGER_DISCIPLE_RESEARCHER
+            set villagerToMod disciple VILLAGER_DISCIPLE_RESEARCHER with sound
+        elsif discipleType == GE_VILLAGER_DISCIPLE_MINER
+            set villagerToMod disciple VILLAGER_DISCIPLE_MINER with sound
+        elsif discipleType == GE_VILLAGER_DISCIPLE_PILGRIM
+            set villagerToMod disciple VILLAGER_DISCIPLE_PILGRIM with sound
+        elsif discipleType == GE_VILLAGER_DISCIPLE_REFINER
+            set villagerToMod disciple VILLAGER_DISCIPLE_REFINER with sound
+        end if
+
+        ALTITUDE of rGodInstance[godHandle] = geGodAltitude
+    end if
+end script ge_CreateDisciple
+
+
+begin script ge_RemoveDisciple(GodHandle,DiscipleType,TownRadius)
+    godHandle = GodHandle
+    discipleType = DiscipleType
+    villagerToMod = 0
+    townRadius = TownRadius
+start
+    if rGodInstance[godHandle] exists
+        if discipleType == GE_VILLAGER_DISCIPLE_FARMER
+            villagerToMod = get disciple VILLAGER_DISCIPLE_FARMER at {ge_HomeTown[godHandle]} radius townRadius
+        elsif discipleType == GE_VILLAGER_DISCIPLE_FORESTER
+            villagerToMod = get disciple VILLAGER_DISCIPLE_FORESTER at {ge_HomeTown[godHandle]} radius townRadius
+        elsif discipleType == GE_VILLAGER_DISCIPLE_FISHERMAN
+            villagerToMod = get disciple VILLAGER_DISCIPLE_FISHERMAN at {ge_HomeTown[godHandle]} radius townRadius
+        elsif discipleType == GE_VILLAGER_DISCIPLE_BUILDER
+            villagerToMod = get disciple VILLAGER_DISCIPLE_BUILDER at {ge_HomeTown[godHandle]} radius townRadius
+        elsif discipleType == GE_VILLAGER_DISCIPLE_BREEDER
+            villagerToMod = get disciple VILLAGER_DISCIPLE_BREEDER at {ge_HomeTown[godHandle]} radius townRadius
+        elsif discipleType == GE_VILLAGER_DISCIPLE_PROTECTION
+            villagerToMod = get disciple VILLAGER_DISCIPLE_PROTECTION at {ge_HomeTown[godHandle]} radius townRadius
+        elsif discipleType == GE_VILLAGER_DISCIPLE_MISSIONARY
+            villagerToMod = get disciple VILLAGER_DISCIPLE_MISSIONARY at {ge_HomeTown[godHandle]} radius townRadius
+        elsif discipleType == GE_VILLAGER_DISCIPLE_CRAFTSMAN
+            villagerToMod = get disciple VILLAGER_DISCIPLE_CRAFTSMAN at {ge_HomeTown[godHandle]} radius townRadius
+        elsif discipleType == GE_VILLAGER_DISCIPLE_TRADER
+            villagerToMod = get disciple VILLAGER_DISCIPLE_TRADER at {ge_HomeTown[godHandle]} radius townRadius
+        elsif discipleType == GE_VILLAGER_DISCIPLE_CHANGE_HOUSE
+            villagerToMod = get disciple VILLAGER_DISCIPLE_CHANGE_HOUSE at {ge_HomeTown[godHandle]} radius townRadius
+        elsif discipleType == GE_VILLAGER_DISCIPLE_WORSHIP
+            villagerToMod = get disciple VILLAGER_DISCIPLE_WORSHIP at {ge_HomeTown[godHandle]} radius townRadius
+        elsif discipleType == GE_VILLAGER_DISCIPLE_PROTESTOR
+            villagerToMod = get disciple VILLAGER_DISCIPLE_PROTESTOR at {ge_HomeTown[godHandle]} radius townRadius
+        elsif discipleType == GE_VILLAGER_DISCIPLE_RESEARCHER
+            villagerToMod = get disciple VILLAGER_DISCIPLE_RESEARCHER at {ge_HomeTown[godHandle]} radius townRadius
+        elsif discipleType == GE_VILLAGER_DISCIPLE_MINER
+            villagerToMod = get disciple VILLAGER_DISCIPLE_MINER at {ge_HomeTown[godHandle]} radius townRadius
+        elsif discipleType == GE_VILLAGER_DISCIPLE_PILGRIM
+            villagerToMod = get disciple VILLAGER_DISCIPLE_PILGRIM at {ge_HomeTown[godHandle]} radius townRadius
+        elsif discipleType == GE_VILLAGER_DISCIPLE_REFINER
+            villagerToMod = get disciple VILLAGER_DISCIPLE_REFINER at {ge_HomeTown[godHandle]} radius townRadius
+        end if
+        
+        if villagerToMod exists
+            //run script ge_MoveToRadiusAltitude(godHandle,villagerToMod,geArrivalRadius,gePickupResourceAltitude)
+            set villagerToMod disciple VILLAGER_DISCIPLE_NONE with sound
+            ALTITUDE of rGodInstance[godHandle] = geGodAltitude
+        end if
+    end if
+end script ge_RemoveDisciple
+
+
+// ## GE VISUAL SCRIPTS IMPLEMENTATION ##
+begin script ge_VisualFoodUp(godHandle,rTime)
+    visualEffect = create visual effect VISUAL_EFFECT_RESOURCE_GRAIN_UP at {rGodInstance[godHandle]}+{0,-2,-3} time rTime
+start
+    if camera position near {rGodInstance[godHandle]} radius 200.00
+        play sound "PICKUPFOOD" at {rGodInstance[godHandle]} with volume 1.0 pitch 0.0
+        wait rTime seconds
+        stop sound "PICKUPFOOD"
+    end if
+end script ge_VisualFoodUp
+
+
+begin script ge_VisualWoodUp(godHandle,rTime)
+    visualEffect = create visual effect VISUAL_EFFECT_RESOURCE_WOOD_UP at {rGodInstance[godHandle]}+{0,-2,-3} time rTime
+start
+    if camera position near {rGodInstance[godHandle]} radius 200.00
+        play sound "PICKUPWOOD" at {rGodInstance[godHandle]} with volume 1.0 pitch 0.0
+        wait rTime seconds
+        stop sound "PICKUPWOOD"
+    end if
+end script ge_VisualWoodUp
+
+
+begin script ge_VisualOreUp(godHandle,rTime)
+    visualEffect = create visual effect VISUAL_EFFECT_RESOURCE_ORE_UP at {rGodInstance[godHandle]}+{0,-2,-3} time rTime
+start
+    if camera position near {rGodInstance[godHandle]} radius 200.00
+        play sound "PICKUPORE" at {rGodInstance[godHandle]} with volume 1.0 pitch 0.0
+        wait rTime seconds
+        stop sound "PICKUPORE"
+    end if
+end script ge_VisualOreUp
+
+
+begin script ge_VisualGodBuild(godHandle,rTime)
+
+start
+    if camera position near {rGodInstance[godHandle]} radius 200.00
+        play sound "GODBUILDLOOP" at {rGodInstance[godHandle]} with volume 1.0 pitch 0.0
+        wait rTime seconds
+        stop sound "GODBUILDLOOP"
+    end if
+end script ge_VisualGodBuild
+
+
+//Bimbo Scripts
+begin script bimNewBimbo(rTown,PlayerID)
+    godHandle = -1
+start
+    // Instantiates a new AI instance
+    // run script ge_GetNewGodHandle(rTown,godHandle)
+
+    run script ge_GetNewGodHandle(rTown,PlayerID)
+
+    godHandle = geReturnVal
+    run script geUnlockReturn
+    
+    if godHandle > -1 // make sure godHandle is valid
+        ge_Busy[godHandle] = 0
+        ge_EmergencyMode[godHandle] = 0
+        run background script bim_BimboLoop(godHandle,rTown,PlayerID)
+        run background script bim_BimboEmergency(godHandle,rTown,PlayerID)
+    end if
+end script bimNewBimbo
+
+
+//Every basic non-reactive god actions in this script
+begin script bim_BimboLoop(GodHandle,rTown,PlayerID)
+    godHandle = GodHandle
+    buildingUnderConstruction = 0
+    discipleCounter = 9
+    waterForestCounter = 0
+    resourcesCounter = 0
+    townDesire = 0.0
+    manaRate = 0
+    myPlatoon = 0
+    myCatapult = 0
+    myCounter = 0
+    NumberOfTowns = 0
+    PlayerMana = 0
+    Rand = 0
+    Timer = create timer for 0 seconds
+    townCounter = 0
+    whichSpell = 0
+start
+    ge_MiracleDelay[godHandle] = create timer for 0 seconds
+    ge_EpicSpellDelay[godHandle] = create timer for 120 seconds
+    while 1 == 1 // make sure godHandle is valid
+        wait until rGodInstance[godHandle] exists
+        if myCounter > SK_MaxPlayers
+            myCounter = 0
+        end if
+
+        // Do I need to resource? Don't check these too often
+        //Sometimes make god fly off to 0.0.0
+        if ge_Busy[godHandle] == 0 and ge_EmergencyMode[godHandle] == 0
+            ge_Busy[godHandle] = 1
+            if resourcesCounter > 2
+                resourcesCounter = 0
+                townDesire = get ge_HomeTown[godHandle] desire TOWN_DESIRE_FOR_FOOD
+                if townDesire > bim_MinDesireToStartResource
+                    run script bim_SatisfyFoodDesire(godHandle,ge_HomeTown[godHandle])
+                end if
+                townDesire = get ge_HomeTown[godHandle] desire TOWN_DESIRE_FOR_WOOD
+                if townDesire > bim_MinDesireToStartResource
+                    run script bim_SatisfyWoodDesire(godHandle,ge_HomeTown[godHandle])
+                end if
+                townDesire = get ge_HomeTown[godHandle] desire TOWN_DESIRE_FOR_ORE
+                if townDesire > bim_MinDesireToStartResource
+                    run script bim_SatisfyOreDesire(godHandle,ge_HomeTown[godHandle])
+                end if
+            end if
+            ge_Busy[godHandle] = 0
+        end if
+        
+        // Are there any new buildings to build?
+        // (May go mad if there is not enough resources anywhere, haven't tested.)
+        if ge_Busy[godHandle] == 0 and ge_EmergencyMode[godHandle] == 0
+            ge_Busy[godHandle] = 1
+            run script bim_BuildNewBuilding(godHandle,ge_HomeTown[godHandle])
+            ge_Busy[godHandle] = 0
+        end if
+        
+        if ge_Busy[godHandle] == 0 and ge_EmergencyMode[godHandle] == 0
+            //Heal my Platoons
+            if get Timer time remaining <= 0
+                ge_Busy[godHandle] = 1
+                run script bim_HealMyPlatoon(godHandle,ge_HomeTown[godHandle])
+                ge_Busy[godHandle] = 0
+                Timer = create timer for 300 seconds
+            end if
+        end if
+
+        // Are any of my structures on fire?
+        if ge_Busy[godHandle] == 0 and ge_EmergencyMode[godHandle] == 0
+            ge_Busy[godHandle] = 1
+            run script bim_Firefight(godHandle,ge_HomeTown[godHandle])
+            ge_Busy[godHandle] = 0
+        end if
+        
+        if ge_Busy[godHandle] == 0 and ge_EmergencyMode[godHandle] == 0
+            NumberOfTowns = get player ge_Player[godHandle] town total
+            // Are there enough of each disciple type? Don't do this too often
+            if discipleCounter > 8 and size of ge_HomeTown[godHandle] < 175 and NumberOfTowns == 1
+                ge_Busy[godHandle] = 1
+                discipleCounter = 0
+                run script bim_Disciples(godHandle,ge_HomeTown[godHandle])
+                ge_Busy[godHandle] = 0
+            end if
+        end if
+
+        //Water Forests
+        if ge_Busy[godHandle] == 0 and ge_EmergencyMode[godHandle] == 0
+            if waterForestCounter > 4
+                ge_Busy[godHandle] = 1
+                waterForestCounter = 0
+                run script bim_WaterForest(godHandle,ge_HomeTown[godHandle])
+                ge_Busy[godHandle] = 0
+            end if
+        end if
+
+        // Prevent from idling
+        if ge_Busy[godHandle] == 0 and ge_EmergencyMode[godHandle] == 0
+            ge_Busy[godHandle] = 1
+            run script bim_MoveRandom(godHandle,ge_HomeTown[godHandle])
+            ge_Busy[godHandle] = 0
+        end if
+
+        //Fire Epic Spell
+        if get ge_EpicSpellDelay[godHandle] time remaining <= 0 and EpicSpellsActivated == 1
+            run script bim_EpicSpell(godHandle,ge_HomeTown[godHandle],0,0)
+        end if
+
+        if townCounter >= 10
+            geChangeTown[godHandle] = 1
+        end if
+
+        if ge_Busy[godHandle] == 0 and ge_EmergencyMode[godHandle] == 0
+            discipleCounter++ resourcesCounter++ waterForestCounter++ myCounter++ townCounter++
+        end if
+    end while
+end script bim_BimboLoop
+
+
+//Set Emergency mode in this script
+begin script bim_BimboEmergency(GodHandle,rTown,PlayerID)
+
+    godHandle = GodHandle
+    currentMana = 0
+    myCounter = 0
+    myInfluence = 0
+    EnemyCreature = 0
+    EnemyCreatureDist = 0
+    EnemyPlatoon = 0
+    EnemyCatapult = 0
+    Target = 0
+    TargetType = 0
+
+start
+
+    while 1 == 1
+        wait until rGodInstance[godHandle] exists
+        if myCounter > SK_MaxPlayers
+            myCounter = 0
+        end if
+
+        if PlayerID != myCounter
+            EnemyCreature = get player myCounter creature
+            EnemyCreatureDist = get distance from {ge_HomeTown[godHandle]} to {EnemyCreature}
+            EnemyPlatoon = get platoon of player myCounter nearest {ge_HomeTown[godHandle]} radius bim_DefendRadius
+            EnemyCatapult = get siege weapon of player myCounter nearest {ge_HomeTown[godHandle]} radius bim_DefendRadius
+            Target = 0
+
+            if EnemyPlatoon exists
+                myInfluence = get player ge_Player[godHandle] influence at {EnemyPlatoon}
+                if myInfluence > 0
+                    Target = EnemyPlatoon
+                end if
+                TargetType = 1
+            elsif EnemyCatapult exists
+                myInfluence = get player ge_Player[godHandle] influence at {EnemyCatapult}
+                if myInfluence > 0
+                    Target = EnemyCatapult
+                end if
+                TargetType = 2
+            elsif EnemyCreatureDist < bim_DefendRadius
+                myInfluence = get player ge_Player[godHandle] influence at {EnemyCreature}
+                if myInfluence > 0
+                    Target = EnemyCreature
+                end if
+                TargetType = 3
+            end if
+            currentMana = get player ge_Player[godHandle] mana
+            if Target != 0 and currentMana > geManaCostFire and ge_Altar[godHandle] >= 1
+                //say "Set Emergency Mode"
+                ge_EmergencyMode[godHandle] = 1
+                wait until ge_Busy[godHandle] == 0
+                //say "Fighting Platoon"
+                ge_Busy[godHandle] = 1
+                run script bim_FightEnemy(godHandle,ge_HomeTown[godHandle],Target,TargetType)
+                ge_Busy[godHandle] = 0
+                
+            elsif Target == 0 or currentMana < geManaCostFire or ge_Altar[godHandle] == 0
+                ge_EmergencyMode[godHandle] = 0
+            end if
+        end if
+
+        myCounter++
+    end while
+
+end script bim_BimboEmergency
+
+
+begin script bim_SatisfyWoodDesire(GodHandle,rTown)
+    godHandle = GodHandle
+    myStorehouse = 0
+    myTree = 0
+    townDesire = 0
+    myInfluence = 0
+    counter = 0
+start
+    while counter < 3 and rGodInstance[godHandle] exists
+        //say "Satisfy Wood"
+        myStorehouse = get building ABODE_NUMBER_STORAGE_PIT in ge_HomeTown[godHandle] min built 1.0
+        townDesire = get ge_HomeTown[godHandle] desire TOWN_DESIRE_FOR_WOOD
+        myTree = get SCRIPT_OBJECT_TYPE_TREE at {ge_HomeTown[godHandle]} radius bim_ResourceGatherRadius
+        myInfluence = get player ge_Player[godHandle] influence at {myTree}
+        if myStorehouse exists
+            run script ge_PickupResource(godHandle,myTree,GE_HT_WOOD,-1)
+            run script ge_DropInStorehouse(godHandle,myStorehouse,-1)
+        end if
+        counter++
+    end while
+end script bim_SatisfyWoodDesire
+
+begin script bim_SatisfyOreDesire(GodHandle,rTown)
+    godHandle = GodHandle
+    myStorehouse = 0
+    myOreRock = 0
+    townDesire = 0
+    myInfluence = 0
+    counter = 0
+start
+    while counter < 3 and rGodInstance[godHandle] exists
+        //say "Satisfy Ore"
+        myStorehouse = get building ABODE_NUMBER_STORAGE_PIT in ge_HomeTown[godHandle] min built 1.0
+        myOreRock = get SCRIPT_OBJECT_TYPE_ORE_ROCK at {ge_HomeTown[godHandle]} radius bim_ResourceGatherRadius
+        townDesire = get ge_HomeTown[godHandle] desire TOWN_DESIRE_FOR_ORE
+        myInfluence = get player ge_Player[godHandle] influence at {myOreRock}
+        if myStorehouse exists
+            run script ge_PickupResource(godHandle,myOreRock,GE_HT_ORE,-1)
+            run script ge_DropInStorehouse(godHandle,myStorehouse,-1)
+        end if
+        counter++
+    end while
+end script bim_SatisfyOreDesire
+
+// Currently only gathers from 1 field //Should gather from multiple fields now
+begin script bim_SatisfyFoodDesire(GodHandle,rTown)
+    godHandle = GodHandle
+    myAltar = 0
+    myStorehouse = 0
+    myField = 0//get building ABODE_NUMBER_FIELD in rTown min built 1.0
+    myHouse = 0
+    foodInField = 0
+    townDesire = 0
+    currentMana = 0
+    waterThrows = 0
+    counter = 0
+start
+    while counter < 3 and rGodInstance[godHandle] exists
+        //say "Satisfy Food"
+        myHouse = get random home in town ge_HomeTown[godHandle]
+        myField = get ABODE_NUMBER_FIELD at {myHouse} radius bim_ResourceGatherRadius
+        townDesire = get ge_HomeTown[godHandle] desire TOWN_DESIRE_FOR_FOOD
+        myStorehouse = get building ABODE_NUMBER_STORAGE_PIT in ge_HomeTown[godHandle] min built 1.0
+        if myStorehouse exists
+            foodInField = get resource RESOURCE_TYPE_FOOD in myField
+            myAltar = get building ABODE_NUMBER_ALTAR in ge_HomeTown[godHandle] min built 1.0
+            if foodInField < 600 and myAltar exists// then try to water
+                currentMana = get player ge_Player[godHandle] mana        
+                waterThrows = currentMana / geManaCostWater
+                if waterThrows > 3 // Max times it will water (make global var?)
+                    waterThrows = 3
+                end if
+                while waterThrows > 0
+                    run script ge_ThrowMiracle(godHandle, GE_MIRACLE_TYPE_WATER, myField)
+                    waterThrows -= 1
+                    wait 3 seconds
+                end while
+            end if
+            run script ge_PickupResource(godHandle,myField,GE_HT_FOOD,-1)
+            run script ge_DropInStorehouse(godHandle,myStorehouse,-1)
+            townDesire = get ge_HomeTown[godHandle] desire TOWN_DESIRE_FOR_FOOD
+        end if
+        counter++
+    end while
+end script bim_SatisfyFoodDesire
+
+//Priority list for building
+begin script bim_BuildNewBuilding(GodHandle,rTown)
+    godHandle = GodHandle
+    buildingUnderConstruction = 0
+    isThereConstruction = GE_FALSE
+    currentMana = 0
+    myHome = 0
+    myTownSize = 0
+start
+    if rGodInstance[godHandle] exists
+        //say "Build Building"
+        myTownSize = size of ge_HomeTown[godHandle]
+        // Find out if/which unconstructed building exists (isn't there a way to iterate through game consts??)
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_STORAGE_PIT in ge_HomeTown[godHandle] max built bim_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_ALTAR in ge_HomeTown[godHandle] max built bim_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get WONDER EPIC_WONDER_NUMBER_SIREN at {ge_HomeTown[godHandle]} radius 750
+            if BUILT of buildingUnderConstruction == 1.0
+                buildingUnderConstruction = 0
+            end if
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get WONDER EPIC_WONDER_NUMBER_HURRICANE at {ge_HomeTown[godHandle]} radius 750
+            if BUILT of buildingUnderConstruction == 1.0
+                buildingUnderConstruction = 0
+            end if
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get WONDER EPIC_WONDER_NUMBER_EARTHQUAKE at {ge_HomeTown[godHandle]} radius 750
+            if BUILT of buildingUnderConstruction == 1.0
+                buildingUnderConstruction = 0
+            end if
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get WONDER EPIC_WONDER_NUMBER_VOLCANO at {ge_HomeTown[godHandle]} radius 750
+            if BUILT of buildingUnderConstruction == 1.0
+                buildingUnderConstruction = 0
+            end if
+        end if
+        if not buildingUnderConstruction exists and myTownSize > capacity of ge_HomeTown[godHandle] * 0.9
+            buildingUnderConstruction = get building ABODE_NUMBER_E in ge_HomeTown[godHandle] max built bim_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists and myTownSize > capacity of ge_HomeTown[godHandle] * 0.9
+            buildingUnderConstruction = get building ABODE_NUMBER_D in ge_HomeTown[godHandle] max built bim_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists and myTownSize > capacity of ge_HomeTown[godHandle] * 0.9
+            buildingUnderConstruction = get building ABODE_NUMBER_C in ge_HomeTown[godHandle] max built bim_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists and myTownSize > capacity of ge_HomeTown[godHandle] * 0.9
+            buildingUnderConstruction = get building ABODE_NUMBER_B in ge_HomeTown[godHandle] max built bim_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists and myTownSize > capacity of ge_HomeTown[godHandle] * 0.9
+            buildingUnderConstruction = get building ABODE_NUMBER_A in ge_HomeTown[godHandle] max built bim_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_TEMPLE in ge_HomeTown[godHandle] max built bim_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_CREATURE_PEN in ge_HomeTown[godHandle] max built bim_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_MELEE_ARMOURY in ge_HomeTown[godHandle] max built bim_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_RANGED_ARMOURY in ge_HomeTown[godHandle] max built bim_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_CRECHE in ge_HomeTown[godHandle] max built bim_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_SHRINE in ge_HomeTown[godHandle] max built bim_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_PUB in ge_HomeTown[godHandle] max built bim_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_TOWN_CENTRE in ge_HomeTown[godHandle] max built bim_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_WORKSHOP in ge_HomeTown[godHandle] max built bim_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_STUDY in ge_HomeTown[godHandle] max built bim_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_UNIVERSITY in ge_HomeTown[godHandle] max built bim_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_PRISON in ge_HomeTown[godHandle] max built bim_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_SMELTER in ge_HomeTown[godHandle] max built bim_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_GRANARY in ge_HomeTown[godHandle] max built bim_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_LUMBERMILL in ge_HomeTown[godHandle] max built bim_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_MARKET_POT in ge_HomeTown[godHandle] max built bim_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_MARKET_STATUE in ge_HomeTown[godHandle] max built bim_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_MARKET_PLANT in ge_HomeTown[godHandle] max built bim_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_AMPITHEATRE in ge_HomeTown[godHandle] max built bim_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_GRAVEYARD in ge_HomeTown[godHandle] max built bim_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_OLD_PERSONS_HOME in ge_HomeTown[godHandle] max built bim_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_BATHHOUSE in ge_HomeTown[godHandle] max built bim_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_WALLTOWER_TECH0 in ge_HomeTown[godHandle] max built bim_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_WALLTOWER_TECH1 in ge_HomeTown[godHandle] max built bim_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_GATEHOUSE in ge_HomeTown[godHandle] max built bim_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_GATEHOUSE_F in ge_HomeTown[godHandle] max built bim_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_SKYSCRAPER in ge_HomeTown[godHandle] max built bim_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_E in ge_HomeTown[godHandle] max built bim_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_D in ge_HomeTown[godHandle] max built bim_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_C in ge_HomeTown[godHandle] max built bim_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_B in ge_HomeTown[godHandle] max built bim_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_A in ge_HomeTown[godHandle] max built bim_MaxBuiltToGodBuild
+        end if
+
+        if buildingUnderConstruction exists
+            // This will probably never be true, but just in case
+            if buildingUnderConstruction on fire
+                currentMana = get player ge_Player[godHandle] mana
+                while buildingUnderConstruction exists and buildingUnderConstruction on fire and geManaCostWater <= currentMana
+
+                    run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_WATER,buildingUnderConstruction)
+                    currentMana -= geManaCostWater
+                end while
+            end if
+            run script ge_GodBuild(godHandle,buildingUnderConstruction,bim_ResourceGatherRadius)
+            buildingUnderConstruction = 0
+        end if
+    end if
+end script bim_BuildNewBuilding
+
+
+begin script bim_Firefight(GodHandle,rTown)
+    godHandle = GodHandle
+    damagedBuilding = 0
+    isThereConstruction = GE_FALSE
+    currentMana = 0
+start
+    if rGodInstance[godHandle] exists
+        //say "Firefight"
+        damagedBuilding = get random abode of type ABODE_NUMBER_A in town ge_HomeTown[godHandle]
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= bim_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_B in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= bim_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_C in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= bim_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_D in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= bim_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_E in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= bim_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_SKYSCRAPER in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= bim_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_ALTAR in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= bim_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_STORAGE_PIT in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= bim_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_CRECHE in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= bim_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_SHRINE in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= bim_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_TEMPLE in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= bim_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_PUB in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= bim_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_TOWN_CENTRE in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= bim_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_CREATURE_PEN in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= bim_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_MELEE_ARMOURY in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= bim_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_RANGED_ARMOURY in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= bim_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_WORKSHOP in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= bim_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_STUDY in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= bim_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_UNIVERSITY in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= bim_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_PRISON in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= bim_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_SMELTER in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= bim_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_GRANARY in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= bim_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_LUMBERMILL in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= bim_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_MARKET_POT in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= bim_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_MARKET_STATUE in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= bim_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_MARKET_PLANT in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= bim_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_AMPITHEATRE in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= bim_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_GRAVEYARD in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= bim_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_OLD_PERSONS_HOME in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= bim_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_BATHHOUSE in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= bim_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_WALLTOWER_TECH0 in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= bim_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_WALLTOWER_TECH1 in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= bim_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_GATEHOUSE in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= bim_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_GATEHOUSE_F in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= bim_DamageToFirefight
+            damagedBuilding = 0
+        end if
+
+        if damagedBuilding exists
+            if damagedBuilding on fire
+                currentMana = get player ge_Player[godHandle] mana
+                while damagedBuilding exists and damagedBuilding on fire and geManaCostWater <= currentMana
+                    run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_WATER,damagedBuilding)
+                    currentMana -= geManaCostWater
+                end while
+            end if
+            run script ge_GodBuild(godHandle,damagedBuilding,bim_ResourceGatherRadius)
+            damagedBuilding = 0
+        end if
+    end if
+end script bim_Firefight
+
+
+begin script bim_Disciples(GodHandle,rTown)
+    godHandle = GodHandle
+    numberOfDisciples = 0
+start
+    if rGodInstance[godHandle] exists
+        bim_MaleBreeders = adult size of ge_HomeTown[godHandle] * 12 / 100 //12 percent of town
+        bim_Prayers = adult size of ge_HomeTown[godHandle] * 20 / 100 //20 percent of town
+        bim_Miners = adult size of ge_HomeTown[godHandle] * 8 / 100 //8 percent of town
+        bim_NumDiscipleOther = adult size of ge_HomeTown[godHandle] * 4 / 100 //4 percent of town
+        //say "Disciples"
+        numberOfDisciples = get number of disciple VILLAGER_DISCIPLE_FARMER in town ge_HomeTown[godHandle]
+        while numberOfDisciples < bim_NumDiscipleOther // Need more
+            run script ge_CreateDisciple(godHandle,GE_VILLAGER_DISCIPLE_FARMER)
+            numberOfDisciples += 1
+        end while
+        while numberOfDisciples > bim_NumDiscipleOther // Need less
+            run script ge_RemoveDisciple(godHandle,GE_VILLAGER_DISCIPLE_FARMER,bim_ResourceGatherRadius)
+            numberOfDisciples -= 1
+        end while
+        
+        numberOfDisciples = get number of disciple VILLAGER_DISCIPLE_FORESTER in town ge_HomeTown[godHandle]
+        while numberOfDisciples < bim_NumDiscipleOther // Need more
+            run script ge_CreateDisciple(godHandle,GE_VILLAGER_DISCIPLE_FORESTER)
+            numberOfDisciples += 1
+        end while
+        while numberOfDisciples > bim_NumDiscipleOther // Need less
+            run script ge_RemoveDisciple(godHandle,GE_VILLAGER_DISCIPLE_FORESTER,bim_ResourceGatherRadius)
+            numberOfDisciples -= 1
+        end while 
+        
+        numberOfDisciples = get number of disciple VILLAGER_DISCIPLE_BUILDER in town ge_HomeTown[godHandle]
+        while numberOfDisciples < bim_NumDiscipleOther // Need more
+            run script ge_CreateDisciple(godHandle,GE_VILLAGER_DISCIPLE_BUILDER)
+            numberOfDisciples += 1
+        end while
+        while numberOfDisciples > bim_NumDiscipleOther // Need less
+            run script ge_RemoveDisciple(godHandle,GE_VILLAGER_DISCIPLE_BUILDER,bim_ResourceGatherRadius)
+            numberOfDisciples -= 1
+        end while 
+        
+        numberOfDisciples = get number of disciple VILLAGER_DISCIPLE_BREEDER in town ge_HomeTown[godHandle]
+        while numberOfDisciples < bim_MaleBreeders // Need more
+            run script ge_CreateDisciple(godHandle,GE_VILLAGER_DISCIPLE_BREEDER)
+            numberOfDisciples += 1
+        end while
+        while numberOfDisciples > bim_MaleBreeders // Need less
+            run script ge_RemoveDisciple(godHandle,GE_VILLAGER_DISCIPLE_BREEDER,bim_ResourceGatherRadius)
+            numberOfDisciples -= 1
+        end while 
+        
+        numberOfDisciples = get number of disciple VILLAGER_DISCIPLE_WORSHIP in town ge_HomeTown[godHandle]
+        while numberOfDisciples < bim_Prayers // Need more
+            run script ge_CreateDisciple(godHandle,GE_VILLAGER_DISCIPLE_WORSHIP)
+            numberOfDisciples += 1
+        end while
+        while numberOfDisciples > bim_Prayers // Need less
+            run script ge_RemoveDisciple(godHandle,GE_VILLAGER_DISCIPLE_WORSHIP,bim_ResourceGatherRadius)
+            numberOfDisciples -= 1
+        end while 
+        
+        numberOfDisciples = get number of disciple VILLAGER_DISCIPLE_MINER in town ge_HomeTown[godHandle]
+        while numberOfDisciples < bim_Miners // Need more
+            run script ge_CreateDisciple(godHandle,GE_VILLAGER_DISCIPLE_MINER)
+            numberOfDisciples += 1
+        end while
+        while numberOfDisciples > bim_Miners // Need less
+            run script ge_RemoveDisciple(godHandle,GE_VILLAGER_DISCIPLE_MINER,bim_ResourceGatherRadius)
+            numberOfDisciples -= 1
+        end while
+        
+        numberOfDisciples = get number of disciple VILLAGER_DISCIPLE_REFINER in town ge_HomeTown[godHandle]
+        while numberOfDisciples < bim_NumDiscipleOther // Need more
+            run script ge_CreateDisciple(godHandle,GE_VILLAGER_DISCIPLE_REFINER)
+            numberOfDisciples += 1
+        end while
+        while numberOfDisciples > bim_NumDiscipleOther // Need less
+            run script ge_RemoveDisciple(godHandle,GE_VILLAGER_DISCIPLE_REFINER,bim_ResourceGatherRadius)
+            numberOfDisciples -= 1
+        end while 
+    end if
+end script bim_Disciples
+
+begin script bim_MoveRandom(GodHandle,rTown)
+    godHandle = GodHandle
+    myHome = 0
+start
+    if rGodInstance[godHandle] exists
+        //say "Move Random"
+        myHome = get random home in town ge_HomeTown[godHandle]
+        if myHome exists
+            while HEALTH of myHome >= 1.0 and myHome exists
+                run script ge_MoveToObject(godHandle,myHome)
+                myHome = 0
+            end while
+        end if
+    end if
+end script bim_MoveRandom
+
+begin script bim_WaterForest(GodHandle,rTown)
+    godHandle = GodHandle
+    counter = 0
+    myAltar = 0
+    currentMana = 0
+    myHouse = 0
+    myNumber = 0
+    myTree = 0
+    myInfluence = 0
+start
+    if rGodInstance[godHandle] exists
+        //say "Water Forest"
+        counter = 0
+        myHouse = get random home in town ge_HomeTown[godHandle]
+        myTree = get SCRIPT_OBJECT_TYPE_TREE at {myHouse} radius bim_ResourceGatherRadius
+        myInfluence = get player ge_Player[godHandle] influence at {myTree}
+        myAltar = get building ABODE_NUMBER_ALTAR in ge_HomeTown[godHandle] min built 1.0
+
+        currentMana = get player ge_Player[godHandle] mana
+        while myAltar exists and myInfluence > 0 and myTree exists and currentMana > 20000 and counter < 2
+            run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_WATER,myTree)
+            wait 3 seconds
+            counter++
+        end while
+    end if
+
+end script bim_WaterForest
+
+begin script bim_FightEnemy(GodHandle,rTown,Target,TargetType)
+    //TargetType = 1: Platoon, TargetType = 2: Catapult, TargetType = 3: Creature
+    godHandle = GodHandle
+    counter = 0
+    myAltar = 0
+    currentMana = 0
+    myNumber = 0
+    myTown = 0
+    myInfluence1 = 0
+    myInfluence2 = 0
+    myPlatoon = 0
+    myRock = 0
+    myCounter = 0
+start
+    //say "Fight Platoons"
+    if rGodInstance[godHandle] exists
+        currentMana = get player ge_Player[godHandle] mana
+        if Target exists and not Target on fire
+            if currentMana >= geManaCostMeteor + 20000 and PLAYER of Target != ge_Player[godHandle] and get ge_MiracleDelay[godHandle] time remaining <= 0
+                myNumber = number from 1 to 5
+                if myNumber == 1
+                    run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_METEOR,Target)
+                    ge_MiracleDelay[godHandle] = create timer for 7 seconds
+                elsif myNumber == 2 or myNumber == 3
+                    run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_FIRE,Target)
+                    ge_MiracleDelay[godHandle] = create timer for 7 seconds
+                else
+                    if TargetType == 1
+                        run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_STORM,Target)
+                        ge_MiracleDelay[godHandle] = create timer for 7 seconds
+                    end if
+                end if
+            
+            elsif currentMana >= geManaCostStorm and PLAYER of Target != ge_Player[godHandle] and get ge_MiracleDelay[godHandle] time remaining <= 0
+                myNumber = number from 1 to 3
+                if myNumber == 1
+                    if TargetType == 1
+                        run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_STORM,Target)
+                        ge_MiracleDelay[godHandle] = create timer for 7 seconds
+                    end if
+                elsif myNumber == 2 or myNumber == 3
+                    run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_FIRE,Target)
+                    ge_MiracleDelay[godHandle] = create timer for 7 seconds
+                end if
+
+            elsif myRock exists and PLAYER of Target != ge_Player[godHandle]
+                //run script geThrowObjectAtObject(godHandle, myRock, myPlatoon)
+
+            end if
+        end if
+    end if
+
+end script bim_FightEnemy
+
+begin script bim_EpicSpell(GodHandle,rTown,whichSpell,Target)
+    godHandle = GodHandle
+    myNumber = 0
+    myBuilding = 0
+    myLocation = 0
+    myRand = 0
+    playerMana = 0
+    EnemySettlement = 0
+    PlayerID = 0
+start
+
+    if rGodInstance[godHandle] exists
+        ge_EpicSpellDelay[godHandle] = create timer for 450 seconds
+
+        playerMana = get player ge_Player[godHandle] mana
+        //Randomize Spell here
+        if playerMana >= 42500
+            myNumber = number from 1 to 8
+            if myNumber == 1
+                whichSpell = GE_MIRACLE_TYPE_VERDANT
+
+            elsif myNumber == 2 or myNumber == 3
+                whichSpell = GE_MIRACLE_TYPE_FIRERAIN
+
+            elsif myNumber == 4
+                whichSpell = GE_MIRACLE_TYPE_THUNDERSTORM
+
+            elsif myNumber == 5 or myNumber == 6 or myNumber == 7 or myNumber == 8 or myNumber == 9
+                whichSpell = GE_MIRACLE_TYPE_METEORID
+
+            end if
+        elsif playerMana >= 40000
+            myNumber = number from 1 to 8
+            if myNumber == 1
+                whichSpell = GE_MIRACLE_TYPE_VERDANT
+
+            elsif myNumber == 2 or myNumber == 3
+                whichSpell = GE_MIRACLE_TYPE_FIRERAIN
+
+            elsif myNumber == 4 or myNumber == 5
+                whichSpell = GE_MIRACLE_TYPE_THUNDERSTORM
+
+            end if
+        elsif playerMana >= 30000
+            myNumber = number from 1 to 6
+            if myNumber == 1
+                whichSpell = GE_MIRACLE_TYPE_VERDANT
+
+            elsif myNumber == 2 or myNumber == 3
+                whichSpell = GE_MIRACLE_TYPE_FIRERAIN
+
+            end if
+        elsif playerMana >= 15000
+            myNumber = number from 1 to 3
+            if myNumber == 1
+                whichSpell = GE_MIRACLE_TYPE_VERDANT
+
+            end if
+        end if
+
+        if whichSpell != 0
+            if whichSpell == GE_MIRACLE_TYPE_VERDANT
+                myBuilding = get building ABODE_NUMBER_STORAGE_PIT in ge_HomeTown[godHandle] min built 1.0
+                myLocation = marker at {myBuilding} + {number from 20 to 35,number from -20 to -35}
+                if not {myLocation} under water
+                    run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_VERDANT,myLocation)
+                end if
+
+            elsif whichSpell == GE_MIRACLE_TYPE_FIRERAIN or whichSpell == GE_MIRACLE_TYPE_THUNDERSTORM or whichSpell == GE_MIRACLE_TYPE_METEORID
+                PlayerID = ge_Player[godHandle]
+                if EnemyIDFinal[PlayerID] == 0
+                    EnemySettlement = PlayerTown1
+
+                elsif EnemyIDFinal[PlayerID] == 1
+                    EnemySettlement = PlayerTown2
+
+                elsif EnemyIDFinal[PlayerID] == 2
+                    EnemySettlement = PlayerTown3
+
+                elsif EnemyIDFinal[PlayerID] == 3
+                    EnemySettlement = PlayerTown4
+
+                end if
+
+                myRand = number from 1 to 5
+                if myRand == 1
+                    myBuilding = get building ALTAR in EnemySettlement min built 0.75
+                elsif myRand == 2
+                    myBuilding = get building STORAGE_YARD in EnemySettlement min built 0.75
+
+                elsif myRand == 3
+                    myBuilding = get building TEMPLE in EnemySettlement min built 0.75
+
+                elsif myRand >= 4
+                    myBuilding = get random abode in town EnemySettlement
+                end if
+
+
+                if myBuilding exists
+                    if whichSpell == GE_MIRACLE_TYPE_FIRERAIN
+                        run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_FIRERAIN,myBuilding)
+
+                    elsif whichSpell == GE_MIRACLE_TYPE_THUNDERSTORM
+                        run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_THUNDERSTORM,myBuilding)
+
+                    elsif whichSpell == GE_MIRACLE_TYPE_METEORID
+                        run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_METEORID,myBuilding)
+
+                    end if
+                end if
+            end if
+        end if
+    end if
+
+end script bim_EpicSpell
+
+begin script bim_HealMyPlatoon(GodHandle,rTown)
+    godHandle = GodHandle
+    counter = 0
+    myAltar = 0
+    currentMana = 0
+    myNumber = 0
+    myTown = 0
+    myInfluence = 0
+    myPlatoon = 0
+    myRock = 0
+    myHome = get random abode in town rTown
+start
+    //say "Heal Platoons"
+    if rGodInstance[godHandle] exists
+        myTown = get building ABODE_NUMBER_TOWN_CENTRE in ge_HomeTown[godHandle] min built 1.0
+        myAltar = get building ABODE_NUMBER_ALTAR in ge_HomeTown[godHandle] min built 1.0
+        myPlatoon = get platoon of player ge_Player[godHandle] nearest {myHome} radius 750
+        
+        if myPlatoon exists
+            myInfluence = get player ge_Player[godHandle] influence at {myPlatoon}
+        end if
+
+        currentMana = get player ge_Player[godHandle] mana
+        if myAltar exists and myInfluence > 0 and myTown exists and myPlatoon exists
+            if currentMana >= geManaCostHeal and PLAYER of myPlatoon == ge_Player[godHandle] and HEALTH of myPlatoon < 0.75
+                run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_HEAL,myPlatoon)
+            end if
+        end if
+    end if
+
+end script bim_HealMyPlatoon

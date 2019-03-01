@@ -1,0 +1,269 @@
+///////////////////////////////////////////////////////////////////////////////
+//          Marauders Script
+//    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//    Start date:        31.10.18            By: Boxhead
+//    Update date:    20.12.18            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+define script Marauders(whichTown)
+define script MaraudersTutorial(MA_Town)
+define script SpawnMarauders(MA_Town)
+define script CheckForMarauders(MarauderPlatoon)
+define script MaraudersBehaivour(MarauderPlatoon,MA_Town)
+
+global MaraudersActive[SK_MaxPlayers]
+global MaraudersPlatoonSize = 30
+global MaraudersDelay = 420
+global MaraudersMax = 2
+global MaraudersCount = 0
+
+
+begin script Marauders(whichTown)
+
+    SpawnMaraudersTimer = create timer for 120 seconds
+
+start
+
+if SK_Tutorials == 1
+    run background script MaraudersTutorial(whichTown)
+end if
+
+begin loop
+    if get SpawnMaraudersTimer time remaining <= 0
+        SpawnMaraudersTimer = create timer for MaraudersDelay seconds
+        run script SpawnMarauders(whichTown)
+    end if
+end loop
+
+end script Marauders
+
+
+begin script MaraudersTutorial(MA_Town)
+
+    TutScroll = 0
+
+start
+
+if Language == German
+    TutScroll = create highlight BRONZE name "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_12" remind "HELP_TEXT_CREATURE_CURRENT_SOURCE_09" at {MA_Town} + {0,5,0}
+elsif Language == English
+    TutScroll = create highlight BRONZE name "HELP_TEXT_MULTIPLAYER_SETUP_HELP_06" remind "HELP_TEXT_CREATURE_CURRENT_SOURCE_09" at {MA_Town} + {0,5,0}
+end if
+
+begin loop
+    if TutScroll right clicked
+        clear right clicked object
+        begin dialogue
+            if Language == English
+                say "Town with marauder-addon. After a set amount of time, this town recruits a marauder-platoon. The town-controller gets control of the marauder-platoon."
+            elsif Language == German
+                say "Stadt mit Marodeur-Addon. Nach einer bestimmten Zeit erscheint ein Marodeur-Platoon. Der Besitzer der Stadt erlangt die Kontrolle ueber das Platoon."
+            end if
+            wait 7 seconds
+        end dialogue
+    end if
+end loop
+
+end script MaraudersTutorial
+
+
+//For neutral and player and AI
+begin script SpawnMarauders(MA_Town)
+
+    MarauderPlatoon = 0
+    Path = 0
+    PlayerID = 0
+    AttackPath[4]
+
+start
+
+    if MaraudersCount < MaraudersMax and size of MA_Town > 0
+        MarauderPlatoon = recruit ARMY_UNIT_TYPE_MELEE_7 town MA_Town platoon of size MaraudersPlatoonSize
+        wait until not MarauderPlatoon recruiting
+        if MarauderPlatoon exists
+            MaraudersCount++
+            set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_SPEED of MarauderPlatoon to 11.00
+            run background script CheckForMarauders(MarauderPlatoon)
+            //If Player is AI give platoon control to script
+            if PLAYER of MA_Town >= 1 and PLAYER of MA_Town <= 5
+                Path = number from 1 to 3
+                PlayerID = PLAYER of MA_Town
+
+                PLAYER of MarauderPlatoon = PlayerID
+                run background script SK_AIRecruitmentGenericPlatoon(MarauderPlatoon,PlayerID)
+                if PlayerID == 1
+                    if Path == 1
+                        AttackPath[0] = AttackPathCenterPlayer1[0]
+                        AttackPath[1] = AttackPathCenterPlayer1[1]
+                        AttackPath[2] = AttackPathCenterPlayer1[2]
+                        AttackPath[3] = AttackPathCenterPlayer1[3]
+
+                    elsif Path == 2
+                        AttackPath[0] = AttackPathFlankPlayer1[0]
+                        AttackPath[1] = AttackPathFlankPlayer1[1]
+                        AttackPath[2] = AttackPathFlankPlayer1[2]
+                        AttackPath[3] = AttackPathFlankPlayer1[3]
+
+                    elsif Path == 3
+                        AttackPath[0] = AttackPathBackdoorPlayer1[0]
+                        AttackPath[1] = AttackPathBackdoorPlayer1[1]
+                        AttackPath[2] = AttackPathBackdoorPlayer1[2]
+                        AttackPath[3] = AttackPathBackdoorPlayer1[3]
+
+                    end if
+
+                elsif PlayerID == 2
+                    if Path == 1
+                        AttackPath[0] = AttackPathCenterPlayer2[0]
+                        AttackPath[1] = AttackPathCenterPlayer2[1]
+                        AttackPath[2] = AttackPathCenterPlayer2[2]
+                        AttackPath[3] = AttackPathCenterPlayer2[3]
+
+                    elsif Path == 2
+                        AttackPath[0] = AttackPathFlankPlayer2[0]
+                        AttackPath[1] = AttackPathFlankPlayer2[1]
+                        AttackPath[2] = AttackPathFlankPlayer2[2]
+                        AttackPath[3] = AttackPathFlankPlayer2[3]
+
+                    elsif Path == 3
+                        AttackPath[0] = AttackPathBackdoorPlayer2[0]
+                        AttackPath[1] = AttackPathBackdoorPlayer2[1]
+                        AttackPath[2] = AttackPathBackdoorPlayer2[2]
+                        AttackPath[3] = AttackPathBackdoorPlayer2[3]
+
+                    end if
+
+                elsif PlayerID == 3
+                    if Path == 1
+                        AttackPath[0] = AttackPathCenterPlayer3[0]
+                        AttackPath[1] = AttackPathCenterPlayer3[1]
+                        AttackPath[2] = AttackPathCenterPlayer3[2]
+                        AttackPath[3] = AttackPathCenterPlayer3[3]
+
+                    elsif Path == 2
+                        AttackPath[0] = AttackPathFlankPlayer3[0]
+                        AttackPath[1] = AttackPathFlankPlayer3[1]
+                        AttackPath[2] = AttackPathFlankPlayer3[2]
+                        AttackPath[3] = AttackPathFlankPlayer3[3]
+
+                    elsif Path == 3
+                        AttackPath[0] = AttackPathBackdoorPlayer3[0]
+                        AttackPath[1] = AttackPathBackdoorPlayer3[1]
+                        AttackPath[2] = AttackPathBackdoorPlayer3[2]
+                        AttackPath[3] = AttackPathBackdoorPlayer3[3]
+
+                    end if
+                end if
+                run background script SK_ArmyBehaivours(PlayerID,MarauderPlatoon,1,0,0,AttackPath[0],AttackPath[1],AttackPath[2],AttackPath[3],0)
+            elsif not PLAYER of MA_Town == 0 //Run this if town is neutral
+                run background script MaraudersBehaivour(MarauderPlatoon,MA_Town)
+            end if
+        end if
+    end if
+
+end script SpawnMarauders
+
+
+begin script CheckForMarauders(MarauderPlatoon)
+
+start
+
+    wait until MarauderPlatoon not exists
+    MaraudersCount--
+
+end script CheckForMarauders
+//If neutral
+begin script MaraudersBehaivour(MarauderPlatoon,MA_Town)
+
+    AttackMode = 0
+    AttackRadius = 60
+    Building = 0
+    Counter = 0
+    EnemyCreature = 0
+    EnemyCreatureDist = 0
+    EnemyPlatoon = 0
+    EnemyPlayer = 0
+    EnemyCatapult = 0
+    EnemySettlement = 0
+    EnemyTownCentre = 0
+    locAttack = 0
+    myPlatoon = 0
+    Number = 0
+    PlatoonSize = 0
+    PlatoonSizeEnemy = 0
+    PointOn = 0
+    RecalculateTimer = create timer for 0 seconds
+    Timer = create timer for 0 seconds
+    TownCaptureStarted = 0
+    VariableA = 0
+    VariableB = 0
+    WaypointTown = 0
+    WaypointTimer = create timer for 0 seconds
+
+start
+
+begin loop
+
+    if Counter >= SK_MaxPlayers
+        Counter = 0
+    end if
+
+    EnemyCreature = get player Counter creature
+    EnemyCreatureDist = get distance from {MarauderPlatoon} to {EnemyCreature}
+    if EnemyCreatureDist <= AttackRadius and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of EnemyCreature > 0.00 and MarauderPlatoon can navigate to {EnemyCreature}
+        clear MarauderPlatoon action queue
+        begin loop
+            EnemyCreatureDist = get distance from {MarauderPlatoon} to {EnemyCreature}
+            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_MOVING_OBJECT using EnemyCreature to MarauderPlatoon action queue
+            PlatoonSize = get number of villagers in platoon MarauderPlatoon
+            until PlatoonSize == 0 or SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of EnemyCreature == 0.00 or not MarauderPlatoon can navigate to {EnemyCreature} or EnemyCreatureDist > AttackRadius
+        end loop
+        clear MarauderPlatoon action queue
+    end if
+    
+    EnemyPlatoon = get platoon of player Counter nearest {MarauderPlatoon} radius AttackRadius
+    EnemyCatapult = get siege weapon of player Counter nearest {MarauderPlatoon} radius AttackRadius
+    if EnemyPlatoon exists and MarauderPlatoon can navigate to {EnemyPlatoon}
+        clear MarauderPlatoon action queue
+        begin loop
+            EnemyPlatoon = get platoon of player Counter nearest {MarauderPlatoon} radius AttackRadius
+            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_PLATOON using EnemyPlatoon to MarauderPlatoon action queue
+            PlatoonSize = get number of villagers in platoon MarauderPlatoon
+            PlatoonSizeEnemy = get number of villagers in platoon EnemyPlatoon
+            until PlatoonSize == 0 or PlatoonSizeEnemy == 0 or not MarauderPlatoon can navigate to {EnemyPlatoon} or EnemyPlatoon not exists
+        end loop
+        clear MarauderPlatoon action queue
+
+    elsif EnemyCatapult exists and MarauderPlatoon can navigate to {EnemyCatapult}
+        clear MarauderPlatoon action queue
+        VariableA = 0
+        begin loop
+            EnemyCatapult = get siege weapon of player Counter nearest {MarauderPlatoon} radius AttackRadius
+            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using EnemyCatapult to MarauderPlatoon action queue
+            PlatoonSize = get number of villagers in platoon MarauderPlatoon
+            EnemyPlatoon = get platoon of player Counter nearest {MarauderPlatoon} radius AttackRadius
+            if EnemyPlatoon exists and MarauderPlatoon can navigate to {EnemyPlatoon}
+                VariableA = 1
+            end if
+            until PlatoonSize == 0 or EnemyCatapult not exists or not MarauderPlatoon can navigate to {EnemyCatapult} or VariableA == 1 or EnemyCatapult not exists
+        end loop
+        clear MarauderPlatoon action queue
+        VariableA = 0
+    end if
+
+    if get WaypointTimer time remaining <= 0 or get distance from {MarauderPlatoon} to {MA_Town} > 500
+        begin loop
+            WaypointTown = marker at {MA_Town} + {number from -50 to 50,number from -50 to 50}
+            until MarauderPlatoon can navigate to {WaypointTown}
+        end loop
+        WaypointTimer = create timer for 225 seconds
+        clear MarauderPlatoon action queue
+        add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {WaypointTown} to MarauderPlatoon action queue
+    end if
+
+    Counter++
+    until MarauderPlatoon not exists
+end loop
+
+end script MaraudersBehaivour

@@ -1,0 +1,1861 @@
+///////////////////////////////////////////////////////////////////////////////
+//    Land 4 Norse-Strategy
+//    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//    Start date:        31.10.16            By: Boxhead
+//    Update date:    07.04.18            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+define script LC4_Norse_Capital_Impressiveness
+define script TownConversion
+define script Tribute
+define script GatehouseManager
+define script LC4_Speeches
+define script LC4_Norse_Capital
+define script LC4_AttackNearestTownTimer
+define script LC4_DefendPlatoons
+define script LC4_GetNearestSettlement
+define script ResourceManagerNorseCapital
+define script VillagerManagerNorseCapital
+define script ResourceManagerNorseTown
+define script VillagerManagerNorseTown
+define script NorseScript1
+define script DisableLocalPlatoonResponse
+
+begin script LC4_Norse_Capital_Impressiveness
+
+    Threshold = 0
+
+start
+
+    Threshold = get town Minor_FrontTown impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from Minor_FrontTown to PlayerTown FRONT_TOWN_IMPRESSIVENESS - Threshold
+
+    Threshold = get town Minor_SideTown impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from Minor_SideTown to PlayerTown SIDE_TOWN_IMPRESSIVENESS - Threshold
+
+    Threshold = get town Minor_OreTown impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from Minor_OreTown to PlayerTown ORE_TOWN_IMPRESSIVENESS - Threshold
+
+    Threshold = get town Minor_MountainTown impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from Minor_MountainTown to PlayerTown MOUNTAIN_TOWN_IMPRESSIVENESS - Threshold
+
+    Threshold = get town Minor_SickTown impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from Minor_SickTown to PlayerTown SICK_TOWN_IMPRESSIVENESS - Threshold
+
+    Threshold = get town NorseTown impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from NorseTown to PlayerTown NORSE_TOWN_IMPRESSIVENESS - Threshold
+
+    Threshold = get town NorseCapital impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from NorseCapital to PlayerTown NORSE_CAPITAL_IMPRESSIVENESS - Threshold
+
+begin loop
+
+    if PLAYER of Minor_FrontTown == 0
+        enable migration from Minor_SideTown to Minor_FrontTown
+        enable migration from Minor_OreTown to Minor_FrontTown
+        enable migration from Minor_MountainTown to Minor_FrontTown
+        enable migration from Minor_SickTown to Minor_FrontTown
+        enable migration from NorseTown to Minor_FrontTown
+        enable migration from NorseCapital to Minor_FrontTown
+        
+    elsif PLAYER of Minor_FrontTown >= 1
+        disable migration from Minor_SideTown to Minor_FrontTown
+        disable migration from Minor_OreTown to Minor_FrontTown
+        disable migration from Minor_MountainTown to Minor_FrontTown
+        disable migration from Minor_SickTown to Minor_FrontTown
+        disable migration from NorseTown to Minor_FrontTown
+        disable migration from NorseCapital to Minor_FrontTown
+    end if
+    
+    if PLAYER of Minor_SideTown == 0
+        enable migration from Minor_FrontTown to Minor_SideTown
+        enable migration from Minor_OreTown to Minor_SideTown
+        enable migration from Minor_MountainTown to Minor_SideTown
+        enable migration from Minor_SickTown to Minor_SideTown
+        enable migration from NorseTown to Minor_SideTown
+        enable migration from NorseCapital to Minor_SideTown
+        
+    elsif PLAYER of Minor_SideTown >= 1
+        disable migration from Minor_FrontTown to Minor_SideTown
+        disable migration from Minor_OreTown to Minor_SideTown
+        disable migration from Minor_MountainTown to Minor_SideTown
+        disable migration from Minor_SickTown to Minor_SideTown
+        disable migration from NorseTown to Minor_SideTown
+        disable migration from NorseCapital to Minor_SideTown
+    end if
+    
+    if PLAYER of Minor_OreTown == 0
+        enable migration from Minor_FrontTown to Minor_OreTown
+        enable migration from Minor_SideTown to Minor_OreTown
+        enable migration from Minor_MountainTown to Minor_OreTown
+        enable migration from Minor_SickTown to Minor_OreTown
+        enable migration from NorseTown to Minor_OreTown
+        enable migration from NorseCapital to Minor_OreTown
+        
+    elsif PLAYER of Minor_OreTown >= 1
+        disable migration from Minor_FrontTown to Minor_OreTown
+        disable migration from Minor_SideTown to Minor_OreTown
+        disable migration from Minor_MountainTown to Minor_OreTown
+        disable migration from Minor_SickTown to Minor_OreTown
+        disable migration from NorseTown to Minor_OreTown
+        disable migration from NorseCapital to Minor_OreTown
+    end if
+    
+    if PLAYER of Minor_MountainTown == 0
+        enable migration from Minor_FrontTown to Minor_MountainTown
+        enable migration from Minor_SideTown to Minor_MountainTown
+        enable migration from Minor_OreTown to Minor_MountainTown
+        enable migration from Minor_SickTown to Minor_MountainTown
+        enable migration from NorseTown to Minor_MountainTown
+        enable migration from NorseCapital to Minor_MountainTown
+        
+    elsif PLAYER of Minor_MountainTown >= 1
+        disable migration from Minor_FrontTown to Minor_MountainTown
+        disable migration from Minor_SideTown to Minor_MountainTown
+        disable migration from Minor_OreTown to Minor_MountainTown
+        disable migration from Minor_SickTown to Minor_MountainTown
+        disable migration from NorseTown to Minor_MountainTown
+        disable migration from NorseCapital to Minor_MountainTown
+    end if
+    
+    if PLAYER of Minor_SickTown == 0
+        enable migration from Minor_FrontTown to Minor_SickTown
+        enable migration from Minor_SideTown to Minor_SickTown
+        enable migration from Minor_OreTown to Minor_SickTown
+        enable migration from Minor_MountainTown to Minor_SickTown
+        enable migration from NorseTown to Minor_SickTown
+        enable migration from NorseCapital to Minor_SickTown
+        
+    elsif PLAYER of Minor_SickTown >= 1
+        disable migration from Minor_FrontTown to Minor_SickTown
+        disable migration from Minor_SideTown to Minor_SickTown
+        disable migration from Minor_OreTown to Minor_SickTown
+        disable migration from Minor_MountainTown to Minor_SickTown
+        disable migration from NorseTown to Minor_SickTown
+        disable migration from NorseCapital to Minor_SickTown
+    end if
+    
+    if PLAYER of NorseTown == 0
+        enable migration from Minor_FrontTown to NorseTown
+        enable migration from Minor_SideTown to NorseTown
+        enable migration from Minor_OreTown to NorseTown
+        enable migration from Minor_MountainTown to NorseTown
+        enable migration from Minor_SickTown to NorseTown
+        enable migration from NorseCapital to NorseTown
+        
+    elsif PLAYER of NorseTown >= 1
+        disable migration from Minor_FrontTown to NorseTown
+        disable migration from Minor_SideTown to NorseTown
+        disable migration from Minor_OreTown to NorseTown
+        disable migration from Minor_MountainTown to NorseTown
+        disable migration from Minor_SickTown to NorseTown
+        disable migration from NorseCapital to NorseTown
+    end if
+    
+    if PLAYER of NorseCapital == 0
+        enable migration from Minor_FrontTown to NorseCapital
+        enable migration from Minor_SideTown to NorseCapital
+        enable migration from Minor_OreTown to NorseCapital
+        enable migration from Minor_MountainTown to NorseCapital
+        enable migration from Minor_SickTown to NorseCapital
+        enable migration from NorseTown to NorseCapital
+        
+    elsif PLAYER of NorseCapital >= 1
+        disable migration from Minor_FrontTown to NorseCapital
+        disable migration from Minor_SideTown to NorseCapital
+        disable migration from Minor_OreTown to NorseCapital
+        disable migration from Minor_MountainTown to NorseCapital
+        disable migration from Minor_SickTown to NorseCapital
+        disable migration from NorseTown to NorseCapital
+    end if
+    
+end loop
+
+end script LC4_Norse_Capital_Impressiveness
+
+begin script TownConversion
+
+    isConverted1 = 0
+    isConverted2 = 0
+    isConverted3 = 0
+    isConverted4 = 0
+    isConverted5 = 0
+    isConverted6 = 0
+    isConverted7 = 0
+    a = 0
+    b = 0
+    c = 0
+    d = 0
+    e = 0
+    f = 0
+    g = 0
+
+start
+
+begin loop
+
+    isConverted1 = variable get town Minor_FrontTown method of last conversion
+    isConverted2 = variable get town Minor_SideTown method of last conversion
+    isConverted3 = variable get town Minor_OreTown method of last conversion
+    isConverted4 = variable get town Minor_MountainTown method of last conversion
+    isConverted5 = variable get town Minor_SickTown method of last conversion
+    isConverted6 = variable get town NorseTown method of last conversion
+    isConverted7 = variable get town NorseCapital method of last conversion
+
+    /*
+    if variable get town NorseCapital status == variable TOWN_STATUS_MIGRATION_STARTED
+        test = get platoon of type ARMY_UNIT_FIRST_MELEE of town NorseCapital
+        while test exists
+            test = get platoon of type ARMY_UNIT_FIRST_MELEE of town NorseCapital
+            delete test
+        end while
+
+        test = get platoon of type ARMY_UNIT_FIRST_RANGED of town NorseCapital
+        while test exists
+            test = get platoon of type ARMY_UNIT_FIRST_RANGED of town NorseCapital
+            delete test
+        end while
+    end if
+    */
+
+    if isConverted1 != 0 and a == 0
+        //if PLAYER of Minor_FrontTown == 0 or get town Minor_FrontTown is migrating to == PlayerTown
+            a = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted1 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            end if
+        //end if
+    end if
+
+    if isConverted1 != 0
+        if PLAYER of NorseCapital == 1
+            disable migration from Minor_FrontTown to Minor_SideTown
+            disable migration from Minor_FrontTown to Minor_OreTown
+            disable migration from Minor_FrontTown to Minor_MountainTown
+            disable migration from Minor_FrontTown to Minor_SickTown
+            disable migration from Minor_FrontTown to NorseTown
+            disable migration from Minor_FrontTown to NorseCapital
+            disable migration from Minor_FrontTown to PlayerTown
+        else
+            enable migration from Minor_FrontTown to Minor_SideTown
+            enable migration from Minor_FrontTown to Minor_OreTown
+            enable migration from Minor_FrontTown to Minor_MountainTown
+            enable migration from Minor_FrontTown to Minor_SickTown
+            enable migration from Minor_FrontTown to NorseTown
+            enable migration from Minor_FrontTown to NorseCapital
+            enable migration from Minor_FrontTown to PlayerTown
+        end if
+    end if
+    
+    if isConverted2 != 0 and b == 0
+        //if PLAYER of Minor_SideTown == 0 or get town Minor_SideTown is migrating to == PlayerTown
+            b = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted2 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            end if
+        //end if
+    end if
+    
+    if isConverted2 != 0
+        if PLAYER of NorseCapital == 1
+            disable migration from Minor_SideTown to Minor_FrontTown
+            disable migration from Minor_SideTown to Minor_OreTown
+            disable migration from Minor_SideTown to Minor_MountainTown
+            disable migration from Minor_SideTown to Minor_SickTown
+            disable migration from Minor_SideTown to NorseTown
+            disable migration from Minor_SideTown to NorseCapital
+            disable migration from Minor_SideTown to PlayerTown
+        else
+            enable migration from Minor_SideTown to Minor_FrontTown
+            enable migration from Minor_SideTown to Minor_OreTown
+            enable migration from Minor_SideTown to Minor_MountainTown
+            enable migration from Minor_SideTown to Minor_SickTown
+            enable migration from Minor_SideTown to NorseTown
+            enable migration from Minor_SideTown to NorseCapital
+            enable migration from Minor_SideTown to PlayerTown
+        end if
+    end if
+
+    if isConverted3 != 0 and c == 0
+        //if PLAYER of Minor_OreTown == 0 or get town Minor_OreTown is migrating to == PlayerTown
+            c = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted3 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            end if
+        //end if
+    end if
+
+    if isConverted3 != 0
+        if PLAYER of NorseCapital == 1
+            disable migration from Minor_OreTown to Minor_FrontTown
+            disable migration from Minor_OreTown to Minor_SideTown
+            disable migration from Minor_OreTown to Minor_MountainTown
+            disable migration from Minor_OreTown to Minor_SickTown
+            disable migration from Minor_OreTown to NorseTown
+            disable migration from Minor_OreTown to NorseCapital
+            disable migration from Minor_OreTown to PlayerTown
+        else
+            enable migration from Minor_OreTown to Minor_FrontTown
+            enable migration from Minor_OreTown to Minor_SideTown
+            enable migration from Minor_OreTown to Minor_MountainTown
+            enable migration from Minor_OreTown to Minor_SickTown
+            enable migration from Minor_OreTown to NorseTown
+            enable migration from Minor_OreTown to NorseCapital
+            enable migration from Minor_OreTown to PlayerTown
+        end if
+    end if
+    
+    if isConverted4 != 0 and d == 0
+        //if PLAYER of Minor_MountainTown == 0 or get town Minor_MountainTown is migrating to == PlayerTown
+            d = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted4 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            end if
+        //end if
+    end if
+
+    if isConverted4 != 0
+        if PLAYER of NorseCapital == 1
+            disable migration from Minor_MountainTown to Minor_FrontTown
+            disable migration from Minor_MountainTown to Minor_SideTown
+            disable migration from Minor_MountainTown to Minor_OreTown
+            disable migration from Minor_MountainTown to Minor_SickTown
+            disable migration from Minor_MountainTown to NorseTown
+            disable migration from Minor_MountainTown to NorseCapital
+            disable migration from Minor_MountainTown to PlayerTown
+        else
+            enable migration from Minor_MountainTown to Minor_FrontTown
+            enable migration from Minor_MountainTown to Minor_SideTown
+            enable migration from Minor_MountainTown to Minor_OreTown
+            enable migration from Minor_MountainTown to Minor_SickTown
+            enable migration from Minor_MountainTown to NorseTown
+            enable migration from Minor_MountainTown to NorseCapital
+            enable migration from Minor_MountainTown to PlayerTown
+        end if
+    end if
+    
+    if isConverted5 != 0 and e == 0
+        //if PLAYER of Minor_SickTown == 0 or get town Minor_SickTown is migrating to == PlayerTown
+            e = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted5 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            end if
+        //end if
+    end if
+
+    if isConverted5 != 0
+        if PLAYER of NorseCapital == 1
+            disable migration from Minor_SickTown to Minor_FrontTown
+            disable migration from Minor_SickTown to Minor_SideTown
+            disable migration from Minor_SickTown to Minor_OreTown
+            disable migration from Minor_SickTown to Minor_MountainTown
+            disable migration from Minor_SickTown to NorseTown
+            disable migration from Minor_SickTown to NorseCapital
+            disable migration from Minor_SickTown to PlayerTown
+        else
+            enable migration from Minor_SickTown to Minor_FrontTown
+            enable migration from Minor_SickTown to Minor_SideTown
+            enable migration from Minor_SickTown to Minor_OreTown
+            enable migration from Minor_SickTown to Minor_MountainTown
+            enable migration from Minor_SickTown to NorseTown
+            enable migration from Minor_SickTown to NorseCapital
+            enable migration from Minor_SickTown to PlayerTown
+        end if
+    end if
+    
+    if isConverted6 != 0 and f == 0
+        //if PLAYER of NorseTown == 0 or get town NorseTown is migrating to == PlayerTown
+            f = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted6 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            end if
+        //end if
+    end if
+    
+    if isConverted6 != 0
+        if PLAYER of NorseCapital == 1
+            disable migration from NorseTown to Minor_FrontTown
+            disable migration from NorseTown to Minor_SideTown
+            disable migration from NorseTown to Minor_OreTown
+            disable migration from NorseTown to Minor_MountainTown
+            disable migration from NorseTown to Minor_SickTown
+            disable migration from NorseTown to NorseCapital
+            disable migration from NorseTown to PlayerTown
+        else
+            enable migration from NorseTown to Minor_FrontTown
+            enable migration from NorseTown to Minor_SideTown
+            enable migration from NorseTown to Minor_OreTown
+            enable migration from NorseTown to Minor_MountainTown
+            enable migration from NorseTown to Minor_SickTown
+            enable migration from NorseTown to NorseCapital
+            enable migration from NorseTown to PlayerTown
+        end if
+    end if
+
+    if isConverted7 != 0 and g == 0
+        //if PLAYER of NorseCapital == 0 or get town NorseCapital is migrating to == PlayerTown
+            g = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted7 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            end if
+        //end if
+    end if
+
+    if isConverted7 != 0
+        if PLAYER of NorseCapital == 1
+            disable migration from NorseCapital to Minor_FrontTown
+            disable migration from NorseCapital to Minor_SideTown
+            disable migration from NorseCapital to Minor_OreTown
+            disable migration from NorseCapital to Minor_MountainTown
+            disable migration from NorseCapital to Minor_SickTown
+            disable migration from NorseCapital to NorseTown
+            disable migration from NorseCapital to PlayerTown
+        else
+            enable migration from NorseCapital to Minor_FrontTown
+            enable migration from NorseCapital to Minor_SideTown
+            enable migration from NorseCapital to Minor_OreTown
+            enable migration from NorseCapital to Minor_MountainTown
+            enable migration from NorseCapital to Minor_SickTown
+            enable migration from NorseCapital to NorseTown
+            enable migration from NorseCapital to PlayerTown
+        end if
+    end if    
+    
+end loop
+
+end script TownConversion
+
+begin script Tribute
+
+    mig1 = 0
+    mig2 = 0
+    mig3 = 0
+    mig4 = 0
+    mig5 = 0
+    mig6 = 0
+    mig7 = 0
+    a = 0
+
+start
+
+begin loop
+
+    if (variable get town Minor_FrontTown status == variable MIGRATION_MIGRATED) and mig1 == 0
+        mig1 = 1
+        MigrationsAccepted = MigrationsAccepted + 1
+    end if
+    
+    if (variable get town Minor_SideTown status == variable MIGRATION_MIGRATED) and mig2 == 0
+        mig2 = 1
+        MigrationsAccepted = MigrationsAccepted + 1
+    end if
+    
+    if (variable get town Minor_OreTown status == variable MIGRATION_MIGRATED) and mig3 == 0
+        mig3 = 1
+        MigrationsAccepted = MigrationsAccepted + 1
+    end if
+    
+    if (variable get town Minor_MountainTown status == variable MIGRATION_MIGRATED) and mig4 == 0
+        mig4 = 1
+        MigrationsAccepted = MigrationsAccepted + 1
+    end if
+    
+    if (variable get town Minor_SickTown status == variable MIGRATION_MIGRATED) and mig5 == 0
+        mig5 = 1
+        MigrationsAccepted = MigrationsAccepted + 1
+    end if
+    
+    if (variable get town NorseTown status == variable MIGRATION_MIGRATED) and mig6 == 0
+        mig6 = 1
+        MigrationsAccepted = MigrationsAccepted + 1
+    end if
+    
+    if (variable get town NorseCapital status == variable MIGRATION_MIGRATED) and mig7 == 0
+        mig7 = 1
+        MigrationsAccepted = MigrationsAccepted + 1
+    end if
+
+    if MigrationsAccepted >= 1 and a == 0
+        a = 1
+        increment tribute by 5000
+    end if
+    
+    if MigrationsAccepted >= 2 and a == 1
+        a = 2
+        increment tribute by 5000
+    end if
+    
+    if MigrationsAccepted >= 3 and a == 2
+        a = 3
+        increment tribute by 10000
+    end if
+    
+    if MigrationsAccepted >= 4 and a == 3
+        a = 4
+        increment tribute by 10000
+    end if
+    
+    if MigrationsAccepted >= 5 and a == 4
+        a = 5
+        increment tribute by 15000
+    end if
+    
+    if MigrationsAccepted >= 6 and a == 5
+        a = 6
+        increment tribute by 20000
+    end if
+    
+    if MigrationsAccepted >= 7 and a == 6
+        a = 7
+        increment tribute by 25000
+    end if
+    
+end loop
+    
+end script Tribute
+
+begin script LC4_Speeches
+
+    isConverted1 = 0
+    isConverted2 = 0
+    isConverted3 = 0
+    isConverted4 = 0
+    isConverted5 = 0
+    isConverted6 = 0
+    isConverted7 = 0
+    
+    mig1 = 0
+    mig2 = 0
+    mig3 = 0
+    mig4 = 0
+    mig5 = 0
+    mig6 = 0
+    mig7 = 0
+    
+    LoseDialogue1 = 0
+    
+    Number = 0
+    
+    AttackTimer = create timer for 0 seconds
+    LoseTimer = create timer for 0 seconds
+
+    Conv1 = 0
+    Conv2 = 0
+    Conv3 = 0
+    Conv4 = 0
+    Conv5 = 0
+    Conv6 = 0
+    Conv7 = 0
+    
+    PlayerPlatoon = 0
+    
+    a = 0
+    b = 0
+    c = 0
+    d = 0
+    e = 0
+    f = 0
+    g = 0
+    astory = 0
+    bstory = 0
+    
+    Armory = 0
+    ArmoryRanged = 0
+    Granary = 0
+    Market = 0
+    Nursery = 0
+    Store = 0
+    Tavern = 0
+    Temple = 0
+    Altar = 0
+    Theatre = 0
+    Bath = 0
+    Pen = 0
+    Field = 0
+    Wall = 0
+    Granary2 = 0
+    Graveyard = 0
+    Lumber = 0
+    Nursery2 = 0
+    Rest = 0
+    Sky = 0
+    Smelter = 0
+    Storehouse = 0
+    Tavern2 = 0
+    Temple2 = 0
+    Uni = 0
+    
+    ab = 0
+    bb = 0
+    cb = 0
+    db = 0
+    eb = 0
+    fb = 0
+    gb = 0
+    
+    Dialogue1said = 0
+    Dialogue2 = 0
+    TownDialogue = 1
+    
+    StoryDialogue = 0
+    StoryDialogueTimer = create timer for 200 seconds
+
+    StartDialogueSaid = 0
+    ObjectiveCommentSaid = 0
+    ArmyCommentSaid = 0
+    Army100CommentSaid = 0
+    Army200CommentSaid = 0
+    PlayerPlatoonWithinNorseWallsSaid = 0
+    PlayerPlatoonAttackingNorseTCSaid = 0
+    PlatoonDummy = 0
+
+    PlatoonKilledTimer = create timer for 0 seconds
+
+    NumberPlatoon = 0
+
+start
+
+begin loop
+    
+    if PlatoonKilled == 1
+        PlatoonKilled = 0
+        if get PlatoonKilledTimer time remaining <= 0
+            NumberPlatoon = number from 1 to 4
+            PlatoonKilledTimer = create timer for 120 seconds
+            GB_DialogueIsRunning = 1
+            if NumberPlatoon == 1
+                begin dialogue
+                    say "BW2T_SCRIPT_04FINAL_ADVISORS_NORSE_TAUNTS_170"
+                    wait until read
+                end dialogue
+            elsif NumberPlatoon == 2 
+                begin dialogue
+                    say "BW2T_SCRIPT_04FINAL_ADVISORS_NORSE_TAUNTS_220"
+                    wait until read
+                end dialogue
+            elsif NumberPlatoon == 3
+                begin dialogue
+                    say "BW2T_SCRIPT_04FINAL_ADVISORS_NORSE_TAUNTS_340"
+                    wait until read
+                end dialogue
+            elsif NumberPlatoon == 4
+                begin dialogue
+                    say "BW2T_SCRIPT_04FINAL_ADVISORS_NORSE_TAUNTS_GREEKS_WIN_BATTLES_90"
+                    wait until read
+                end dialogue
+            end if
+            GB_DialogueIsRunning = 0
+        end if
+    end if
+
+    if PlayerPlatoonWithinNorseWallsSaid == 0
+        PlatoonDummy = get platoon of player 0 nearest {NorseCapital} radius 400
+        if PlatoonDummy exists
+            PlayerPlatoonWithinNorseWallsSaid = 1
+            begin dialogue
+                eject evil spirit
+                //EA: Here we go, here we go, here we go!
+                say "BW2T_SCRIPT_04FINAL_PLAYTHROUGH30_60"
+                wait until read
+                //EA "Yeah! This is it! Attack!"
+                say "BW2T_SCRIPT_03FINAL_PLAYTHROUGH29_280"
+                wait until read
+                send evil spirit home
+                //GEN: Their force is overwhelming.
+                say "BW2T_SCRIPT_04FINAL_PLAYTHROUGH30_70"
+                wait until read
+            end dialogue
+        end if
+    end if
+
+    if PlayerPlatoonAttackingNorseTCSaid == 0
+        if town NorseCapital is under takeover from player 0
+            PlayerPlatoonAttackingNorseTCSaid = 1
+            begin dialogue
+            //GEN: All troops to me! We must defend against the brutal Greeks!
+            say "BW2T_SCRIPT_04FINAL_PLAYTHROUGH30_80"
+            wait until read
+
+            eject evil spirit
+            //EA: Yes - we've got them!
+            say "BW2T_SCRIPT_04FINAL_PLAYTHROUGH30_90"
+            wait until read
+                
+            send evil spirit home
+            end dialogue
+        end if
+    end if
+
+    //----Check if players army reaches 50 warriors----//            
+    if get army size in town PlayerTown >= 50 and Army100CommentSaid == 0 
+        Army100CommentSaid = 1
+        GB_DialogueIsRunning = 1
+        begin dialogue
+            //GEN: "Their strength grows. We must prepare for war."
+            say "BW2T_SCRIPT_04FINAL_ADVISORS_LAND_DONE_260"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+        
+    //----Check if players army reaches 100 warriors----//        
+    if get army size in town PlayerTown >= 100 and Army200CommentSaid == 0 
+        GB_DialogueIsRunning = 1
+        begin dialogue
+            Army200CommentSaid = 1    
+            //GEN: "They have an impressive army."    
+            say "BW2T_SCRIPT_04FINAL_ADVISORS_LAND_DONE_270"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+
+    if ArmyCommentSaid == 0 and get army size in town PlayerTown > 0
+        GB_DialogueIsRunning = 1
+        begin dialogue
+            //GEN: So the Greeks have recruited a platoon? Let's see how it fares against Norse iron!
+            say "BW2T_SCRIPT_04FINAL_ADVISORS_NORSE_TAUNTS_180"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+        ArmyCommentSaid = 1
+    end if
+
+    if StartDialogueSaid == 0
+        GB_DialogueIsRunning = 1
+        StartDialogueSaid = 1
+        begin dialogue
+            eject good spirit
+            //GA: "Come along, Leader. We need to start building." 
+                say "BW2T_SCRIPT_03FINAL_PLAYTHROUGH29_470"
+                wait until read
+            //GA: "We should start making houses."
+                say "BW2T_SCRIPT_03FINAL_PLAYTHROUGH29_490"
+                wait until read
+            send good spirit home
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+
+    if get total of stat STATS_AGC_OBJECTIVES_NUM_COMPLETED >= 1 and ObjectiveCommentSaid == 0
+        GB_DialogueIsRunning = 1
+        begin dialogue
+            eject good spirit
+            //GA: "If you need a reminder of what your objectives are, go to the objectives part of the Menu."
+                say "BW2T_SCRIPT_03FINAL_PLAYTHROUGH29_410"
+                wait until read
+            send good spirit home
+        end dialogue
+        ObjectiveCommentSaid = 1
+        GB_DialogueIsRunning = 0
+    end if
+
+    isConverted1 = variable get town Minor_FrontTown method of last conversion
+    isConverted2 = variable get town Minor_SideTown method of last conversion
+    isConverted3 = variable get town Minor_OreTown method of last conversion
+    isConverted4 = variable get town Minor_MountainTown method of last conversion
+    isConverted5 = variable get town Minor_SickTown method of last conversion
+    isConverted6 = variable get town NorseTown method of last conversion
+    isConverted7 = variable get town NorseCapital method of last conversion
+
+    if PLAYER of Minor_FrontTown != 1 and Conv1 == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        if isConverted1 == 1//aggressive
+            begin dialogue
+                //GEN: Turn that settlement into a military outpost. Build armies there for defence against these people!
+                say "BW2T_SCRIPT_04FINAL_ADVISORS_LAND_DONE_160"
+                wait until read
+                eject evil spirit
+                //EA: "wow, he's getting pretty jumpy"
+                say "BW2T_SCRIPT_03FINAL_PLAYTHROUGH29_500"
+                wait until read
+
+                eject good spirit
+                //GA: "look, we need to get our defenses going"
+                say "BW2T_SCRIPT_03FINAL_PLAYTHROUGH29_510"
+                wait until read
+
+                //EA: "we should really get an army going"
+                say "BW2T_SCRIPT_03FINAL_PLAYTHROUGH29_520"
+                wait until read
+                        
+                send evil spirit home
+                send good spirit home
+            end dialogue
+            isConverted1 = 0
+            Conv1 = 1
+        elsif isConverted1 == 2//passive
+            begin dialogue
+                eject good spirit
+                //GA: "Look! Those people are migrating! They want to live in our Town! They're bringing all their worldly goods. Hooray!"
+                say "BW2T_SCRIPT_03FINAL_ADVISORS_TUT_680"
+                wait until read
+                send good spirit home
+                //GEN: Turn that settlement into a military outpost. Build armies there for defence against these people!
+                say "BW2T_SCRIPT_04FINAL_ADVISORS_LAND_DONE_160"
+                wait until read
+                eject evil spirit
+                //EA: "wow, he's getting pretty jumpy"
+                say "BW2T_SCRIPT_03FINAL_PLAYTHROUGH29_500"
+                wait until read
+
+                eject good spirit
+                //GA: "look, we need to get our defenses going"
+                say "BW2T_SCRIPT_03FINAL_PLAYTHROUGH29_510"
+                wait until read
+
+                //EA: "we should really get an army going"
+                say "BW2T_SCRIPT_03FINAL_PLAYTHROUGH29_520"
+                wait until read
+                        
+                send evil spirit home
+                send good spirit home
+            end dialogue
+            isConverted1 = 0
+            Conv1 = 1
+        end if
+        GB_DialogueIsRunning = 0
+    end if 
+    
+    if UnderAttack >= 1 and get AttackTimer time remaining <= 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        UnderAttack = 0
+        Number = number from 1 to 14
+        if Number == 1
+            begin dialogue
+                make evil spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_EA_01"
+                wait until read
+                send evil spirit home
+            end dialogue
+        end if
+        if Number == 2
+            begin dialogue
+                make evil spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_EA_02"
+                wait until read
+                send evil spirit home
+            end dialogue
+        end if
+        if Number == 3
+            begin dialogue
+                make evil spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_EA_05"
+                wait until read
+                send evil spirit home
+            end dialogue
+        end if
+        if Number == 4
+            begin dialogue
+                make evil spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_EA_06"
+                wait until read
+                send evil spirit home
+            end dialogue
+        end if
+        if Number == 5
+            begin dialogue
+                make evil spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_EA_07"
+                wait until read
+                send evil spirit home
+            end dialogue
+        end if
+        if Number == 6
+            begin dialogue
+                make evil spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_EA_08"
+                wait until read
+                send evil spirit home
+            end dialogue
+        end if
+        if Number == 7
+            begin dialogue
+                make evil spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_EA_18"
+                wait until read
+                send evil spirit home
+            end dialogue
+        end if
+        if Number == 8
+            begin dialogue
+                make good spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_GA_01"
+                wait until read
+                send good spirit home
+            end dialogue
+        end if
+        if Number == 9
+            begin dialogue
+                make good spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_GA_02"
+                wait until read
+                send good spirit home
+            end dialogue
+        end if
+        if Number == 10
+            begin dialogue
+                make good spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_GA_05"
+                wait until read
+                send good spirit home
+            end dialogue
+        end if
+        if Number == 11
+            begin dialogue
+                make good spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_GA_06"
+                wait until read
+                send good spirit home
+            end dialogue
+        end if
+        if Number == 12
+            begin dialogue
+                make good spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_GA_07"
+                wait until read
+                send good spirit home
+            end dialogue
+        end if
+        if Number == 13
+            begin dialogue
+                make good spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_GA_09"
+                wait until read
+                send good spirit home
+            end dialogue
+        end if
+        if Number == 14
+            begin dialogue
+                make good spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_GA_10"
+                wait until read
+                send good spirit home
+            end dialogue
+        end if
+        GB_DialogueIsRunning = 0
+        AttackTimer = create timer for 45 seconds
+    end if
+    
+    if (PLAYER of PlayerTown != 0 and PLAYER of Minor_FrontTown != 0 and PLAYER of Minor_SideTown != 0 and PLAYER of Minor_OreTown != 0 and PLAYER of Minor_MountainTown != 0 and PLAYER of Minor_SickTown != 0 and PLAYER of NorseTown != 0 and PLAYER of NorseCapital != 0) and get LoseTimer time remaining <= 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        LoseDialogue1 = number from 1 to 5
+        if LoseDialogue1 == 1
+            begin dialogue
+                make good spirit appear
+                say "BW2T_SCRIPT_GENERIC_ADVISORS_SUGGEST_RESTART_10"
+                wait until read
+                send good spirit home
+            end dialogue
+        end if
+        
+        if LoseDialogue1 == 2
+            begin dialogue
+                make evil spirit appear
+                say "BW2T_SCRIPT_GENERIC_ADVISORS_SUGGEST_RESTART_20"
+                wait until read
+                send evil spirit home
+            end dialogue
+        end if
+        
+        if LoseDialogue1 == 3
+            begin dialogue
+                make good spirit appear
+                say "BW2T_SCRIPT_GENERIC_ADVISORS_SUGGEST_RESTART_30"
+                wait until read
+                send good spirit home
+            end dialogue
+        end if
+        
+        if LoseDialogue1 == 4
+            begin dialogue
+                make evil spirit appear
+                say "BW2T_SCRIPT_GENERIC_ADVISORS_SUGGEST_RESTART_40"
+                wait until read
+                send evil spirit home
+            end dialogue
+        end if
+        
+        if LoseDialogue1 == 5
+            begin dialogue
+                make evil spirit appear
+                say "BW2T_SCRIPT_GENERIC_ADVISORS_SUGGEST_RESTART_50"
+                wait until read
+                send evil spirit home
+            end dialogue
+        end if
+        
+        GB_DialogueIsRunning = 0
+        LoseTimer = create timer for 75 seconds
+    end if
+    
+    if a == 0 PlayerPlatoon = get platoon of player 0 nearest {PlayerTown} radius 500 end if
+    
+    if PlayerPlatoon exists and a == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        a = 1
+        begin dialogue
+            say "BW2T_SCRIPT_04FINAL_ADVISORS_LAND_DONE_240"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if (get building ABODE_NUMBER_MELEE_ARMOURY in PlayerTown min built 0.0 exists or get building ABODE_NUMBER_RANGED_ARMOURY in PlayerTown min built 0.0 exists) and ab == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        ab = 1
+        begin dialogue
+            say "BW2T_SCRIPT_04FINAL_ADVISORS_LAND_DONE_220"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building ABODE_NUMBER_RANGED_ARMOURY in PlayerTown min built 0.0 exists and bb == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        bb = 1
+        begin dialogue
+            say "BW2T_SCRIPT_04FINAL_ADVISORS_LAND_DONE_230"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if cb == 0 and L4BuildWallComplete == 1 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        cb = 1
+        begin dialogue
+            say "BW2T_SCRIPT_04FINAL_ADVISORS_LAND_DONE_280"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if FirstArmyCreated == 1 and Dialogue1said == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        Dialogue1said = 1
+        begin dialogue
+            say "BW2T_SCRIPT_04FINAL_ADVISORS_NORSE_TAUNTS_GREEK_ARMIES_150"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if TownsConverted >= 1 and TownDialogue == 1 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        TownDialogue = 2
+        begin dialogue
+            say "BW2T_SCRIPT_04FINAL_ADVISORS_NORSE_TAUNTS_GREEK_IMPRESS_150"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get player 0 impressiveness >= NORSE_CAPITAL_IMPRESSIVENESS * 0.2 + 7500 and Dialogue2 == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        Dialogue2 = 2
+        begin dialogue
+            say "BW2T_SCRIPT_04FINAL_ADVISORS_NORSE_TAUNTS_GREEK_IMPRESS_160"
+            wait until read
+            say "BW2T_SCRIPT_04FINAL_ADVISORS_NORSE_TAUNTS_GREEK_IMPRESS_170"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get player 0 impressiveness >= NORSE_CAPITAL_IMPRESSIVENESS * 0.4 + 7500 and Dialogue2 == 2 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        Dialogue2 = 3
+        begin dialogue
+            say "BW2T_SCRIPT_04FINAL_ADVISORS_NORSE_TAUNTS_GREEK_IMPRESS_180"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get player 0 impressiveness >= NORSE_CAPITAL_IMPRESSIVENESS * 0.6 + 7500 and Dialogue2 == 3 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        Dialogue2 = 4
+        begin dialogue
+            say "BW2T_SCRIPT_04FINAL_ADVISORS_NORSE_TAUNTS_GREEK_IMPRESS_190"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get player 0 impressiveness >= NORSE_CAPITAL_IMPRESSIVENESS * 0.75 + 7500 and Dialogue2 == 4 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        Dialogue2 = 5
+        begin dialogue
+            say "BW2T_SCRIPT_04FINAL_ADVISORS_NORSE_TAUNTS_GREEK_IMPRESS_30"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get player 0 impressiveness >= NORSE_CAPITAL_IMPRESSIVENESS * 0.9 + 7500 and Dialogue2 == 5 and GB_DialogueIsRunning == 0 and get player 0 alignment > 0
+        GB_DialogueIsRunning = 1
+        Dialogue2 = 6
+        begin dialogue
+            // GEN: "These Greeks are impressive"
+            say "BW2T_SCRIPT_04FINAL_PLAYTHROUGH30_10"
+            wait until read
+            // GEN: "Their dedication to culture and fairness are second to none"
+            say "BW2T_SCRIPT_04FINAL_PLAYTHROUGH30_20"
+            wait until read
+            // GEN: "Maybe an alliance would be to our advantage."
+            say "BW2T_SCRIPT_04FINAL_PLAYTHROUGH30_30"
+            wait until read
+            eject good spirit
+            // GA: "Their people are impressed; they are waivering. If we just build up a bit more the Norse will surely join us."
+            say "BW2T_SCRIPT_04FINAL_PLAYTHROUGH30_40"
+            wait until read
+            eject evil spirit
+            // EA: "It's never too late to attack though!"
+            say "BW2T_SCRIPT_04FINAL_PLAYTHROUGH30_50"
+            wait until read
+            send good spirit home
+            send evil spirit home
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if TownsConverted >= 2 and GB_DialogueIsRunning == 0 and bstory == 0
+        GB_DialogueIsRunning = 1
+        bstory = 1
+        begin dialogue
+            say "BW2T_SCRIPT_04FINAL_ADVISORS_LAND_DONE_200"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+end loop
+    
+end script LC4_Speeches
+
+begin script GatehouseManager
+
+    GatehousePos[7]
+    GateHouseT11 = 0
+    GateHouseT12 = 0
+    GateHouseT13 = 0
+    GateHouseT21 = 0
+    Counter = 0
+    Cnt = 0
+
+
+    //T1 = AztecCapital
+    //T2 = AztecFirstTown
+    oCreature = get player 0 creature
+    PlayerPlatoonT11 = 0
+    CatapultT11 = 0
+    TestCreatureT11 = 0
+    PlayerPlatoonT12 = 0
+    CatapultT12 = 0
+    TestCreatureT12 = 0
+    PlayerPlatoonT13 = 0
+    CatapultT13 = 0
+    TestCreatureT13 = 0
+    PlayerPlatoonT21 = 0
+    CatapultT21 = 0
+    TestCreatureT21 = 0
+    PlayerPlatoonT22 = 0
+    CatapultT22 = 0
+    TestCreatureT22 = 0
+    EnemyNearDoorT11 = 0
+    EnemyNearDoorT12 = 0
+    EnemyNearDoorT13 = 0
+    EnemyNearDoorT21 = 0
+
+start
+
+begin loop
+    GateHouseT11 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {1465.59,298.60,1976.05} radius 15
+    GateHouseT12 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {1315.90,298.41,1832.17} radius 15
+    GateHouseT13 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {1147.77,298.97,2008.74} radius 15
+    GateHouseT21 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {515.59,294.50,1849.58} radius 15
+    
+    oCreature = get player 0 creature
+
+    if PLAYER of NorseCapital == 1
+
+        if not town NorseCapital is under takeover from player 0
+            PlayerPlatoonT11 = get platoon of player 0 nearest {GateHouseT11} radius 100
+            CatapultT11 = get siege weapon of player 0 nearest {GateHouseT11} radius 100
+            TestCreatureT11 = get distance from {GateHouseT11} to {oCreature}
+            
+            if PlayerPlatoonT11 exists
+                EnemyNearDoorT11 = 1
+            elsif CatapultT11 exists
+                EnemyNearDoorT11 = 1
+            elsif TestCreatureT11 < 200 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+                EnemyNearDoorT11 = 1
+            else
+                EnemyNearDoorT11 = 0
+            end if
+            
+            if EnemyNearDoorT11 == 1
+                set gate GateHouseT11 close
+            else
+                set gate GateHouseT11 open
+            end if
+            
+            PlayerPlatoonT12 = get platoon of player 0 nearest {GateHouseT12} radius 100
+            CatapultT12 = get siege weapon of player 0 nearest {GateHouseT12} radius 100
+            TestCreatureT12 = get distance from {GateHouseT12} to {oCreature}
+            
+            if PlayerPlatoonT12 exists
+                EnemyNearDoorT12 = 1
+            elsif CatapultT12 exists
+                EnemyNearDoorT12 = 1
+            elsif TestCreatureT12 < 200 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+                EnemyNearDoorT12 = 1
+            else
+                EnemyNearDoorT12 = 0
+            end if
+            
+            if EnemyNearDoorT12 == 1
+                set gate GateHouseT12 close
+            else
+                set gate GateHouseT12 open
+            end if
+            
+            PlayerPlatoonT13 = get platoon of player 0 nearest {GateHouseT13} radius 100
+            CatapultT13 = get siege weapon of player 0 nearest {GateHouseT13} radius 100
+            TestCreatureT13 = get distance from {GateHouseT13} to {oCreature}
+            
+            if PlayerPlatoonT13 exists
+                EnemyNearDoorT13 = 1
+            elsif CatapultT13 exists
+                EnemyNearDoorT13 = 1
+            elsif TestCreatureT13 < 200 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+                EnemyNearDoorT13 = 1
+            else
+                EnemyNearDoorT13 = 0
+            end if
+            
+            if EnemyNearDoorT13 == 1
+                set gate GateHouseT13 close
+            else
+                set gate GateHouseT13 open
+            end if
+        else
+            set gate GateHouseT11 open
+            set gate GateHouseT12 open
+            set gate GateHouseT13 open
+        end if
+        
+    end if
+
+    if PLAYER of NorseTown == 1
+    
+        if not town NorseTown is under takeover from player 0
+            PlayerPlatoonT21 = get platoon of player 0 nearest {GateHouseT21} radius 100
+            CatapultT21 = get siege weapon of player 0 nearest {GateHouseT21} radius 100
+            TestCreatureT21 = get distance from {GateHouseT21} to {oCreature}
+            
+            if PlayerPlatoonT21 exists
+                EnemyNearDoorT21 = 1
+            elsif CatapultT21 exists
+                EnemyNearDoorT21 = 1
+            elsif TestCreatureT21 < 200 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+                EnemyNearDoorT21 = 1
+            else
+                EnemyNearDoorT21 = 0
+            end if
+            
+            if EnemyNearDoorT21 == 1
+                set gate GateHouseT21 close
+            else
+                set gate GateHouseT21 open
+            end if
+        else
+            set gate GateHouseT21 open
+        end if
+        
+    end if
+    
+end loop
+
+end script GatehouseManager
+
+begin script LC4_Norse_Capital
+
+    RecruitTimer1 = 0
+    RecruitTimer2 = 0
+    Wall[5]
+    Script1Triggered = 0
+    Script1Timer = create timer for 0 seconds
+    NorseTownScriptStarted = 0
+    WallCounter = 0
+    PlannedWall[8]
+    PlannedWallPos[8]
+    NearestSettlementTownCentre = 0
+    AttackingPlatoons = 0
+    PlayerGateHouse = 0
+    PlayerPlatoon = 0
+    AttackingPosition = 0
+    AttackingPositionFallBack = 0
+    CatapultScriptFired = 1
+
+start
+
+    //extend town NorseCapital influence by 40
+
+    AttackNearestTownTimer = create timer for 0 seconds
+    PlayerGateHouse = get HOUSE GATEHOUSE at {1230.16,121.12,738.84} radius 100
+    set gate PlayerGateHouse open
+
+    PlannedWallPos[0] = marker at {429.97,296.53,1871.60}
+    PlannedWallPos[1] = marker at {463.42,297.78,1867.11}
+    PlannedWallPos[2] = marker at {494.97,294.53,1855.15}
+    PlannedWallPos[3] = marker at {530.12,294.44,1846.31}
+    PlannedWallPos[4] = marker at {570.23,290.50,1832.85}
+    PlannedWallPos[5] = marker at {608.97,285.96,1830.00}
+    PlannedWallPos[6] = marker at {714.10,286.31,1833.75}
+    PlannedWallPos[7] = marker at {734.53,282.89,1832.73}
+
+    if Difficulty >= 4
+        add resource WOOD 5000 to PlayerTown
+        add resource ORE 5000 to PlayerTown
+        add resource FOOD 5000 to PlayerTown
+    elsif Difficulty == 3
+        add resource WOOD 7500 to PlayerTown
+        add resource ORE 7500 to PlayerTown
+        add resource FOOD 7500 to PlayerTown
+    elsif Difficulty == 2
+        add resource WOOD 10000 to PlayerTown
+        add resource ORE 10000 to PlayerTown
+        add resource FOOD 10000 to PlayerTown
+    elsif Difficulty == 1
+        add resource WOOD 12500 to PlayerTown
+        add resource ORE 12500 to PlayerTown
+        add resource FOOD 12500 to PlayerTown
+    end if
+
+    //----Create town static defenders platoons----//
+    
+    LC4_Platoon[0] = create platoon PLATOON_INFO_NORSE_MELEE_2 at {PlatoonPos[0]} with 25 * RecruitSizeModifier men and 0 women
+    attach LC4_Platoon[0] to NorseCapital
+    PLAYER of LC4_Platoon[0] = 1
+    run background script LC4_StaticPlatoonsActions(PlatoonPos[0],Melee,LC4_Platoon[0])
+    enable platoon LC4_Platoon[0] respond to town NorseCapital attack
+    set LC4_Platoon[0] focus to {PlatoonPos[0]}
+    
+    LC4_Platoon[1] = create platoon PLATOON_INFO_NORSE_MELEE_2 at {PlatoonPos[1]} with 25 * RecruitSizeModifier men and 0 women
+    attach LC4_Platoon[1] to NorseCapital
+    PLAYER of LC4_Platoon[1] = 1
+    run background script LC4_StaticPlatoonsActions(PlatoonPos[1],Melee,LC4_Platoon[1])
+    enable platoon LC4_Platoon[1] respond to town NorseCapital attack
+    set LC4_Platoon[1] focus to {PlatoonPos[1]}
+    
+    RecruitTimer1 = create timer for 60 seconds
+    RecruitTimer2 = create timer for 60 seconds
+    //RecruitTimers for different towns
+    
+    run background script LC4_Platoon14Actions
+
+    begin loop
+        
+        NearestSettlementTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in NearestSettlement min built 1.0
+        if TownsConverted >= 3 or TownsAggressiveConverted >= 1 or LC4_Platoon[0] not exists or LC4_Platoon[1] not exists
+            //if get RecruitTimer1 time remaining <= 0 or get RecruitTimer2 time remaining <= 0
+
+                //NorseCapital Production
+                if LC4_Platoon[0] not exists and PLAYER of NorseCapital == 1 and get RecruitTimer1 time remaining <= 0 and not town NorseCapital is under takeover from player 0
+                    LC4_Platoon[0] = recruit ARMY_UNIT_TYPE_MELEE_1 town NorseCapital platoon of size 20 * RecruitSizeModifier
+                    RecruitTimer1 = create timer for 180 * RecruitModifier seconds
+                    enable platoon LC4_Platoon[0] respond to town NorseCapital attack
+                    run background script LC4_StaticPlatoonsActions(PlatoonPos[0],Melee,LC4_Platoon[0])
+
+                elsif LC4_Platoon[1] not exists and PLAYER of NorseCapital == 1 and get RecruitTimer1 time remaining <= 0 and not town NorseCapital is under takeover from player 0
+                    LC4_Platoon[1] = recruit ARMY_UNIT_TYPE_MELEE_1 town NorseCapital platoon of size 20 * RecruitSizeModifier
+                    RecruitTimer1 = create timer for 180 * RecruitModifier seconds
+                    enable platoon LC4_Platoon[1] respond to town NorseCapital attack
+                    run background script LC4_StaticPlatoonsActions(PlatoonPos[1],Melee,LC4_Platoon[1])
+
+                elsif LC4_Platoon[2] not exists and PLAYER of NorseCapital == 1 and get RecruitTimer1 time remaining <= 0 and not town NorseCapital is under takeover from player 0
+                    LC4_Platoon[2] = recruit ARMY_UNIT_TYPE_MELEE_1 town NorseCapital platoon of size 20 * RecruitSizeModifier
+                    RecruitTimer1 = create timer for 180 * RecruitModifier seconds
+                    enable platoon LC4_Platoon[2] respond to town NorseCapital attack
+                    run background script LC4_StaticPlatoonsActions(PlatoonPos[2],Melee,LC4_Platoon[2])
+
+                elsif LC4_Platoon[3] not exists and PLAYER of NorseCapital == 1 and get RecruitTimer1 time remaining <= 0 and not town NorseCapital is under takeover from player 0
+                    LC4_Platoon[3] = recruit ARMY_UNIT_TYPE_MELEE_1 town NorseCapital platoon of size 20 * RecruitSizeModifier
+                    RecruitTimer1 = create timer for 120 * RecruitModifier seconds
+                    enable platoon LC4_Platoon[3] respond to town NorseCapital attack
+                    run background script LC4_StaticPlatoonsActions(PlatoonPos[3],Melee,LC4_Platoon[3])
+
+                elsif LC4_Platoon[4] not exists and PLAYER of NorseCapital == 1 and get RecruitTimer1 time remaining <= 0 and not town NorseCapital is under takeover from player 0
+                    LC4_Platoon[4] = recruit ARMY_UNIT_TYPE_MELEE_1 town NorseCapital platoon of size 20 * RecruitSizeModifier
+                    RecruitTimer1 = create timer for 120 * RecruitModifier seconds
+                    enable platoon LC4_Platoon[4] respond to town NorseCapital attack
+                    run background script LC4_StaticPlatoonsActions(PlatoonPos[4],Melee,LC4_Platoon[4])
+
+                elsif LC4_Platoon[14] not exists and PLAYER of NorseCapital == 1 and PLAYER of NorseTown != 1 and get RecruitTimer1 time remaining <= 0 and not town NorseCapital is under takeover from player 0
+                    LC4_Platoon[14] = recruit ARMY_UNIT_TYPE_MELEE_1 town NorseCapital platoon of size 20 * RecruitSizeModifier
+                    RecruitTimer1 = create timer for 120 * RecruitModifier seconds
+
+                elsif LC4_Platoon[17] not exists and PLAYER of NorseCapital == 1 and get AttackNearestTownTimer time remaining <= 0 and not town NorseCapital is under takeover from player 0 and AttackingPlatoons == 1
+                    LC4_Platoon[17] = recruit ARMY_UNIT_TYPE_MELEE_1 town NorseCapital platoon of size 30 * RecruitSizeModifier
+                    RecruitTimer1 = create timer for 200 * RecruitModifier seconds
+                    if FirstArmyCreated == 0
+                        FirstArmyCreated = 1
+                    end if
+                    run background script LC4_ArmyBehaivours(LC4_Platoon[17],Melee,Conqueror,0,0,0,0,0)
+
+                elsif LC4_Platoon[18] not exists and LC4_Platoon[17] exists and {LC4_Platoon[17]} near {NorseCapital} radius 550 and PLAYER of NorseCapital == 1 and not town NorseCapital is under takeover from player 0 and get AttackNearestTownTimer time remaining <= 0 and AttackingPlatoons == 1
+                    LC4_Platoon[18] = recruit ARMY_UNIT_TYPE_RANGED_1 town NorseCapital platoon of size 20 * RecruitSizeModifier
+                    RecruitTimer1 = create timer for 200 * RecruitModifier seconds
+                    run background script LC4_ArmyBehaivours(LC4_Platoon[18],Ranged,Conqueror,0,0,0,0,0)
+
+                elsif LC4_SiegeCatapult[1] not exists and LC4_Platoon[17] exists and {LC4_Platoon[17]} near {NorseCapital} radius 550 and PLAYER of NorseCapital == 1 and not town NorseCapital is under takeover from player 0 and get AttackNearestTownTimer time remaining <= 0 and AttackingPlatoons == 1
+                    LC4_SiegeCatapult[1] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_1 town NorseCapital siege weapon
+                    RecruitTimer1 = create timer for 200 * RecruitModifier seconds
+                    run background script LC4_MoveCatapultThenAttack(LC4_SiegeCatapult[1],Conqueror,0,0,0)
+
+                elsif LC4_Platoon[5] not exists and PLAYER of NorseCapital == 1 and get RecruitTimer1 time remaining <= 0 and not town NorseCapital is under takeover from player 0 and get RecruitTimer1 time remaining <= 0
+                    LC4_Platoon[5] = recruit ARMY_UNIT_TYPE_MELEE_1 town NorseCapital platoon of size 12 * RecruitSizeModifier
+                    RecruitTimer1 = create timer for 120 * RecruitModifier seconds
+                    if FirstArmyCreated == 0
+                        FirstArmyCreated = 1
+                    end if
+                    AttackingPosition = marker at {AttackPos[0]}
+                    AttackingPositionFallBack = marker at {AttackPos[0]}
+                    run background script LC4_ArmyBehaivours(LC4_Platoon[5],Melee,Attacker,0,AttackingPosition,AttackingPositionFallBack,0,0)
+
+                elsif LC4_Platoon[6] not exists and PLAYER of NorseCapital == 1 and get RecruitTimer1 time remaining <= 0 and not town NorseCapital is under takeover from player 0
+                    LC4_Platoon[6] = recruit ARMY_UNIT_TYPE_MELEE_1 town NorseCapital platoon of size 12 * RecruitSizeModifier
+                    RecruitTimer1 = create timer for 120 * RecruitModifier seconds
+                    AttackingPosition = marker at {AttackPos[1]}
+                    AttackingPositionFallBack = marker at {AttackPos[1]}
+                    run background script LC4_ArmyBehaivours(LC4_Platoon[6],Melee,Attacker,0,AttackingPosition,AttackingPositionFallBack,0,0)
+
+                elsif LC4_Platoon[7] not exists and PLAYER of NorseCapital == 1 and get RecruitTimer1 time remaining <= 0 and not town NorseCapital is under takeover from player 0
+                    LC4_Platoon[7] = recruit ARMY_UNIT_TYPE_MELEE_1 town NorseCapital platoon of size 12 * RecruitSizeModifier
+                    RecruitTimer1 = create timer for 120 * RecruitModifier seconds
+                    AttackingPosition = marker at {AttackPos[2]}
+                    AttackingPositionFallBack = marker at {AttackPos[2]}
+                    run background script LC4_ArmyBehaivours(LC4_Platoon[7],Melee,Attacker,0,AttackingPosition,AttackingPositionFallBack,0,0)
+
+                elsif LC4_Platoon[13] not exists and PLAYER of NorseCapital == 1 and get RecruitTimer1 time remaining <= 0 and not town NorseCapital is under takeover from player 0 and ScriptedAttackStart == 2
+                    LC4_Platoon[13] = recruit ARMY_UNIT_TYPE_MELEE_1 town NorseCapital platoon of size 12 * RecruitSizeModifier
+                    RecruitTimer1 = create timer for 160 * RecruitModifier seconds
+                    AttackingPosition = marker at {AttackPos[4]}
+                    AttackingPositionFallBack = marker at {AttackPos[4]}
+                    run background script LC4_ArmyBehaivours(LC4_Platoon[13],Melee,Escort,LC4_SiegeCatapult[0],AttackingPosition,AttackingPositionFallBack,0,0)
+
+                elsif LC4_SiegeCatapult[0] not exists and PLAYER of NorseCapital == 1 and not town NorseCapital is under takeover from player 0 and ScriptedAttackStart == 2 and get RecruitTimer1 time remaining <= 0
+                    LC4_SiegeCatapult[0] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_1 town NorseCapital siege weapon
+                    RecruitTimer1 = create timer for 160 * RecruitModifier seconds
+                    run background script LC4_MoveCatapultThenAttack(LC4_SiegeCatapult[0],0,SiegeRoute1[0],SiegeRoute1[1],SiegeRoute1[2])
+
+                end if
+                
+                //NorseTown Production
+                if LC4_Platoon[14] not exists and PLAYER of NorseTown == 1 and get RecruitTimer2 time remaining <= 0 and not town NorseTown is under takeover from player 0
+                    LC4_Platoon[14] = recruit ARMY_UNIT_TYPE_MELEE_1 town NorseTown platoon of size 20 * RecruitSizeModifier
+                    RecruitTimer2 = create timer for 180 * RecruitModifier seconds
+                    enable platoon LC4_Platoon[14] respond to town NorseTown attack
+
+                elsif LC4_Platoon[15] not exists and PLAYER of NorseTown == 1 and get RecruitTimer2 time remaining <= 0 and not town NorseTown is under takeover from player 0
+                    LC4_Platoon[15] = recruit ARMY_UNIT_TYPE_MELEE_1 town NorseTown platoon of size 15 * RecruitSizeModifier
+                    RecruitTimer2 = create timer for 180 * RecruitModifier seconds
+                    enable platoon LC4_Platoon[15] respond to town NorseTown attack
+                    run background script LC4_StaticPlatoonsActions(PlatoonPos[5],Melee,LC4_Platoon[15])
+
+                elsif LC4_Platoon[16] not exists and PLAYER of NorseTown == 1 and get RecruitTimer2 time remaining <= 0 and not town NorseTown is under takeover from player 0
+                    LC4_Platoon[16] = recruit ARMY_UNIT_TYPE_MELEE_1 town NorseTown platoon of size 15 * RecruitSizeModifier
+                    RecruitTimer2 = create timer for 120 * RecruitModifier seconds
+                    enable platoon LC4_Platoon[16] respond to town NorseTown attack
+                    run background script LC4_StaticPlatoonsActions(PlatoonPos[6],Melee,LC4_Platoon[16])
+
+                end if
+                
+                //NorseCapitalWalls
+                Wall[1] = get wall segment nearest {1461.58,299.03,2001.08} radius 15
+                Wall[2] = get wall segment nearest {1346.61,297.81,1829.58} radius 15
+                Wall[3] = get wall segment nearest {1131.04,302.40,1958.52} radius 15
+                //NorseCapitalWalls
+                
+                //NorseTownWalls
+                Wall[4] = get wall segment nearest {549.78,293.14,1842.80} radius 15
+                Wall[5] = get wall segment nearest {647.52,286.02,1830.78} radius 15
+                //NorseTownWalls
+
+                if LC4_WallArcher[0] not exists and Wall[1] exists and PLAYER of Wall[1] == 1 and HEALTH of Wall[1] == 1.0 and not town NorseCapital is under takeover from player 0 and get RecruitTimer1 time remaining <= 0
+                    LC4_WallArcher[0] = recruit ARMY_UNIT_TYPE_RANGED_2 town NorseCapital platoon of size number from 15 to 20 * RecruitSizeModifier
+                    RecruitTimer1 = create timer for 75 * RecruitModifier seconds
+                    wait until not LC4_WallArcher[0] recruiting
+                    enable platoon LC4_WallArcher[0] respond to town NorseCapital attack
+                    add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[1] to LC4_WallArcher[0] action queue
+                    
+                elsif LC4_WallArcher[1] not exists and Wall[2] exists and PLAYER of Wall[2] == 1 and HEALTH of Wall[2] == 1.0 and not town NorseCapital is under takeover from player 0 and get RecruitTimer1 time remaining <= 0
+                    LC4_WallArcher[1] = recruit ARMY_UNIT_TYPE_RANGED_2 town NorseCapital platoon of size number from 15 to 20 * RecruitSizeModifier
+                    RecruitTimer1 = create timer for 75 * RecruitModifier seconds
+                    wait until not LC4_WallArcher[1] recruiting
+                    enable platoon LC4_WallArcher[1] respond to town NorseCapital attack
+                    add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[2] to LC4_WallArcher[1] action queue
+                    
+                elsif LC4_WallArcher[2] not exists and Wall[3] exists and PLAYER of Wall[3] == 1 and HEALTH of Wall[3] == 1.0 and not town NorseCapital is under takeover from player 0 and get RecruitTimer1 time remaining <= 0
+                    LC4_WallArcher[2] = recruit ARMY_UNIT_TYPE_RANGED_2 town NorseCapital platoon of size number from 15 to 20 * RecruitSizeModifier
+                    RecruitTimer1 = create timer for 75 * RecruitModifier seconds
+                    wait until not LC4_WallArcher[2] recruiting
+                    enable platoon LC4_WallArcher[2] respond to town NorseCapital attack
+                    add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[3] to LC4_WallArcher[2] action queue
+                
+                elsif LC4_WallArcher[3] not exists and Wall[4] exists and PLAYER of Wall[4] == 1 and HEALTH of Wall[4] == 1.0 and not town NorseTown is under takeover from player 0 and get RecruitTimer2 time remaining <= 0
+                    LC4_WallArcher[3] = recruit ARMY_UNIT_TYPE_RANGED_2 town NorseTown platoon of size number from 15 to 20 * RecruitSizeModifier
+                    RecruitTimer2 = create timer for 75 * RecruitModifier seconds
+                    wait until not LC4_WallArcher[3] recruiting
+                    enable platoon LC4_WallArcher[3] respond to town NorseTown attack
+                    add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[4] to LC4_WallArcher[3] action queue
+
+                elsif LC4_WallArcher[4] not exists and Wall[5] exists and PLAYER of Wall[5] == 1 and HEALTH of Wall[5] == 1.0 and not town NorseTown is under takeover from player 0 and get RecruitTimer2 time remaining <= 0
+                    LC4_WallArcher[4] = recruit ARMY_UNIT_TYPE_RANGED_2 town NorseTown platoon of size number from 15 to 20 * RecruitSizeModifier
+                    RecruitTimer2 = create timer for 75 * RecruitModifier seconds
+                    wait until not LC4_WallArcher[4] recruiting
+                    enable platoon LC4_WallArcher[4] respond to town NorseTown attack
+                    add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[5] to LC4_WallArcher[4] action queue
+
+                end if
+            //end if
+        end if
+
+        if PLAYER of Minor_FrontTown == 0 or PLAYER of Minor_MountainTown == 0 or PLAYER of NorseTown == 0
+            //Take over a town and start attacking the player a lot    
+            if NearestSettlement != 0 and PLAYER of NearestSettlement == 0
+                AttackingPlatoons = 1
+            end if
+
+        elsif PLAYER of NearestSettlement == 1 and AttackingPlatoons == 1
+            //Attack PlayerTown with remaining troops
+            AttackingPlatoons = 0
+        end if
+        
+        if L4BuildWallComplete == 1 and ScriptAttackerSent == 0
+            ScriptAttackerSent = 1
+            LC4_Platoon[12] = recruit ARMY_UNIT_TYPE_MELEE_1 town NorseCapital platoon of size 20 * RecruitSizeModifier
+            wait until not LC4_Platoon[12] recruiting
+            AttackingPosition = marker at {AttackPos[3]}
+            AttackingPositionFallBack = marker at {AttackPos[3]}
+            run background script LC4_ArmyBehaivours(LC4_Platoon[12],Melee,Attacker,0,AttackingPosition,AttackingPositionFallBack,0,0)
+        end if
+        
+        if TownsConverted >= 2 or TownsAggressiveConverted >= 1
+            if NorseTownScriptStarted == 0
+                NorseTownScriptStarted = 1
+                LC4_Platoon[14] = recruit ARMY_UNIT_TYPE_MELEE_1 town NorseCapital platoon of size 25 * RecruitSizeModifier
+                enable platoon LC4_Platoon[14] respond to town NorseCapital attack
+                wait until not LC4_Platoon[14] recruiting
+            end if
+        end if
+        
+        if PLAYER of NorseTown == 1
+            wait 15 seconds
+            if WallCounter < 8
+                PlannedWall[WallCounter] = build building at {PlannedWallPos[WallCounter]} desire 1.0
+                add resource RESOURCE_TYPE_ORE number from 8000 to 8500 to PlannedWall[WallCounter]
+                WallCounter++
+            end if
+        end if
+    
+    end loop
+    
+end script LC4_Norse_Capital
+
+begin script LC4_AttackNearestTownTimer
+
+start
+
+begin loop
+
+    if get AttackNearestTownTimer time remaining <= 0
+        wait 45 seconds
+        AttackNearestTownTimer = create timer for 900 * RecruitModifier seconds
+    end if
+
+end loop
+
+end script LC4_AttackNearestTownTimer
+
+begin script LC4_DefendPlatoons
+
+    PlayerPlatoon = 0
+    DefendRecruitTimer1 = create timer for 0 seconds
+    DefendRecruitTimer2 = create timer for 0 seconds
+
+start
+
+begin loop
+
+    PlayerPlatoon = get platoon of player 0 nearest {NorseCapital} radius 300
+    if PlayerPlatoon exists and LC4_Platoon[8] not exists and LC4_Platoon[9] not exists and get DefendRecruitTimer1 time remaining == 0 and PLAYER of NorseCapital == 1
+        DefendRecruitTimer1 = create timer for 300 * RecruitModifier seconds
+        LC4_Platoon[8] = recruit ARMY_UNIT_TYPE_MELEE_1 town NorseCapital platoon of size number from 12 to 12 * RecruitSizeModifier
+        enable platoon LC4_Platoon[8] respond to town NorseCapital attack
+        wait until not LC4_Platoon[8] recruiting
+            
+        LC4_Platoon[9] = recruit ARMY_UNIT_TYPE_MELEE_1 town NorseCapital platoon of size number from 12 to 12 * RecruitSizeModifier
+        enable platoon LC4_Platoon[9] respond to town NorseCapital attack
+        wait until not LC4_Platoon[9] recruiting
+    end if
+        
+    PlayerPlatoon = get platoon of player 0 nearest {NorseTown} radius 300
+    if PlayerPlatoon exists and LC4_Platoon[10] not exists and LC4_Platoon[11] not exists and get DefendRecruitTimer2 time remaining == 0 and PLAYER of NorseTown == 1
+        DefendRecruitTimer2 = create timer for 300 * RecruitModifier seconds
+        LC4_Platoon[10] = recruit ARMY_UNIT_TYPE_MELEE_1 town NorseTown platoon of size 10 * RecruitSizeModifier
+        enable platoon LC4_Platoon[10] respond to town NorseTown attack
+        wait until not LC4_Platoon[10] recruiting
+            
+        LC4_Platoon[11] = recruit ARMY_UNIT_TYPE_MELEE_1 town NorseTown platoon of size 10 * RecruitSizeModifier
+        enable platoon LC4_Platoon[11] respond to town NorseTown attack
+        wait until not LC4_Platoon[11] recruiting
+    end if
+
+end loop
+
+end script LC4_DefendPlatoons
+
+begin script LC4_GetNearestSettlement
+
+    NearestTown = 0
+
+start
+
+begin loop
+    if PLAYER of NorseCapital == 1
+        if PLAYER of Minor_FrontTown == 0
+            NearestTown = Minor_FrontTown
+
+        elsif PLAYER of Minor_MountainTown == 0
+            NearestTown = Minor_MountainTown
+
+        elsif PLAYER of NorseTown == 0
+            NearestTown = NorseTown
+
+        else
+            NearestTown = PlayerTown
+
+        end if
+
+        NearestSettlement = NearestTown
+        wait 45 seconds
+
+    end if
+end loop
+
+end script LC4_GetNearestSettlement
+
+begin script ResourceManagerNorseCapital
+
+start
+
+begin loop
+
+    wait 5 seconds //To evade the sound bug if storage is burning...
+
+    if PLAYER of NorseCapital == 1
+        if (get town NorseCapital RESOURCE_TYPE_ORE total < 10297)
+            add resource RESOURCE_TYPE_ORE number from 100 to 500 to NorseCapital
+        elsif (get town NorseCapital RESOURCE_TYPE_WOOD total < 16322)
+            add resource RESOURCE_TYPE_WOOD number from 500 to 1000 to NorseCapital
+        elsif (get town NorseCapital RESOURCE_TYPE_FOOD total < 17624)
+            add resource RESOURCE_TYPE_FOOD number from 500 to 1500 to NorseCapital
+        end if
+    end if
+    
+    until PLAYER of NorseCapital != 1
+end loop    
+
+end script ResourceManagerNorseCapital
+
+begin script VillagerManagerNorseCapital
+
+    Counter = 0
+    Villager = 0
+    HousesBuilt = 0
+
+start
+
+begin loop
+
+    wait 900 * BuilderModifier seconds
+    Counter = 0
+
+    if PLAYER of NorseCapital == 1
+        if HousesBuilt == 0
+            HousesBuilt = 1
+            build all town NorseCapital buildings in group 10
+        end if
+        begin loop
+            Villager = create random villager of tribe TRIBE_TYPE_NORSE at {NorseCapital} + {number from -12 to 12, 0, number from -12 to 12}//create VILLAGER VILLAGER_INFO_JAPANESE_FORESTER_MALE at {1013.581, 132.333, 2002.798} + {number from -3 to 3, 0, number from -3 to 3}
+            attach Villager to NorseCapital
+            release Villager
+            
+            wait number from 6 to 10 seconds
+            Counter++
+            until Counter >= 20 or PLAYER of NorseCapital != 1
+        end loop
+    end if
+
+end loop
+
+end script VillagerManagerNorseCapital
+
+begin script VillagerManagerNorseTown
+
+    Counter = 0
+    Villager = 0
+    HousesBuilt = 0
+
+start
+
+begin loop
+
+    wait 900 * BuilderModifier seconds
+    Counter = 0
+
+    if PLAYER of NorseTown == 1
+        if HousesBuilt == 0
+            HousesBuilt = 1
+            build all town NorseTown buildings in group 10
+        end if
+        begin loop
+            Villager = create random villager of tribe TRIBE_TYPE_NORSE at {NorseTown} + {number from -12 to 12, 0, number from -12 to 12}//create VILLAGER VILLAGER_INFO_JAPANESE_FORESTER_MALE at {1013.581, 132.333, 2002.798} + {number from -3 to 3, 0, number from -3 to 3}
+            attach Villager to NorseTown
+            release Villager
+            
+            wait number from 6 to 10 seconds
+            Counter++
+            until Counter >= 10 or PLAYER of NorseTown != 1
+        end loop
+    end if
+
+end loop
+
+end script VillagerManagerNorseTown
+
+begin script ResourceManagerNorseTown
+
+    Counter = 0
+
+start
+
+begin loop
+
+    wait 5 seconds //To evade the sound bug if storage is burning...
+
+    if PLAYER of NorseTown == 1
+        if (get town NorseTown RESOURCE_TYPE_ORE total < 10495)
+            add resource RESOURCE_TYPE_ORE number from 100 to 500 to NorseTown
+        elsif (get town NorseTown RESOURCE_TYPE_WOOD total < 13267)
+            add resource RESOURCE_TYPE_WOOD number from 500 to 1000 to NorseTown
+        elsif (get town NorseTown RESOURCE_TYPE_FOOD total < 10495)
+            add resource RESOURCE_TYPE_FOOD number from 500 to 1500 to NorseTown
+        end if
+    end if
+    
+    until PLAYER of NorseTown != 1
+end loop    
+
+end script ResourceManagerNorseTown
+
+begin script NorseScript1
+
+    AttackingPosition = marker at {AttackPos[4]}
+    AttackingPositionFallBack = marker at {AttackPos[4]}
+    AtmosMixer = create mixer
+
+start
+
+    wait until TownsConverted >= 3 or TownsAggressiveConverted >= 1
+
+    wait 30 seconds
+
+    wait until dialogue ready and camera ready
+
+    begin cinema
+        set fade red 0 green 0 blue 0 time 2
+        disable atmos sound
+        set atmos volume 0
+        set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_MAP to 0.0
+        set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_POSITIONAL to 0.0
+        wait 4 seconds
+        ScriptedAttackStart = 1
+
+        LC4_Platoon[13] = create platoon PLATOON_INFO_NORSE_MELEE_2 at {Script1WP[0]} with 25 * RecruitSizeModifier men and 0 women
+        attach LC4_Platoon[13] to NorseCapital
+        PLAYER of LC4_Platoon[13] = 1
+            
+        LC4_SiegeCatapult[0] = create siege weapon SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_2 belonging to NorseCapital at {Script1WP[1]}
+        attach LC4_SiegeCatapult[0] to NorseCapital
+        PLAYER of LC4_SiegeCatapult[0] = 1
+
+        run background script LC4_ArmyBehaivours(LC4_Platoon[13],Melee,Escort,LC4_SiegeCatapult[0],AttackingPosition,AttackingPositionFallBack,0,0)
+        run background script LC4_MoveCatapultThenAttack(LC4_SiegeCatapult[0],0,SiegeRoute1[0],SiegeRoute1[1],SiegeRoute1[2])
+
+        set game time 23.00
+        start music "nemesis"
+        set LC4_EnemyCreature position to {Script1WP[1]}
+        ENEMY_CREATURE_ALLOWED_TO_ATTACK = 1
+        set camera position to {1312.89,310.00,1841.42}
+        set camera focus to {1341.92,298.66,1902.29}
+        set fade in time 2
+        wait 12 seconds
+        set camera position to {1300.67,308.88,1894.57}
+        set camera focus to {1311.91,298.44,1833.34}
+        wait 7 seconds
+        set fade red 0 green 0 blue 0 time 2
+        wait 2 seconds
+        set camera position to {1392.86,140.00,474.62}
+        set camera focus to {1290.20,96.99,551.77}
+        enable atmos sound
+        set atmos volume 0.45
+        set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_MAP to 0.6
+        set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_POSITIONAL to 0.6
+        set fade in time 4
+    end cinema
+    wait 20 seconds
+    ScriptedAttackStart = 2
+    stop music with fadetime 5
+
+end script NorseScript1
+
+begin script DisableLocalPlatoonResponse
+
+    Counter = 0
+
+start
+
+begin loop
+    if Counter > 99
+        Counter = 0
+        wait 30 seconds
+    end if
+    if LC4_Platoon[Counter] exists
+        disable platoon LC4_Platoon[Counter] respond to local platoon attack
+    end if
+    if LC4_WallArcher[Counter] exists
+        disable platoon LC4_WallArcher[Counter] respond to local platoon attack
+    end if
+    Counter++
+end loop
+
+end script DisableLocalPlatoonResponse

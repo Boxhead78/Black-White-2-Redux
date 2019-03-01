@@ -1,0 +1,109 @@
+//--------------------------------------------------------------------------------------------------------------
+define script FirerainSpell(PlayerID,SpellPosition)
+define script Firerain_Fireballs(PlayerID,FirerainSpell)
+
+global Firerain_MaxCycles = 4 //Each cycle will fire 3 fireballs. 4 cycles = 12 fireballs
+
+
+begin script FirerainSpell(PlayerID,SpellPosition)
+    Effect1 = 0
+    Effect2 = 0
+
+    Rock = 0
+    SeedEffect = 0
+    PlayerMana = 0
+    VerdantSpell = 0
+
+    BrakeLoop = 0
+
+start
+
+    if PlayerID == 0
+        //For players
+        empty player hand
+        wait 0.25 seconds
+        Rock = create SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_BOULDER_ROUND at hand position
+        SeedEffect = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_SEED on Rock time -1
+        set SeedEffect colour red 195 green 30 blue 30
+        set Rock in player 0 hand
+        VerdantSpell = Rock
+        PlayerMana = get player PlayerID mana
+
+        set player PlayerID mana PlayerMana - 20000
+
+        wait 1 seconds
+
+        begin loop
+            if bindable action BINDABLE_ACTION_TYPE_ACTION performed
+                BrakeLoop = 1
+                SpellPosition = marker at hand position
+            end if
+            if not Rock is HELD
+                delete Rock
+                delete SeedEffect
+                BrakeLoop = 2
+            end if
+            until BrakeLoop >= 1
+        end loop
+
+        delete Rock
+        delete SeedEffect
+    else
+        // For AIs
+        BrakeLoop = 1
+    end if
+
+    if BrakeLoop == 1
+        //Script here
+        Effect1 = create visual effect VISUAL_EFFECT_TOWN_TAKEOVER_AGGRESSOR at {SpellPosition} + {0,10,0} time 40
+        set Effect1 colour red 195 green 30 blue 30
+        wait 20 seconds
+        run background script Firerain_Fireballs(PlayerID,marker at {SpellPosition})
+    elsif BrakeLoop == 2
+        PlayerMana = get player PlayerID mana
+        set player PlayerID mana PlayerMana + 20000
+    end if
+
+end script FirerainSpell
+
+
+begin script Firerain_Fireballs(PlayerID,FirerainSpell)
+
+    Counter = 0
+    CounterFireball = 0
+    Effect1 = 0
+    Fireball = 0
+    FireballStartPos = 0
+    FireballDestPos = 0
+    FireballDestPosNew = 0
+
+start
+
+    Effect1 = create visual effect VISUAL_EFFECT_WEATHER_SANDSTORM at {FirerainSpell} + {80,90,80} time -1
+    FireballStartPos = marker at {FirerainSpell} + {80,90,80}
+    SCALE of Effect1 = 0.75
+    set Effect1 colour red 195 green 5 blue 5
+    while Counter < Firerain_MaxCycles 
+        wait 5 seconds
+        FireballDestPos = marker at {FireballStartPos} + {number from -30 to -10,30,number from -30 to -10}
+        if Counter == 0
+            FireballDestPos = marker at {FireballStartPos} + {-20,30,-20}
+        end if
+        FireballDestPosNew = FireballDestPos
+        while CounterFireball < 3
+            wait 0.45 seconds
+            FireballDestPos = marker at {FireballDestPosNew} + {number from -5 to 5,0,number from -5 to 5}
+            Fireball = make player PlayerID throw miracle MIRACLE_TYPE_FIRE from ({FireballStartPos} + {0,1.5,0}) heading ({FireballDestPos} - {FireballStartPos})
+            CounterFireball++
+        end while
+        CounterFireball = 0
+        Counter++
+    end while
+
+    wait 5 seconds
+
+    wait until not {FirerainSpell} viewed
+
+    delete Effect1
+
+end script Firerain_Fireballs

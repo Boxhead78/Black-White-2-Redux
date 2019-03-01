@@ -1,0 +1,47 @@
+///////////////////////////////////////////////////////////////////////////////
+//    Land 4 PlayerTown Script
+//    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//    Start date:        02.11.16            By: Boxhead
+//    Update date:    03.11.16            By: Boxhead
+//
+//    Unfinished Script.
+//
+///////////////////////////////////////////////////////////////////////////////
+
+    global Scroll_ImpressTownMain = 0
+    global Scroll_ImpressTownMainPos = 0
+    global MAINPROGRESS = 0
+
+begin script LC4_EnoughObjectivesDone
+
+    ShowTimer = create timer for 0 seconds
+    ImpressTown_TownImpressed = 0
+    PlayerTownTownCentre = 0
+    PlayerTownTownCentrePos = 0
+    NewCenter = 0
+
+start
+
+    Scroll_ImpressTownMainPos = marker at {1296.73,95.91,520.15}
+
+    Scroll_ImpressTownMain = create highlight GOLD name "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_04" remind "HELP_TEXT_CREATURE_CURRENT_SOURCE_09" at ({Scroll_ImpressTownMainPos} + {0.00,3.00,0.00})
+    
+    PlayerTownTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in GB_PlayerTown min built 1.0
+    PlayerTownTownCentrePos = marker at {PlayerTownTownCentre}
+    
+    begin loop
+    
+        if Scroll_ImpressTownMain right clicked and get ShowTimer time remaining <= 0
+            say "Beeindrucke diese Stadt, indem du sie vom Einfluss der Wikinger befreist."
+            ShowTimer = create timer for 10 seconds
+            ImpressTown_TownImpressed = 1
+        end if
+        until ImpressTown_TownImpressed == 1
+    end loop
+    
+    delete Scroll_ImpressTownMain
+    set player 0 town PlayerTown capture reason LAST_CAPTURE_AGGRESSIVE
+    run map script line "CREATE_TOWN_CENTRE(0, "1315.18,530.50", "GREEK_ABODE_TOWN_CENTRE", 0, 1000, 0)"
+
+end script LC4_EnoughObjectivesDone

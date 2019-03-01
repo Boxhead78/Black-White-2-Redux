@@ -1,0 +1,199 @@
+///////////////////////////////////////////////////////////////////////////////
+//          Trebuchet Script
+//    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//    Start date:        31.10.18            By: Boxhead
+//    Update date:    20.12.18            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+define script Trebuchet(whichTown,ScriptedAltarEffectPos)
+define script TrebuchetTutorial(TB_Town)
+define script TrebuchetFireFireballs(TB_Town,ScriptedAltarEffectPos)
+define script TrebuchetEffects(ScriptedAltar,ScriptedAltarEffectPos)
+
+global AltarReady = 0
+global TrebuchetDelay = 600
+global MaxFireballs = 9 //Fireballs per player
+global FireballsDelayMin = 1
+global FireballsDelayMax = 2
+
+
+begin script Trebuchet(whichTown,ScriptedAltarEffectPos)
+
+    TrebuchetTimer = create timer for 0 seconds
+    ScriptedAltar = 0
+
+start
+
+ScriptedAltar = get building ABODE_NUMBER_ALTAR in whichTown min built 1.0 
+run background script SK_AITownBuildingAltarWorkaround(-1,ScriptedAltar)
+run background script TrebuchetEffects(ScriptedAltar,ScriptedAltarEffectPos)
+
+if SK_Tutorials == 1
+    run background script TrebuchetTutorial(whichTown)
+end if
+
+begin loop
+    if HEALTH of ScriptedAltar == 1.0
+        if get TrebuchetTimer time remaining <= 0
+            if PLAYER of whichTown >= 0 and PLAYER of whichTown <= 5 
+                run script TrebuchetFireFireballs(whichTown,ScriptedAltarEffectPos)
+            end if
+            TrebuchetTimer = create timer for TrebuchetDelay seconds
+        end if
+    end if
+end loop
+
+end script Trebuchet
+
+
+begin script TrebuchetTutorial(TB_Town)
+
+    TutScroll = 0
+
+start
+
+if Language == German
+    TutScroll = create highlight BRONZE name "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_11" remind "HELP_TEXT_CREATURE_CURRENT_SOURCE_09" at {TB_Town} + {0,5,0}
+elsif Language == English
+    TutScroll = create highlight BRONZE name "HELP_TEXT_MULTIPLAYER_SETUP_HELP_07" remind "HELP_TEXT_CREATURE_CURRENT_SOURCE_09" at {TB_Town} + {0,5,0}
+end if
+
+begin loop
+    if TutScroll right clicked
+        clear right clicked object
+        begin dialogue
+            if Language == English
+                say "Town with trebuchet addon. After a set amount of time, this town fires a small fire-rain at all enemies as long as the altar which is holding a fireball has 100% health."
+            elsif Language == German
+                say "Stadt mit Ballisten-Addon. Nach einer bestimmten Zeit werden alle gegnerischen Staedte mit einem Feuerregen angegriffen, waehrend der Altar, der ein Feuerball traegt unbeschaedigt ist."
+            end if
+            wait 12 seconds
+        end dialogue
+        begin dialogue
+            if Language == English
+                say "A player must control this town so that this action takes place."
+            elsif Language == German
+                say "Ein Spieler muss diese Stadt kontrollieren, damit der Altar aktiviert wird."
+            end if
+            wait 7 seconds
+        end dialogue
+    end if
+end loop
+
+end script TrebuchetTutorial
+
+
+begin script TrebuchetFireFireballs(TB_Town,ScriptedAltarEffectPos)
+
+    Counter = 0
+    Fireball = 0
+    PlayerID = 0
+    StartPos = 0
+    AltarVis = 0
+    WarningEffect[SK_MaxPlayers]
+
+start
+
+AltarVis = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_UP at {ScriptedAltarEffectPos} time -1 target {ScriptedAltarEffectPos}
+set AltarVis colour red 192 green 0 blue 0
+
+Counter = 0
+PlayerID = PLAYER of TB_Town
+if PLAYER of PlayerTown1 != PlayerID and PlayerTown1 != 0
+    WarningEffect[0] = create visual effect VISUAL_EFFECT_EPIC_TARGET_WARNING at {PlayerTown1} + {0.000,10.000,0.000} time 15 target {PlayerTown1} + {0.000,10.000,0.000}
+    wait 9 seconds
+    begin loop
+        StartPos = marker at {PlayerTown1} + {0,2500,0}
+        Fireball = make player PlayerID throw miracle MIRACLE_TYPE_FIRE from ({StartPos} + {0, -3.0, 0}) heading (({StartPos} + {number from -10 to 10,10,number from -10 to 10}) - {StartPos})
+        wait number from FireballsDelayMin to FireballsDelayMax seconds
+        Counter++
+        until Counter >= MaxFireballs
+    end loop
+end if
+
+Counter = 0
+if PLAYER of PlayerTown2 != PlayerID and PlayerTown2 != 0
+    WarningEffect[0] = create visual effect VISUAL_EFFECT_EPIC_TARGET_WARNING at {PlayerTown2} + {0.000,10.000,0.000} time 15 target {PlayerTown2} + {0.000,10.000,0.000}
+    wait 9 seconds
+    begin loop
+        StartPos = marker at {PlayerTown2} + {0,2500,0}
+        Fireball = make player PlayerID throw miracle MIRACLE_TYPE_FIRE from ({StartPos} + {0, -3.0, 0}) heading (({StartPos} + {number from -10 to 10,10,number from -10 to 10}) - {StartPos})
+        wait number from FireballsDelayMin to FireballsDelayMax seconds
+        Counter++
+        until Counter >= MaxFireballs
+    end loop
+end if
+
+Counter = 0
+if PLAYER of PlayerTown3 != PlayerID and PlayerTown3 != 0
+    WarningEffect[0] = create visual effect VISUAL_EFFECT_EPIC_TARGET_WARNING at {PlayerTown3} + {0.000,10.000,0.000} time 15 target {PlayerTown3} + {0.000,10.000,0.000}
+    wait 9 seconds
+    begin loop
+        StartPos = marker at {PlayerTown3} + {0,2500,0}
+        Fireball = make player PlayerID throw miracle MIRACLE_TYPE_FIRE from ({StartPos} + {0, -3.0, 0}) heading (({StartPos} + {number from -10 to 10,10,number from -10 to 10}) - {StartPos})
+        wait number from FireballsDelayMin to FireballsDelayMax seconds
+        Counter++
+        until Counter >= MaxFireballs
+    end loop
+end if
+
+Counter = 0
+if PLAYER of PlayerTown4 != PlayerID and PlayerTown4 != 0
+    WarningEffect[0] = create visual effect VISUAL_EFFECT_EPIC_TARGET_WARNING at {PlayerTown4} + {0.000,10.000,0.000} time 15 target {PlayerTown4} + {0.000,10.000,0.000}
+    wait 9 seconds
+    begin loop
+        StartPos = marker at {PlayerTown4} + {0,2500,0}
+        Fireball = make player PlayerID throw miracle MIRACLE_TYPE_FIRE from ({StartPos} + {0, -3.0, 0}) heading (({StartPos} + {number from -10 to 10,10,number from -10 to 10}) - {StartPos})
+        wait number from FireballsDelayMin to FireballsDelayMax seconds
+        Counter++
+        until Counter >= MaxFireballs
+    end loop
+end if
+
+Counter = 0
+if PLAYER of PlayerTown5 != PlayerID and PlayerTown5 != 0
+    WarningEffect[0] = create visual effect VISUAL_EFFECT_EPIC_TARGET_WARNING at {PlayerTown5} + {0.000,10.000,0.000} time 15 target {PlayerTown5} + {0.000,10.000,0.000}
+    wait 9 seconds
+    begin loop
+        StartPos = marker at {PlayerTown5} + {0,2500,0}
+        Fireball = make player PlayerID throw miracle MIRACLE_TYPE_FIRE from ({StartPos} + {0, -3.0, 0}) heading (({StartPos} + {number from -10 to 10,10,number from -10 to 10}) - {StartPos})
+        wait number from FireballsDelayMin to FireballsDelayMax seconds
+        Counter++
+        until Counter >= MaxFireballs
+    end loop
+end if
+
+delete AltarVis
+
+end script TrebuchetFireFireballs
+
+
+begin script TrebuchetEffects(ScriptedAltar,ScriptedAltarEffectPos)
+
+    VisualEffect1 = 0
+    VisualEffect2 = 0
+    VisualEffect3 = 0
+    VisualExists = 0
+
+start
+
+begin loop
+    if HEALTH of ScriptedAltar == 1.0 and VisualExists == 0
+        AltarReady = 1
+        VisualExists = 1
+        VisualEffect1 = create visual effect VISUAL_EFFECT_SIREN_BEAM at {ScriptedAltarEffectPos} time -1 target {ScriptedAltarEffectPos} + {0,50,0}
+        set VisualEffect1 color red 215 green 20 blue 20
+        VisualEffect2 = create visual effect VISUAL_EFFECT_FIREBALL_HAND_POUR at {ScriptedAltarEffectPos} + {0,10,0} time -1 target {ScriptedAltarEffectPos} + {0,50,0}
+        SCALE of VisualEffect2 = 1.33
+
+    elsif HEALTH of ScriptedAltar < 1.0 and VisualExists == 1
+        AltarReady = 0
+        VisualExists = 0
+        delete VisualEffect1
+        delete VisualEffect2
+
+    end if
+end loop
+
+end script TrebuchetEffects

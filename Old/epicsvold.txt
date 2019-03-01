@@ -1,0 +1,988 @@
+
+
+define EPIC_OFFSETX_POS = 6
+define EPIC_OFFSETZ_POS = 4
+define ROTATION_OF_EPIC = 9
+
+define script HurricaneScript
+define script HurricaneCinemaControl(oHurricane)
+define script VolcanoScript
+define script VolcanoCinemaControl
+define script EarthquakeScript
+define script SirenScript
+
+
+begin script HurricaneScript
+
+    // Other Variables
+    //oTown = 0
+    hEpic = 0
+    oVisual = 0
+    oVisual2 = 0
+    oVisual3 = 0
+
+    // Hurricane Specific variables
+    HurricanePhysics = 0
+    HurricanePos = 0
+    HurricaneReady = 0
+    oHurricane = 0
+    HurricaneHeld = 0
+
+    // Visual effects to replace wonder's miracle
+    Rock1 = 0
+    HurricaneSeed = 0
+
+    // Camera variables to put cam directly in front of wonder
+    RelativePos = 0
+    hEpicPos = 0
+    hEpicFoc = 0
+
+start
+
+//oTown = get town with id 0
+
+begin loop
+    oHurricane = 0
+    hEpic = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_HURRICANE at {playerTown} radius 300
+        RelativePos = marker at get world position from hEpic to {hEpic}
+        hEpicPos = marker at {hEpic}+(hEpic * {RelativePos}+{-20,10,hEpic})
+        hEpicFoc = marker at {hEpic}+{0,-0,0}
+      if hEpic exists and SCRIPT_OBJECT_PROPERTY_TYPE_BUILT_PERCENTAGE of hEpic == 1.0
+        wait 1 second
+        if hEpic right clicked and wonder in hand or hEpic left clicked and wonder in hand
+        empty player hand
+         wait 0.2 seconds
+         Rock1 = create SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_BOULDER_ROUND at hand position
+         HurricaneSeed = create visual effect VISUAL_EFFECT_HURRICANE_SEED on Rock1 time -1
+         set Rock1 in player 0 hand
+         HurricaneHeld = get object held
+         HurricaneHeld = Rock1
+             wait 1 second
+        begin loop
+              if bindable action BINDABLE_ACTION_TYPE_ACTION performed
+                HurricanePos = marker at hand position
+                oHurricane = create hurricane at {HurricanePos} player 0 direction {125,0,223}
+                     clear player 0 spell charging
+                     stop visual effect HurricaneSeed
+                     delete Rock1
+            run background script HurricaneCinemaControl(oHurricane)
+                                wait 7 seconds
+                                play string sound "SCRIPT1_VEPIC_FLAMETHROWERWHOOSH4"
+                                start music "egypt_chant"
+                                wait 5 seconds
+                                invoke hEpic EPIC_WONDER_STAGE_1
+                                play string sound "SCRIPT3_HEPIC_SYNTH3"
+                                play string sound "SCRIPT1_VEPIC_BEAMOFLIGHTLOOP10"
+                                wait 5 seconds
+                                invoke hEpic EPIC_WONDER_STAGE_2
+                                play string sound "SCRIPT3_HEPIC_SYNTH3"
+                                play string sound "SCRIPT1_VEPIC_BEAMOFLIGHTLOOP10"
+                                wait 1 second
+                                enable predefined sky "hurricane" time 5
+                                wait 3 seconds
+                                play string sound "SCRIPT3_HEPIC_SYNTH3"
+                                play string sound "SCRIPT1_VEPIC_BEAMOFLIGHTLOOP10"
+                                invoke hEpic EPIC_WONDER_STAGE_3
+                                invoke hEpic EPIC_WONDER_STAGE_4
+                                invoke hEpic EPIC_WONDER_STAGE_5
+                                invoke hEpic EPIC_WONDER_STAGE_6
+                                invoke hEpic EPIC_WONDER_STAGE_7
+                                invoke hEpic EPIC_WONDER_STAGE_8
+                                play string sound "SCRIPT4_SEPIC_BEAMOFLIGHTLOOP7"
+                                wait 2 seconds
+                                play string sound "HURRICANELIGHTNING3"
+                                play string sound "SCRIPT3_HEPIC_SYNTH3"
+                                invoke hEpic EPIC_WONDER_STAGE_9
+                                invoke hEpic EPIC_WONDER_STAGE_10
+                                wait 3 seconds
+                                stop sound "SCRIPT4_SEPIC_BEAMOFLIGHTLOOP7"
+                                wait 1 second
+                                oVisual = create visual effect VISUAL_EFFECT_HURRICANE_BEAM on hEpic time 1
+                                oVisual2 = create visual effect VISUAL_EFFECT_HURRICANE_PULSE on hEpic time 1
+                                play string sound "SCRIPT3_HEPIC_HURRICANELIGHTNING1"
+                                stop sound "HURRICANELIGHTNING2"
+                                wait 2 seconds
+                                wait 1 second
+                                set fade in time 1
+                                invoke oHurricane EPIC_WONDER_STAGE_START_BEAM
+                                oVisual3 = create visual effect VISUAL_EFFECT_HURRICANE_BEAM at {HurricanePos} time -1
+                                play string sound "SCRIPT2_EEPIC_BEAMOFLIGHTSTART1"
+                                stop sound "SCRIPT3_HEPIC_SYNTH2"
+                                stop sound "SCRIPT3_HEPIC_SYNTH3"
+                                stop sound "SCRIPT1_VEPIC_BEAMOFLIGHTLOOP10"
+                                invoke oHurricane EPIC_WONDER_STAGE_END_BEAM
+                                stop music with fadetime 1
+                                start music "hurricane_music"
+                invoke oHurricane EPIC_CREATE_CLOUDS
+                invoke oHurricane EPIC_SET_CLOUDS_STORM
+                invoke oHurricane EPIC_ENTER_TORNADO
+                                wait 0.3 seconds
+                                invoke oHurricane EPIC_START_GROUND_SWIRL
+                invoke oHurricane EPIC_START_TOP_SWIRL
+                                stop visual effect oVisual3
+                                wait 9 seconds
+                                invoke oHurricane EPIC_MOVE_TORNADO
+                invoke oHurricane EPIC_CRUMBLE_BUILDINGS
+                invoke oHurricane EPIC_ENABLE_TORNADO_DESTRUCTION
+                                wait 28 seconds                                
+                invoke oHurricane EPIC_DISABLE_TORNADO_DESTRUCTION
+                invoke oHurricane EPIC_STOP_TORNADO
+                invoke oHurricane EPIC_EXIT_TORNADO
+                invoke oHurricane EPIC_CLEAR_CLOUDS
+                invoke oHurricane EPIC_END_TORNADO
+                delete oHurricane
+                                enable predefined sky "mainsky" time 5
+                                wait 5 seconds
+                                stop music with fadetime 2
+                                delete oHurricane
+                                invoke hEpic EPIC_WONDER_STAGE_LAST
+                                clear right clicked object
+                                clear right clicked position
+                                clear left clicked object
+                                clear left clicked position
+                oHurricane = 1
+                           elsif HurricaneHeld != Rock1 or bindable action BINDABLE_ACTION_TYPE_CANCEL_CURRENT_ACTION performed
+                                skip current cutscene
+                                stop visual effect HurricaneSeed
+                                delete Rock1
+                                stop spell oHurricane
+                                delete oHurricane
+                                wait 1 second 
+            end if
+                              until oHurricane == 1
+        end loop
+             end if
+       end if
+end loop
+
+end script HurricaneScript
+
+
+begin script HurricaneCinemaControl(oHurricane)
+          //oTown = get town with id 0
+          hEpic = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_HURRICANE at {playerTown} radius 300
+          hEpicFoc = marker at {hEpic}+{0,-0,0}
+          HurricanePos = marker at hand position
+          Hurricane = marker at future position of epic miracle oHurricane with time 0 seconds
+          CinemaFinish = 0
+          EpicZOffsetHur = marker at (EPIC_OFFSETZ_POS * {hEpic})
+start
+   if CinemaFinish == 0
+        begin cinema
+                           enable global influence
+            wait 2 seconds
+                                move camera focus to {HurricanePos} time 5
+                                move camera position to {HurricanePos} time 5
+            wait 2 seconds
+                                set fade red 255 green 255 blue 255 time 2
+            wait 2 seconds
+                                set fade in time 1
+                                set camera focus to {hEpicFoc}+{0,10,0}
+                                set camera position to {hEpic}+{EPIC_OFFSETX_POS * ROTATION_OF_EPIC/2, 10,EpicZOffsetHur}
+            wait 7 seconds
+                                move camera focus to {hEpic}+{0,30,0} time 13
+                                move camera position to {hEpic}+{EPIC_OFFSETX_POS * ROTATION_OF_EPIC/2,30,EpicZOffsetHur} time 13
+            wait 14 seconds
+                                move camera focus to {hEpic}+{0,140,3} time 1
+            wait 2 seconds
+                                set fade red 255 green 255 blue 255 time 1
+            wait 1 second
+                                set camera focus to {HurricanePos}
+                                set camera position to {HurricanePos}+{0,250,180}
+                set fade in time 1
+            wait 4 seconds
+                                set camera focus follow oHurricane offset {0,240,0}
+                                set camera position follow oHurricane offset {80,240,130}
+            wait 5 seconds
+                                set camera focus follow oHurricane
+                                set camera position follow oHurricane offset {40,100,60}
+            wait 6 seconds
+                                set camera position to {oHurricane}+{80,30,0}
+                                set camera focus to {oHurricane}+{10,30,0}
+            wait 4 seconds
+                                set camera focus follow oHurricane
+                                set camera position follow oHurricane offset {40,200,-150}
+            wait 5 seconds
+                                set camera focus follow oHurricane
+                                set camera position follow oHurricane offset {40,100,60}
+            wait 12 seconds
+                                disable global influence
+                           enable predefined sky "mainsky" time 5
+            wait 5 seconds
+                    end cinema
+        CinemaFinish = 1
+    else
+        CinemaFinish = 0
+    end if
+        until CinemaFinish == 1 or key KB_ESC down
+
+    if key KB_ESC down
+  skip current cutscene
+   wait 2 seconds
+    end if                
+end script HurricaneCinemaControl
+
+begin script VolcanoScript
+
+//oTown = 0
+vEpic = 0
+oVolcano = 0
+
+// Visual effects for the Volcano - 1 to 12
+oVisual = 0
+oVisual2 = 0
+oVisual3 = 0
+oVisual3Pos = 0
+oVisual4 = 0
+oVisual5 = 0
+oVisual6 = 0
+oVisual7 = 0
+oVisual8 = 0
+oVisual9 = 0
+oVisual10 = 0
+oVisual11 = 0
+oVisual12 = 0
+
+// Visual effects for the Volcano - 13 to 26
+oVisual13 = 0
+oVisual14 = 0
+oVisual15 = 0
+oVisual16 = 0
+oVisual17 = 0
+oVisual18 = 0
+oVisual19 = 0
+oVisual20 = 0
+oVisual21 = 0
+oVisual22 = 0
+oVisual23 = 0
+oVisual24 = 0
+oVisual25 = 0
+oVisual26 = 0
+
+// Unused variables
+VolcanoPos = 0
+VolcanoMixer = 0
+VolcanoWorldPos = 0
+Sound = 0
+
+// Volcano Epic Positions and focuses
+vEpicFoc = 0
+vEpicPos = 0
+RelativePos = 0
+Cam = marker at camera position
+PosX = 0
+PosZ = 0
+
+// Front of Wonder Pos
+WonderPos = 0
+
+start
+//oTown = get town with id 0
+WonderPos = 0
+
+begin loop
+    oVolcano = 0
+    vEpic = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_VOLCANO at {playerTown} radius 300
+        PosX = marker at {vEpic}+{-20,0,0}
+        PosZ = marker at (vEpic * {0,0,10})
+        RelativePos = marker at get world position from vEpic to {vEpic}
+        vEpicPos = marker at {vEpic}+(vEpicPos * {RelativePos})
+        vEpicFoc = marker at {vEpic}+{0,-0,0}
+    if vEpic left clicked or vEpic right clicked
+        wait 1 second
+        if wonder in hand
+        begin loop
+            if wonder fire near hand position radius 0.5
+                                VolcanoPos = marker at hand position
+           oVolcano = create volcano at {VolcanoPos} player 0
+                            run background script VolcanoCinemaControl
+                                wait 5 seconds
+                                start music "norse_chant_vocal"
+                                play string sound "SCRIPT1_VEPIC_SYNTH2"
+                                wait 5 seconds
+                                invoke vEpic EPIC_WONDER_STAGE_1
+                                play string sound "SCRIPT1_SEPIC_SYNTH2"
+                                play string sound "SCRIPT1_VEPIC_FLAMETHROWERWHOOSH4"
+                                wait 4 seconds
+                                play string sound "SCRIPT1_SEPIC_SYNTH2"
+                                play string sound "SCRIPT1_VEPIC_FLAMETHROWERWHOOSH2"
+                                invoke vEpic EPIC_WONDER_STAGE_2
+                                wait 4.2 seconds
+                                play string sound "SCRIPT1_SEPIC_SYNTH2"
+                                play string sound "SCRIPT1_VEPIC_FLAMETHROWERWHOOSH1"
+                                invoke vEpic EPIC_WONDER_STAGE_3
+                                invoke vEpic EPIC_WONDER_STAGE_4
+                                wait 2.5 seconds
+                                invoke vEpic EPIC_WONDER_STAGE_5
+                                invoke vEpic EPIC_WONDER_STAGE_6
+                                invoke vEpic EPIC_WONDER_STAGE_7
+                                wait 2 seconds
+                                invoke vEpic EPIC_WONDER_STAGE_8
+                                invoke vEpic EPIC_WONDER_STAGE_9
+                                invoke vEpic EPIC_WONDER_STAGE_10
+                                invoke vEpic EPIC_WONDER_STAGE_START_BEAM
+                                wait 1.5 seconds
+                                oVisual = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM on vEpic time 1
+                                oVisual20 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM on vEpic time 1
+                                oVisual2 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_UP at {vEpic} time 1
+                                oVisual16 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_UP at {vEpic}+{0,5,0} time 1
+                                play string sound "SCRIPT1_VEPIC_EXPLOSION3"
+                                stop sound "SCRIPT1_SEPIC_SYNTH2"
+                                wait 2 seconds
+                                play string sound "SCRIPT1_VEPIC_DECAYCHARGESPELL"
+                                wait 1 second
+                                play string sound "SCRIPT1_VEPIC_DECAYCHARGESPELL"
+                                wait 2 seconds
+                                stop visual effect oVisual
+                                stop visual effect oVisual2
+                                stop music with fadetime -5
+                                wait 2 seconds
+                                oVisual3 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM at {VolcanoPos} time -1
+                                play string sound "SCRIPT1_VEPIC_BEAMOFLIGHTSTART1"
+                                invoke oVolcano EPIC_START_SWIRL
+                                wait 1 second
+                                oVisual4 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,200,0} time 1
+                                oVisual10 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,205,0} time 1
+                                play string sound "SCRIPT1_VEPIC_DECAYCHARGESPELL"
+                                wait 2 seconds
+                                oVisual5 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,200,0} time 1
+                                oVisual11 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,205,0} time 1
+                                play string sound "SCRIPT1_VEPIC_DECAYCHARGESPELL"
+                                wait 2 seconds
+                                oVisual6 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,200,0} time 1
+                                oVisual12 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,205,0} time 1
+                                play string sound "SCRIPT1_VEPIC_DECAYCHARGESPELL"
+                                invoke oVolcano EPIC_START_SHOCKWAVE
+                                start music "volcano_music"
+                                wait 1 second
+                invoke oVolcano EPIC_START_RISING
+                                invoke oVolcano EPIC_START_SMOKE
+                                wait 1 second
+                                oVisual7 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,200,0} time 1
+                                oVisual13 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,205,0} time 1
+                                play string sound "SCRIPT1_VEPIC_DECAYCHARGESPELL"
+                                wait 2 seconds
+                                oVisual7 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,200,0} time 1
+                                oVisual13 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,205,0} time 1
+                                play string sound "SCRIPT1_VEPIC_DECAYCHARGESPELL"
+                                wait 2 seconds
+                                oVisual8 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,200,0} time 1
+                                oVisual14 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,205,0} time 1
+                                play string sound "SCRIPT1_VEPIC_DECAYCHARGESPELL"
+                                wait 2 seconds
+                                oVisual9 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,200,0} time 1
+                                oVisual15 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,205,0} time 1
+                                play string sound "SCRIPT1_VEPIC_DECAYCHARGESPELL"
+                wait 2 seconds
+                                oVisual21 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,200,0} time 1
+                                oVisual22 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,205,0} time 1
+                                play string sound "SCRIPT1_VEPIC_DECAYCHARGESPELL"
+                                wait 3 seconds
+                                oVisual25 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,200,0} time 1
+                                oVisual26 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,205,0} time 1
+                                play string sound "SCRIPT1_VEPIC_DECAYCHARGESPELL"
+                                play string sound "SCRIPT1_VEPIC_EXPLOSION3"
+                                play string sound "SCRIPT1_VEPIC_VOLCANOSHOCKWAVHIGHPITCHED"
+                                invoke oVolcano EPIC_START_EXPLOSION
+                                invoke oVolcano EPIC_FLASH
+                                invoke oVolcano EPIC_FLASH
+                                oVisual16 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,200,0} time 1
+                                oVisual17 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,205,0} time 1
+                                play string sound "SCRIPT1_VEPIC_DECAYCHARGESPELL"
+                                wait 2 seconds
+                                oVisual23 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,200,0} time 1
+                                oVisual24 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,205,0} time 1
+                                play string sound "SCRIPT1_VEPIC_DECAYCHARGESPELL"
+                                wait 3.5 seconds
+                                stop visual effect oVisual3
+                                play string sound "SCRIPT1_VEPIC_EXPLOSION3"
+                                invoke oVolcano EPIC_START_EXPLOSION
+                                invoke oVolcano EPIC_FLASH
+                                invoke oVolcano EPIC_FLASH
+                invoke oVolcano EPIC_START_BUBBLING_LAVA
+                invoke oVolcano EPIC_START_LAVA
+                                wait 6 seconds
+                invoke oVolcano EPIC_START_ASH
+                invoke oVolcano EPIC_START_SMOKE
+                                play string sound "SCRIPT1_VEPIC_EXPLOSION3"
+                                invoke oVolcano EPIC_START_EXPLOSION
+                                invoke oVolcano EPIC_FLASH
+                                invoke oVolcano EPIC_FLASH
+                                wait 0.2 seconds
+                invoke oVolcano EPIC_START_ROCK_SHOWER
+                invoke oVolcano EPIC_SPAWN_ROCKS
+                                wait 4 seconds
+                                play string sound "SCRIPT1_VEPIC_EXPLOSION3"
+                                invoke oVolcano EPIC_START_EXPLOSION
+                                invoke oVolcano EPIC_FLASH
+                                invoke oVolcano EPIC_FLASH
+                                wait 4.2 seconds
+                                play string sound "SCRIPT1_VEPIC_EXPLOSION3"
+                                invoke oVolcano EPIC_START_EXPLOSION
+                                invoke oVolcano EPIC_FLASH
+                                invoke oVolcano EPIC_FLASH
+                                wait 5 seconds
+                                play string sound "SCRIPT1_VEPIC_EXPLOSION3"
+                                invoke oVolcano EPIC_START_EXPLOSION
+                                invoke oVolcano EPIC_FLASH
+                                invoke oVolcano EPIC_FLASH
+                                enable predefined sky "mainsky" time 5
+                                wait 5 seconds
+                                play string sound "SCRIPT1_VEPIC_EXPLOSION3"
+                                invoke oVolcano EPIC_START_EXPLOSION
+                                invoke oVolcano EPIC_FLASH
+                                invoke oVolcano EPIC_FLASH
+                                wait 2 seconds
+                                play string sound "SCRIPT1_VEPIC_EXPLOSION3"
+                                invoke oVolcano EPIC_START_EXPLOSION
+                                invoke oVolcano EPIC_FLASH
+                                invoke oVolcano EPIC_FLASH
+                                play string sound "SCRIPT1_VEPIC_EXPLOSION3"
+                                invoke oVolcano EPIC_START_EXPLOSION
+                                invoke oVolcano EPIC_FLASH
+                                invoke oVolcano EPIC_FLASH
+                                wait 2 seconds
+                                play string sound "SCRIPT1_VEPIC_EXPLOSION3"
+                wait 28 seconds
+                invoke oVolcano EPIC_STOP_ASH
+                invoke oVolcano EPIC_STOP_SMOKE
+                invoke oVolcano EPIC_END_ROCK_SHOWER
+                invoke oVolcano EPIC_START_FALLING
+                invoke oVolcano EPIC_STOP_BUBBLING_LAVA
+                wait 10 seconds
+                invoke oVolcano EPIC_STOP_LAVA
+                wait 5 seconds
+                delete oVolcano
+                                invoke vEpic EPIC_WONDER_STAGE_LAST
+                                clear right clicked object
+                                clear right clicked position
+                                clear left clicked object
+                                clear left clicked position
+                               oVolcano = 1
+                               else oVolcano = 0
+                               end if
+                              until oVolcano == 1
+             end loop
+        end if
+    end if
+if oVolcano == 1
+release loop
+end if
+end loop
+end script VolcanoScript
+
+begin script VolcanoCinemaControl
+          //oTown = get town with id 0
+          vEpic = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_VOLCANO at {playerTown} radius 300
+          vEpicFoc = marker at {vEpic}+{0,-0,0}
+          VolcanoPos = marker at hand position
+          oVolcano = 0
+          Volcano = marker at future position of epic miracle oVolcano with time 0 seconds
+          CinemaFinish = 0
+          EpicZOffsetVol = marker at (EPIC_OFFSETZ_POS * {vEpic})
+start
+   if CinemaFinish == 0
+          oVolcano = get spell EPIC_WONDER_NUMBER_VOLCANO at {VolcanoPos} radius 5
+               begin cinema
+                 wait 2 seconds
+               move camera focus to {VolcanoPos} time 5
+               move camera position to {VolcanoPos} time 5
+                 wait 2 seconds
+               set fade red 255 green 255 blue 255 time 1
+                 wait 1 second
+               play string sound "SCRIPT1_VEPIC_FLAMETHROWERWHOOSH4"
+               set fade in time 1
+               enable fixed camera rotation at {vEpic}
+               start music "norse_chant_vocal"
+               play string sound "SCRIPT1_VEPIC_EPICTOWERELECTRIC2"
+               set camera focus to {vEpicFoc}+{0,10,0}
+               set camera position to {vEpic}+{EPIC_OFFSETX_POS * ROTATION_OF_EPIC/2,10, EpicZOffsetVol}
+                 wait 7 seconds
+               move camera focus to {vEpic}+{0,30,0} time 13
+               move camera position to {vEpic}+{EPIC_OFFSETX_POS * ROTATION_OF_EPIC/2,30, EpicZOffsetVol} time 13 
+                 wait 1.5 seconds
+               enable predefined sky "volcano" time 5
+                 wait 10.5 seconds
+               move camera focus to {vEpic}+{0,170,5} time 1
+               disable fixed camera rotation at {vEpic}
+                 wait 2 seconds
+               set fade red 255 green 255 blue 255 time 1
+                 wait 1 second
+               set camera focus to {VolcanoPos}+{0,50,0}
+               set camera position to {VolcanoPos}+{0,90,80}
+               set fade in time 3
+                 wait 2 seconds
+               move camera focus to {VolcanoPos} time 5
+               stop music with fadetime -5
+                 wait 8 seconds
+               set camera roll 30 time -1
+               set camera position to {VolcanoPos}+{8,180,46}
+                 wait 6 seconds
+               set camera roll 0 time -10
+               set camera focus to {VolcanoPos}+{0,60,0}
+               set camera position to {VolcanoPos}+{0,60,43}
+        wait 3.5 seconds
+               shake camera strength 6.3
+                 wait 3.5 seconds
+               set camera focus to {VolcanoPos}
+               set camera position to {VolcanoPos}+{0,90,40}
+                 wait 4.5 seconds
+               stop camera shake
+               set camera focus to {VolcanoPos}+{30,0,0}
+               set camera position to {VolcanoPos}+{0,50,40}
+                 wait 7.5 seconds
+               set camera position to {VolcanoPos}+{0,120,120}
+               set camera roll 0 time -100
+                 wait 9 seconds
+               enable predefined sky "mainsky" time 5
+                 wait 5 seconds
+               end cinema
+                     clear right clicked object
+                     clear right clicked position
+                     clear left clicked object
+                     clear left clicked position
+               CinemaFinish = 1
+               else
+               CinemaFinish = 0
+               end if
+             until CinemaFinish == 1 or key KB_ESC down
+
+    if key KB_ESC down
+  skip current cutscene
+   wait 2 seconds
+    end if
+end script VolcanoCinemaControl
+
+// The Earthquake Epic Script - Unleashes a devastating earthquake that rips through towns.
+begin script EarthquakeScript
+
+// Other variables
+//oTown = 0
+eEpic = 0
+
+// Visual effects for Earthquake
+oVisual = 0
+oVisual2 = 0
+oVisual3 = 0
+Viz = 0
+Viz2 = 0
+Viz3 = 0
+Viz4 = 0
+Vis = 0
+
+// Earthquake variables
+oEarthquake = 0
+EarthquakePos = 0
+Rock1 = 0
+EarthquakeSeed = 0
+EarthquakeHeld = 0
+Hand = marker at hand position
+
+// Camera variables to put cam directly in front of wonder
+RelativePos = 0
+eEpicPos = 0
+eEpicFoc = 0
+
+start
+
+//oTown = get town with id 0
+
+begin loop
+    oEarthquake = 0
+    eEpic = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_EARTHQUAKE at {playerTown} radius 300
+        RelativePos = marker at get world position from eEpic to {eEpic}
+        eEpicPos = marker at {eEpic}+(eEpic * {RelativePos}+{15,10,eEpic})
+        eEpicFoc = marker at {eEpic}+{0,-0,0}
+      if eEpic exists and SCRIPT_OBJECT_PROPERTY_TYPE_BUILT_PERCENTAGE of eEpic == 1.0
+        wait 1 second
+        // If Earthquake Wonder Tower clicked, remove the miracle from the hand and replace
+        // with a replica quickly.
+    if eEpic left clicked and wonder in hand or eEpic right clicked and wonder in hand
+        empty player hand
+         wait 0.2 seconds
+         Rock1 = create SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_BOULDER_ROUND at hand position
+         EarthquakeSeed = create visual effect VISUAL_EFFECT_EARTHQUAKE_SEED on Rock1 time -1
+         set Rock1 in player 0 hand
+         EarthquakeHeld = get object held
+         EarthquakeHeld = Rock1
+        wait 1 second
+        begin loop
+                        // If action button is clicked, then delete the replica and VFX,
+                        // and start the Earthquake process.
+            if bindable action BINDABLE_ACTION_TYPE_ACTION performed
+                                EarthquakePos = marker at hand position
+                oEarthquake = create earthquake start hand position end hand position player 0
+                                clear player 0 spell charging
+                                stop visual effect EarthquakeSeed
+                                delete Rock1
+                        // Standard Earthquake Wonder and Miracle Procedure                            
+                          begin cinema
+                                enable global influence
+                                wait 2 seconds
+                                move camera focus to {oEarthquake} time 5
+                                move camera position to {oEarthquake} time 5
+                                wait 2 seconds
+                                set fade red 255 green 255 blue 255 time 1
+                                wait 1 second
+                                play string sound "SCRIPT1_VEPIC_FLAMETHROWERWHOOSH4"
+                                set fade in time 1
+                                start music "greek_chant"
+                                set camera focus to {eEpicFoc}+{0,10,0}
+                                set camera position to {eEpicPos}
+                                play string sound "BEAMOFLIGHTLOOP1"
+                                wait 5 seconds
+                                invoke eEpic EPIC_WONDER_STAGE_1
+                                play string sound "SCRIPT2_EEPIC_SYNTH3"
+                                wait 2.5 seconds
+                                move camera focus to {eEpic}+{0,30,0} time 13
+                                move camera position to {eEpicPos}+{0,20,0} time 13
+                                wait 2 seconds
+                                play string sound "SCRIPT2_EEPIC_SYNTH3"
+                                invoke eEpic EPIC_WONDER_STAGE_2
+                                wait 1 second
+                                enable predefined sky "earthquake" time 5
+                                wait 2 seconds
+                                invoke eEpic EPIC_WONDER_STAGE_3
+                                invoke eEpic EPIC_WONDER_STAGE_4
+                                invoke eEpic EPIC_WONDER_STAGE_5
+                                invoke eEpic EPIC_WONDER_STAGE_6
+                                play string sound "BEAMOFLIGHTLOOP1"
+                                wait 2 seconds
+                                play string sound "BEAMOFLIGHTLOOP1"
+                                play string sound "SCRIPT2_EEPIC_SYNTH2"
+                                invoke eEpic EPIC_WONDER_STAGE_7
+                                invoke eEpic EPIC_WONDER_STAGE_8
+                                invoke eEpic EPIC_WONDER_STAGE_9
+                                invoke eEpic EPIC_WONDER_STAGE_10
+                                invoke eEpic EPIC_WONDER_STAGE_START_BEAM
+                                invoke eEpic EPIC_START_CASTING
+                                invoke eEpic EPIC_PULSE_UP
+                                wait 2.5 seconds
+                                move camera focus to {eEpic}+{0,140,0} time 1
+                                oVisual = create visual effect VISUAL_EFFECT_EARTHQUAKE_BEAM on eEpic time 1
+                                oVisual2 = create visual effect VISUAL_EFFECT_EARTHQUAKE_FLARE at {eEpic} time 1
+                                play string sound "SCRIPT3_HEPIC_HURRICANELIGHTNING1"
+                                wait 2 seconds
+                                set fade red 255 green 255 blue 255 time 2
+                                wait 2 seconds
+                                stop visual effect oVisual
+                                stop visual effect oVisual2
+                                set camera focus to {oEarthquake}
+                                set camera position to {oEarthquake}+{5,60,-20}
+                                set fade in time 2
+                                wait 2 seconds
+                                oVisual3 = create visual effect VISUAL_EFFECT_EARTHQUAKE_BEAM at {EarthquakePos} time -15
+                                stop sound "SCRIPT2_EEPIC_SYNTH3"
+                                stop sound "BEAMOFLIGHTLOOP1"
+                                play string sound "SCRIPT2_EEPIC_BEAMOFLIGHTSTART1"
+                                invoke oEarthquake EPIC_START_CASTING
+                                invoke oEarthquake EPIC_WONDER_STAGE_END_BEAM
+                                wait 0.2 seconds
+                                invoke oEarthquake EPIC_PULSE_DOWN
+                                stop music with fadetime 1
+                                wait 0.5 seconds
+                                shake camera strength 7.2
+                                Viz = create visual effect VISUAL_EFFECT_EARTHQUAKE_ROCKS at {oEarthquake}+{0,3,0} time -1
+                                Viz2 = create visual effect VISUAL_EFFECT_EARTHQUAKE_FLARE at {oEarthquake}+{0,3,0} time -1
+                                start music "earthquake_music"
+                                enable oEarthquake physics tracking
+                                set oEarthquake physics balance 15
+                                set capture radius multiplier 1.5
+                  invoke oEarthquake EPIC_PULSE_DOWN
+                                wait 3 seconds
+                          invoke oEarthquake EPIC_START_SHIFTING
+                                invoke oEarthquake EPIC_START_SINKING
+                                invoke oEarthquake EPIC_START_CRACKING
+                          invoke oEarthquake EPIC_CRUMBLE_BUILDINGS     
+                                Viz3 = create visual effect VISUAL_EFFECT_EARTHQUAKE_BANG at {oEarthquake}+{0,3,0} time 1                        
+                                play string sound "SCRIPT2_EEPIC_EARTHQUAKECRACK"
+                                wait 2 seconds
+                                stop visual effect oVisual3
+                                stop visual effect Viz
+                                stop visual effect Viz2
+                                wait 1 second
+                                stop visual effect Viz3
+                                wait 1 second
+                play string sound "SCRIPT2_EEPIC_EARTHQSCREAM1"
+                                set camera focus follow oEarthquake offset {0,9,0}
+                                set camera position follow oEarthquake offset {0,13,-12}
+                                Viz4 = create visual effect VISUAL_EFFECT_EARTHQUAKE_DUST on oEarthquake time -1        
+                                wait 1 second
+                          invoke oEarthquake EPIC_START_STEAM
+                                invoke oEarthquake EPIC_PULSE_UP
+                                stop visual effect Viz4
+                                wait 2 seconds
+                play string sound "SCRIPT2_EEPIC_EARTHQSCREAM1"
+                                set camera focus follow oEarthquake offset {0,10,0}
+                                set camera position follow oEarthquake offset {14,15,4}
+                                wait 2 seconds
+                                set camera position to {oEarthquake}+{10,40,0}
+                                wait 2 seconds
+                                stop camera shake
+                                set camera focus follow oEarthquake offset {0,9,0}
+                                set camera position follow oEarthquake offset {0,13,-12}                                
+                                wait 4 seconds
+                                move camera focus to {oEarthquake}+{0,-8,0} time 10
+                                move camera position to {EarthquakePos}+{0,250,0} time 20
+                                wait 1.7 seconds
+                                stop sound "SCRIPT2_EEPIC_EARTHQUAKECRACK"
+                                wait 15 seconds
+                                enable predefined sky "mainsky" time 5
+                                wait 5 seconds
+                                    disable global influence
+                        end cinema
+             wait 55 seconds
+                invoke oEarthquake EPIC_START_CLOSING
+                invoke oEarthquake EPIC_ADD_NAVIGATION
+                wait 20 seconds
+                invoke oEarthquake EPIC_REMOVE_NAVIGATION
+                                invoke eEpic EPIC_WONDER_STAGE_LAST
+                                clear right clicked object
+                                clear right clicked position
+                delete oEarthquake
+                oEarthquake = 1
+                           elsif EarthquakeHeld != Rock1 or bindable action BINDABLE_ACTION_TYPE_CANCEL_CURRENT_ACTION performed
+                                skip current cutscene
+                                stop visual effect EarthquakeSeed
+                                delete Rock1
+                                stop spell oEarthquake
+                                delete oEarthquake
+                        else
+                        oEarthquake = 0
+            end if
+            until oEarthquake == 1 or key KB_ESC down
+          end loop
+        end if
+        end if
+end loop
+
+end script EarthquakeScript
+
+begin script SirenScript
+
+// Other variables
+//oTown = get town with id 0
+oVisual = 0
+oVisual2 = 0
+SirenSeed = 0
+Rock1 = 0
+SirenInf = 0
+
+// Siren Variables//
+
+// SirenSpell - the argument on the right of the equals sign is what SirenSpell will equal,
+// and what is declared on the right will be the SirenSpell.
+SirenSpell = 0
+
+// oSiren - variable used for determining if the Siren has finished.
+oSiren = 0
+
+// SirenHeld - variable used to determine what is being held
+SirenHeld = 0
+
+// SirenPos - variable declaring the firing position of the Siren.
+SirenPos = 0
+
+// StarNymph - declares the object Nymph as a plot item to the Siren.
+StarNymph = 0
+
+// StarVillager - applies similar to StarNymph.
+StarVillager = 0
+
+// StarGatehouse - declares the star gatehouse closest to the Siren and opens for converted villagers.
+StarGatehouse = 0
+
+// Siren Wonder Tower Variables
+sEpic = 0
+sEpicPos = 0
+sEpicFoc = 0
+RelativePos = 0
+Epic = 0
+
+start
+begin loop
+    oSiren = 0
+        SirenSpell = 0
+        SirenHeld = get object held
+        // sEpic - straight forward, looking for the epic tower
+    sEpic = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_SIREN at {playerTown} radius 300
+        RelativePos = marker at get world position from sEpic to {sEpic}
+        sEpicPos = marker at {sEpic}+(sEpic * {RelativePos}+{15,5,sEpic})
+        sEpicFoc = marker at {sEpic}+{0,-0,0}
+      if sEpic exists and SCRIPT_OBJECT_PROPERTY_TYPE_BUILT_PERCENTAGE of sEpic == 1.0
+        wait 1 second
+        // If the Siren Tower is clicked, empty the hand of the wonder's epic and 
+        // replace with a replica quickly.
+        if sEpic right clicked and wonder in hand or sEpic left clicked and wonder in hand
+        empty player hand
+         wait 0.2 seconds
+         Rock1 = create MOBILESTATIC BOULDERROUND at hand position
+         SirenSeed = create visual effect VISUAL_EFFECT_SIREN_SEED on Rock1 time -1
+         set Rock1 in player 0 hand
+         SirenHeld = Rock1
+         Epic = get spell EPIC_WONDER_NUMBER_SIREN at {sEpic} radius 0.5
+             wait 1 second
+        begin loop
+              // If the action button is clicked, then stop the visual effect on the replica and delete it,
+              // thus, making the created siren look like it's from the wonder.
+              if bindable action BINDABLE_ACTION_TYPE_ACTION performed
+                SirenPos = marker at hand position+{0,-2,0}
+                SirenSpell = create siren at {SirenPos} player 0
+                StarGatehouse = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE at {SirenSpell} radius 500
+                  if StarGatehouse not exists
+                StarGatehouse = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {SirenSpell} radius 500
+                  end if
+                     clear player 0 spell charging
+                     stop visual effect SirenSeed
+                     delete Rock1
+                  // Standard Siren Wonder and Miracle procedure.
+             begin cinema
+                                enable global influence
+                                wait 2 seconds
+                                move camera focus to hand position time 4
+                                move camera position to hand position time 4
+                                wait 2 seconds
+                                set fade red 255 green 255 blue 255 time 2
+                                wait 3 seconds
+                                play string sound "SCRIPT4_SEPIC_FLAMETHROWERWHOOSH4"
+                                set fade in time 1
+                                start music "japanese_chant"
+                                set camera focus to {sEpicFoc}+{0,5,0}
+                                set camera position to {sEpicPos}
+                                wait 3 seconds
+                                move camera focus to {sEpic}+{0,35,0} time 13
+                                move camera position to {sEpicPos}+{0,30,0} time 13
+                                wait 3 seconds
+                                stop visual effect oVisual
+                                invoke sEpic EPIC_WONDER_STAGE_1
+                                invoke sEpic EPIC_WONDER_STAGE_2
+                                play string sound "SCRIPT4_SEPIC_EXPLOSION2"
+                                wait 3 seconds
+                                invoke sEpic EPIC_WONDER_STAGE_3
+                                invoke sEpic EPIC_WONDER_STAGE_4
+                                play string sound "SCRIPT4_SEPIC_EXPLOSION2"
+                                enable predefined sky "siren" time 5
+                                wait 3 seconds
+                                invoke sEpic EPIC_WONDER_STAGE_5
+                                invoke sEpic EPIC_WONDER_STAGE_6
+                                invoke sEpic EPIC_WONDER_STAGE_7
+                                wait 1 second
+                                play string sound "SCRIPT4_SEPIC_EPICTOWERELECTRIC2"
+                                invoke sEpic EPIC_WONDER_STAGE_8
+                                invoke sEpic EPIC_WONDER_STAGE_9
+                                invoke sEpic EPIC_WONDER_STAGE_10
+                                invoke sEpic EPIC_WONDER_STAGE_START_BEAM
+                                wait 4 seconds
+                                move camera focus to {sEpic}+{0,170,4} time 1
+                                oVisual = create visual effect VISUAL_EFFECT_WONDER_SIREN_BEAM at {sEpic}+{0,40,0} time -1
+                                stop sound "SCRIPT4_SEPIC_EPICTOWERELECTRIC2"
+                                play string sound "SCRIPT4_SEPIC_EXPLOSION3"
+                                wait 2 seconds
+                                set fade red 255 green 255 blue 255 time 1
+                                wait 1.5 seconds
+                                invoke sEpic EPIC_WONDER_STAGE_END_BEAM
+                                set fade in time 1
+                                set camera focus to {SirenPos}
+                                set camera position to {SirenPos}+{0,60,40}
+                      wait 2.2 seconds
+                                invoke SirenSpell EPIC_BEAM_DOWN
+                                play string sound "SCRIPT4_SEPIC_BEAMOFLIGHTSTART1"
+                                stop music with fadetime -2
+                      invoke SirenSpell EPIC_MOVE_VILLAGERS
+                                play string sound "SCRIPT4_SEPIC_BEAMOFLIGHTLOOP7"
+                                wait 2 seconds
+                                stop visual effect oVisual2
+                                wait 4 seconds
+                      invoke SirenSpell EPIC_SHOW_SIREN
+                                wait 1.5 seconds
+                           stop sound "SCRIPT4_SEPIC_BEAMOFLIGHTLOOP7"
+        start music "sirensong"
+        set camera focus to {SirenPos}+{0,0,0}
+        set camera position to {SirenPos}+{0,20,3}
+                                    move camera position to {SirenPos}+{0,50,3} time 7
+        wait 7 seconds
+                    say "BW2T_SCRIPT_SIREN_SONG_10"
+                set camera focus to {SirenPos}+{0,35,0}
+        set camera position to {SirenPos}+{25,35,3}
+        wait 4 seconds
+                                StarVillager = get living villager at {SirenSpell} radius 150
+                                StarVillager = get star villager near {SirenSpell} radius 150
+                                StarNymph = get SirenSpell star EPIC_OBJECT_NYMPH
+                wait 6.5 seconds
+                say "BW2T_SCRIPT_SIREN_SONG_20"
+        invoke SirenSpell EPIC_SUMMON_NYMPHS
+        invoke SirenSpell EPIC_ADD_NYMPHS
+        set camera position to {SirenPos}+{-35,20,10}
+        wait 7 seconds
+        set camera position to {SirenPos}+{16,30,6}
+                wait 2 seconds
+                say "BW2T_SCRIPT_SIREN_SONG_30"
+                move camera position to {SirenPos}+{16,20,16} time 7
+                set camera focus to {SirenPos}+{0,30,0}
+        wait 4 seconds
+        set camera position to {SirenPos}+{-50,40,50}
+                wait 1 second
+                move camera position to {SirenPos}+{-30,40,60} time 6
+        wait 3 seconds
+                say "BW2T_SCRIPT_SIREN_SONG_40"
+        wait 8 seconds
+            invoke SirenSpell EPIC_TRIGGER_NYMPHS_GESTURE
+                wait 3 seconds
+            invoke SirenSpell EPIC_TRIGGER_NYMPHS
+                                    wait 1 second
+                                move camera focus to {StarVillager} time 5
+                                set camera position to {SirenPos}+{5,35,-25}
+                                    wait 7 seconds
+                  set camera position to {StarVillager}+{6,7,5}
+                                say "BW2T_SCRIPT_SIREN_SONG_50"
+                    wait 5.5 seconds
+                  move camera position to {StarVillager}+{12,7,5} time 8
+                  move camera focus to {StarVillager}-{8,-7,5} time 8
+                                say "BW2T_SCRIPT_SIREN_SONG_60"
+                                    wait 8 seconds
+                   move camera position to {SirenPos}+{5,7,-35} time 8
+                    wait 10 seconds
+                invoke SirenSpell EPIC_REMOVE_SIREN
+                                set StarVillager player 0
+                                // Set the StarVillagers home position then open the nearest gatehouse to let them get there.
+                                set StarVillager home position {playerTown}
+                                set gate StarGatehouse open
+                                // These states are set so that the villagers don't get stuck, and are directed to do something else.
+                                state StarVillager VILLAGER_SUBSTATE_HUG_TREE
+                                wait 0.2 seconds
+                                state StarVillager VILLAGER_SUBSTATE_GO_HOME
+                                set villager StarVillager default speed to SCRIPT_VILLAGER_DEFAULT_SPEED_RUNNING
+                                play string sound "SCRIPT4_SEPIC_SIRENDISAPPEAR"
+                                set camera focus to {SirenPos}
+                                set camera position to {SirenPos}+{10,15,40}
+                                wait 5 seconds
+                                enable predefined sky "ogam" time 5
+                  end cinema
+                                wait 4 seconds
+                                move StarVillager position to {playerTown}
+                                invoke SirenSpell EPIC_SHUT_DOWN_BEAM
+                                invoke SirenSpell EPIC_END_SPELL
+                                wait 1 second
+                                invoke sEpic EPIC_WONDER_STAGE_LAST
+                                stop visual effect oVisual
+                                disable global influence
+                                clear right clicked object
+                                clear right clicked position
+                                delete SirenSpell
+                                delete Epic
+                                oSiren = 0
+                           elsif SirenHeld != Rock1 or bindable action BINDABLE_ACTION_TYPE_CANCEL_CURRENT_ACTION performed
+                                stop visual effect SirenSeed
+                                delete Rock1
+                                stop spell SirenSpell
+                                delete SirenSpell
+                                wait 1 second
+                           else
+                                oSiren = 1                                
+                                end if
+                        until oSiren == 0
+                    end loop
+             end if
+       end if
+end loop
+end script SirenScript

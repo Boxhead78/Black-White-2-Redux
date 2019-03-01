@@ -1,0 +1,153 @@
+///////////////////////////////////////////////////////////////////////////////
+//    Land 8 Music Manager
+//    ~~~~~~~~~~~~~~~~~~~~~~
+//
+//    Start date:        01.06.2018            By:    Boxhead
+//    Update date:        01.06.2018            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+define script LC8_MusicManager
+
+run script LC8_MusicManager
+
+begin script LC8_MusicManager
+
+    Number = 0
+    NumberOfPlatoons = 0
+    Platoon = 0
+    land11mixer = 0
+    MusicIsRunning = 0
+
+    Counter = 0
+    Town_ID[7]
+
+start
+
+wait until LC8_LargeSiegeOver == 1
+
+begin loop
+
+    while Counter > 6
+        Counter = 0
+    end while
+
+    Town_ID[Counter] = get town with id Counter
+
+    if MusicIsRunning == 0
+        if PLAYER of Town_ID[Counter] == 0
+            Platoon = 0
+            NumberOfPlatoons = 0
+            Platoon = get platoon of player 1 nearest {Town_ID[Counter]} radius 250
+            NumberOfPlatoons = get number of platoon of player 1 at {Town_ID[Counter]} radius 250
+
+            if Platoon exists and get number of villagers in platoon Platoon > 100
+                MusicIsRunning = 1
+                Number = number from 1 to 3
+                start dynamic music
+                set dynamic music "small" loop -1 urgent
+                wait 20 seconds
+                if Number == 1
+                    set dynamic music "smallevent4" loop 0 urgent
+                    wait 8 seconds
+                    set dynamic music "medium" loop -1
+
+                elsif Number == 2
+                    set dynamic music "large" loop -1
+
+                elsif Number == 3
+                    set dynamic music "large" loop -1
+                    wait 45 seconds
+                    set dynamic music "medium" loop -1
+
+                end if
+            elsif NumberOfPlatoons >= 4
+                MusicIsRunning = 1
+                Number = number from 1 to 3
+                start dynamic music
+                set dynamic music "small" loop -1 urgent
+                wait 20 seconds
+                if Number == 1
+                    set dynamic music "smallevent4" loop 0 urgent
+                    wait 8 seconds
+                    set dynamic music "medium" loop -1
+
+                elsif Number == 2
+                    set dynamic music "large" loop -1
+
+                elsif Number == 3
+                    set dynamic music "large" loop -1
+                    wait 45 seconds
+                    set dynamic music "medium" loop -1
+
+                end if
+            end if
+
+        end if
+
+        if PLAYER of Town_ID[Counter] == 1
+            Platoon = 0
+            NumberOfPlatoons = 0
+            Platoon = get platoon of player 0 nearest {Town_ID[Counter]} radius 250
+            NumberOfPlatoons = get number of platoon of player 0 at {Town_ID[Counter]} radius 250
+
+            if Platoon exists and get number of villagers in platoon Platoon > 50
+                MusicIsRunning = 1
+                Number = number from 1 to 3
+                start dynamic music
+                set dynamic music "small" loop -1 urgent
+                wait 20 seconds
+                if Number == 1
+                    set dynamic music "smallevent4" loop 0 urgent
+                    wait 8 seconds
+                    set dynamic music "medium" loop -1
+
+                elsif Number == 2
+                    set dynamic music "large" loop -1
+
+                elsif Number == 3
+                    set dynamic music "large" loop -1
+                    wait 45 seconds
+                    set dynamic music "medium" loop -1
+
+                end if
+            elsif NumberOfPlatoons > 3
+                MusicIsRunning = 1
+                Number = number from 1 to 3
+                start dynamic music
+                set dynamic music "small" loop -1 urgent
+                wait 20 seconds
+                if Number == 1
+                    set dynamic music "smallevent4" loop 0 urgent
+                    wait 8 seconds
+                    set dynamic music "medium" loop -1
+
+                elsif Number == 2
+                    set dynamic music "large" loop -1
+
+                elsif Number == 3
+                    set dynamic music "large" loop -1
+                    wait 45 seconds
+                    set dynamic music "medium" loop -1
+
+                end if
+            end if
+
+        end if
+    end if
+
+    if MusicIsRunning == 1
+        MusicIsRunning = 0
+        wait 175 seconds
+        land11mixer = create mixer
+        set mixer land11mixer channel AUDIO_MIXER_CHANNEL_MUSIC to 0.0 with fadetime 10
+        wait 10 seconds 
+        stop dynamic music
+        destroy mixer land11mixer with fadetime 3
+        wait number from 250 to 400 seconds
+    end if
+
+    Counter++
+
+end loop
+
+end script LC8_MusicManager

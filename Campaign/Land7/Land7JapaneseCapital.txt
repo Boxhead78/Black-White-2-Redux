@@ -1,0 +1,2946 @@
+///////////////////////////////////////////////////////////////////////////////
+//    Land 7 Japanese-Strategy
+//    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//    Start date:        02.03.18            By: Boxhead
+//    Update date:    08.03.18            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+define script LC7_Japanese_Capital_Impressiveness
+define script LC7_TownConversion
+define script LC7_Tribute
+define script LC7_GatehouseManager
+define script LC7_Speeches
+define script LC7_Japanese_Capital
+define script LC7_AttackNearestTownTimer
+define script LC7_DefendPlatoons
+define script HurricaneResourceManager
+define script LC7_LargeSiegeScript
+define script LC7_LargeSiegePlatoonManager
+define script LC7_LargeSiegeMusicManager
+define script LC7_JapaneseCapitalVillagerManager
+define script LC7_JapaneseTown1VillagerManager
+define script LC7_JapaneseTown2VillagerManager
+define script LC7_JapaneseCapitalRessourceManager
+define script LC7_JapaneseTown1RessourceManager
+define script LC7_JapaneseTown2RessourceManager
+define script LC7_GetNearestSettlement
+define script LC7_PlatoonBehaivors
+define script DisableLocalPlatoonResponse
+
+begin script LC7_Japanese_Capital_Impressiveness
+
+    Threshold = 0
+
+start
+
+    Threshold = get town MinorTown1 impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from MinorTown1 to PlayerTown MINOR_TOWN1_IMPRESSIVENESS - Threshold
+
+    Threshold = get town MinorTown2 impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from MinorTown2 to PlayerTown MINOR_TOWN2_IMPRESSIVENESS - Threshold
+
+    Threshold = get town MinorTown3 impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from MinorTown3 to PlayerTown MINOR_TOWN3_IMPRESSIVENESS - Threshold
+
+    Threshold = get town MinorTown4 impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from MinorTown4 to PlayerTown MINOR_TOWN4_IMPRESSIVENESS - Threshold
+
+    Threshold = get town MinorTown5 impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from MinorTown5 to PlayerTown MINOR_TOWN5_IMPRESSIVENESS - Threshold
+
+    Threshold = get town MinorTown6 impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from MinorTown6 to PlayerTown MINOR_TOWN6_IMPRESSIVENESS - Threshold
+
+    Threshold = get town JapaneseTown1 impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from JapaneseTown1 to PlayerTown JAPANESE_TOWN1_IMPRESSIVENESS - Threshold
+
+    Threshold = get town JapaneseTown2 impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from JapaneseTown2 to PlayerTown JAPANESE_TOWN2_IMPRESSIVENESS - Threshold
+
+    Threshold = get town JapaneseCapital impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from JapaneseCapital to PlayerTown JAPANESE_CAPITAL_IMPRESSIVENESS - Threshold
+
+begin loop
+
+    if PLAYER of MinorTown1 == 0
+        enable migration from MinorTown2 to MinorTown1
+        enable migration from MinorTown3 to MinorTown1
+        enable migration from MinorTown4 to MinorTown1
+        enable migration from MinorTown5 to MinorTown1
+        enable migration from MinorTown6 to MinorTown1
+        enable migration from JapaneseTown1 to MinorTown1
+        enable migration from JapaneseTown2 to MinorTown1
+        enable migration from JapaneseCapital to MinorTown1
+        
+    elsif PLAYER of MinorTown1 >= 1
+        disable migration from MinorTown2 to MinorTown1
+        disable migration from MinorTown3 to MinorTown1
+        disable migration from MinorTown4 to MinorTown1
+        disable migration from MinorTown5 to MinorTown1
+        disable migration from MinorTown6 to MinorTown1
+        disable migration from JapaneseTown1 to MinorTown1
+        disable migration from JapaneseTown2 to MinorTown1
+        disable migration from JapaneseCapital to MinorTown1
+    end if
+    
+    if PLAYER of MinorTown2 == 0
+        enable migration from MinorTown1 to MinorTown2
+        enable migration from MinorTown3 to MinorTown2
+        enable migration from MinorTown4 to MinorTown2
+        enable migration from MinorTown5 to MinorTown2
+        enable migration from MinorTown6 to MinorTown2
+        enable migration from JapaneseTown1 to MinorTown2
+        enable migration from JapaneseTown2 to MinorTown2
+        enable migration from JapaneseCapital to MinorTown2
+        
+    elsif PLAYER of MinorTown2 >= 1
+        disable migration from MinorTown1 to MinorTown2
+        disable migration from MinorTown3 to MinorTown2
+        disable migration from MinorTown4 to MinorTown2
+        disable migration from MinorTown5 to MinorTown2
+        disable migration from MinorTown6 to MinorTown2
+        disable migration from JapaneseTown1 to MinorTown2
+        disable migration from JapaneseTown2 to MinorTown2
+        disable migration from JapaneseCapital to MinorTown2
+    end if
+    
+    if PLAYER of MinorTown3 == 0
+        enable migration from MinorTown1 to MinorTown3
+        enable migration from MinorTown2 to MinorTown3
+        enable migration from MinorTown4 to MinorTown3
+        enable migration from MinorTown5 to MinorTown3
+        enable migration from MinorTown6 to MinorTown3
+        enable migration from JapaneseTown1 to MinorTown3
+        enable migration from JapaneseTown2 to MinorTown3
+        enable migration from JapaneseCapital to MinorTown3
+        
+    elsif PLAYER of MinorTown3 >= 1
+        disable migration from MinorTown1 to MinorTown3
+        disable migration from MinorTown2 to MinorTown3
+        disable migration from MinorTown4 to MinorTown3
+        disable migration from MinorTown5 to MinorTown3
+        disable migration from MinorTown6 to MinorTown3
+        disable migration from JapaneseTown1 to MinorTown3
+        disable migration from JapaneseTown2 to MinorTown3
+        disable migration from JapaneseCapital to MinorTown3
+    end if
+    
+    if PLAYER of MinorTown4 == 0
+        enable migration from MinorTown1 to MinorTown4
+        enable migration from MinorTown2 to MinorTown4
+        enable migration from MinorTown3 to MinorTown4
+        enable migration from MinorTown5 to MinorTown4
+        enable migration from MinorTown6 to MinorTown4
+        enable migration from JapaneseTown1 to MinorTown4
+        enable migration from JapaneseTown2 to MinorTown4
+        enable migration from JapaneseCapital to MinorTown4
+        
+    elsif PLAYER of MinorTown4 >= 1
+        disable migration from MinorTown1 to MinorTown4
+        disable migration from MinorTown2 to MinorTown4
+        disable migration from MinorTown3 to MinorTown4
+        disable migration from MinorTown5 to MinorTown4
+        disable migration from MinorTown6 to MinorTown4
+        disable migration from JapaneseTown1 to MinorTown4
+        disable migration from JapaneseTown2 to MinorTown4
+        disable migration from JapaneseCapital to MinorTown4
+    end if
+    
+    if PLAYER of MinorTown5 == 0
+        enable migration from MinorTown1 to MinorTown5
+        enable migration from MinorTown2 to MinorTown5
+        enable migration from MinorTown3 to MinorTown5
+        enable migration from MinorTown4 to MinorTown5
+        enable migration from MinorTown6 to MinorTown5
+        enable migration from JapaneseTown1 to MinorTown5
+        enable migration from JapaneseTown2 to MinorTown5
+        enable migration from JapaneseCapital to MinorTown5
+        
+    elsif PLAYER of MinorTown5 >= 1
+        disable migration from MinorTown1 to MinorTown5
+        disable migration from MinorTown2 to MinorTown5
+        disable migration from MinorTown3 to MinorTown5
+        disable migration from MinorTown4 to MinorTown5
+        disable migration from MinorTown6 to MinorTown5
+        disable migration from JapaneseTown1 to MinorTown5
+        disable migration from JapaneseTown2 to MinorTown5
+        disable migration from JapaneseCapital to MinorTown5
+    end if
+    
+    if PLAYER of MinorTown6 == 0
+        enable migration from MinorTown1 to MinorTown6
+        enable migration from MinorTown2 to MinorTown6
+        enable migration from MinorTown3 to MinorTown6
+        enable migration from MinorTown4 to MinorTown6
+        enable migration from MinorTown5 to MinorTown6
+        enable migration from JapaneseTown1 to MinorTown6
+        enable migration from JapaneseTown2 to MinorTown6
+        enable migration from JapaneseCapital to MinorTown6
+        
+    elsif PLAYER of MinorTown6 >= 1
+        disable migration from MinorTown1 to MinorTown6
+        disable migration from MinorTown2 to MinorTown6
+        disable migration from MinorTown3 to MinorTown6
+        disable migration from MinorTown4 to MinorTown6
+        disable migration from MinorTown5 to MinorTown6
+        disable migration from JapaneseTown1 to MinorTown6
+        disable migration from JapaneseTown2 to MinorTown6
+        disable migration from JapaneseCapital to MinorTown6
+    end if
+    
+    if PLAYER of JapaneseTown1 == 0
+        enable migration from MinorTown1 to JapaneseTown1
+        enable migration from MinorTown2 to JapaneseTown1
+        enable migration from MinorTown3 to JapaneseTown1
+        enable migration from MinorTown4 to JapaneseTown1
+        enable migration from MinorTown5 to JapaneseTown1
+        enable migration from MinorTown6 to JapaneseTown1
+        enable migration from JapaneseTown2 to JapaneseTown1
+        enable migration from JapaneseCapital to JapaneseTown1
+        
+    elsif PLAYER of JapaneseTown1 >= 1
+        disable migration from MinorTown1 to JapaneseTown1
+        disable migration from MinorTown2 to JapaneseTown1
+        disable migration from MinorTown3 to JapaneseTown1
+        disable migration from MinorTown4 to JapaneseTown1
+        disable migration from MinorTown5 to JapaneseTown1
+        disable migration from MinorTown6 to JapaneseTown1
+        disable migration from JapaneseTown2 to JapaneseTown1
+        disable migration from JapaneseCapital to JapaneseTown1
+    end if
+    
+    if PLAYER of JapaneseTown2 == 0
+        enable migration from MinorTown1 to JapaneseTown2
+        enable migration from MinorTown2 to JapaneseTown2
+        enable migration from MinorTown3 to JapaneseTown2
+        enable migration from MinorTown4 to JapaneseTown2
+        enable migration from MinorTown5 to JapaneseTown2
+        enable migration from MinorTown6 to JapaneseTown2
+        enable migration from JapaneseTown1 to JapaneseTown2
+        enable migration from JapaneseCapital to JapaneseTown2
+        
+    elsif PLAYER of JapaneseTown2 >= 1
+        disable migration from MinorTown1 to JapaneseTown2
+        disable migration from MinorTown2 to JapaneseTown2
+        disable migration from MinorTown3 to JapaneseTown2
+        disable migration from MinorTown4 to JapaneseTown2
+        disable migration from MinorTown5 to JapaneseTown2
+        disable migration from MinorTown6 to JapaneseTown2
+        disable migration from JapaneseTown1 to JapaneseTown2
+        disable migration from JapaneseCapital to JapaneseTown2
+    end if
+    
+    if PLAYER of JapaneseCapital == 0
+        enable migration from MinorTown1 to JapaneseCapital
+        enable migration from MinorTown2 to JapaneseCapital
+        enable migration from MinorTown3 to JapaneseCapital
+        enable migration from MinorTown4 to JapaneseCapital
+        enable migration from MinorTown5 to JapaneseCapital
+        enable migration from MinorTown6 to JapaneseCapital
+        enable migration from JapaneseTown1 to JapaneseCapital
+        enable migration from JapaneseTown2 to JapaneseCapital
+        
+    elsif PLAYER of JapaneseCapital >= 1
+        disable migration from MinorTown1 to JapaneseCapital
+        disable migration from MinorTown2 to JapaneseCapital
+        disable migration from MinorTown3 to JapaneseCapital
+        disable migration from MinorTown4 to JapaneseCapital
+        disable migration from MinorTown5 to JapaneseCapital
+        disable migration from MinorTown6 to JapaneseCapital
+        disable migration from JapaneseTown1 to JapaneseCapital
+        disable migration from JapaneseTown2 to JapaneseCapital
+    end if
+    
+end loop
+
+end script LC7_Japanese_Capital_Impressiveness
+
+begin script LC7_TownConversion
+
+    isConverted1 = 0
+    isConverted2 = 0
+    isConverted3 = 0
+    isConverted4 = 0
+    isConverted5 = 0
+    isConverted6 = 0
+    isConverted7 = 0
+    isConverted8 = 0
+    isConverted9 = 0
+    a = 0
+    b = 0
+    c = 0
+    d = 0
+    e = 0
+    f = 0
+    g = 0
+    h = 0
+    i = 0
+    
+start
+
+begin loop
+
+    isConverted1 = variable get town MinorTown1 method of last conversion
+    isConverted2 = variable get town MinorTown2 method of last conversion
+    isConverted3 = variable get town MinorTown3 method of last conversion
+    isConverted4 = variable get town MinorTown4 method of last conversion
+    isConverted5 = variable get town MinorTown5 method of last conversion
+    isConverted6 = variable get town MinorTown6 method of last conversion
+    isConverted7 = variable get town JapaneseTown1 method of last conversion
+    isConverted8 = variable get town JapaneseTown2 method of last conversion
+    isConverted9 = variable get town JapaneseCapital method of last conversion
+
+    if isConverted1 != 0 and a == 0
+        if PLAYER of MinorTown1 == 0 or get town MinorTown1 is migrating to == PlayerTown
+            a = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted1 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            elsif isConverted1 == 2
+                TownsPeacefulConverted = TownsPeacefulConverted + 1
+            end if
+        end if
+    end if
+
+    if isConverted1 != 0
+        if PLAYER of JapaneseCapital == 1
+            disable migration from MinorTown1 to MinorTown2
+            disable migration from MinorTown1 to MinorTown3
+            disable migration from MinorTown1 to MinorTown4
+            disable migration from MinorTown1 to MinorTown5
+            disable migration from MinorTown1 to MinorTown6
+            disable migration from MinorTown1 to JapaneseTown1
+            disable migration from MinorTown1 to JapaneseTown2
+            disable migration from MinorTown1 to JapaneseCapital
+            disable migration from MinorTown1 to PlayerTown
+        else
+            enable migration from MinorTown1 to MinorTown2
+            enable migration from MinorTown1 to MinorTown3
+            enable migration from MinorTown1 to MinorTown4
+            enable migration from MinorTown1 to MinorTown5
+            enable migration from MinorTown1 to MinorTown6
+            enable migration from MinorTown1 to JapaneseTown1
+            enable migration from MinorTown1 to JapaneseTown2
+            enable migration from MinorTown1 to JapaneseCapital
+            enable migration from MinorTown1 to PlayerTown
+        end if
+    end if
+    
+    if isConverted2 != 0 and b == 0
+        if PLAYER of MinorTown2 == 0 or get town MinorTown2 is migrating to == PlayerTown
+            b = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted2 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            elsif isConverted2 == 2
+                TownsPeacefulConverted = TownsPeacefulConverted + 1
+            end if
+        end if
+    end if
+
+    if isConverted2 != 0
+        if PLAYER of JapaneseCapital == 1
+            disable migration from MinorTown2 to MinorTown1
+            disable migration from MinorTown2 to MinorTown3
+            disable migration from MinorTown2 to MinorTown4
+            disable migration from MinorTown2 to MinorTown5
+            disable migration from MinorTown2 to MinorTown6
+            disable migration from MinorTown2 to JapaneseTown1
+            disable migration from MinorTown2 to JapaneseTown2
+            disable migration from MinorTown2 to JapaneseCapital
+            disable migration from MinorTown2 to PlayerTown
+        else
+            enable migration from MinorTown2 to MinorTown1
+            enable migration from MinorTown2 to MinorTown3
+            enable migration from MinorTown2 to MinorTown4
+            enable migration from MinorTown2 to MinorTown5
+            enable migration from MinorTown2 to MinorTown6
+            enable migration from MinorTown2 to JapaneseTown1
+            enable migration from MinorTown2 to JapaneseTown2
+            enable migration from MinorTown2 to JapaneseCapital
+            enable migration from MinorTown2 to PlayerTown
+        end if
+    end if
+    
+    if isConverted3 != 0 and c == 0
+        if PLAYER of MinorTown3 == 0 or get town MinorTown3 is migrating to == PlayerTown
+            c = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted3 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            elsif isConverted3 == 2
+                TownsPeacefulConverted = TownsPeacefulConverted + 1
+            end if
+        end if
+    end if
+
+    if isConverted3 != 0
+        if PLAYER of JapaneseCapital == 1
+            disable migration from MinorTown3 to MinorTown1
+            disable migration from MinorTown3 to MinorTown2
+            disable migration from MinorTown3 to MinorTown4
+            disable migration from MinorTown3 to MinorTown5
+            disable migration from MinorTown3 to MinorTown6
+            disable migration from MinorTown3 to JapaneseTown1
+            disable migration from MinorTown3 to JapaneseTown2
+            disable migration from MinorTown3 to JapaneseCapital
+            disable migration from MinorTown3 to PlayerTown
+        else
+            enable migration from MinorTown3 to MinorTown1
+            enable migration from MinorTown3 to MinorTown2
+            enable migration from MinorTown3 to MinorTown4
+            enable migration from MinorTown3 to MinorTown5
+            enable migration from MinorTown3 to MinorTown6
+            enable migration from MinorTown3 to JapaneseTown1
+            enable migration from MinorTown3 to JapaneseTown2
+            enable migration from MinorTown3 to JapaneseCapital
+            enable migration from MinorTown3 to PlayerTown
+        end if
+    end if
+    
+    if isConverted4 != 0 and d == 0
+        if PLAYER of MinorTown4 == 0 or get town MinorTown4 is migrating to == PlayerTown
+            d = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted4 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            elsif isConverted4 == 2
+                TownsPeacefulConverted = TownsPeacefulConverted + 1
+            end if
+        end if
+    end if
+
+    if isConverted4 != 0
+        if PLAYER of JapaneseCapital == 1
+            disable migration from MinorTown4 to MinorTown1
+            disable migration from MinorTown4 to MinorTown2
+            disable migration from MinorTown4 to MinorTown3
+            disable migration from MinorTown4 to MinorTown5
+            disable migration from MinorTown4 to MinorTown6
+            disable migration from MinorTown4 to JapaneseTown1
+            disable migration from MinorTown4 to JapaneseTown2
+            disable migration from MinorTown4 to JapaneseCapital
+            disable migration from MinorTown4 to PlayerTown
+        else
+            enable migration from MinorTown4 to MinorTown1
+            enable migration from MinorTown4 to MinorTown2
+            enable migration from MinorTown4 to MinorTown3
+            enable migration from MinorTown4 to MinorTown5
+            enable migration from MinorTown4 to MinorTown6
+            enable migration from MinorTown4 to JapaneseTown1
+            enable migration from MinorTown4 to JapaneseTown2
+            enable migration from MinorTown4 to JapaneseCapital
+            enable migration from MinorTown4 to PlayerTown
+        end if
+    end if
+    
+    if isConverted5 != 0 and e == 0
+        if PLAYER of MinorTown5 == 0 or get town MinorTown5 is migrating to == PlayerTown
+            e = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted5 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            elsif isConverted5 == 2
+                TownsPeacefulConverted = TownsPeacefulConverted + 1
+            end if
+        end if
+    end if
+
+    if isConverted5 != 0
+        if PLAYER of JapaneseCapital == 1
+            disable migration from MinorTown5 to MinorTown1
+            disable migration from MinorTown5 to MinorTown2
+            disable migration from MinorTown5 to MinorTown3
+            disable migration from MinorTown5 to MinorTown4
+            disable migration from MinorTown5 to MinorTown6
+            disable migration from MinorTown5 to JapaneseTown1
+            disable migration from MinorTown5 to JapaneseTown2
+            disable migration from MinorTown5 to JapaneseCapital
+            disable migration from MinorTown5 to PlayerTown
+        else
+            enable migration from MinorTown5 to MinorTown1
+            enable migration from MinorTown5 to MinorTown2
+            enable migration from MinorTown5 to MinorTown3
+            enable migration from MinorTown5 to MinorTown4
+            enable migration from MinorTown5 to MinorTown6
+            enable migration from MinorTown5 to JapaneseTown1
+            enable migration from MinorTown5 to JapaneseTown2
+            enable migration from MinorTown5 to JapaneseCapital
+            enable migration from MinorTown5 to PlayerTown
+        end if
+    end if
+    
+    if isConverted6 != 0 and f == 0
+        if PLAYER of MinorTown6 == 0 or get town MinorTown6 is migrating to == PlayerTown
+            f = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted6 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            elsif isConverted6 == 2
+                TownsPeacefulConverted = TownsPeacefulConverted + 1
+            end if
+        end if
+    end if
+
+    if isConverted6 != 0
+        if PLAYER of JapaneseCapital == 1
+            disable migration from MinorTown6 to MinorTown1
+            disable migration from MinorTown6 to MinorTown2
+            disable migration from MinorTown6 to MinorTown3
+            disable migration from MinorTown6 to MinorTown4
+            disable migration from MinorTown6 to MinorTown5
+            disable migration from MinorTown6 to JapaneseTown1
+            disable migration from MinorTown6 to JapaneseTown2
+            disable migration from MinorTown6 to JapaneseCapital
+            disable migration from MinorTown6 to PlayerTown
+        else
+            enable migration from MinorTown6 to MinorTown1
+            enable migration from MinorTown6 to MinorTown2
+            enable migration from MinorTown6 to MinorTown3
+            enable migration from MinorTown6 to MinorTown4
+            enable migration from MinorTown6 to MinorTown5
+            enable migration from MinorTown6 to JapaneseTown1
+            enable migration from MinorTown6 to JapaneseTown2
+            enable migration from MinorTown6 to JapaneseCapital
+            enable migration from MinorTown6 to PlayerTown
+        end if
+    end if
+    
+    if isConverted7 != 0 and g == 0
+        if PLAYER of JapaneseTown1 == 0 or get town JapaneseTown1 is migrating to == PlayerTown
+            g = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted7 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            elsif isConverted7 == 2
+                TownsPeacefulConverted = TownsPeacefulConverted + 1
+            end if
+        end if
+    end if    
+
+    if isConverted7 != 0
+        if PLAYER of JapaneseCapital == 1
+            disable migration from JapaneseTown1 to MinorTown1
+            disable migration from JapaneseTown1 to MinorTown2
+            disable migration from JapaneseTown1 to MinorTown3
+            disable migration from JapaneseTown1 to MinorTown4
+            disable migration from JapaneseTown1 to MinorTown5
+            disable migration from JapaneseTown1 to MinorTown6
+            disable migration from JapaneseTown1 to JapaneseTown2
+            disable migration from JapaneseTown1 to JapaneseCapital
+            disable migration from JapaneseTown1 to PlayerTown
+        else
+            enable migration from JapaneseTown1 to MinorTown1
+            enable migration from JapaneseTown1 to MinorTown2
+            enable migration from JapaneseTown1 to MinorTown3
+            enable migration from JapaneseTown1 to MinorTown4
+            enable migration from JapaneseTown1 to MinorTown5
+            enable migration from JapaneseTown1 to MinorTown6
+            enable migration from JapaneseTown1 to JapaneseTown2
+            enable migration from JapaneseTown1 to JapaneseCapital
+            enable migration from JapaneseTown1 to PlayerTown
+        end if
+    end if
+    
+    if isConverted8 != 0 and h == 0
+        if PLAYER of JapaneseTown2 == 0 or get town JapaneseTown2 is migrating to == PlayerTown
+            h = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted8 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            elsif isConverted8 == 2
+                TownsPeacefulConverted = TownsPeacefulConverted + 1
+            end if
+        end if
+    end if
+
+    if isConverted8 != 0
+        if PLAYER of JapaneseCapital == 1
+            disable migration from JapaneseTown2 to MinorTown1
+            disable migration from JapaneseTown2 to MinorTown2
+            disable migration from JapaneseTown2 to MinorTown3
+            disable migration from JapaneseTown2 to MinorTown4
+            disable migration from JapaneseTown2 to MinorTown5
+            disable migration from JapaneseTown2 to MinorTown6
+            disable migration from JapaneseTown2 to JapaneseTown1
+            disable migration from JapaneseTown2 to JapaneseCapital
+            disable migration from JapaneseTown2 to PlayerTown
+        else
+            enable migration from JapaneseTown2 to MinorTown1
+            enable migration from JapaneseTown2 to MinorTown2
+            enable migration from JapaneseTown2 to MinorTown3
+            enable migration from JapaneseTown2 to MinorTown4
+            enable migration from JapaneseTown2 to MinorTown5
+            enable migration from JapaneseTown2 to MinorTown6
+            enable migration from JapaneseTown2 to JapaneseTown1
+            enable migration from JapaneseTown2 to JapaneseCapital
+            enable migration from JapaneseTown2 to PlayerTown
+        end if
+    end if
+    
+    if isConverted9 != 0 and i == 0
+        if PLAYER of JapaneseCapital == 0 or get town JapaneseCapital is migrating to == PlayerTown
+            i = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted9 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            elsif isConverted9 == 2
+                TownsPeacefulConverted = TownsPeacefulConverted + 1
+            end if
+        end if
+    end if
+
+    if isConverted9 != 0
+        if PLAYER of JapaneseCapital == 1
+            disable migration from JapaneseCapital to MinorTown1
+            disable migration from JapaneseCapital to MinorTown2
+            disable migration from JapaneseCapital to MinorTown3
+            disable migration from JapaneseCapital to MinorTown4
+            disable migration from JapaneseCapital to MinorTown5
+            disable migration from JapaneseCapital to MinorTown6
+            disable migration from JapaneseCapital to JapaneseTown1
+            disable migration from JapaneseCapital to JapaneseTown2
+            disable migration from JapaneseCapital to PlayerTown
+        else
+            enable migration from JapaneseCapital to MinorTown1
+            enable migration from JapaneseCapital to MinorTown2
+            enable migration from JapaneseCapital to MinorTown3
+            enable migration from JapaneseCapital to MinorTown4
+            enable migration from JapaneseCapital to MinorTown5
+            enable migration from JapaneseCapital to MinorTown6
+            enable migration from JapaneseCapital to JapaneseTown1
+            enable migration from JapaneseCapital to JapaneseTown2
+            enable migration from JapaneseCapital to PlayerTown
+        end if
+    end if
+    
+end loop
+
+end script LC7_TownConversion
+
+begin script LC7_Tribute
+
+    mig1 = 0
+    mig2 = 0
+    mig3 = 0
+    mig4 = 0
+    mig5 = 0
+    mig6 = 0
+    mig7 = 0
+    mig8 = 0
+    mig9 = 0
+    mig10 = 0
+    mig11 = 0
+    mig12 = 0
+    a = 0
+
+start
+
+begin loop
+
+    if (variable get town MinorTown1 status == variable MIGRATION_MIGRATED) and mig1 == 0 and get town MinorTown1 has migrated to == PlayerTown
+        mig1 = 1
+        MigrationsAccepted = MigrationsAccepted + 1
+    end if
+    
+    if (variable get town MinorTown2 status == variable MIGRATION_MIGRATED) and mig2 == 0 and get town MinorTown2 has migrated to == PlayerTown
+        mig2 = 1
+        MigrationsAccepted = MigrationsAccepted + 1
+    end if
+    
+    if (variable get town MinorTown3 status == variable MIGRATION_MIGRATED) and mig3 == 0 and get town MinorTown3 has migrated to == PlayerTown
+        mig3 = 1
+        MigrationsAccepted = MigrationsAccepted + 1
+    end if
+    
+    if (variable get town MinorTown4 status == variable MIGRATION_MIGRATED) and mig4 == 0 and get town MinorTown4 has migrated to == PlayerTown
+        mig4 = 1
+        MigrationsAccepted = MigrationsAccepted + 1
+    end if
+    
+    if (variable get town MinorTown5 status == variable MIGRATION_MIGRATED) and mig5 == 0 and get town MinorTown5 has migrated to == PlayerTown
+        mig5 = 1
+        MigrationsAccepted = MigrationsAccepted + 1
+    end if
+    
+    if (variable get town MinorTown6 status == variable MIGRATION_MIGRATED) and mig6 == 0 and get town MinorTown6 has migrated to == PlayerTown
+        mig6 = 1
+        MigrationsAccepted = MigrationsAccepted + 1
+    end if
+    
+    if (variable get town JapaneseTown1 status == variable MIGRATION_MIGRATED) and mig7 == 0 and get town JapaneseTown1 has migrated to == PlayerTown
+        mig7 = 1
+        MigrationsAccepted = MigrationsAccepted + 1
+    end if
+    
+    if (variable get town JapaneseTown2 status == variable MIGRATION_MIGRATED) and mig8 == 0 and get town JapaneseTown2 has migrated to == PlayerTown
+        mig8 = 1
+        MigrationsAccepted = MigrationsAccepted + 1
+    end if
+    
+    if (variable get town JapaneseCapital status == variable MIGRATION_MIGRATED) and mig9 == 0 and get town JapaneseCapital has migrated to == PlayerTown
+        mig9 = 1
+        MigrationsAccepted = MigrationsAccepted + 1
+    end if
+
+    if MigrationsAccepted >= 1 and a == 0
+        a = 1
+        increment tribute by 5000
+    end if
+    
+    if MigrationsAccepted >= 2 and a == 1
+        a = 2
+        increment tribute by 5000
+    end if
+    
+    if MigrationsAccepted >= 3 and a == 2
+        a = 3
+        increment tribute by 10000
+    end if
+    
+    if MigrationsAccepted >= 4 and a == 3
+        a = 4
+        increment tribute by 10000
+    end if
+    
+    if MigrationsAccepted >= 5 and a == 4
+        a = 5
+        increment tribute by 15000
+    end if
+    
+    if MigrationsAccepted >= 6 and a == 5
+        a = 6
+        increment tribute by 15000
+    end if
+    
+    if MigrationsAccepted >= 7 and a == 6
+        a = 7
+        increment tribute by 20000
+    end if
+    
+    if MigrationsAccepted >= 8 and a == 7
+        a = 8
+        increment tribute by 25000
+    end if
+    
+    if MigrationsAccepted >= 9 and a == 8
+        a = 9
+        increment tribute by 30000
+    end if
+    
+end loop
+
+end script LC7_Tribute
+
+begin script LC7_GatehouseManager
+
+    GateHouseT11 = 0
+    GateHouseT21 = 0
+    GateHouseT22 = 0
+    GateHouseT23 = 0
+    GateHouseT31 = 0
+    GateHouseT32 = 0
+    GateHouseT33 = 0
+
+    Counter = 0
+    Cnt = 0
+
+    oCreature = get player 0 creature
+
+    PlayerPlatoonT11 = 0
+    CatapultT11 = 0
+    TestCreatureT11 = 0
+
+    EnemyNearDoorT11 = 0
+
+    PlayerPlatoonT21 = 0
+    CatapultT21 = 0
+    TestCreatureT21 = 0
+    PlayerPlatoonT22 = 0
+    CatapultT22 = 0
+    TestCreatureT22 = 0
+    PlayerPlatoonT23 = 0
+    CatapultT23 = 0
+    TestCreatureT23 = 0
+
+    EnemyNearDoorT21 = 0
+    EnemyNearDoorT22 = 0
+    EnemyNearDoorT23 = 0
+
+    PlayerPlatoonT31 = 0
+    CatapultT31 = 0
+    TestCreatureT31 = 0
+    PlayerPlatoonT32 = 0
+    CatapultT32 = 0
+    TestCreatureT32 = 0
+    PlayerPlatoonT33 = 0
+    CatapultT33 = 0
+    TestCreatureT33 = 0
+
+    EnemyNearDoorT31 = 0
+    EnemyNearDoorT32 = 0
+    EnemyNearDoorT33 = 0
+
+start
+
+begin loop
+
+    GateHouseT11 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {1709.80,44.72,1232.86} radius 15
+    
+    oCreature = get player 0 creature
+
+    if PLAYER of JapaneseTown1 == 1
+
+        if not town JapaneseTown1 is under takeover from player 0
+            PlayerPlatoonT11 = get platoon of player 0 nearest {GateHouseT11} radius 100
+            CatapultT11 = get siege weapon of player 0 nearest {GateHouseT11} radius 100
+            TestCreatureT11 = get distance from {GateHouseT11} to {oCreature}
+            
+            if PlayerPlatoonT11 exists
+                EnemyNearDoorT11 = 1
+            elsif CatapultT11 exists
+                EnemyNearDoorT11 = 1
+            elsif TestCreatureT11 < 200 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+                EnemyNearDoorT11 = 1
+            else
+                EnemyNearDoorT11 = 0
+            end if
+            
+            if EnemyNearDoorT11 == 1
+                set gate GateHouseT11 close
+            else
+                set gate GateHouseT11 open
+            end if
+        else
+            set gate GateHouseT11 open
+        end if
+
+    end if
+
+    GateHouseT21 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {911.89,76.59,1178.70} radius 15
+    GateHouseT22 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {1121.04,84.63,1066.94} radius 15
+    GateHouseT23 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {1070.39,84.69,814.54} radius 15
+    
+    oCreature = get player 0 creature
+
+    if PLAYER of JapaneseTown2 == 1
+
+        if not town JapaneseTown2 is under takeover from player 0
+            PlayerPlatoonT21 = get platoon of player 0 nearest {GateHouseT21} radius 100
+            CatapultT21 = get siege weapon of player 0 nearest {GateHouseT21} radius 100
+            TestCreatureT21 = get distance from {GateHouseT21} to {oCreature}
+            
+            if PlayerPlatoonT21 exists
+                EnemyNearDoorT21 = 1
+            elsif CatapultT21 exists
+                EnemyNearDoorT21 = 1
+            elsif TestCreatureT21 < 200 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+                EnemyNearDoorT21 = 1
+            else
+                EnemyNearDoorT21 = 0
+            end if
+            
+            if EnemyNearDoorT21 == 1
+                set gate GateHouseT21 close
+            else
+                set gate GateHouseT21 open
+            end if
+
+
+            PlayerPlatoonT22 = get platoon of player 0 nearest {GateHouseT22} radius 100
+            CatapultT22 = get siege weapon of player 0 nearest {GateHouseT22} radius 100
+            TestCreatureT22 = get distance from {GateHouseT22} to {oCreature}
+            
+            if PlayerPlatoonT22 exists
+                EnemyNearDoorT22 = 1
+            elsif CatapultT22 exists
+                EnemyNearDoorT22 = 1
+            elsif TestCreatureT22 < 200 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+                EnemyNearDoorT22 = 1
+            else
+                EnemyNearDoorT22 = 0
+            end if
+            
+            if EnemyNearDoorT22 == 1
+                set gate GateHouseT22 close
+            else
+                set gate GateHouseT22 open
+            end if
+
+
+            PlayerPlatoonT23 = get platoon of player 0 nearest {GateHouseT23} radius 100
+            CatapultT23 = get siege weapon of player 0 nearest {GateHouseT23} radius 100
+            TestCreatureT23 = get distance from {GateHouseT23} to {oCreature}
+            
+            if PlayerPlatoonT23 exists
+                EnemyNearDoorT23 = 1
+            elsif CatapultT23 exists
+                EnemyNearDoorT23 = 1
+            elsif TestCreatureT23 < 200 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+                EnemyNearDoorT23 = 1
+            else
+                EnemyNearDoorT23 = 0
+            end if
+            
+            if EnemyNearDoorT23 == 1
+                set gate GateHouseT23 close
+            else
+                set gate GateHouseT23 open
+            end if
+        else
+            set gate GateHouseT21 open
+            set gate GateHouseT22 open
+            set gate GateHouseT23 open
+        end if
+
+    end if
+
+    GateHouseT31 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {1326.68,56.73,1911.45} radius 15
+    GateHouseT32 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {1414.61,67.01,1430.92} radius 15
+    GateHouseT33 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {2022.68,134.10,571.53} radius 15
+    
+    oCreature = get player 0 creature
+
+    if PLAYER of JapaneseCapital == 1
+
+        if not town JapaneseCapital is under takeover from player 0
+            PlayerPlatoonT31 = get platoon of player 0 nearest {GateHouseT31} radius 100
+            CatapultT31 = get siege weapon of player 0 nearest {GateHouseT31} radius 100
+            TestCreatureT31 = get distance from {GateHouseT31} to {oCreature}
+            
+            if PlayerPlatoonT31 exists
+                EnemyNearDoorT31 = 1
+            elsif CatapultT31 exists
+                EnemyNearDoorT31 = 1
+            elsif TestCreatureT31 < 200 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+                EnemyNearDoorT31 = 1
+            else
+                EnemyNearDoorT31 = 0
+            end if
+            
+            if EnemyNearDoorT31 == 1
+                set gate GateHouseT31 close
+            else
+                set gate GateHouseT31 open
+            end if
+
+
+            PlayerPlatoonT32 = get platoon of player 0 nearest {GateHouseT32} radius 100
+            CatapultT32 = get siege weapon of player 0 nearest {GateHouseT32} radius 100
+            TestCreatureT32 = get distance from {GateHouseT32} to {oCreature}
+            
+            if PlayerPlatoonT32 exists
+                EnemyNearDoorT32 = 1
+            elsif CatapultT32 exists
+                EnemyNearDoorT32 = 1
+            elsif TestCreatureT32 < 200 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+                EnemyNearDoorT32 = 1
+            else
+                EnemyNearDoorT32 = 0
+            end if
+            
+            if EnemyNearDoorT32 == 1
+                set gate GateHouseT32 close
+            else
+                set gate GateHouseT32 open
+            end if
+
+
+            PlayerPlatoonT33 = get platoon of player 0 nearest {GateHouseT33} radius 100
+            CatapultT33 = get siege weapon of player 0 nearest {GateHouseT33} radius 100
+            TestCreatureT33 = get distance from {GateHouseT33} to {oCreature}
+            
+            if PlayerPlatoonT33 exists
+                EnemyNearDoorT33 = 1
+            elsif CatapultT33 exists
+                EnemyNearDoorT33 = 1
+            elsif TestCreatureT33 < 200 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+                EnemyNearDoorT33 = 1
+            else
+                EnemyNearDoorT33 = 0
+            end if
+            
+            if EnemyNearDoorT33 == 1
+                set gate GateHouseT33 close
+            else
+                set gate GateHouseT33 open
+            end if
+        else
+            set gate GateHouseT31 open
+            set gate GateHouseT32 open
+            set gate GateHouseT33 open
+        end if
+
+    end if
+    
+end loop
+
+end script LC7_GatehouseManager
+
+begin script LC7_Speeches
+
+    isConverted1 = 0
+    isConverted2 = 0
+    isConverted3 = 0
+    isConverted4 = 0
+    isConverted5 = 0
+    isConverted6 = 0
+    isConverted7 = 0
+    isConverted8 = 0
+    isConverted9 = 0
+    isConverted10 = 0
+    isConverted11 = 0
+    isConverted12 = 0
+    
+    mig1 = 0
+    mig2 = 0
+    mig3 = 0
+    mig4 = 0
+    mig5 = 0
+    mig6 = 0
+    mig7 = 0
+    mig8 = 0
+    mig9 = 0
+    mig10 = 0
+    mig11 = 0
+    mig12 = 0
+    
+    LoseDialogue1 = 0
+    
+    Number = 0
+    
+    AttackTimer = create timer for 0 seconds
+    LoseTimer = create timer for 0 seconds
+
+    Conv1 = 0
+    Conv2 = 0
+    Conv3 = 0
+    Conv4 = 0
+    Conv5 = 0
+    Conv6 = 0
+    Conv7 = 0
+    Conv8 = 0
+    Conv9 = 0
+    Conv10 = 0
+    Conv11 = 0
+    Conv12 = 0
+    
+    a = 0
+    b = 0
+    c = 0
+    d = 0
+    e = 0
+    f = 0
+    g = 0
+    h = 0
+    i = 0
+    j = 0
+    jj = 0
+    k = 0
+    l = 0
+    m = 0
+    n = 0
+    o = 0
+    p = 0
+    q = 0
+    r = 0
+    s = 0
+    t = 0
+    w = 0
+    v = 0
+    astory = 0
+    bstory = 0
+    
+    ab = 0
+    ac = 0
+    ad = 0
+    ae = 0
+    af = 0
+    ag = 0
+    ah = 0
+    ai = 0
+    aj = 0
+    ak = 0
+    al = 0
+    am = 0
+
+    PlayerPlatoon = 0
+    
+    StoryDialogue = 0
+    StoryDialogueTimer = create timer for 200 seconds
+    
+    EvilDialogue = 0
+    GoodDialogue = 0
+    
+    Platoon = 0
+    Catapult = 0
+
+    EpicBuilding = 0
+    EpicSaid = 0
+    ArmyBuiltComment = 0
+    PlatoonCrossedLine = 0
+    PlayersPlatoon = 0
+    Hurricane = 0
+
+    PlatoonKilledTimer = create timer for 0 seconds
+    CatapultDestroyedTimer = create timer for 0 seconds
+    CreatureKilledTimer = create timer for 0 seconds
+
+    SiegeComments = 0
+    SiegeCommentsTimer = create timer for 0 seconds
+
+    EnemyUnderAttack = 0
+
+    AdvisorNumber = 0
+    AdvisorTimer = create timer for 200 seconds
+
+start
+
+begin loop
+
+    if town JapaneseCapital is under takeover from player 0 and EnemyUnderAttack == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        begin dialogue
+            //say "They dare to assault my city?!"
+            say "BW2T_SCRIPT_07FINAL_ADVISORS_PLAYEREXPANDS_50"
+            wait until read
+            // " They are over-running our towns. Honor cannot permit this. Attack! Attack!"
+            say "BW2T_SCRIPT_07FINAL_ADVISORS_JAPANESEFIGHTBACK_20"
+            wait until read
+            EnemyUnderAttack = 1
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+
+    if LC7_LargeSiegeLaunchAttack == 1 and SiegeComments == 0 and get SiegeCommentsTimer time remaining <= 0 and GB_DialogueIsRunning == 0
+        SiegeComments = 1
+        GB_DialogueIsRunning = 1
+        begin dialogue
+            say "BW2T_SCRIPT_07FINAL_ADVISORS_PLAYEREXPANDS_70"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+        SiegeCommentsTimer = create timer for 45 seconds
+    end if
+    
+    if LC7_LargeSiegeLaunchAttack == 1 and SiegeComments == 1 and get SiegeCommentsTimer time remaining <= 0 and GB_DialogueIsRunning == 0
+        SiegeComments = 2
+        GB_DialogueIsRunning = 1
+        begin dialogue
+            say "BW2T_SCRIPT_08FINAL_ADVISORS_JAPANESEFIGHTBACK_100"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+        SiegeCommentsTimer = create timer for 45 seconds
+    end if
+
+    if LC7_LargeSiegeLaunchAttack == 1 and SiegeComments == 2 and get SiegeCommentsTimer time remaining <= 0 and GB_DialogueIsRunning == 0
+        SiegeComments = 3
+        GB_DialogueIsRunning = 1
+        begin dialogue
+            say "BW2T_SCRIPT_08FINAL_ADVISORS_JAPANESEFIGHTBACK_120"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+        SiegeCommentsTimer = create timer for 45 seconds
+    end if
+
+    if PlatoonKilled == 1 and GB_DialogueIsRunning == 0
+        PlatoonKilled = 0
+        if get PlatoonKilledTimer time remaining <= 0
+            PlatoonKilledTimer = create timer for 120 seconds
+            GB_DialogueIsRunning = 1
+            begin dialogue
+                say "BW2T_SCRIPT_08FINAL_ENEMY_ARMY_UNIT_DEFEATED"
+                wait until read
+            end dialogue
+            GB_DialogueIsRunning = 0
+        end if
+    end if
+
+    if CatapultDestroyed == 1 and GB_DialogueIsRunning == 0
+        CatapultDestroyed = 0
+        if get CatapultDestroyedTimer time remaining <= 0
+            CatapultDestroyedTimer = create timer for 120 seconds
+            GB_DialogueIsRunning = 1
+            begin dialogue
+                say "BW2T_SCRIPT_08FINAL_PLAYER_CREATURE_SMASHES_CATAPULT"
+                wait until read
+            end dialogue
+            GB_DialogueIsRunning = 0
+        end if
+    end if
+
+    if CreatureKilled == 1 and GB_DialogueIsRunning == 0
+        CreatureKilled = 0
+        if get CreatureKilledTimer time remaining <= 0
+            CreatureKilledTimer = create timer for 120 seconds
+            GB_DialogueIsRunning = 1
+            begin dialogue
+                say "BW2T_SCRIPT_07FINAL_PLAYER_CREATURE_KILLS_ENEMY_CREATURE"
+                wait until read
+            end dialogue
+            GB_DialogueIsRunning = 0
+        end if
+    end if
+
+    //Send the creature
+    if TownsConverted >= 2 or get army size in town PlayerTown > 20
+        if SendCreature == 0 and GB_DialogueIsRunning == 0
+            GB_DialogueIsRunning = 1
+            SendCreature = 1
+            begin dialogue
+                say "BW2T_SCRIPT_07FINAL_ADVISORS_IMPRESSTOWN_10"
+                wait until read
+            end dialogue
+            GB_DialogueIsRunning = 0
+        end if
+    end if
+
+    if HurricaneFired == 1 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        HurricaneFired = 2
+        begin dialogue
+            //say "Unleash the hurricane!"
+            say "BW2T_SCRIPT_07FINAL_ADVISORS_JAPANESEUSEHURRICANE_10"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+
+    if AIEpic exists and HEALTH of AIEpic >= 1.0 and EpicSaid == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        EpicSaid = 1
+        begin dialogue
+            say "BW2T_SCRIPT_07FINAL_EPIC_HURRICANE_READY"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+
+    if get number of platoon belonging to player 0 > 0 and ArmyBuiltComment == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        ArmyBuiltComment = 1
+        begin dialogue
+            //They seek to conquer us through war, but their lack of honor shall be their undoing. Send our warriors out!
+            say "BW2T_SCRIPT_07FINAL_ADVISORS_INVADETOWN_40"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+
+    if PlatoonCrossedLine == 0
+        PlayersPlatoon = get platoon of player 0 nearest {1766.16,46.51,1298.43} radius 250
+    end if
+
+    if PlayersPlatoon exists and PlatoonCrossedLine == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        PlatoonCrossedLine = 1
+        begin dialogue
+            //"Mobilize the armies - stem this greek tide at once!"
+            say "BW2T_SCRIPT_07FINAL_ADVISORS_INVADETOWN_70"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+
+    if get number of type SCRIPT_OBJECT_TYPE_WONDER in PlayerTown min built 0.0 > 0 and EpicBuilding == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        EpicBuilding = 1
+        begin dialogue
+            say "BW2T_SCRIPT_07FINAL_ADVISORS_JAPANESE_ANGER_250"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+
+    if UnderAttack >= 1 and get AttackTimer time remaining <= 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        UnderAttack = 0
+        Number = number from 1 to 14
+        if Number == 1
+            begin dialogue
+                make evil spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_EA_01"
+                wait until read
+                send evil spirit home
+            end dialogue
+        end if
+        if Number == 2
+            begin dialogue
+                make evil spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_EA_02"
+                wait until read
+                send evil spirit home
+            end dialogue
+        end if
+        if Number == 3
+            begin dialogue
+                make evil spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_EA_05"
+                wait until read
+                send evil spirit home
+            end dialogue
+        end if
+        if Number == 4
+            begin dialogue
+                make evil spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_EA_06"
+                wait until read
+                send evil spirit home
+            end dialogue
+        end if
+        if Number == 5
+            begin dialogue
+                make evil spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_EA_07"
+                wait until read
+                send evil spirit home
+            end dialogue
+        end if
+        if Number == 6
+            begin dialogue
+                make evil spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_EA_08"
+                wait until read
+                send evil spirit home
+            end dialogue
+        end if
+        if Number == 7
+            begin dialogue
+                make evil spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_EA_18"
+                wait until read
+                send evil spirit home
+            end dialogue
+        end if
+        if Number == 8
+            begin dialogue
+                make good spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_GA_01"
+                wait until read
+                send good spirit home
+            end dialogue
+        end if
+        if Number == 9
+            begin dialogue
+                make good spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_GA_02"
+                wait until read
+                send good spirit home
+            end dialogue
+        end if
+        if Number == 10
+            begin dialogue
+                make good spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_GA_05"
+                wait until read
+                send good spirit home
+            end dialogue
+        end if
+        if Number == 11
+            begin dialogue
+                make good spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_GA_06"
+                wait until read
+                send good spirit home
+            end dialogue
+        end if
+        if Number == 12
+            begin dialogue
+                make good spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_GA_07"
+                wait until read
+                send good spirit home
+            end dialogue
+        end if
+        if Number == 13
+            begin dialogue
+                make good spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_GA_09"
+                wait until read
+                send good spirit home
+            end dialogue
+        end if
+        if Number == 14
+            begin dialogue
+                make good spirit appear
+                say "BW2T_HELP_TEXT_GUIDANCE_BATTLE_ALERT_GA_10"
+                wait until read
+                send good spirit home
+            end dialogue
+        end if
+        GB_DialogueIsRunning = 0
+        AttackTimer = create timer for 45 seconds
+    end if
+    
+    if PLAYER of PlayerTown != 0 and PLAYER of MinorTown1 != 0 and PLAYER of MinorTown2 != 0 and PLAYER of MinorTown3 != 0 and PLAYER of MinorTown4 != 0 and PLAYER of MinorTown5 != 0 and PLAYER of MinorTown6 != 0 and PLAYER of JapaneseTown1 != 0 and PLAYER of JapaneseTown2 != 0 and PLAYER of JapaneseCapital != 0 and get LoseTimer time remaining <= 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        LoseDialogue1 = number from 1 to 5
+        if LoseDialogue1 == 1
+            begin dialogue
+                make good spirit appear
+                say "BW2T_SCRIPT_GENERIC_ADVISORS_SUGGEST_RESTART_10"
+                wait until read
+                send good spirit home
+            end dialogue
+        end if
+        
+        if LoseDialogue1 == 2
+            begin dialogue
+                make evil spirit appear
+                say "BW2T_SCRIPT_GENERIC_ADVISORS_SUGGEST_RESTART_20"
+                wait until read
+                send evil spirit home
+            end dialogue
+        end if
+        
+        if LoseDialogue1 == 3
+            begin dialogue
+                make good spirit appear
+                say "BW2T_SCRIPT_GENERIC_ADVISORS_SUGGEST_RESTART_30"
+                wait until read
+                send good spirit home
+            end dialogue
+        end if
+        
+        if LoseDialogue1 == 4
+            begin dialogue
+                make evil spirit appear
+                say "BW2T_SCRIPT_GENERIC_ADVISORS_SUGGEST_RESTART_40"
+                wait until read
+                send evil spirit home
+            end dialogue
+        end if
+        
+        if LoseDialogue1 == 5
+            begin dialogue
+                make evil spirit appear
+                say "BW2T_SCRIPT_GENERIC_ADVISORS_SUGGEST_RESTART_50"
+                wait until read
+                send evil spirit home
+            end dialogue
+        end if
+        
+        GB_DialogueIsRunning = 0
+        LoseTimer = create timer for 75 seconds
+    end if
+
+    /*
+
+    if (get building MELEE_ARMOURY in PlayerTown min built 0.0 exists or get building RANGED_ARMOURY in PlayerTown min built 0.0 exists) and ab == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        ab = 1
+        begin dialogue
+            say "BW2T_SCRIPT_07FINAL_ADVISORS_JAPANESE_ANGER_150"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building ABODE_A in PlayerTown min built 0.0 exists and a == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        a = 1
+        begin dialogue
+            say "BW2T_SCRIPT_07FINAL_PLAYER_BUILDS_HUT"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building ABODE_B in PlayerTown min built 0.0 exists and b == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        b = 1
+        begin dialogue
+            say "BW2T_SCRIPT_07FINAL_PLAYER_BUILDS_HOUSE"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building ABODE_C in PlayerTown min built 0.0 exists and c == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        c = 1
+        begin dialogue
+            say "BW2T_SCRIPT_07FINAL_PLAYER_BUILDS_VILLA"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building ABODE_D in PlayerTown min built 0.0 exists and d == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        d = 1
+        begin dialogue
+            say "BW2T_SCRIPT_07FINAL_PLAYER_BUILDS_MANOR"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building ABODE_E in PlayerTown min built 0.0 exists and e == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        e = 1
+        begin dialogue
+            say "BW2T_SCRIPT_07FINAL_PLAYER_BUILDS_MANSION"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building SKYSCRAPER in PlayerTown min built 0.0 exists and f == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        f = 1
+        begin dialogue
+            say "BW2T_SCRIPT_07FINAL_PLAYER_BUILDS_SKYSCRAPER"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building STORAGE_YARD in PlayerTown min built 0.0 exists and g == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        g = 1
+        begin dialogue
+            say "BW2T_SCRIPT_07FINAL_PLAYER_BUILDS_STOREHOUSE"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building FIELD in PlayerTown min built 0.0 exists and h == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        h = 1
+        begin dialogue
+            say "BW2T_SCRIPT_07FINAL_PLAYER_BUILDS_FIELD"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building CREATURE_PEN in PlayerTown min built 0.0 exists and i == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        i = 1
+        begin dialogue
+            say "BW2T_SCRIPT_07FINAL_PLAYER_BUILDS_CREATURE_PEN"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if (get building WALLTOWER_TECH0 in PlayerTown max built 0.9 exists or get building WALLTOWER_TECH1 in PlayerTown max built 0.9 exists) and j == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        j = 1
+        begin dialogue
+            say "BW2T_SCRIPT_07FINAL_PLAYER_BUILDS_FORTIFIED_WALL"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+
+    if (get building GATEHOUSE in PlayerTown min built 0.0 exists or get building GATEHOUSE_F in PlayerTown min built 0.9 exists) and jj == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        jj = 1
+        begin dialogue
+            say "BW2T_SCRIPT_07FINAL_PLAYER_BUILDS_GATEHOUSE"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building GRAVEYARD in PlayerTown min built 0.0 exists and k == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        k = 1
+        begin dialogue
+            say "BW2T_SCRIPT_07FINAL_PLAYER_BUILDS_GRAVEYARD"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building PUB in PlayerTown min built 0.0 exists and l == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        l = 1
+        begin dialogue
+            say "BW2T_SCRIPT_07FINAL_PLAYER_BUILDS_TAVERN"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building CRECHE in PlayerTown min built 0.0 exists and m == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        m = 1
+        begin dialogue
+            say "BW2T_SCRIPT_07FINAL_PLAYER_BUILDS_NURSERY"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building UNIVERSITY in PlayerTown min built 0.0 exists and n == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        n = 1
+        begin dialogue
+            say "BW2T_SCRIPT_07FINAL_PLAYER_BUILDS_UNIVERSITY"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building OLD_PERSONS_HOME in PlayerTown min built 0.0 exists and o == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        o = 1
+        begin dialogue
+            say "BW2T_SCRIPT_06FINAL_JAPANESE_GENERAL_PEACE_STEVE_360"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building TEMPLE in PlayerTown min built 0.0 exists and p == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        p = 1
+        begin dialogue
+            say "BW2T_SCRIPT_07FINAL_PLAYER_BUILDS_TEMPLE"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building LUMBERMILL in PlayerTown min built 0.0 exists and q == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        q = 1
+        begin dialogue
+            say "BW2T_SCRIPT_07FINAL_PLAYER_BUILDS_LUMBER_MILL"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building SMELTER in PlayerTown min built 0.0 exists and r == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        r = 1
+        begin dialogue
+            say "BW2T_SCRIPT_07FINAL_PLAYER_BUILDS_SMELTER"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building GRANARY in PlayerTown min built 0.0 exists and s == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        s = 1
+        begin dialogue
+            say "BW2T_SCRIPT_07FINAL_PLAYER_BUILDS_GRANARY"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building BATHHOUSE in PlayerTown min built 0.0 exists and t == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        t = 1
+        begin dialogue
+            say "BW2T_SCRIPT_07FINAL_PLAYER_BUILDS_BATHS"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if get building AMPITHEATRE in PlayerTown min built 0.0 exists and w == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        w = 1
+        begin dialogue
+            say "BW2T_SCRIPT_07FINAL_PLAYER_BUILDS_AMPHITHEATRE"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+
+    if get building PRISON in PlayerTown min built 0.0 exists and v == 0 and GB_DialogueIsRunning == 0
+        GB_DialogueIsRunning = 1
+        v = 1
+        begin dialogue
+            say "BW2T_SCRIPT_07FINAL_PLAYER_BUILDS_PRISON"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+
+    */
+    
+    if TownsAggressiveConverted >= 2 and EvilDialogue == 0
+        GB_DialogueIsRunning = 1
+        EvilDialogue = 2
+        begin dialogue
+            say "BW2T_SCRIPT_07FINAL_ADVISORS_INVADETOWN_20"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if TownsAggressiveConverted >= 3 and EvilDialogue == 2
+        GB_DialogueIsRunning = 1
+        EvilDialogue = 3
+        begin dialogue
+            say "BW2T_SCRIPT_07FINAL_ADVISORS_INVADETOWN_30"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if TownsAggressiveConverted >= 4 and EvilDialogue == 3
+        GB_DialogueIsRunning = 1
+        EvilDialogue = 4
+        begin dialogue
+            say "BW2T_SCRIPT_07FINAL_ADVISORS_INVADETOWN_50"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if TownsPeacefulConverted >= 1 and GoodDialogue == 0
+        GB_DialogueIsRunning = 1
+        GoodDialogue = 1
+        begin dialogue
+            say "BW2T_SCRIPT_07FINAL_ADVISORS_IMPRESSTOWN_20"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if TownsPeacefulConverted >= 2 and GoodDialogue == 1
+        GB_DialogueIsRunning = 1
+        GoodDialogue = 2
+        begin dialogue
+            say "BW2T_SCRIPT_07FINAL_ADVISORS_IMPRESSTOWN_30"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if TownsPeacefulConverted >= 4 and GoodDialogue == 2
+        GB_DialogueIsRunning = 1
+        GoodDialogue = 3
+        begin dialogue
+            say "BW2T_SCRIPT_07FINAL_ADVISORS_IMPRESSTOWN_40"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if TownsPeacefulConverted >= 5 and GoodDialogue == 3
+        GB_DialogueIsRunning = 1
+        GoodDialogue = 4
+        begin dialogue
+            say "BW2T_SCRIPT_07FINAL_ADVISORS_IMPRESSTOWN_50"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+    
+    if TownsPeacefulConverted >= 6 and GoodDialogue == 4
+        GB_DialogueIsRunning = 1
+        GoodDialogue = 5
+        begin dialogue
+            say "BW2T_SCRIPT_07FINAL_ADVISORS_IMPRESSTOWN_60"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+
+end loop
+
+end script LC7_Speeches
+
+begin script LC7_Japanese_Capital
+
+    LC7_RecruitTimer1 = create timer for 120 seconds
+    LC7_RecruitTimer2 = create timer for 120 seconds
+    LC7_RecruitTimer3 = create timer for 120 seconds
+    LC7_AttackTimer = create timer for 0 seconds
+    ATTACK_DELAY = 700 * RecruitModifier
+    
+    a = 0
+
+    Wall[13]
+
+    HurricaneBuilding = 0
+
+    Number = 0
+
+    CastEpicPos = 0
+
+    HurricaneTimer = create timer for 0 seconds
+    HURRICANEDELAY = 2250
+    HurricaneWarning = 0
+    EpicHurr = 0
+
+    AttackingPlatoons = 0
+
+    SiegeCheck = 0
+
+    NearestSettlementTownCentre = 0
+
+    PlayerPlatoon = 0
+
+    AttackingPosition = 0
+    AttackingPositionFallBack = 0
+    
+start
+
+    AttackNearestTownTimer = create timer for 0 seconds
+
+    //extend town JapaneseCapital influence by 40
+    //extend town JapaneseTown1 influence by 40
+    //extend town JapaneseTown2 influence by 40
+
+    if Difficulty >= 4
+        add resource WOOD 5000 to PlayerTown
+        add resource ORE 4000 to PlayerTown
+        add resource FOOD 5000 to PlayerTown
+    elsif Difficulty == 3
+        add resource WOOD 7500 to PlayerTown
+        add resource ORE 6000 to PlayerTown
+        add resource FOOD 7500 to PlayerTown
+    elsif Difficulty == 2
+        add resource WOOD 10000 to PlayerTown
+        add resource ORE 8000 to PlayerTown
+        add resource FOOD 10000 to PlayerTown
+    elsif Difficulty == 1
+        add resource WOOD 12500 to PlayerTown
+        add resource ORE 10000 to PlayerTown
+        add resource FOOD 12500 to PlayerTown
+    end if
+
+    add resource WOOD 2500 to MinorTown2
+    add resource ORE 500 to MinorTown2
+    add resource FOOD 3000 to MinorTown2
+
+    add resource WOOD 1000 to MinorTown3
+    add resource ORE 0 to MinorTown3
+    add resource FOOD 5000 to MinorTown3
+
+    //JapaneseCapital Walls
+    Wall[0] = get wall segment nearest {2014.54,135.62,542.40} radius 15
+    Wall[1] = get wall segment nearest {2012.79,143.57,514.57} radius 15
+    Wall[2] = get wall segment nearest {2084.54,186.76,373.85} radius 15
+    Wall[3] = get wall segment nearest {2186.74,187.16,340.29} radius 15
+    Wall[4] = get wall segment nearest {1422.57,65.95,1391.35} radius 15
+    Wall[5] = get wall segment nearest {1397.80,67.29,1466.61} radius 15
+    Wall[6] = get wall segment nearest {1315.95,56.40,1875.48} radius 15
+    Wall[7] = get wall segment nearest {1325.53,56.18,1945.45} radius 15
+
+    //JapaneseTown1 Walls
+    Wall[8] = get wall segment nearest {1729.99,44.69,1219.22} radius 15
+    Wall[9] = get wall segment nearest {1682.14,44.66,1238.35} radius 15
+
+    //JapaneseTown2 Walls
+    Wall[10] = get wall segment nearest {1103.75,85.13,838.40} radius 15
+    Wall[11] = get wall segment nearest {1101.67,84.63,1094.87} radius 15
+    Wall[12] = get wall segment nearest {938.65,76.97,1176.51} radius 15
+
+    //----Create town static defenders platoons----//
+
+    //--JapaneseCapital--//
+    LC7_Platoon[0] = create platoon PLATOON_INFO_JAPANESE_MELEE_4 at {PlatoonPos[0]} + {-1.5,0,-2} with 25 * RecruitSizeModifier men and 0 women
+    attach LC7_Platoon[0] to JapaneseCapital
+    PLAYER of LC7_Platoon[0] = 1
+    run background script LC7_StaticPlatoonsActions(PlatoonPos[0],Melee,LC7_Platoon[0])
+    disable platoon LC7_Platoon[0] respond to town JapaneseCapital attack
+    disable platoon LC7_Platoon[0] camp
+    set LC7_Platoon[0] focus to {PlatoonPos[0]}
+
+    LC7_Platoon[1] = create platoon PLATOON_INFO_JAPANESE_MELEE_4 at {PlatoonPos[1]} + {-1.5,0,-2} with 25 * RecruitSizeModifier men and 0 women
+    attach LC7_Platoon[1] to JapaneseCapital
+    PLAYER of LC7_Platoon[1] = 1
+    run background script LC7_StaticPlatoonsActions(PlatoonPos[1],Melee,LC7_Platoon[1])
+    disable platoon LC7_Platoon[1] respond to town JapaneseCapital attack
+    disable platoon LC7_Platoon[1] camp
+    set LC7_Platoon[1] focus to {PlatoonPos[1]}
+
+    LC7_Platoon[2] = create platoon PLATOON_INFO_JAPANESE_MELEE_4 at {PlatoonPos[2]} + {-1.5,0,-2} with 25 * RecruitSizeModifier men and 0 women
+    attach LC7_Platoon[2] to JapaneseCapital
+    PLAYER of LC7_Platoon[2] = 1
+    run background script LC7_StaticPlatoonsActions(PlatoonPos[2],Melee,LC7_Platoon[2])
+    disable platoon LC7_Platoon[2] respond to town JapaneseCapital attack
+    disable platoon LC7_Platoon[2] camp
+    set LC7_Platoon[2] focus to {PlatoonPos[2]}
+
+    LC7_Platoon[6] = create platoon PLATOON_INFO_JAPANESE_MELEE_3 at {PlatoonPos[6]} with 30 * RecruitSizeModifier men and 0 women
+    attach LC7_Platoon[6] to JapaneseCapital
+    PLAYER of LC7_Platoon[6] = 1
+    run background script LC7_StaticPlatoonsActions(PlatoonPos[6],Melee,LC7_Platoon[6])
+    disable platoon LC7_Platoon[6] respond to town JapaneseCapital attack
+    set LC7_Platoon[6] focus to {PlayerTown}
+
+    LC7_Platoon[7] = create platoon PLATOON_INFO_JAPANESE_MELEE_3 at {PlatoonPos[7]} with 30 * RecruitSizeModifier men and 0 women
+    attach LC7_Platoon[7] to JapaneseCapital
+    PLAYER of LC7_Platoon[7] = 1
+    run background script LC7_StaticPlatoonsActions(PlatoonPos[7],Melee,LC7_Platoon[7])
+    disable platoon LC7_Platoon[7] respond to town JapaneseCapital attack
+    set LC7_Platoon[7] focus to {PlayerTown}
+
+    LC7_Platoon[8] = create platoon PLATOON_INFO_JAPANESE_MELEE_5 at {PlatoonPos[8]} with 20 * RecruitSizeModifier men and 0 women
+    attach LC7_Platoon[8] to JapaneseCapital
+    PLAYER of LC7_Platoon[8] = 1
+    run background script LC7_StaticPlatoonsActions(PlatoonPos[8],Melee,LC7_Platoon[8])
+    disable platoon LC7_Platoon[8] respond to town JapaneseCapital attack
+    set LC7_Platoon[8] focus to {PlayerTown}
+
+    //--JapaneseTown1--//
+    LC7_Platoon[11] = create platoon PLATOON_INFO_JAPANESE_MELEE_3 at {PlatoonPos[9]} with 20 * RecruitSizeModifier men and 0 women
+    attach LC7_Platoon[11] to JapaneseTown1
+    PLAYER of LC7_Platoon[11] = 1
+    run background script LC7_StaticPlatoonsActions(PlatoonPos[9],Melee,LC7_Platoon[11])
+    enable platoon LC7_Platoon[11] respond to town JapaneseTown1 attack
+    set LC7_Platoon[11] focus to {PlayerTown}
+
+    LC7_Platoon[12] = create platoon PLATOON_INFO_JAPANESE_MELEE_3 at {PlatoonPos[10]} with 20 * RecruitSizeModifier men and 0 women
+    attach LC7_Platoon[12] to JapaneseTown1
+    PLAYER of LC7_Platoon[12] = 1
+    run background script LC7_StaticPlatoonsActions(PlatoonPos[10],Melee,LC7_Platoon[12])
+    enable platoon LC7_Platoon[12] respond to town JapaneseTown1 attack
+    set LC7_Platoon[12] focus to {PlayerTown}
+
+    LC7_Platoon[13] = create platoon PLATOON_INFO_JAPANESE_MELEE_3 at {PlatoonPos[11]} with 20 * RecruitSizeModifier men and 0 women
+    attach LC7_Platoon[13] to JapaneseTown1
+    PLAYER of LC7_Platoon[13] = 1
+    run background script LC7_StaticPlatoonsActions(PlatoonPos[11],Melee,LC7_Platoon[13])
+    enable platoon LC7_Platoon[13] respond to town JapaneseTown1 attack
+    set LC7_Platoon[13] focus to {PlayerTown}
+
+    //--JapaneseTown2--//
+    LC7_Platoon[14] = create platoon PLATOON_INFO_JAPANESE_MELEE_3 at {PlatoonPos[12]} with 30 * RecruitSizeModifier men and 0 women
+    attach LC7_Platoon[14] to JapaneseTown2
+    PLAYER of LC7_Platoon[14] = 1
+    run background script LC7_StaticPlatoonsActions(PlatoonPos[12],Melee,LC7_Platoon[14])
+    enable platoon LC7_Platoon[14] respond to town JapaneseTown2 attack
+    set LC7_Platoon[14] focus to {PlayerTown}
+
+    //----Create patrol platoons----//
+
+    if Difficulty >= 3
+        LC7_Platoon[9] = create platoon PLATOON_INFO_JAPANESE_MELEE_3 at {PatrolRouteA[0]} with 75 * RecruitSizeModifier men and 0 women
+        attach LC7_Platoon[9] to JapaneseCapital
+        PLAYER of LC7_Platoon[9] = 1
+        run background script LC7_ArmyBehaivours(LC7_Platoon[9],Melee,Patrol,0,0,0,WaypointsA,0)
+        enable platoon LC7_Platoon[9] respond to town JapaneseCapital attack
+        enable platoon LC7_Platoon[9] respond to town JapaneseTown1 attack
+        enable platoon LC7_Platoon[9] respond to town JapaneseTown2 attack
+    end if
+
+    LC7_Platoon[10] = create platoon PLATOON_INFO_JAPANESE_MELEE_3 at {PatrolRouteB[0]} with 25 * RecruitSizeModifier men and 0 women
+    attach LC7_Platoon[10] to JapaneseCapital
+    PLAYER of LC7_Platoon[10] = 1
+    run background script LC7_ArmyBehaivours(LC7_Platoon[10],Melee,Patrol,0,0,0,WaypointsB,0)
+    enable platoon LC7_Platoon[10] respond to town JapaneseCapital attack
+    enable platoon LC7_Platoon[10] respond to town JapaneseTown1 attack
+    enable platoon LC7_Platoon[10] respond to town JapaneseTown2 attack
+
+    //----Create town archer platoons----//
+
+    LC7_WallArcher[0] = create platoon PLATOON_INFO_JAPANESE_RANGED_3 at {Wall[0]} with 20 * RecruitSizeModifier men and 0 women
+    attach LC7_WallArcher[0] to JapaneseCapital
+    PLAYER of LC7_WallArcher[0] = 1
+    disable platoon LC7_WallArcher[0] respond to town JapaneseCapital attack
+    add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[0] to LC7_WallArcher[0] action queue
+
+    LC7_WallArcher[1] = create platoon PLATOON_INFO_JAPANESE_RANGED_3 at {Wall[1]} with 20 * RecruitSizeModifier men and 0 women
+    attach LC7_WallArcher[1] to JapaneseCapital
+    PLAYER of LC7_WallArcher[1] = 1
+    disable platoon LC7_WallArcher[1] respond to town JapaneseCapital attack
+    add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[1] to LC7_WallArcher[1] action queue
+
+    LC7_WallArcher[2] = create platoon PLATOON_INFO_JAPANESE_RANGED_3 at {Wall[2]} with 20 * RecruitSizeModifier men and 0 women
+    attach LC7_WallArcher[2] to JapaneseCapital
+    PLAYER of LC7_WallArcher[2] = 1
+    disable platoon LC7_WallArcher[2] respond to town JapaneseCapital attack
+    add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[2] to LC7_WallArcher[2] action queue
+
+    LC7_WallArcher[3] = create platoon PLATOON_INFO_JAPANESE_RANGED_3 at {Wall[3]} with 20 * RecruitSizeModifier men and 0 women
+    attach LC7_WallArcher[3] to JapaneseCapital
+    PLAYER of LC7_WallArcher[3] = 1
+    disable platoon LC7_WallArcher[3] respond to town JapaneseCapital attack
+    add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[3] to LC7_WallArcher[3] action queue
+
+    LC7_WallArcher[4] = create platoon PLATOON_INFO_JAPANESE_RANGED_3 at {Wall[4]} with 20 * RecruitSizeModifier men and 0 women
+    attach LC7_WallArcher[4] to JapaneseCapital
+    PLAYER of LC7_WallArcher[4] = 1
+    disable platoon LC7_WallArcher[4] respond to town JapaneseCapital attack
+    add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[4] to LC7_WallArcher[4] action queue
+
+    LC7_WallArcher[5] = create platoon PLATOON_INFO_JAPANESE_RANGED_3 at {Wall[5]} with 20 * RecruitSizeModifier men and 0 women
+    attach LC7_WallArcher[5] to JapaneseCapital
+    PLAYER of LC7_WallArcher[5] = 1
+    disable platoon LC7_WallArcher[5] respond to town JapaneseCapital attack
+    add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[5] to LC7_WallArcher[5] action queue
+
+    LC7_WallArcher[6] = create platoon PLATOON_INFO_JAPANESE_RANGED_3 at {Wall[6]} with 20 * RecruitSizeModifier men and 0 women
+    attach LC7_WallArcher[6] to JapaneseCapital
+    PLAYER of LC7_WallArcher[6] = 1
+    disable platoon LC7_WallArcher[6] respond to town JapaneseCapital attack
+    add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[6] to LC7_WallArcher[6] action queue
+
+    LC7_WallArcher[7] = create platoon PLATOON_INFO_JAPANESE_RANGED_3 at {Wall[7]} with 20 * RecruitSizeModifier men and 0 women
+    attach LC7_WallArcher[7] to JapaneseCapital
+    PLAYER of LC7_WallArcher[7] = 1
+    disable platoon LC7_WallArcher[7] respond to town JapaneseCapital attack
+    add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[7] to LC7_WallArcher[7] action queue
+
+
+    LC7_WallArcher[8] = create platoon PLATOON_INFO_JAPANESE_RANGED_3 at {Wall[8]} with 20 * RecruitSizeModifier men and 0 women
+    attach LC7_WallArcher[8] to JapaneseTown1
+    PLAYER of LC7_WallArcher[8] = 1
+    enable platoon LC7_WallArcher[8] respond to town JapaneseTown1 attack
+    add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[8] to LC7_WallArcher[8] action queue
+
+    LC7_WallArcher[9] = create platoon PLATOON_INFO_JAPANESE_RANGED_3 at {Wall[9]} with 20 * RecruitSizeModifier men and 0 women
+    attach LC7_WallArcher[9] to JapaneseTown1
+    PLAYER of LC7_WallArcher[9] = 1
+    enable platoon LC7_WallArcher[9] respond to town JapaneseTown1 attack
+    add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[9] to LC7_WallArcher[9] action queue
+
+
+    LC7_WallArcher[10] = create platoon PLATOON_INFO_JAPANESE_RANGED_3 at {Wall[10]} with 20 * RecruitSizeModifier men and 0 women
+    attach LC7_WallArcher[10] to JapaneseTown2
+    PLAYER of LC7_WallArcher[10] = 1
+    enable platoon LC7_WallArcher[10] respond to town JapaneseTown2 attack
+    add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[10] to LC7_WallArcher[10] action queue
+
+    LC7_WallArcher[11] = create platoon PLATOON_INFO_JAPANESE_RANGED_3 at {Wall[11]} with 20 * RecruitSizeModifier men and 0 women
+    attach LC7_WallArcher[11] to JapaneseTown2
+    PLAYER of LC7_WallArcher[11] = 1
+    enable platoon LC7_WallArcher[11] respond to town JapaneseTown2 attack
+    add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[11] to LC7_WallArcher[11] action queue
+
+    LC7_WallArcher[12] = create platoon PLATOON_INFO_JAPANESE_RANGED_3 at {Wall[12]} with 20 * RecruitSizeModifier men and 0 women
+    attach LC7_WallArcher[12] to JapaneseTown2
+    PLAYER of LC7_WallArcher[12] = 1
+    enable platoon LC7_WallArcher[12] respond to town JapaneseTown2 attack
+    add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[12] to LC7_WallArcher[12] action queue
+
+    wait until IntroFinished == 1
+
+    //----These look silly in the intro, so create them here----//
+
+    LC7_Platoon[3] = create platoon PLATOON_INFO_JAPANESE_MELEE_3 at {PlatoonPos[3]} + {2,0,-2} with 25 * RecruitSizeModifier men and 0 women
+    attach LC7_Platoon[3] to JapaneseCapital
+    PLAYER of LC7_Platoon[3] = 1
+    run background script LC7_StaticPlatoonsActions(PlatoonPos[3],Melee,LC7_Platoon[3])
+    enable platoon LC7_Platoon[3] respond to town JapaneseCapital attack
+    set LC7_Platoon[3] focus to {PlatoonPos[3]}
+
+    LC7_Platoon[4] = create platoon PLATOON_INFO_JAPANESE_MELEE_3 at {PlatoonPos[4]} + {5,0,-5} with 30 * RecruitSizeModifier men and 0 women
+    attach LC7_Platoon[4] to JapaneseCapital
+    PLAYER of LC7_Platoon[4] = 1
+    run background script LC7_StaticPlatoonsActions(PlatoonPos[4],Melee,LC7_Platoon[4])
+    enable platoon LC7_Platoon[4] respond to town JapaneseCapital attack
+    set LC7_Platoon[4] focus to {PlatoonPos[4]}
+
+    LC7_Platoon[5] = create platoon PLATOON_INFO_JAPANESE_MELEE_3 at {PlatoonPos[5]} + {5,0,-5} with 30 * RecruitSizeModifier men and 0 women
+    attach LC7_Platoon[5] to JapaneseCapital
+    PLAYER of LC7_Platoon[5] = 1
+    run background script LC7_StaticPlatoonsActions(PlatoonPos[5],Melee,LC7_Platoon[5])
+    enable platoon LC7_Platoon[5] respond to town JapaneseCapital attack
+    set LC7_Platoon[5] focus to {PlatoonPos[5]}
+
+
+    //----Create static Siege Weapons----//
+
+    LC7_SiegeCatapult[0] = create siege weapon SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_2 belonging to JapaneseCapital at {StaticSiegePos[0]}
+    set LC7_SiegeCatapult[0] focus to {PlayerTown}
+    add action SIEGEWEAPON_AGENDA_ACTION_DEFEND_POSITION using {StaticSiegePos[0]} to siege weapon LC7_SiegeCatapult[0] action queue
+
+    LC7_SiegeCatapult[1] = create siege weapon SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 belonging to JapaneseCapital at {StaticSiegePos[1]}
+    set LC7_SiegeCatapult[1] focus to {PlayerTown}
+    add action SIEGEWEAPON_AGENDA_ACTION_DEFEND_POSITION using {StaticSiegePos[1]} to siege weapon LC7_SiegeCatapult[2] action queue
+
+    LC7_SiegeCatapult[2] = create siege weapon SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 belonging to JapaneseCapital at {StaticSiegePos[2]}
+    set LC7_SiegeCatapult[2] focus to {PlayerTown}
+    add action SIEGEWEAPON_AGENDA_ACTION_DEFEND_POSITION using {StaticSiegePos[2]} to siege weapon LC7_SiegeCatapult[2] action queue
+
+    LC7_SiegeCatapult[3] = create siege weapon SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 belonging to JapaneseCapital at {StaticSiegePos[3]}
+    set LC7_SiegeCatapult[3] focus to {PlayerTown}
+    add action SIEGEWEAPON_AGENDA_ACTION_DEFEND_POSITION using {StaticSiegePos[3]} to siege weapon LC7_SiegeCatapult[3] action queue
+
+    LC7_SiegeCatapult[4] = create siege weapon SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 belonging to JapaneseCapital at {StaticSiegePos[4]}
+    set LC7_SiegeCatapult[4] focus to {PlayerTown}
+    add action SIEGEWEAPON_AGENDA_ACTION_DEFEND_POSITION using {StaticSiegePos[4]} to siege weapon LC7_SiegeCatapult[4] action queue
+
+    //----Create Attack Wave 1----//
+
+    ///*Let them use old scripts*///
+    if Difficulty > 2
+        LC7_Platoon[15] = create platoon PLATOON_INFO_JAPANESE_MELEE_3 at {PlatoonPos[13]} with 25 * RecruitSizeModifier men and 0 women
+        attach LC7_Platoon[15] to JapaneseCapital
+        PLAYER of LC7_Platoon[15] = 1
+        set LC7_Platoon[15] focus to {PlayerTown}
+
+        LC7_SiegeCatapult[5] = create siege weapon SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 belonging to JapaneseCapital at {PlatoonPos[13]} + {0,0,0}
+        disable siege weapon LC7_SiegeCatapult[5] auto attack
+
+        LC7_Platoon[16] = create platoon PLATOON_INFO_JAPANESE_MELEE_3 at {PlatoonPos[13]} + {50,0,10} with 25 * RecruitSizeModifier men and 0 women
+        attach LC7_Platoon[16] to JapaneseCapital
+        PLAYER of LC7_Platoon[16] = 1
+        set LC7_Platoon[16] focus to {PlayerTown}
+    end if
+
+    run background script LC7_Platoon15Actions
+    run background script LC7_Catapult5Actions
+    run background script LC7_Platoon16Actions
+
+    begin loop
+
+        //if get LC7_RecruitTimer1 time remaining <= 0 or get LC7_RecruitTimer2 time remaining <= 0 or get LC7_RecruitTimer3 time remaining <= 0
+
+            //JapaneseCapital Walls
+            Wall[0] = get wall segment nearest {2014.54,135.62,542.40} radius 15
+            Wall[1] = get wall segment nearest {2012.79,143.57,514.57} radius 15
+            Wall[2] = get wall segment nearest {2084.54,186.76,373.85} radius 15
+            Wall[3] = get wall segment nearest {2186.74,187.16,340.29} radius 15
+            Wall[4] = get wall segment nearest {1422.57,65.95,1391.35} radius 15
+            Wall[5] = get wall segment nearest {1397.80,67.29,1466.61} radius 15
+            Wall[6] = get wall segment nearest {1315.95,56.40,1875.48} radius 15
+            Wall[7] = get wall segment nearest {1325.53,56.18,1945.45} radius 15
+
+            //JapaneseTown1 Walls
+            Wall[8] = get wall segment nearest {1729.99,44.69,1219.22} radius 15
+            Wall[9] = get wall segment nearest {1682.14,44.66,1238.35} radius 15
+
+            //JapaneseTown2 Walls
+            Wall[10] = get wall segment nearest {1103.75,85.13,838.40} radius 15
+            Wall[11] = get wall segment nearest {1101.67,84.63,1094.87} radius 15
+            Wall[12] = get wall segment nearest {938.65,76.97,1176.51} radius 15
+
+            //JapaneseCapital
+            NearestSettlementTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in NearestSettlement min built 1.0
+            if LC7_Platoon[0] not exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get LC7_RecruitTimer1 time remaining <= 0
+                LC7_Platoon[0] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 20 * RecruitSizeModifier
+                LC7_RecruitTimer1 = create timer for 180 * RecruitModifier seconds
+                enable platoon LC7_Platoon[0] respond to town JapaneseCapital attack
+                wait until not LC7_Platoon[0] recruiting
+                run background script LC7_StaticPlatoonsActions(PlatoonPos[0],Melee,LC7_Platoon[0])
+
+            elsif LC7_Platoon[1] not exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get LC7_RecruitTimer1 time remaining <= 0
+                LC7_Platoon[1] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 20 * RecruitSizeModifier
+                LC7_RecruitTimer1 = create timer for 180 * RecruitModifier seconds
+                enable platoon LC7_Platoon[1] respond to town JapaneseCapital attack
+                wait until not LC7_Platoon[1] recruiting
+                run background script LC7_StaticPlatoonsActions(PlatoonPos[1],Melee,LC7_Platoon[1])
+
+            elsif LC7_Platoon[2] not exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get LC7_RecruitTimer1 time remaining <= 0
+                LC7_Platoon[2] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 20 * RecruitSizeModifier
+                LC7_RecruitTimer1 = create timer for 180 * RecruitModifier seconds
+                enable platoon LC7_Platoon[2] respond to town JapaneseCapital attack
+                wait until not LC7_Platoon[2] recruiting
+                run background script LC7_StaticPlatoonsActions(PlatoonPos[2],Melee,LC7_Platoon[2])
+
+            elsif LC7_Platoon[3] not exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get LC7_RecruitTimer1 time remaining <= 0
+                LC7_Platoon[3] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 20 * RecruitSizeModifier
+                LC7_RecruitTimer1 = create timer for 180 * RecruitModifier seconds
+                enable platoon LC7_Platoon[3] respond to town JapaneseCapital attack
+                wait until not LC7_Platoon[3] recruiting
+                run background script LC7_StaticPlatoonsActions(PlatoonPos[3],Melee,LC7_Platoon[3])
+
+            elsif LC7_Platoon[4] not exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get LC7_RecruitTimer1 time remaining <= 0
+                LC7_Platoon[4] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 20 * RecruitSizeModifier
+                LC7_RecruitTimer1 = create timer for 120 * RecruitModifier seconds
+                enable platoon LC7_Platoon[4] respond to town JapaneseCapital attack
+                wait until not LC7_Platoon[4] recruiting
+                run background script LC7_StaticPlatoonsActions(PlatoonPos[4],Melee,LC7_Platoon[4])
+
+            elsif LC7_Platoon[5] not exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get LC7_RecruitTimer1 time remaining <= 0
+                LC7_Platoon[5] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 20 * RecruitSizeModifier
+                LC7_RecruitTimer1 = create timer for 120 * RecruitModifier seconds
+                enable platoon LC7_Platoon[5] respond to town JapaneseCapital attack
+                wait until not LC7_Platoon[5] recruiting
+                run background script LC7_StaticPlatoonsActions(PlatoonPos[5],Melee,LC7_Platoon[5])
+
+            elsif LC7_WallArcher[0] not exists and Wall[0] exists and PLAYER of Wall[0] == 1 and HEALTH of Wall[0] == 1.0 and not town JapaneseCapital is under takeover from player 0 and get LC7_RecruitTimer1 time remaining <= 0
+                LC7_WallArcher[0] = recruit ARMY_UNIT_TYPE_RANGED_2 town JapaneseCapital platoon of size 20 * RecruitSizeModifier
+                LC7_RecruitTimer1 = create timer for 60 * RecruitModifier seconds
+                wait until not LC7_WallArcher[0] recruiting
+                enable platoon LC7_WallArcher[0] respond to town JapaneseCapital attack
+                add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[0] to LC7_WallArcher[0] action queue
+
+            elsif LC7_WallArcher[1] not exists and Wall[1] exists and PLAYER of Wall[1] == 1 and HEALTH of Wall[1] == 1.0 and not town JapaneseCapital is under takeover from player 0 and get LC7_RecruitTimer1 time remaining <= 0
+                LC7_WallArcher[1] = recruit ARMY_UNIT_TYPE_RANGED_2 town JapaneseCapital platoon of size 20 * RecruitSizeModifier
+                LC7_RecruitTimer1 = create timer for 60 * RecruitModifier seconds
+                wait until not LC7_WallArcher[1] recruiting
+                enable platoon LC7_WallArcher[1] respond to town JapaneseCapital attack
+                add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[1] to LC7_WallArcher[1] action queue
+
+            elsif LC7_WallArcher[2] not exists and Wall[2] exists and PLAYER of Wall[2] == 1 and HEALTH of Wall[2] == 1.0 and not town JapaneseCapital is under takeover from player 0 and get LC7_RecruitTimer1 time remaining <= 0
+                LC7_WallArcher[2] = recruit ARMY_UNIT_TYPE_RANGED_2 town JapaneseCapital platoon of size 20 * RecruitSizeModifier
+                LC7_RecruitTimer1 = create timer for 60 * RecruitModifier seconds
+                wait until not LC7_WallArcher[2] recruiting
+                enable platoon LC7_WallArcher[2] respond to town JapaneseCapital attack
+                add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[2] to LC7_WallArcher[2] action queue
+
+            elsif LC7_WallArcher[3] not exists and Wall[3] exists and PLAYER of Wall[3] == 1 and HEALTH of Wall[3] == 1.0 and not town JapaneseCapital is under takeover from player 0 and get LC7_RecruitTimer1 time remaining <= 0
+                LC7_WallArcher[3] = recruit ARMY_UNIT_TYPE_RANGED_2 town JapaneseCapital platoon of size 20 * RecruitSizeModifier
+                LC7_RecruitTimer1 = create timer for 60 * RecruitModifier seconds
+                wait until not LC7_WallArcher[3] recruiting
+                enable platoon LC7_WallArcher[3] respond to town JapaneseCapital attack
+                add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[3] to LC7_WallArcher[3] action queue
+
+            //Attack Nearest Settlement
+            elsif LC7_Platoon[24] not exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get AttackNearestTownTimer time remaining <= 0 and AttackingPlatoons == 1
+                LC7_Platoon[24] = recruit ARMY_UNIT_TYPE_RANGED_4 town JapaneseCapital platoon of size 60 * RecruitSizeModifier
+                LC7_RecruitTimer1 = create timer for 200 * RecruitModifier seconds
+                enable platoon LC7_Platoon[24] respond to town JapaneseCapital attack
+                wait until not LC7_Platoon[24] recruiting
+                run background script LC7_ArmyBehaivours(LC7_Platoon[24],Ranged,Conqueror,0,0,0,0,0)
+        
+            elsif LC7_Platoon[25] not exists and LC7_Platoon[24] exists and {LC7_Platoon[24]} near {JapaneseCapital} radius 550 and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get AttackNearestTownTimer time remaining <= 0 and AttackingPlatoons == 1
+                LC7_Platoon[25] = recruit ARMY_UNIT_TYPE_RANGED_4 town JapaneseCapital platoon of size 40 * RecruitSizeModifier
+                LC7_RecruitTimer1 = create timer for 200 * RecruitModifier seconds
+                enable platoon LC7_Platoon[25] respond to town JapaneseCapital attack
+                wait until not LC7_Platoon[25] recruiting
+                run background script LC7_ArmyBehaivours(LC7_Platoon[25],Ranged,Conqueror,0,0,0,0,0)
+
+            elsif LC7_SiegeCatapult[11] not exists and LC7_Platoon[24] exists and {LC7_Platoon[24]} near {JapaneseCapital} radius 550 and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get AttackNearestTownTimer time remaining <= 0 and AttackingPlatoons == 1
+                LC7_SiegeCatapult[11] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_4 town JapaneseCapital siege weapon
+                LC7_RecruitTimer1 = create timer for 200 * RecruitModifier seconds
+                run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[11],Conqueror,0,0,0)
+
+            elsif LC7_SiegeCatapult[12] not exists and LC7_Platoon[24] exists and {LC7_Platoon[24]} near {JapaneseCapital} radius 550 and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get AttackNearestTownTimer time remaining <= 0 and AttackingPlatoons == 1
+                LC7_SiegeCatapult[12] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_4 town JapaneseCapital siege weapon
+                LC7_RecruitTimer1 = create timer for 200 * RecruitModifier seconds
+                run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[12],Conqueror,0,0,0)
+    
+            //Attack PlayerTown
+            elsif LC7_Platoon[16] not exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get LC7_RecruitTimer1 time remaining <= 0 and LC7_LargeSiegeIsRunning == 0
+                LC7_Platoon[16] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 30 * RecruitSizeModifier
+                LC7_RecruitTimer1 = create timer for 160 * RecruitModifier seconds
+                enable platoon LC7_Platoon[16] respond to town JapaneseCapital attack
+                wait until not LC7_Platoon[16] recruiting
+
+            elsif LC7_Platoon[17] not exists and TownsConverted >= 2 and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get LC7_RecruitTimer1 time remaining <= 0 and get LC7_CreatureAttackTimer time remaining <= 0 and LC7_LargeSiegeIsRunning == 0
+                LC7_CreatureAttackTimer = create timer for 1000 * RecruitModifier seconds
+                LC7_Platoon[17] = recruit ARMY_UNIT_TYPE_RANGED_2 town JapaneseCapital platoon of size 75 * RecruitSizeModifier
+                LC7_RecruitTimer1 = create timer for 160 * RecruitModifier seconds
+                enable platoon LC7_Platoon[17] respond to town JapaneseCapital attack
+                wait until not LC7_Platoon[17] recruiting
+
+            elsif LC7_Platoon[15] not exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get LC7_RecruitTimer1 time remaining <= 0  and get LC7_AttackTimer time remaining <= 0 and LC7_LargeSiegeIsRunning == 0
+                LC7_Platoon[15] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 20 * RecruitSizeModifier
+                LC7_RecruitTimer1 = create timer for 160 * RecruitModifier seconds
+                LC7_AttackTimer = create timer for ATTACK_DELAY seconds
+                ATTACK_DELAY = ATTACK_DELAY - 75
+                enable platoon LC7_Platoon[15] respond to town JapaneseCapital attack
+                wait until not LC7_Platoon[15] recruiting
+
+            elsif LC7_SiegeCatapult[5] not exists and LC7_Platoon[15] exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get LC7_RecruitTimer1 time remaining <= 0 and get LC7_AttackTimer time remaining <= 0 and LC7_LargeSiegeIsRunning == 0
+                ATTACK_DELAY = ATTACK_DELAY - 75
+                LC7_SiegeCatapult[5] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseCapital siege weapon
+                LC7_RecruitTimer1 = create timer for 100 * RecruitModifier seconds
+
+            //JapaneseTown1
+            elsif LC7_Platoon[11] not exists and PLAYER of JapaneseTown1 == 1 and not town JapaneseTown1 is under takeover from player 0 and get LC7_RecruitTimer2 time remaining <= 0
+                LC7_Platoon[11] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown1 platoon of size 30 * RecruitSizeModifier
+                LC7_RecruitTimer2 = create timer for 180 * RecruitModifier seconds
+                enable platoon LC7_Platoon[11] respond to town JapaneseTown1 attack
+                wait until not LC7_Platoon[11] recruiting
+                run background script LC7_StaticPlatoonsActions(PlatoonPos[9],Melee,LC7_Platoon[11])
+
+            elsif LC7_Platoon[12] not exists and PLAYER of JapaneseTown1 == 1 and not town JapaneseTown1 is under takeover from player 0 and get LC7_RecruitTimer2 time remaining <= 0
+                LC7_Platoon[12] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown1 platoon of size 30 * RecruitSizeModifier
+                LC7_RecruitTimer2 = create timer for 180 * RecruitModifier seconds
+                enable platoon LC7_Platoon[12] respond to town JapaneseTown1 attack
+                wait until not LC7_Platoon[12] recruiting
+                run background script LC7_StaticPlatoonsActions(PlatoonPos[10],Melee,LC7_Platoon[12])
+
+            elsif LC7_Platoon[13] not exists and PLAYER of JapaneseTown1 == 1 and not town JapaneseTown1 is under takeover from player 0 and get LC7_RecruitTimer2 time remaining <= 0
+                LC7_Platoon[13] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown1 platoon of size 30 * RecruitSizeModifier
+                LC7_RecruitTimer2 = create timer for 180 * RecruitModifier seconds
+                enable platoon LC7_Platoon[13] respond to town JapaneseTown1 attack
+                wait until not LC7_Platoon[13] recruiting
+                run background script LC7_StaticPlatoonsActions(PlatoonPos[11],Melee,LC7_Platoon[13])
+
+            elsif LC7_WallArcher[8] not exists and Wall[8] exists and PLAYER of Wall[8] == 1 and HEALTH of Wall[8] == 1.0 and not town JapaneseTown1 is under takeover from player 0 and get LC7_RecruitTimer2 time remaining <= 0
+                LC7_WallArcher[8] = recruit ARMY_UNIT_TYPE_RANGED_2 town JapaneseTown1 platoon of size 20 * RecruitSizeModifier
+                LC7_RecruitTimer2 = create timer for 60 * RecruitModifier seconds
+                wait until not LC7_WallArcher[8] recruiting
+                enable platoon LC7_WallArcher[8] respond to town JapaneseTown1 attack
+                add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[8] to LC7_WallArcher[8] action queue
+
+            elsif LC7_WallArcher[9] not exists and Wall[9] exists and PLAYER of Wall[9] == 1 and HEALTH of Wall[9] == 1.0 and not town JapaneseTown1 is under takeover from player 0 and get LC7_RecruitTimer2 time remaining <= 0
+                LC7_WallArcher[9] = recruit ARMY_UNIT_TYPE_RANGED_2 town JapaneseTown1 platoon of size 20 * RecruitSizeModifier
+                LC7_RecruitTimer2 = create timer for 60 * RecruitModifier seconds
+                wait until not LC7_WallArcher[9] recruiting
+                enable platoon LC7_WallArcher[9] respond to town JapaneseTown1 attack
+                add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[9] to LC7_WallArcher[9] action queue
+
+            //Attack Nearest Settlement
+            elsif LC7_Platoon[25] not exists and LC7_Platoon[24] exists and {LC7_Platoon[24]} near {JapaneseCapital} radius 550 and PLAYER of JapaneseTown1 == 1 and not town JapaneseTown1 is under takeover from player 0 and get AttackNearestTownTimer time remaining <= 0 and AttackingPlatoons == 1
+                LC7_Platoon[25] = recruit ARMY_UNIT_TYPE_RANGED_4 town JapaneseTown1 platoon of size 40 * RecruitSizeModifier
+                LC7_RecruitTimer2 = create timer for 200 * RecruitModifier seconds
+                enable platoon LC7_Platoon[25] respond to town JapaneseTown1 attack
+                wait until not LC7_Platoon[25] recruiting
+                run background script LC7_ArmyBehaivours(LC7_Platoon[25],Ranged,Conqueror,0,0,0,0,0)
+
+            //Attack PlayerTown
+            elsif LC7_Platoon[22] not exists and PLAYER of JapaneseTown1 == 1 and not town JapaneseTown1 is under takeover from player 0 and get LC7_RecruitTimer2 time remaining <= 0 and LC7_LargeSiegeIsRunning == 0 and TownsConverted >= 4
+                LC7_Platoon[22] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown1 platoon of size 25 * RecruitSizeModifier
+                LC7_RecruitTimer2 = create timer for 160 * RecruitModifier seconds
+                enable platoon LC7_Platoon[22] respond to town JapaneseTown1 attack
+                wait until not LC7_Platoon[22] recruiting
+                AttackingPosition = marker at {SiegeAttackPos[0]}//+{40,0,40}
+                AttackingPositionFallBack = marker at {SiegeAttackPrePos[0]}//+{40,0,40}
+                run background script LC7_ArmyBehaivours(LC7_Platoon[22],Melee,Escort,LC7_SiegeCatapult[9],AttackingPosition,AttackingPositionFallBack,0,0)
+
+            elsif LC7_Platoon[23] not exists and PLAYER of JapaneseTown1 == 1 and not town JapaneseTown1 is under takeover from player 0 and get LC7_RecruitTimer2 time remaining <= 0 and LC7_LargeSiegeIsRunning == 0 and TownsConverted >= 4
+                LC7_Platoon[23] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown1 platoon of size 25 * RecruitSizeModifier
+                LC7_RecruitTimer2 = create timer for 160 * RecruitModifier seconds
+                enable platoon LC7_Platoon[23] respond to town JapaneseTown1 attack
+                wait until not LC7_Platoon[23] recruiting
+                AttackingPosition = marker at {SiegeAttackPos[1]}//+{40,0,40}
+                AttackingPositionFallBack = marker at {SiegeAttackPrePos[1]}//+{40,0,40}
+                run background script LC7_ArmyBehaivours(LC7_Platoon[23],Melee,Escort,LC7_SiegeCatapult[10],AttackingPosition,AttackingPositionFallBack,0,0)
+            
+            elsif LC7_SiegeCatapult[9] not exists and PLAYER of JapaneseTown1 == 1 and not town JapaneseTown1 is under takeover from player 0 and get LC7_RecruitTimer2 time remaining <= 0 and LC7_LargeSiegeIsRunning == 0 and TownsConverted >= 4
+                LC7_SiegeCatapult[9] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseTown1 siege weapon
+                LC7_RecruitTimer2 = create timer for 100 * RecruitModifier seconds
+                run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[9],0,SiegeRoute2[0],SiegeRoute2[1],SiegeRoute2[2])
+
+            elsif LC7_SiegeCatapult[10] not exists and PLAYER of JapaneseTown1 == 1 and not town JapaneseTown1 is under takeover from player 0 and get LC7_RecruitTimer2 time remaining <= 0 and LC7_LargeSiegeIsRunning == 0 and TownsConverted >= 4
+                LC7_SiegeCatapult[10] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseTown1 siege weapon
+                LC7_RecruitTimer2 = create timer for 100 * RecruitModifier seconds
+                run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[10],0,SiegeRoute4[0],SiegeRoute4[1],SiegeRoute4[2])
+
+            //JapaneseTown2
+            //Attack Nearest Settlement
+            elsif LC7_Platoon[25] not exists and LC7_Platoon[24] exists and {LC7_Platoon[24]} near {JapaneseCapital} radius 550 and PLAYER of JapaneseTown2 == 1 and not town JapaneseTown2 is under takeover from player 0 and get AttackNearestTownTimer time remaining <= 0 and AttackingPlatoons == 1
+                LC7_Platoon[25] = recruit ARMY_UNIT_TYPE_RANGED_4 town JapaneseTown2 platoon of size 30 * RecruitSizeModifier
+                LC7_RecruitTimer3 = create timer for 200 * RecruitModifier seconds
+                enable platoon LC7_Platoon[25] respond to town JapaneseTown2 attack
+                wait until not LC7_Platoon[25] recruiting
+                run background script LC7_ArmyBehaivours(LC7_Platoon[25],Ranged,Conqueror,0,0,0,0,0)
+    
+            elsif LC7_Platoon[14] not exists and PLAYER of JapaneseTown2 == 1 and not town JapaneseTown2 is under takeover from player 0 and get LC7_RecruitTimer3 time remaining <= 0
+                LC7_Platoon[14] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown2 platoon of size 40 * RecruitSizeModifier
+                LC7_RecruitTimer3 = create timer for 180 * RecruitModifier seconds
+                enable platoon LC7_Platoon[14] respond to town JapaneseTown2 attack
+                wait until not LC7_Platoon[14] recruiting
+                run background script LC7_StaticPlatoonsActions(PlatoonPos[12],Melee,LC7_Platoon[14])
+
+            elsif LC7_WallArcher[10] not exists and Wall[10] exists and PLAYER of Wall[10] == 1 and HEALTH of Wall[10] == 1.0 and not town JapaneseTown2 is under takeover from player 0 and get LC7_RecruitTimer3 time remaining <= 0
+                LC7_WallArcher[10] = recruit ARMY_UNIT_TYPE_RANGED_2 town JapaneseTown2 platoon of size 20 * RecruitSizeModifier
+                LC7_RecruitTimer3 = create timer for 60 * RecruitModifier seconds
+                wait until not LC7_WallArcher[10] recruiting
+                enable platoon LC7_WallArcher[10] respond to town JapaneseTown2 attack
+                add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[10] to LC7_WallArcher[10] action queue
+
+            elsif LC7_WallArcher[11] not exists and Wall[11] exists and PLAYER of Wall[11] == 1 and HEALTH of Wall[11] == 1.0 and not town JapaneseTown2 is under takeover from player 0 and get LC7_RecruitTimer3 time remaining <= 0
+                LC7_WallArcher[11] = recruit ARMY_UNIT_TYPE_RANGED_2 town JapaneseTown2 platoon of size 20 * RecruitSizeModifier
+                LC7_RecruitTimer3 = create timer for 60 * RecruitModifier seconds
+                wait until not LC7_WallArcher[11] recruiting
+                enable platoon LC7_WallArcher[11] respond to town JapaneseTown2 attack
+                add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[11] to LC7_WallArcher[11] action queue
+
+            elsif LC7_WallArcher[12] not exists and Wall[12] exists and PLAYER of Wall[12] == 1 and HEALTH of Wall[12] == 1.0 and not town JapaneseTown2 is under takeover from player 0 and get LC7_RecruitTimer3 time remaining <= 0
+                LC7_WallArcher[12] = recruit ARMY_UNIT_TYPE_RANGED_2 town JapaneseTown2 platoon of size 20 * RecruitSizeModifier
+                LC7_RecruitTimer3 = create timer for 60 * RecruitModifier seconds
+                wait until not LC7_WallArcher[12] recruiting
+                enable platoon LC7_WallArcher[12] respond to town JapaneseTown2 attack
+                add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[12] to LC7_WallArcher[12] action queue
+
+            end if
+        //end if
+
+        if PLAYER of JapaneseTown1 == 0 or PLAYER of JapaneseTown2 == 0 or PLAYER of MinorTown5 == 0 or PLAYER of MinorTown6 == 0
+            //Take over a town and start attacking the player a lot    
+            if NearestSettlement != 0 and PLAYER of NearestSettlement == 0
+                AttackingPlatoons = 1
+            end if
+
+        elsif PLAYER of NearestSettlement == 1
+            AttackingPlatoons = 0
+        end if
+
+        if TownsAggressiveConverted >= 1 or TownsConverted >= 3
+            if HurricaneBuilding == 0
+                HurricaneBuilding = 1
+                build all town JapaneseCapital buildings in group 1
+                run background script HurricaneResourceManager
+            end if
+        end if
+
+        if Difficulty >= 4
+            if TownsConverted >= 4 or get army size in town PlayerTown > 80
+                if TownsConverted >= 2 //If player has a large army, start siege earlier
+                    if PLAYER of JapaneseTown1 == 1 and not town JapaneseTown1 is under takeover from player 0 and LC7_LargeSiegeIsRunning == 0 and SiegeCheck == 0
+                        SiegeCheck = 1
+                        wait number from 20 to 30 seconds
+                        LC7_LargeSiegeIsRunning = 1
+                    elsif not PLAYER of JapaneseTown1 == 1 and SiegeCheck == 0
+                        SiegeCheck = 1
+                    end if
+                end if
+            end if
+
+        elsif Difficulty == 3
+            if TownsConverted >= 5 or get army size in town PlayerTown > 80
+                if TownsConverted >= 3 //If player has a large army, start siege earlier
+                    if PLAYER of JapaneseTown1 == 1 and not town JapaneseTown1 is under takeover from player 0 and LC7_LargeSiegeIsRunning == 0 and SiegeCheck == 0
+                        SiegeCheck = 1
+                        wait number from 20 to 30 seconds
+                        LC7_LargeSiegeIsRunning = 1
+                    elsif not PLAYER of JapaneseTown1 == 1 and SiegeCheck == 0
+                        SiegeCheck = 1
+                    end if
+                end if
+            end if
+
+        elsif Difficulty <= 2
+            if TownsConverted >= 6 or get army size in town PlayerTown > 80
+                if TownsConverted >= 4 //If player has a large army, start siege earlier
+                    if PLAYER of JapaneseTown1 == 1 and not town JapaneseTown1 is under takeover from player 0 and LC7_LargeSiegeIsRunning == 0 and SiegeCheck == 0
+                        SiegeCheck = 1
+                        wait number from 20 to 30 seconds
+                        LC7_LargeSiegeIsRunning = 1
+                    elsif not PLAYER of JapaneseTown1 == 1 and SiegeCheck == 0
+                        SiegeCheck = 1
+                    end if
+                end if
+            end if
+        end if
+
+        if SendCreature == 1
+            SendCreature = 2
+            LC7_Platoon[17] = recruit ARMY_UNIT_TYPE_RANGED_2 town JapaneseCapital platoon of size 45 * RecruitSizeModifier
+            run background script LC7_Platoon17Actions
+            LC7_CreatureAttackTimer = create timer for 1200 * RecruitModifier seconds
+        end if
+
+        if get HurricaneTimer time remaining <= 300 and PLAYER of JapaneseCapital == 1 and HEALTH of AIEpic >= 1.0 and CHARGE of AIEpic != 1.0
+            CHARGE of AIEpic = 1.0
+        end if
+
+        if HEALTH of AIEpic >= 1.0 and get HurricaneTimer time remaining <= 0 and PLAYER of JapaneseCapital == 1 and CinemaIsRunning == 0 and not town PlayerTown is under takeover from player 1 and PLAYER of PlayerTown == 0
+            if TownsConverted >= 5 or PLAYER of JapaneseTown1 != 1 or PLAYER of JapaneseTown2 != 1
+
+                enable predefined sky "HURRICANE" time 9
+                HurricaneFired = 1
+                Number = number from 1 to 3
+                if Number == 1
+                    CastEpicPos = marker at {2316.81,88.55,1641.10}
+                elsif Number == 2
+                    CastEpicPos = marker at {2405.45,117.65,1296.47}
+                else
+                    CastEpicPos = marker at {2171.62,165.70,1175.94}
+                end if
+
+                run script EpicTargeter(PlayerTown,marker at {CastEpicPos},0)
+                    
+                HurricaneWarning = create visual effect VISUAL_EFFECT_EPIC_TARGET_WARNING at {ET_FireEpicLocation} time 15 target {ET_FireEpicLocation}
+                wait 15 seconds
+                EpicHurr = create hurricane at {ET_FireEpicLocation} player 1 direction {PlayerTown}
+                    
+                run background script LC7_Hurricane(AIEpic, EpicHurr)
+
+                HurricaneTimer = create timer for HURRICANEDELAY * EpicModifier seconds
+                HURRICANEDELAY += 500
+
+            end if
+        end if
+    end loop
+
+end script LC7_Japanese_Capital
+
+begin script LC7_AttackNearestTownTimer
+
+start
+
+begin loop
+
+    if get AttackNearestTownTimer time remaining <= 0
+        wait 45 seconds
+        AttackNearestTownTimer = create timer for 1000 * RecruitModifier seconds
+    end if
+
+end loop
+
+end script LC7_AttackNearestTownTimer
+
+begin script LC7_DefendPlatoons
+
+    PlayerPlatoon = 0
+    DefendRecruitTimer1 = create timer for 0 seconds
+    DefendRecruitTimer2 = create timer for 0 seconds
+    DefendRecruitTimer3 = create timer for 0 seconds
+
+start
+
+    begin loop
+        PlayerPlatoon = get platoon of player 0 nearest {JapaneseCapital} radius 300
+        if PlayerPlatoon exists and LC7_Platoon[26] not exists and LC7_Platoon[27] not exists and get DefendRecruitTimer1 time remaining <= 0 and PLAYER of JapaneseCapital == 1 //Makes a couple of defend platoons
+            LC7_Platoon[26] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size number from 25 to 25 * RecruitSizeModifier
+            enable platoon LC7_Platoon[26] respond to town JapaneseCapital attack
+            wait until not LC7_Platoon[26] recruiting
+            
+            LC7_Platoon[27] = recruit ARMY_UNIT_TYPE_RANGED_3 town JapaneseCapital platoon of size number from 20 to 20 * RecruitSizeModifier
+            enable platoon LC7_Platoon[27] respond to town JapaneseCapital attack
+            wait until not LC7_Platoon[27] recruiting
+            
+            DefendRecruitTimer1 = create timer for 240 * RecruitModifier seconds
+        end if
+
+        PlayerPlatoon = get platoon of player 0 nearest {JapaneseTown1} radius 300
+        if PlayerPlatoon exists and LC7_Platoon[28] not exists and LC7_Platoon[29] not exists and get DefendRecruitTimer2 time remaining <= 0 and PLAYER of JapaneseTown1 == 1 //Makes a couple of defend platoons
+            LC7_Platoon[28] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown1 platoon of size number from 20 to 20 * RecruitSizeModifier
+            enable platoon LC7_Platoon[28] respond to town JapaneseTown1 attack
+            wait until not LC7_Platoon[28] recruiting
+            
+            LC7_Platoon[29] = recruit ARMY_UNIT_TYPE_RANGED_3 town JapaneseTown1 platoon of size number from 20 to 20 * RecruitSizeModifier
+            enable platoon LC7_Platoon[29] respond to town JapaneseTown1 attack
+            wait until not LC7_Platoon[29] recruiting
+            
+            DefendRecruitTimer2 = create timer for 240 * RecruitModifier seconds
+        end if
+
+        PlayerPlatoon = get platoon of player 0 nearest {JapaneseTown2} radius 300
+        if PlayerPlatoon exists and LC7_Platoon[30] not exists and LC7_Platoon[31] not exists and get DefendRecruitTimer3 time remaining <= 0 and PLAYER of JapaneseTown2 == 1 //Makes a couple of defend platoons
+            LC7_Platoon[30] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown2 platoon of size number from 20 to 20 * RecruitSizeModifier
+            enable platoon LC7_Platoon[30] respond to town JapaneseTown2 attack
+            wait until not LC7_Platoon[30] recruiting
+            
+            LC7_Platoon[31] = recruit ARMY_UNIT_TYPE_RANGED_3 town JapaneseTown2 platoon of size number from 20 to 20 * RecruitSizeModifier
+            enable platoon LC7_Platoon[31] respond to town JapaneseTown2 attack
+            wait until not LC7_Platoon[31] recruiting
+            
+            DefendRecruitTimer3 = create timer for 240 * RecruitModifier seconds
+        end if
+    end loop
+
+end script LC7_DefendPlatoons
+
+begin script HurricaneResourceManager
+
+    Counter = 0
+    Tree = 0
+
+start
+
+begin loop
+    AIEpic = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_HURRICANE at {2103.98,187.82,288.45} radius 150
+    
+until AIEpic exists
+end loop
+
+disable AIEpic hurt by fire
+
+begin loop
+    
+    while Counter < 100 and not {AIEpic} viewed
+        add resource ORE number from 40 to 50 to AIEpic
+        add resource WOOD number from 80 to 90 to AIEpic
+        
+        wait number from 2 to 6 seconds
+        
+        Counter++
+    end while
+    
+    until Counter == 100
+end loop
+
+wait until HEALTH of AIEpic >= 1.0
+
+JAPANESE_CAPITAL_IMPRESSIVENESS = JAPANESE_CAPITAL_IMPRESSIVENESS + 2275
+
+begin loop
+    Tree = get MOBILE_OBJECT at {AIEpic} radius 20
+    if Tree on fire and Tree is HELD
+        empty player hand
+        delete Tree
+    end if
+end loop
+
+end script HurricaneResourceManager
+
+begin script LC7_LargeSiegeScript
+
+start
+
+    wait until LC7_LargeSiegeIsRunning == 1
+
+    run background script LC7_LargeSiegePlatoonManager
+    run background script LC7_LargeSiegeMusicManager
+
+    wait 80 seconds
+    
+    LC7_LargeSiegeLaunchAttack = 1
+
+    wait 275 seconds
+
+    LC7_LargeSiegeIsRunning = 0
+
+end script LC7_LargeSiegeScript
+
+begin script LC7_LargeSiegePlatoonManager
+
+    AttackingPosition = 0
+    AttackingPositionFallBack = 0
+
+start
+
+begin loop
+
+    if LC7_Platoon[18] not exists and PLAYER of JapaneseTown1 == 1 and LC7_LargeSiegeIsRunning == 1
+        wait number from 5 to 10 seconds
+        LC7_Platoon[18] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown1 platoon of size 25 * RecruitSizeModifier
+        wait until not LC7_Platoon[18] recruiting
+        AttackingPosition = marker at {SiegeAttackPos[0]}
+        AttackingPositionFallBack = marker at {SiegeAttackPrePos[0]}
+        run background script LC7_ArmyBehaivours(LC7_Platoon[18],Melee,Special,0,AttackingPosition,AttackingPositionFallBack,0,0)
+    end if
+
+    if LC7_Platoon[19] not exists and PLAYER of JapaneseTown1 == 1 and LC7_LargeSiegeIsRunning == 1 and Difficulty >= 2
+        wait number from 5 to 10 seconds
+        LC7_Platoon[19] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown1 platoon of size 25 * RecruitSizeModifier
+        wait until not LC7_Platoon[19] recruiting
+    end if
+
+    if LC7_Platoon[20] not exists and PLAYER of JapaneseTown1 == 1 and LC7_LargeSiegeIsRunning == 1 and Difficulty >= 3
+        wait number from 5 to 10 seconds
+        LC7_Platoon[20] = recruit ARMY_UNIT_TYPE_RANGED_2 town JapaneseTown1 platoon of size 25 * RecruitSizeModifier
+        wait until not LC7_Platoon[20] recruiting
+        AttackingPosition = marker at {SiegeAttackPos[2]}
+        AttackingPositionFallBack = marker at {SiegeAttackPrePos[2]}
+        run background script LC7_ArmyBehaivours(LC7_Platoon[20],Ranged,Special,0,AttackingPosition,AttackingPositionFallBack,0,0)
+    end if
+
+    if LC7_Platoon[21] not exists and PLAYER of JapaneseTown1 == 1 and LC7_LargeSiegeIsRunning == 1 and Difficulty >= 4
+        wait number from 5 to 10 seconds
+        LC7_Platoon[21] = recruit ARMY_UNIT_TYPE_RANGED_2 town JapaneseTown1 platoon of size 25 * RecruitSizeModifier
+        wait until not LC7_Platoon[21] recruiting
+        AttackingPosition = marker at {SiegeAttackPos[3]}
+        AttackingPositionFallBack = marker at {SiegeAttackPrePos[3]}
+        run background script LC7_ArmyBehaivours(LC7_Platoon[21],Ranged,Special,0,AttackingPosition,AttackingPositionFallBack,0,0)
+    end if
+
+    if LC7_SiegeCatapult[6] not exists and PLAYER of JapaneseTown1 == 1 and LC7_LargeSiegeIsRunning == 1 and LC7_LargeSiegeLaunchAttack == 1
+        wait number from 3 to 9 seconds
+        LC7_SiegeCatapult[6] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseTown1 siege weapon
+        disable siege weapon LC7_SiegeCatapult[6] auto attack
+        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[6],0,SiegeRoute2[0],SiegeRoute2[1],SiegeRoute2[2])
+    end if
+
+    if LC7_SiegeCatapult[7] not exists and PLAYER of JapaneseTown1 == 1 and LC7_LargeSiegeIsRunning == 1 and LC7_LargeSiegeLaunchAttack == 1 and Difficulty >= 2
+        wait number from 3 to 9 seconds
+        LC7_SiegeCatapult[7] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseTown1 siege weapon
+        disable siege weapon LC7_SiegeCatapult[7] auto attack
+        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[7],0,SiegeRoute3[0],SiegeRoute3[1],SiegeRoute3[2])
+    end if
+
+    if LC7_SiegeCatapult[8] not exists and PLAYER of JapaneseTown1 == 1 and LC7_LargeSiegeIsRunning == 1 and LC7_LargeSiegeLaunchAttack == 1 and Difficulty >= 4
+        wait number from 3 to 9 seconds
+        LC7_SiegeCatapult[8] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseTown1 siege weapon
+        disable siege weapon LC7_SiegeCatapult[8] auto attack
+        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[8],0,SiegeRoute4[0],SiegeRoute4[1],SiegeRoute4[2])
+    end if
+
+    until LC7_LargeSiegeIsRunning == 0
+end loop
+
+end script LC7_LargeSiegePlatoonManager
+
+begin script LC7_LargeSiegeMusicManager
+
+    CSMixer = 0
+
+start
+
+    wait 140 seconds
+    CSMixer = create mixer
+    set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 0.0 with fadetime 0
+    start music "cut_scene_battle_02 " loop 2
+    set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 1.0 with fadetime 25
+
+    wait until LC7_LargeSiegeIsRunning == 0
+
+    wait 100 seconds
+
+    stop music with fadetime 10
+
+end script LC7_LargeSiegeMusicManager
+
+begin script LC7_JapaneseCapitalVillagerManager
+
+    Counter = 0
+    Villager = 0
+    HousesBuilt = 0
+
+start
+
+begin loop
+
+    wait 900 * BuilderModifier seconds
+    Counter = 0
+
+    if PLAYER of JapaneseCapital == 1
+        if HousesBuilt == 0
+            HousesBuilt = 1
+            build all town JapaneseCapital buildings in group 10
+        end if
+        begin loop
+            Villager = create random villager of tribe TRIBE_TYPE_JAPANESE at {JapaneseCapital} + {number from -12 to 12, 0, number from -12 to 12}//create VILLAGER VILLAGER_INFO_JAPANESE_FORESTER_MALE at {1013.581, 132.333, 2002.798} + {number from -3 to 3, 0, number from -3 to 3}
+            attach Villager to JapaneseCapital
+            release Villager
+            
+            wait number from 6 to 10 seconds
+            Counter++
+            until Counter >= 25 or PLAYER of JapaneseCapital != 1
+        end loop
+    end if
+
+end loop
+
+end script LC7_JapaneseCapitalVillagerManager
+
+begin script LC7_JapaneseTown1VillagerManager
+
+    Counter = 0
+    Villager = 0
+    HousesBuilt = 0
+
+start
+
+begin loop
+
+    wait 900 * BuilderModifier seconds
+    Counter = 0
+
+    if PLAYER of JapaneseTown1 == 1
+        if HousesBuilt == 0
+            HousesBuilt = 1
+            build all town JapaneseTown1 buildings in group 10
+        end if
+        begin loop
+            Villager = create random villager of tribe TRIBE_TYPE_JAPANESE at {JapaneseTown1} + {number from -12 to 12, 0, number from -12 to 12}//create VILLAGER VILLAGER_INFO_JAPANESE_FORESTER_MALE at {1013.581, 132.333, 2002.798} + {number from -3 to 3, 0, number from -3 to 3}
+            attach Villager to JapaneseTown1
+            release Villager
+            
+            wait number from 6 to 10 seconds
+            Counter++
+            until Counter >= 20 or PLAYER of JapaneseTown1 != 1
+        end loop
+    end if
+
+end loop
+
+end script LC7_JapaneseTown1VillagerManager
+
+begin script LC7_JapaneseTown2VillagerManager
+
+    Counter = 0
+    Villager = 0
+    HousesBuilt = 0
+
+start
+
+begin loop
+
+    wait 900 * BuilderModifier seconds
+    Counter = 0
+
+    if PLAYER of JapaneseTown2 == 1
+        if HousesBuilt == 0
+            HousesBuilt = 1
+            build all town JapaneseTown2 buildings in group 10
+        end if
+        begin loop
+            Villager = create random villager of tribe TRIBE_TYPE_JAPANESE at {JapaneseTown2} + {number from -12 to 12, 0, number from -12 to 12}//create VILLAGER VILLAGER_INFO_JAPANESE_FORESTER_MALE at {1013.581, 132.333, 2002.798} + {number from -3 to 3, 0, number from -3 to 3}
+            attach Villager to JapaneseTown2
+            release Villager
+            
+            wait number from 6 to 10 seconds
+            Counter++
+            until Counter >= 20 or PLAYER of JapaneseTown2 != 1
+        end loop
+    end if
+
+end loop
+
+end script LC7_JapaneseTown2VillagerManager
+
+begin script LC7_JapaneseCapitalRessourceManager
+
+start
+
+begin loop
+
+    wait 5 seconds
+
+    if PLAYER of JapaneseCapital == 1
+        if (get town JapaneseCapital RESOURCE_TYPE_ORE total < 27327)
+            add resource RESOURCE_TYPE_ORE number from 100 to 500 to JapaneseCapital
+        elsif (get town JapaneseCapital RESOURCE_TYPE_WOOD total < 30891)
+            add resource RESOURCE_TYPE_WOOD number from 500 to 1000 to JapaneseCapital
+        elsif (get town JapaneseCapital RESOURCE_TYPE_FOOD total < 32000)
+            add resource RESOURCE_TYPE_FOOD number from 500 to 1500 to JapaneseCapital
+        end if
+    end if
+    
+    until PLAYER of JapaneseCapital != 1
+end loop    
+
+end script LC7_JapaneseCapitalRessourceManager
+
+begin script LC7_JapaneseTown1RessourceManager
+
+start
+
+begin loop
+
+    wait 5 seconds
+
+    if PLAYER of JapaneseTown1 == 1
+        if (get town JapaneseTown1 RESOURCE_TYPE_ORE total < 10000)
+            add resource RESOURCE_TYPE_ORE number from 100 to 500 to JapaneseTown1
+        elsif (get town JapaneseTown1 RESOURCE_TYPE_WOOD total < 20000)
+            add resource RESOURCE_TYPE_WOOD number from 500 to 1000 to JapaneseTown1
+        elsif (get town JapaneseTown1 RESOURCE_TYPE_FOOD total < 20000)
+            add resource RESOURCE_TYPE_FOOD number from 500 to 1500 to JapaneseTown1
+        end if
+    end if
+    
+    until PLAYER of JapaneseTown1 != 1
+end loop    
+
+end script LC7_JapaneseTown1RessourceManager
+
+begin script LC7_JapaneseTown2RessourceManager
+
+start
+
+begin loop
+
+    wait 5 seconds
+
+    if PLAYER of JapaneseTown2 == 1
+        if (get town JapaneseTown2 RESOURCE_TYPE_ORE total < 20000)
+            add resource RESOURCE_TYPE_ORE number from 100 to 500 to JapaneseTown2
+        elsif (get town JapaneseTown2 RESOURCE_TYPE_WOOD total < 25000)
+            add resource RESOURCE_TYPE_WOOD number from 500 to 1000 to JapaneseTown2
+        elsif (get town JapaneseTown2 RESOURCE_TYPE_FOOD total < 30000)
+            add resource RESOURCE_TYPE_FOOD number from 500 to 1500 to JapaneseTown2
+        end if
+    end if
+    
+    until PLAYER of JapaneseTown2 != 1
+end loop    
+
+end script LC7_JapaneseTown2RessourceManager
+
+begin script LC7_GetNearestSettlement
+
+    NearestTown = 0
+
+start
+
+begin loop
+    if PLAYER of JapaneseCapital == 1
+        if PLAYER of JapaneseTown1 == 0
+            NearestTown = JapaneseTown1
+
+        elsif PLAYER of JapaneseTown2 == 0
+            NearestTown = JapaneseTown2
+
+        elsif PLAYER of MinorTown5 == 0
+            NearestTown = MinorTown5
+
+        elsif PLAYER of MinorTown6 == 0
+            NearestTown = MinorTown6
+
+        elsif PLAYER of MinorTown4 == 0
+            NearestTown = MinorTown4
+
+        else
+            NearestTown = PlayerTown
+
+        end if
+
+        NearestSettlement = NearestTown
+        wait 45 seconds
+
+    end if
+end loop
+
+end script LC7_GetNearestSettlement
+
+begin script LC7_PlatoonBehaivors
+
+start
+
+begin loop
+    if town JapaneseCapital is under takeover from player 0
+        enable platoon LC7_Platoon[0] respond to town JapaneseCapital attack
+        enable platoon LC7_Platoon[1] respond to town JapaneseCapital attack
+        enable platoon LC7_Platoon[2] respond to town JapaneseCapital attack
+        enable platoon LC7_Platoon[6] respond to town JapaneseCapital attack
+        enable platoon LC7_Platoon[7] respond to town JapaneseCapital attack
+        enable platoon LC7_Platoon[8] respond to town JapaneseCapital attack
+        enable platoon LC7_WallArcher[0] respond to town JapaneseCapital attack
+        enable platoon LC7_WallArcher[1] respond to town JapaneseCapital attack
+        enable platoon LC7_WallArcher[2] respond to town JapaneseCapital attack
+        enable platoon LC7_WallArcher[3] respond to town JapaneseCapital attack
+        enable platoon LC7_WallArcher[4] respond to town JapaneseCapital attack
+        enable platoon LC7_WallArcher[5] respond to town JapaneseCapital attack
+        enable platoon LC7_WallArcher[6] respond to town JapaneseCapital attack
+        enable platoon LC7_WallArcher[7] respond to town JapaneseCapital attack
+    else
+        disable platoon LC7_Platoon[0] respond to town JapaneseCapital attack
+        disable platoon LC7_Platoon[1] respond to town JapaneseCapital attack
+        disable platoon LC7_Platoon[2] respond to town JapaneseCapital attack
+        disable platoon LC7_Platoon[6] respond to town JapaneseCapital attack
+        disable platoon LC7_Platoon[7] respond to town JapaneseCapital attack
+        disable platoon LC7_Platoon[8] respond to town JapaneseCapital attack
+        disable platoon LC7_WallArcher[0] respond to town JapaneseCapital attack
+        disable platoon LC7_WallArcher[1] respond to town JapaneseCapital attack
+        disable platoon LC7_WallArcher[2] respond to town JapaneseCapital attack
+        disable platoon LC7_WallArcher[3] respond to town JapaneseCapital attack
+        disable platoon LC7_WallArcher[4] respond to town JapaneseCapital attack
+        disable platoon LC7_WallArcher[5] respond to town JapaneseCapital attack
+        disable platoon LC7_WallArcher[6] respond to town JapaneseCapital attack
+        disable platoon LC7_WallArcher[7] respond to town JapaneseCapital attack
+    end if
+    wait number from 5 to 10 seconds
+end loop
+
+end script LC7_PlatoonBehaivors
+
+begin script DisableLocalPlatoonResponse
+
+    Counter = 0
+
+start
+
+begin loop
+    if Counter > 99
+        Counter = 0
+        wait 30 seconds
+    end if
+    if LC7_Platoon[Counter] exists
+        disable platoon LC7_Platoon[Counter] respond to local platoon attack
+    end if
+    if LC7_WallArcher[Counter] exists
+        disable platoon LC7_WallArcher[Counter] respond to local platoon attack
+    end if
+    Counter++
+end loop
+
+end script DisableLocalPlatoonResponse

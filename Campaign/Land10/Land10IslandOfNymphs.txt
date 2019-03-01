@@ -1,0 +1,627 @@
+//===============================================================
+// Land 10 Island of Nymphs - Tom
+//===============================================================
+
+//Defines
+define ID_TOO_YOUNG                = 0
+define ID_MIDDLE_AGED            = 1
+define ID_TOO_OLD                = 2
+define ID_TOO_YOUNG_FEMALE        = 3
+define ID_MIDDLE_AGED_FEMALE    = 4
+define ID_TOO_OLD_FEMALE        = 5
+define ID_ANIMAL                = 6
+define ID_ROCK                    = 7
+define ID_TREE                    = 8
+define ID_ORE                    = 9
+define ID_FOOD                    = 10
+define ID_DEAD_BODY                = 11
+define ID_POO                    = 12
+define ID_DEFAULT                = 13
+define ID_WATER_MIRACLE            = 14
+define ID_FIRE_MIRACLE            = 15
+define ID_HEAL_MIRACLE            = 16
+define ID_METEOR_MIRACLE        = 17
+define ID_LIGHTNING_MIRACLE        = 18
+define ID_SHIELD_MIRACLE        = 19
+define ID_ARMY_FLAG                = 20
+define ID_WOOD                    = 21
+
+//---------------------------------------------------------------
+// Script Defines
+//---------------------------------------------------------------
+define script NY_Intro
+define script NY_Reactions(ID)
+define script NY_Outro(FinishedMan)
+
+//Globals//
+global Nymph[5]
+global Couldron = 0
+
+begin script DisableEverythingOnPerson(Person)
+start
+    move Person position to {Person}
+    disable Person reactable
+    enable Person indestructible
+    disable Person set on fire    
+    disable Person pickup
+    disable Person moveable
+    
+end script DisableEverythingOnPerson
+
+//---------------------//
+//------Nymphs---------//
+//---------------------//
+
+begin script MoveThingDown(Thing)
+A = 0
+start
+    begin loop
+        A = ALTITUDE of Thing 
+        A-=0.005
+        ALTITUDE of Thing = A
+    end loop
+end script MoveThingDown
+
+begin script LC10_Nymphs
+
+NymphPos[5]
+DropPos = marker at {305.05,74.71,706.72}
+Counter = 0
+Scroll = 0
+Influence = 0
+CompletedScript = 0
+Object = 0
+Highlight = 0
+AnimalDone = 0
+RockDone = 0
+TreeDone = 0
+OreDone = 0
+FoodDone = 0
+PooDone = 0
+WaterDone = 0
+FireDone = 0
+HealDone = 0
+MeteorDone = 0
+BoltDone = 0
+ShieldDone = 0
+FlagDone = 0
+WoodDone = 0
+Beam[5] 
+Base[5] 
+
+Type = 0
+SubType = 0
+ExitDead = 0
+
+ReminderPos = marker at {332.34,74.11,692.24}
+SmokeFX = 0
+
+Villager = 0
+
+start
+    Couldron = create FEATURE FEATURE_INFO_CAULDRON at {305.61,74.77,711.33}
+        
+    SmokeFX  = create visual effect "gp_s_poison_cloud.ves" strength 1 scale 1 at {Couldron}+ {0, 1, 0} time -1
+    Nymph[0] = create VILLAGER NORSE_HOUSEWIFE at {306.91,74.78,714.01}
+    Nymph[1] = create VILLAGER NORSE_HOUSEWIFE at {305.03,74.75,710.37}
+    ALTITUDE of Nymph[1] = -0.053
+    Nymph[2] = create VILLAGER NORSE_HOUSEWIFE at {306.12,74.78,712.56} + {-0.1,0,-0.25}
+    Nymph[3] = create VILLAGER NORSE_HOUSEWIFE at {308.23,74.78,712.12}
+    
+    run script DisableEverythingOnPerson(Nymph[0])
+    run script DisableEverythingOnPerson(Nymph[1])
+    run script DisableEverythingOnPerson(Nymph[2])
+    run script DisableEverythingOnPerson(Nymph[3])
+    
+    
+    set Nymph[0] focus to {Couldron}
+    play anim "a_p_l9islandofnymph_woman_idle2" on Nymph[1] loop -1
+    play anim "a_p_l9islandofnymph_woman_idle3" on Nymph[2] loop -1
+    //play anim "a_p_l9islandofnymph_woman_idle1" on Nymph[3] loop -1
+    
+    set Nymph[2] carrying CARRIED_OBJECT_CAULDRON_STICK
+    
+    
+    set Nymph[1] focus to {Couldron} + {-1,0,0}
+    set Nymph[2] focus to {Couldron} + {-5,0,1}
+    set Nymph[3] focus to {Couldron}
+    ALTITUDE of Nymph[3] = 0.063
+    
+    //play anim "a_p_l9islandofnymph_nymph_hovering_idle2" on Nymph[0] loop 10000
+    //play anim "a_p_l9islandofnymph_nymph_hovering_idle1" on Nymph[1] loop 10000
+    //play anim "a_p_l9islandofnymph_nymph_hovering_idle1" on Nymph[2] loop 10000
+    //play anim "a_p_l9islandofnymph_nymph_hovering_idle2" on Nymph[3] loop 10000
+    //play anim "a_p_l9islandofnymph_nymph_hovering_idle3" on Nymph[4] loop 10000
+        
+    
+    Scroll = create highlight SILVER name "BW2T_SCRIPT_09FINAL_CHALLENGENAME_ISLAND_OF_NYMPHS" remind "BW2T_SCRIPT_09FINAL_CHALLENGENAME_ISLAND_OF_NYMPHS" at {ReminderPos} + {0.00,5.00,0.00}
+    
+    begin loop
+
+     if HEALTH of Nymph[0] < 1
+         delete Scroll
+         ExitDead = 1
+     elsif HEALTH of Nymph[1] < 1
+         delete Scroll
+         ExitDead = 1
+     elsif HEALTH of Nymph[2] < 1
+         delete Scroll
+         ExitDead = 1
+     elsif HEALTH of Nymph[3] < 1
+         delete Scroll
+         ExitDead = 1
+     end if
+
+    until Scroll right clicked or Scroll not exists
+    end loop
+
+    delete Scroll //add reminder scroll
+
+    if ExitDead == 0
+        run script NY_Intro
+    end if
+    
+    Influence = create influence at {DropPos} radius 6
+    Scroll = create highlight SILVER name "BW2T_SCRIPT_09FINAL_CHALLENGE_NYMPHS_REMINDER" remind "BW2T_SCRIPT_09FINAL_CHALLENGE_NYMPHS_REMINDER" at {ReminderPos} + {0.00,5.00,0.00}
+
+    if ExitDead == 0
+        set player 0 objective TRIBUTE_OBJECTIVE_LAND_9 with amount 1 text "BW2T_SCRIPT_09FINAL_CHALLENGENAME_ISLAND_OF_NYMPHS" amount 1 description "BW2T_SCRIPT_09FINAL_CHALLENGE_NYMPHS_REMINDER" start value 0 reward 40000
+        L10ShowingIslandNymphObjective = 1
+    end if
+
+    begin loop
+        if HEALTH of Nymph[0] < 1
+            ExitDead = 1
+        elsif HEALTH of Nymph[1] < 1
+            ExitDead = 1
+        elsif HEALTH of Nymph[2] < 1
+            ExitDead = 1
+        elsif HEALTH of Nymph[3] < 1
+            ExitDead = 1
+        end if
+            
+        Object = get object held
+        if Object exists
+            Type = variable get Object type
+            SubType = variable get Object sub type
+            wait until not Object is HELD or player 0 cast miracle SCRIPT_FIND_TYPE_ANY near {DropPos} radius 10
+            if Object is FLYING and (SubType != variable POT_INFO_HAND_WOOD) and (SubType != variable POT_INFO_HAND_ORE) and (SubType != variable POT_INFO_HAND_FOOD)
+                wait until Object is not FLYING or player 0 cast miracle SCRIPT_FIND_TYPE_ANY near {DropPos} radius 10 or 5 seconds
+            end if
+
+            //if {Object} near {DropPos} radius 10
+            //if hand position near {DropPos} radius 10
+                //Huge list of checks starts here
+
+                //if variable get Object type == variable ARMY_FLAG and FlagDone == 0 //Army flag
+                    //run script NY_Reactions(ID_ARMY_FLAG)
+                    //FlagDone = 1
+                
+            //if {Object} near {DropPos} radius 10
+            
+            if ( (SubType == variable POT_INFO_HAND_WOOD or SubType == variable POT_INFO_HAND_FOOD or SubType == variable POT_INFO_HAND_ORE) and hand position near {DropPos} radius 10) or ( (SubType != variable POT_INFO_HAND_WOOD and SubType != variable POT_INFO_HAND_FOOD and SubType != variable POT_INFO_HAND_ORE) and {Object} near {DropPos} radius 10) or player 0 cast miracle MIRACLE_TYPE_TORNADO near {DropPos} radius 10
+            
+                //Miracles first to avoid stupid yellow assert
+                if player 0 cast miracle MIRACLE_TYPE_WATER near {DropPos} radius 10 and WaterDone == 0
+                    run script NY_Reactions(ID_WATER_MIRACLE)
+                    WaterDone = 1
+
+                elsif player 0 cast miracle MIRACLE_TYPE_FIRE near {DropPos} radius 10 and FireDone == 0
+                    run script NY_Reactions(ID_FIRE_MIRACLE)
+                    FireDone = 1
+
+                elsif player 0 cast miracle MIRACLE_TYPE_HEAL near {DropPos} radius 10 and HealDone == 0
+                    run script NY_Reactions(ID_HEAL_MIRACLE)
+                    HealDone = 1
+
+                elsif player 0 cast miracle MIRACLE_TYPE_METEOR near {DropPos} radius 10 and MeteorDone == 0
+                    run script NY_Reactions(ID_METEOR_MIRACLE)
+                    MeteorDone = 1
+
+                elsif player 0 cast miracle MIRACLE_TYPE_STORM near {DropPos} radius 10 and BoltDone == 0
+                    run script NY_Reactions(ID_LIGHTNING_MIRACLE)
+                    BoltDone = 1
+
+                elsif (player 0 cast miracle MIRACLE_TYPE_TORNADO near {DropPos} radius 10 or player 0 cast miracle MIRACLE_TYPE_WIND near {DropPos} radius 10) and ShieldDone == 0
+                    run script NY_Reactions(ID_SHIELD_MIRACLE)
+                    ShieldDone = 1
+
+                elsif player 0 cast miracle SCRIPT_FIND_TYPE_ANY near {DropPos} radius 10 //Stop yellow assert by catching all miracles
+                    run script NY_Reactions(ID_DEFAULT)
+
+                elsif ((Type == variable VILLAGER or Type == variable CHILD) and HEALTH of Object <= 0) //Dead body
+                    run script NY_Reactions(ID_DEAD_BODY)
+
+                elsif Type == variable ANIMAL and AnimalDone == 0 //Animal dropped
+                    run script NY_Reactions(ID_ANIMAL)
+                    AnimalDone = 1
+
+                elsif (Type == variable ROCK_OBJECT or Type == variable ORE_ROCK) and RockDone == 0 //Rock
+                    run script NY_Reactions(ID_ROCK)
+                    RockDone = 1
+
+                elsif Type == variable TREE and TreeDone == 0 //Tree
+                    run script NY_Reactions(ID_TREE)
+                    TreeDone = 1
+
+                elsif SubType == variable POT_INFO_HAND_WOOD and WoodDone == 0
+                    run script NY_Reactions(ID_WOOD)
+                    WoodDone = 1
+
+                elsif SubType == variable POT_INFO_HAND_ORE and OreDone == 0 //Ore
+                    run script NY_Reactions(ID_ORE)
+                    OreDone = 1
+
+                elsif SubType == variable POT_INFO_HAND_FOOD and FoodDone == 0 //Food
+                    run script NY_Reactions(ID_FOOD)
+                    FoodDone = 1
+
+                elsif Type == variable POO and PooDone == 0 //Poop
+                    run script NY_Reactions(ID_POO)
+                    PooDone = 1
+
+                elsif Type == variable VILLAGER or Type == variable CHILD
+
+                    if ((AGE of Object < 21 and Type == variable VILLAGER) or (Type == variable CHILD) and Object is male and HEALTH of Object > 0)
+                        //Too young man
+                        run script NY_Reactions(ID_TOO_YOUNG)
+                    elsif ((AGE of Object < 21 and Type == variable VILLAGER) or (Type == variable CHILD) and not Object is male and HEALTH of Object > 0)
+                        //Too young man
+                        run script NY_Reactions(ID_TOO_YOUNG_FEMALE)
+
+                    elsif Object is male and HEALTH of Object > 0 and Type == variable VILLAGER
+
+                        if AGE of Object == 21 //Perfect
+                            disable Object reactable
+                            disable Object moveable
+                            disable Object pickup
+                            enable Object indestructible
+                            CompletedScript = 1
+                            begin dialogue
+                                say "BW2T_SCRIPT_09FINAL_CHALLENGE_NYMPHS_40"
+                                wait until read
+                                say "BW2T_SCRIPT_09FINAL_CHALLENGE_NYMPHS_330"
+                                wait until read
+                            end dialogue
+                        elsif AGE of Object > 21 and AGE of Object < 50 //Middle age man
+                            run script NY_Reactions(ID_MIDDLE_AGED)
+                        elsif AGE of Object >= 50 //Too old man
+                            run script NY_Reactions(ID_TOO_OLD)
+
+                        end if
+
+                    elsif not Object is male and HEALTH of Object > 0 and Type == variable VILLAGER
+
+                        if AGE of Object >= 21 and AGE of Object < 50 //Middle age female
+                            run script NY_Reactions(ID_MIDDLE_AGED_FEMALE)
+                        elsif AGE of Object >= 50 //Old female
+                            run script NY_Reactions(ID_TOO_OLD_FEMALE)
+                        end if
+
+                    end if
+
+
+                else //Default catch-all thing
+                    run script NY_Reactions(ID_DEFAULT)
+
+                end if
+
+            end if
+        end if  
+
+    until CompletedScript == 1 or ExitDead == 1
+    end loop
+
+    delete Scroll
+
+    if ExitDead == 0
+        wait 3 seconds
+        run script NY_Outro(Object)
+        set player 0 objective TRIBUTE_OBJECTIVE_LAND_9 status to TRIBUTE_OBJECTIVE_STATE_COMPLETE
+        wait 2.5 seconds
+        set player 0 objective TRIBUTE_OBJECTIVE_LAND_9 status to TRIBUTE_OBJECTIVE_STATE_COMPLETE_HIDDEN
+    end if
+    
+end script LC10_Nymphs
+
+
+
+//-------------------//
+//----Intro----------//
+//-------------------//
+
+begin script NY_Intro
+
+CSMixer = 0
+CouldronPos = marker at {305.61,74.77,711.33}
+
+start
+    
+    set fade red 0 green 0 blue 0 time 1
+    wait 1 seconds    
+    
+    CSMixer = create mixer
+    set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 0.6
+    
+    begin cinema
+        start music "CUT_SCENE_SINISTER_02" loop 1000
+        wait 2 seconds
+        
+        
+        
+        
+        
+        
+        set camera position to {CouldronPos} + {0,0.5,0}
+        set camera focus to {CouldronPos} + {0.5,0,0.5}
+        
+        move camera position to {CouldronPos} + {0,3,0} time 15
+        move camera focus to {CouldronPos} + {0.5,0,0.5} time 15
+        
+        set camera lens 50
+        set fade in time 2
+        wait 12 seconds
+        //play anim "a_p_garden_turn_180" on Nymph[0] disable stand
+        
+        set camera position to {304.95,74.75,709.66} + {-3,5,-3}
+        set camera focus to {307.32,74.78,713.00} + {2,0,2}
+        move camera position to {304.95,74.75,709.66} + {-1,2.5,-1} time 10
+        wait 0.5 seconds
+        play anim "a_p_l9islandofnymph_woman_talk" on Nymph[0]  loop -1
+        say "BW2T_SCRIPT_09FINAL_CHALLENGE_NYMPHS_10"
+        wait until read
+        wait 0.5 seconds
+        
+        
+        
+        set camera position to {CouldronPos} + {50,30,50}
+        set camera focus to {CouldronPos}
+        set camera lens 70
+        set Nymph[0] focus to {307.32,74.78,713.00} + {0,15,0}
+        
+        play anim "a_p_stand" on Nymph[0] loop 10000
+        
+        eject evil spirit
+        say "BW2T_SCRIPT_09FINAL_CHALLENGE_NYMPHS_20"
+        wait until read
+        wait 0.5 seconds
+        set camera lens 70
+        
+        stop music with fadetime 2
+    end cinema
+    wait 2 seconds
+    set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 1.0
+end script NY_Intro
+
+
+
+//---------------//
+//------Outro----//
+//---------------//
+
+begin script NY_Outro(FinishedMan)
+
+    CouldronPos = marker at {305.61,74.77,711.33}
+
+start
+    
+        
+    set fade red 0 green 0 blue 0 time 1
+    wait 1 seconds
+    
+    begin cinema
+        
+        start music "cut_scene_sad_34s_01"
+        wait 2 seconds
+
+        /*
+
+        set camera position to {305.13,74.69,704.98} + {-1,3,-2}
+        set camera focus to {CouldronPos} + {0,1.5,0}
+        set camera lens 50
+        
+        set Nymph[0] position to {0,0,0}
+        set Nymph[3] position to {0,0,0}
+        
+        //Nymph[0] = create VILLAGER NORSE_FARMER at {1603.006, 97.982, 1040.131}
+        set FinishedMan position to {305.64,74.75,709.75}
+        set FinishedMan focus to {305.76,74.70,705.67}
+        
+
+        set Nymph[1] position to {304.89,74.73,708.19}
+        set Nymph[1] focus to {CouldronPos}
+        
+        
+        set Nymph[2] position to {306.38,74.73,708.33}
+        set Nymph[2] focus to {CouldronPos}
+
+        play anim "a_p_l9islandofnymph_backing_into_pot" on FinishedMan loop 1000    
+        set anim speed of FinishedMan to 0.7
+        play anim "a_revolt_pounce_man1" on Nymph[1] loop 1000    
+        set anim speed of Nymph[1] to 0.7
+        play anim "a_revolt_pounce_man2" on Nymph[2] loop 1000    
+        set anim speed of Nymph[2] to 0.5
+        wait 0.5 seconds
+        
+        */
+
+        //say "BW2T_SCRIPT_09FINAL_CHALLENGE_NYMPHS_30"
+        //wait until read
+        //wait 50000 seconds
+        //set fade red 0 green 0 blue 0 time 4
+        //wait 5.8 seconds
+        //say "BW2T_SCRIPT_09FINAL_CHALLENGE_NYMPHS_40"
+        
+        wait 0.2 seconds
+        say "BW2T_SCRIPT_09FINAL_CHALLENGE_NYMPHS_370"
+        wait until read
+        wait 1 seconds
+        say "BW2T_SCRIPT_09FINAL_CHALLENGE_NYMPHS_360"
+        wait until read
+        wait 0.2 seconds
+        
+        set FinishedMan position to {305.59,74.77,711.31}
+        move FinishedMan position to {305.59,74.77,711.31}
+        set FinishedMan focus to {304.33,74.75,710.02}
+        
+        //say "BW2T_SCRIPT_09FINAL_CHALLENGE_NYMPHS_340"
+        //wait until read
+        wait 1 seconds
+        
+        reset FinishedMan anim speed
+        play anim "a_p_l9islandofnymph_man_in_pot" on FinishedMan loop -1
+        set camera position to {CouldronPos} + {2,3,2}
+        set camera focus to {CouldronPos} + {0,1.75,0}
+        set camera lens 60
+        move camera position to {CouldronPos} + {3,3.25,3} time 10
+        move camera focus to {CouldronPos} + {0,1.75,0} time 10
+        
+    
+        //ALTITUDE of FinishedMan = -0.4
+        
+        delete Nymph[0]
+        delete Nymph[1]
+        delete Nymph[2]
+        delete Nymph[3]
+    
+        set fade in time 2
+        wait 7 seconds
+        set fade red 0 green 0 blue 0 time 1
+        wait 1 seconds
+        delete FinishedMan
+        set camera position to {CouldronPos} + {50,30,50}
+        set camera focus to {CouldronPos}
+        set camera lens 70
+        wait 1 seconds
+        set fade in time 2
+        wait 3 seconds
+        stop music with fadetime 2
+    end cinema
+    
+end script NY_Outro
+
+
+
+
+
+//---Reactions---//
+
+begin script NY_Reactions(ID)
+
+start
+
+    begin cinema
+        start music "farming_communtiy_land2"
+        set camera position to {Couldron} + {20,20,10}
+        set camera focus to {Couldron} + {2,2,2}
+        move camera position to {Couldron} + {10,15,10} time 40
+        move camera focus to {Couldron} + {2,2,2} time 40
+        play anim "a_p_l9islandofnymph_woman_talk" on Nymph[0]  loop -1
+        wait 2 seconds
+
+        if ID == ID_TOO_YOUNG
+            say "BW2T_SCRIPT_09FINAL_CHALLENGE_NYMPHS_70"
+            wait until read
+            say "BW2T_SCRIPT_09FINAL_CHALLENGE_NYMPHS_80"
+            wait until read
+
+        elsif ID == ID_MIDDLE_AGED
+            say "BW2T_SCRIPT_09FINAL_CHALLENGE_NYMPHS_50"
+            wait until read
+            say "BW2T_SCRIPT_09FINAL_CHALLENGE_NYMPHS_60"
+            wait until read
+
+        elsif ID == ID_TOO_OLD
+            say "BW2T_SCRIPT_09FINAL_CHALLENGE_NYMPHS_110"
+            wait until read
+            say "BW2T_SCRIPT_09FINAL_CHALLENGE_NYMPHS_120"
+            wait until read
+
+        elsif ID == ID_TOO_YOUNG_FEMALE
+            say "BW2T_SCRIPT_09FINAL_CHALLENGE_NYMPHS_100"
+            wait until read
+
+        elsif ID == ID_MIDDLE_AGED_FEMALE
+            say "BW2T_SCRIPT_09FINAL_CHALLENGE_NYMPHS_PICKUP73"
+            wait until read
+
+        elsif ID == ID_TOO_OLD_FEMALE
+            say "BW2T_SCRIPT_09FINAL_CHALLENGE_NYMPHS_90"
+            wait until read
+
+        elsif ID == ID_ANIMAL
+            say "BW2T_SCRIPT_09FINAL_CHALLENGE_NYMPHS_130"
+            wait until read
+
+        elsif ID == ID_ROCK
+            say "BW2T_SCRIPT_09FINAL_CHALLENGE_NYMPHS_140"
+            wait until read
+
+        elsif ID == ID_TREE
+            say "BW2T_SCRIPT_09FINAL_CHALLENGE_NYMPHS_150"
+            wait until read
+
+        elsif ID == ID_ORE
+            say "BW2T_SCRIPT_09FINAL_CHALLENGE_NYMPHS_160"
+            wait until read
+
+        elsif ID == ID_FOOD
+            say "BW2T_SCRIPT_09FINAL_CHALLENGE_NYMPHS_170"
+            wait until read
+
+        elsif ID == ID_DEAD_BODY
+            say "BW2T_SCRIPT_09FINAL_CHALLENGE_NYMPHS_190"
+            wait until read
+
+        elsif ID == ID_POO
+            say "BW2T_SCRIPT_09FINAL_CHALLENGE_NYMPHS_200"
+            wait until read
+
+        elsif ID == ID_DEFAULT
+            say "BW2T_SCRIPT_09FINAL_CHALLENGE_NYMPHS_210"
+            wait until read
+
+        elsif ID == ID_WATER_MIRACLE
+            say "BW2T_SCRIPT_09FINAL_CHALLENGE_NYMPHS_240"
+            wait until read
+
+        elsif ID == ID_FIRE_MIRACLE
+            say "BW2T_SCRIPT_09FINAL_CHALLENGE_NYMPHS_250"
+            wait until read
+
+        elsif ID == ID_HEAL_MIRACLE
+            say "BW2T_SCRIPT_09FINAL_CHALLENGE_NYMPHS_260"
+            wait until read
+
+        elsif ID == ID_METEOR_MIRACLE
+            say "BW2T_SCRIPT_09FINAL_CHALLENGE_NYMPHS_270"
+            wait until read
+
+        elsif ID == ID_LIGHTNING_MIRACLE
+            say "BW2T_SCRIPT_09FINAL_CHALLENGE_NYMPHS_280"
+            wait until read
+
+        elsif ID == ID_SHIELD_MIRACLE
+            say "BW2T_SCRIPT_09FINAL_CHALLENGE_NYMPHS_290"
+            wait until read
+
+        elsif ID == ID_ARMY_FLAG
+            say "BW2T_SCRIPT_09FINAL_CHALLENGE_NYMPHS_220"
+            wait until read
+
+        elsif ID == ID_WOOD
+            say "BW2T_SCRIPT_09FINAL_CHALLENGE_NYMPHS_PICKUP92"
+            wait until read
+
+        end if
+        
+        wait 0.5 seconds
+        play anim "a_p_stand" on Nymph[0] loop 10000
+        set camera position to {Couldron} + {-30,27,10}
+        set camera focus to {Couldron} + {2,2,2}
+        stop music with fadetime 3
+        wait 0.5 seconds
+    end cinema
+
+
+end script NY_Reactions

@@ -1,0 +1,400 @@
+define NUMBER_OF_VOLCANOS = 11
+define EPIC_OFFSETX_POS2 = 6
+define EPIC_OFFSETZ_POS2 = 5
+define ROTATION_OF_EPIC2 = 10
+
+define script VolcanoCinemaControl
+define script VolcanoScript
+
+global Volcinema = 0
+global vEpic2[NUMBER_OF_VOLCANOS]
+global vEpic = 0
+global CntV = 0
+global Light2255 = 0
+global camershake6 = 0
+
+run script Volcanomain
+begin script Volcanomain
+
+start
+    CntV = 0
+    Town[0] = get town with id 0
+    Town[3] = get town with id 3
+    Town[4] = get town with id 4
+    Town[6] = get town with id 6
+    Town[7] = get town with id 7
+    Town[8] = get town with id 8
+    Town[9] = get town with id 9
+    Town[10] = get town with id 10
+    Town[11] = get town with id 11
+    Town[12] = get town with id 12
+    Town[13] = get town with id 13
+    begin loop
+        vEpic2[0] = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_VOLCANO in Town[0]
+        vEpic2[3] = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_VOLCANO in Town[3]
+        vEpic2[4] = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_VOLCANO in Town[4]
+        vEpic2[6] = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_VOLCANO in Town[6]
+        vEpic2[7] = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_VOLCANO in Town[7]
+        vEpic2[8] = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_VOLCANO in Town[8]
+        vEpic2[9] = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_VOLCANO in Town[9]
+        vEpic2[10] = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_VOLCANO in Town[10]
+        vEpic2[11] = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_VOLCANO in Town[11]
+        vEpic2[12] = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_VOLCANO in Town[12]
+        vEpic2[13] = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_VOLCANO in Town[13]
+        if CntV == NUMBER_OF_VOLCANOS
+            CntV = 0
+        end if
+        if vEpic2[CntV] left clicked or vEpic2[CntV] right clicked
+             vEpic = vEpic2[CntV]
+            run background script VolcanoScript
+        end if
+        CntV++
+    end loop
+
+end script Volcanomain
+
+
+begin script VolcanoCinemaControl
+          vEpicFoc = marker at {vEpic}+{0,-0,0}
+          oVolcano = 0
+          VolcanoPos = marker at hand position
+          Volcano = marker at future position of epic miracle oVolcano with time 0 seconds
+          EpicZOffsetVol = marker at (EPIC_OFFSETZ_POS2 * {vEpic})
+start
+   if Volcinema == 0
+          oVolcano = get spell EPIC_WONDER_NUMBER_VOLCANO at {VolcanoPos} radius 5
+               begin cinema
+                 wait 2 seconds
+               move camera focus to {VolcanoPos} time 5
+               move camera position to {VolcanoPos} time 5
+                 wait 2 seconds
+               set fade red 255 green 255 blue 255 time 1
+                Light2255 = 1
+                 wait 1 second
+               play string sound "SCRIPT1_VEPIC_FLAMETHROWERWHOOSH4"
+               set fade in time 1
+               Light2255 = 0
+               enable fixed camera rotation at {vEpic}
+               start music "norse_chant_vocal"
+               play string sound "SCRIPT1_VEPIC_EPICTOWERELECTRIC2"
+               set camera focus to {vEpicFoc}+{0,10,0}
+               set camera position to {vEpic}+{EPIC_OFFSETX_POS2 * ROTATION_OF_EPIC2/2,10, EpicZOffsetVol}
+                 wait 7 seconds
+               move camera focus to {vEpic}+{0,30,0} time 13
+               move camera position to {vEpic}+{EPIC_OFFSETX_POS2 * ROTATION_OF_EPIC2/2,30, EpicZOffsetVol} time 13 
+                 wait 1.5 seconds
+                 wait 10.5 seconds
+               move camera focus to {vEpic}+{0,170,5} time 1
+               disable fixed camera rotation at {vEpic}
+                 wait 2 seconds
+               set fade red 255 green 255 blue 255 time 1
+               Light2255 = 1
+                 wait 1 second
+               set camera focus to {VolcanoPos}+{0,50,0}
+               set camera position to {VolcanoPos}+{0,90,80}
+               set fade in time 3
+                Light2255 = 0
+                 wait 2 seconds
+               move camera focus to {VolcanoPos} time 5
+               stop music with fadetime -5
+                 wait 8 seconds
+               set camera roll 30 time -1
+               set camera position to {VolcanoPos}+{8,180,46}
+                 wait 6 seconds
+               set camera roll 0 time -10
+               set camera focus to {VolcanoPos}+{0,60,0}
+               set camera position to {VolcanoPos}+{0,60,43}
+        wait 3.5 seconds
+               shake camera strength 6.3
+                 camershake6 = 1
+                 wait 3.5 seconds
+               set camera focus to {VolcanoPos}
+               set camera position to {VolcanoPos}+{0,90,40}
+                 wait 4.5 seconds
+               stop camera shake
+               camershake6 = 0
+               set camera focus to {VolcanoPos}+{30,0,0}
+               set camera position to {VolcanoPos}+{0,50,40}
+                 wait 7.5 seconds
+               set camera position to {VolcanoPos}+{0,120,120}
+               set camera roll 0 time -100
+                 wait 9 seconds
+                 wait 5 seconds
+               end cinema
+                     clear right clicked object
+                     clear right clicked position
+                     clear left clicked object
+                     clear left clicked position
+               Volcinema = 1
+               else
+               Volcinema = 0
+               end if
+             until Volcinema == 1 or key KB_ESC down
+
+    if key KB_ESC down
+        skip current cutscene
+        wait 2 seconds
+        if Light2255 == 1
+            set fade in time 1
+            Light2255 = 0
+        end if
+        if camershake6 == 1
+            begin cinema
+                stop camera shake
+            end cinema
+            camershake6 = 0
+        end if
+    end if
+end script VolcanoCinemaControl
+
+begin script VolcanoScript
+
+oTown = 0
+oVolcano = 0
+
+
+// Visual effects for the Volcano - 1 to 12
+oVisual = 0
+oVisual2 = 0
+oVisual3 = 0
+oVisual3Pos = 0
+oVisual4 = 0
+oVisual5 = 0
+oVisual6 = 0
+oVisual7 = 0
+oVisual8 = 0
+oVisual9 = 0
+oVisual10 = 0
+oVisual11 = 0
+oVisual12 = 0
+
+// Visual effects for the Volcano - 13 to 26
+oVisual13 = 0
+oVisual14 = 0
+oVisual15 = 0
+oVisual16 = 0
+oVisual17 = 0
+oVisual18 = 0
+oVisual19 = 0
+oVisual20 = 0
+oVisual21 = 0
+oVisual22 = 0
+oVisual23 = 0
+oVisual24 = 0
+oVisual25 = 0
+oVisual26 = 0
+
+// Unused variables
+VolcanoPos = 0
+VolcanoMixer = 0
+VolcanoWorldPos = 0
+Sound = 0
+
+// Volcano Epic Positions and focuses
+vEpicFoc = 0
+vEpicPos = 0
+RelativePos = 0
+Cam = marker at camera position
+PosX = 0
+PosZ = 0
+
+// Front of Wonder Pos
+WonderPos = 0
+
+start
+WonderPos = 0
+
+begin loop
+    oVolcano = 0
+        PosX = marker at {vEpic}+{-20,0,0}
+        PosZ = marker at (vEpic * {0,0,10})
+        RelativePos = marker at get world position from vEpic to {vEpic}
+        vEpicPos = marker at {vEpic}+(vEpicPos * {RelativePos})
+        vEpicFoc = marker at {vEpic}+{0,-0,0}
+    if vEpic left clicked or vEpic right clicked
+        clear right clicked object
+        clear left clicked object
+        clear right button clicked
+        clear left button clicked
+        wait 1 second
+        if wonder in hand
+            begin loop
+                if wonder fire near hand position radius 0.5
+                    VolcanoPos = marker at hand position
+                    oVolcano = create volcano at {VolcanoPos} player 0
+                    run background script VolcanoCinemaControl
+                    wait 5 seconds
+                    start music "norse_chant_vocal"
+                    play string sound "SCRIPT1_VEPIC_SYNTH2"
+                    wait 5 seconds
+                    invoke vEpic EPIC_WONDER_STAGE_1
+                    play string sound "SCRIPT1_SEPIC_SYNTH2"
+                    play string sound "SCRIPT1_VEPIC_FLAMETHROWERWHOOSH4"
+                    wait 4 seconds
+                    play string sound "SCRIPT1_SEPIC_SYNTH2"
+                    play string sound "SCRIPT1_VEPIC_FLAMETHROWERWHOOSH2"
+                    invoke vEpic EPIC_WONDER_STAGE_2
+                    wait 4.2 seconds
+                    play string sound "SCRIPT1_SEPIC_SYNTH2"
+                    play string sound "SCRIPT1_VEPIC_FLAMETHROWERWHOOSH1"
+                    invoke vEpic EPIC_WONDER_STAGE_3
+                    invoke vEpic EPIC_WONDER_STAGE_4
+                    wait 2.5 seconds
+                    invoke vEpic EPIC_WONDER_STAGE_5
+                    invoke vEpic EPIC_WONDER_STAGE_6
+                    invoke vEpic EPIC_WONDER_STAGE_7
+                    wait 2 seconds
+                    invoke vEpic EPIC_WONDER_STAGE_8
+                    invoke vEpic EPIC_WONDER_STAGE_9
+                    invoke vEpic EPIC_WONDER_STAGE_10
+                    invoke vEpic EPIC_WONDER_STAGE_START_BEAM
+                    wait 1.5 seconds
+                    oVisual = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM on vEpic time 1
+                    oVisual20 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM on vEpic time 1
+                    oVisual2 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_UP at {vEpic} time 1
+                    oVisual16 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_UP at {vEpic}+{0,5,0} time 1
+                    play string sound "SCRIPT1_VEPIC_EXPLOSION3"
+                    stop sound "SCRIPT1_SEPIC_SYNTH2"
+                    wait 2 seconds
+                    play string sound "SCRIPT1_VEPIC_DECAYCHARGESPELL"
+                    wait 1 second
+                    play string sound "SCRIPT1_VEPIC_DECAYCHARGESPELL"
+                    wait 2 seconds
+                    stop visual effect oVisual
+                    stop visual effect oVisual2
+                    stop music with fadetime -5
+                    wait 2 seconds
+                    oVisual3 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM at {VolcanoPos} time -1
+                    play string sound "SCRIPT1_VEPIC_BEAMOFLIGHTSTART1"
+                    invoke oVolcano EPIC_START_SWIRL
+                    wait 1 second
+                    oVisual4 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,200,0} time 1
+                    oVisual10 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,205,0} time 1
+                    play string sound "SCRIPT1_VEPIC_DECAYCHARGESPELL"
+                    wait 2 seconds
+                    oVisual5 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,200,0} time 1
+                    oVisual11 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,205,0} time 1
+                    play string sound "SCRIPT1_VEPIC_DECAYCHARGESPELL"
+                    wait 2 seconds
+                    oVisual6 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,200,0} time 1
+                    oVisual12 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,205,0} time 1
+                    play string sound "SCRIPT1_VEPIC_DECAYCHARGESPELL"
+                    invoke oVolcano EPIC_START_SHOCKWAVE
+                    start music "volcano_music"
+                    wait 1 second
+                    invoke oVolcano EPIC_START_RISING
+                    invoke oVolcano EPIC_START_SMOKE
+                    wait 1 second
+                    oVisual7 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,200,0} time 1
+                    oVisual13 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,205,0} time 1
+                    play string sound "SCRIPT1_VEPIC_DECAYCHARGESPELL"
+                    wait 2 seconds
+                    oVisual7 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,200,0} time 1
+                    oVisual13 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,205,0} time 1
+                    play string sound "SCRIPT1_VEPIC_DECAYCHARGESPELL"
+                    wait 2 seconds
+                    oVisual8 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,200,0} time 1
+                    oVisual14 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,205,0} time 1
+                    play string sound "SCRIPT1_VEPIC_DECAYCHARGESPELL"
+                    wait 2 seconds
+                    oVisual9 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,200,0} time 1
+                    oVisual15 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,205,0} time 1
+                    play string sound "SCRIPT1_VEPIC_DECAYCHARGESPELL"
+                    wait 2 seconds
+                    oVisual21 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,200,0} time 1
+                    oVisual22 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,205,0} time 1
+                    play string sound "SCRIPT1_VEPIC_DECAYCHARGESPELL"
+                    wait 3 seconds
+                    oVisual25 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,200,0} time 1
+                    oVisual26 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,205,0} time 1
+                    play string sound "SCRIPT1_VEPIC_DECAYCHARGESPELL"
+                    play string sound "SCRIPT1_VEPIC_EXPLOSION3"
+                    play string sound "SCRIPT1_VEPIC_VOLCANOSHOCKWAVHIGHPITCHED"
+                    invoke oVolcano EPIC_START_EXPLOSION
+                    invoke oVolcano EPIC_FLASH
+                    invoke oVolcano EPIC_FLASH
+                    oVisual16 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,200,0} time 1
+                    oVisual17 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,205,0} time 1
+                    play string sound "SCRIPT1_VEPIC_DECAYCHARGESPELL"
+                    wait 2 seconds
+                    oVisual23 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,200,0} time 1
+                    oVisual24 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {oVolcano}+{0,205,0} time 1
+                    play string sound "SCRIPT1_VEPIC_DECAYCHARGESPELL"
+                    wait 3.5 seconds
+                    stop visual effect oVisual3
+                    play string sound "SCRIPT1_VEPIC_EXPLOSION3"
+                    invoke oVolcano EPIC_START_EXPLOSION
+                    invoke oVolcano EPIC_FLASH
+                    invoke oVolcano EPIC_FLASH
+                    invoke oVolcano EPIC_START_BUBBLING_LAVA
+                    invoke oVolcano EPIC_START_LAVA
+                    wait 6 seconds
+                    invoke oVolcano EPIC_START_ASH
+                    invoke oVolcano EPIC_START_SMOKE
+                    play string sound "SCRIPT1_VEPIC_EXPLOSION3"
+                    invoke oVolcano EPIC_START_EXPLOSION
+                    invoke oVolcano EPIC_FLASH
+                    invoke oVolcano EPIC_FLASH
+                    wait 0.2 seconds
+                    invoke oVolcano EPIC_START_ROCK_SHOWER
+                    invoke oVolcano EPIC_SPAWN_ROCKS
+                    wait 4 seconds
+                    play string sound "SCRIPT1_VEPIC_EXPLOSION3"
+                    invoke oVolcano EPIC_START_EXPLOSION
+                    invoke oVolcano EPIC_FLASH
+                    invoke oVolcano EPIC_FLASH
+                    wait 4.2 seconds
+                    play string sound "SCRIPT1_VEPIC_EXPLOSION3"
+                    invoke oVolcano EPIC_START_EXPLOSION
+                    invoke oVolcano EPIC_FLASH
+                    invoke oVolcano EPIC_FLASH
+                    wait 5 seconds
+                    play string sound "SCRIPT1_VEPIC_EXPLOSION3"
+                    invoke oVolcano EPIC_START_EXPLOSION
+                    invoke oVolcano EPIC_FLASH
+                    invoke oVolcano EPIC_FLASH
+                    wait 5 seconds
+                    play string sound "SCRIPT1_VEPIC_EXPLOSION3"
+                    invoke oVolcano EPIC_START_EXPLOSION
+                    invoke oVolcano EPIC_FLASH
+                    invoke oVolcano EPIC_FLASH
+                    wait 2 seconds
+                    play string sound "SCRIPT1_VEPIC_EXPLOSION3"
+                    invoke oVolcano EPIC_START_EXPLOSION
+                    invoke oVolcano EPIC_FLASH
+                    invoke oVolcano EPIC_FLASH
+                    play string sound "SCRIPT1_VEPIC_EXPLOSION3"
+                    invoke oVolcano EPIC_START_EXPLOSION
+                    invoke oVolcano EPIC_FLASH
+                    invoke oVolcano EPIC_FLASH
+                    wait 2 seconds
+                    play string sound "SCRIPT1_VEPIC_EXPLOSION3"
+                    wait 28 seconds
+                    invoke oVolcano EPIC_STOP_ASH
+                    invoke oVolcano EPIC_STOP_SMOKE
+                    invoke oVolcano EPIC_END_ROCK_SHOWER
+                    invoke oVolcano EPIC_START_FALLING
+                    invoke oVolcano EPIC_STOP_BUBBLING_LAVA
+                    wait 10 seconds
+                    invoke oVolcano EPIC_STOP_LAVA
+                    wait 5 seconds
+                    invoke vEpic EPIC_WONDER_STAGE_LAST
+                    delete oVolcano
+                    clear right clicked object
+                    clear right clicked position
+                    clear left clicked object
+                    clear left clicked position
+                    oVolcano = 1
+                else 
+                    oVolcano = 0
+                end if
+                until oVolcano == 1
+            end loop
+        end if
+    end if
+    if oVolcano == 1
+        release loop
+    end if
+end loop
+
+end script VolcanoScript

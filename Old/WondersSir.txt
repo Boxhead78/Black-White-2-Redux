@@ -1,0 +1,231 @@
+define script SirMain
+
+run script SirMain
+begin script SirMain
+
+// Other variables
+oTown = get town with id 0
+oVisual = 0
+oVisual2 = 0
+SirenSeed = 0
+Rock1 = 0
+SirenInf = 0
+
+// Siren Variables//
+
+// SirenSpell - the argument on the right of the equals sign is what SirenSpell will equal,
+// and what is declared on the right will be the SirenSpell.
+SirenSpell = 0
+
+// oSiren - variable used for determining if the Siren has finished.
+oSiren = 0
+
+// SirenHeld - variable used to determine what is being held
+SirenHeld = 0
+
+// SirenPos - variable declaring the firing position of the Siren.
+SirenPos = 0
+
+// StarNymph - declares the object Nymph as a plot item to the Siren.
+StarNymph = 0
+
+// StarVillager - applies similar to StarNymph.
+StarVillager = 0
+
+// StarGatehouse - declares the star gatehouse closest to the Siren and opens for converted villagers.
+StarGatehouse = 0
+
+// Siren Wonder Tower Variables
+sEpicPLAYER = 0
+sEpicPLAYERPos = 0
+sEpicPLAYERFoc = 0
+RelativePos = 0
+Epic = 0
+
+start
+begin loop
+    oSiren = 0
+        SirenSpell = 0
+        SirenHeld = get object held
+        // sEpicPLAYER - straight forward, looking for the epic tower
+    sEpicPLAYER = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_SIREN at {oTown} radius 750
+        RelativePos = marker at get world position from sEpicPLAYER to {sEpicPLAYER}
+        sEpicPLAYERPos = marker at {sEpicPLAYER}+(sEpicPLAYER * {RelativePos}+{15,5,sEpicPLAYER})
+        sEpicPLAYERFoc = marker at {sEpicPLAYER}+{0,-0,0}
+      if sEpicPLAYER exists and SCRIPT_OBJECT_PROPERTY_TYPE_BUILT_PERCENTAGE of sEpicPLAYER == 1.0
+        wait 1 second
+        // If the Siren Tower is clicked, empty the hand of the wonder's epic and
+        // replace with a replica quickly.
+        if sEpicPLAYER right clicked and wonder in hand or sEpicPLAYER left clicked and wonder in hand
+        empty player hand
+         wait 0.2 seconds
+         Rock1 = create SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_BOULDER_ROUND at hand position
+         SirenSeed = create visual effect VISUAL_EFFECT_SIREN_SEED on Rock1 time -1
+         set Rock1 in player 0 hand
+         SirenHeld = Rock1
+         Epic = get spell EPIC_WONDER_NUMBER_SIREN at {sEpicPLAYER} radius 0.5
+             wait 1 second
+        begin loop
+              // If the action button is clicked, then stop the visual effect on the replica and delete it,
+              // thus, making the created siren look like it's from the wonder.
+              if bindable action BINDABLE_ACTION_TYPE_ACTION performed
+                SirenPos = marker at hand position+{0,-2,0}
+                SirenSpell = create siren at {SirenPos} player 0
+                StarGatehouse = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE at {SirenSpell} radius 500
+                  if StarGatehouse not exists
+                StarGatehouse = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {SirenSpell} radius 500
+                  end if
+                     clear player 0 spell charging
+                     stop visual effect SirenSeed
+                     delete Rock1
+                  // Standard Siren Wonder and Miracle procedure.
+              begin cinema
+                                enable global influence
+                                wait 2 seconds
+                                move camera focus to hand position time 4
+                                move camera position to hand position time 4
+                                wait 2 seconds
+                                set fade red 255 green 255 blue 255 time 2
+                                wait 3 seconds
+                                play string sound "SCRIPT4_sEpicPLAYER_FLAMETHROWERWHOOSH4"
+                                set fade in time 1
+                                start music "japanese_chant"
+                                set camera focus to {sEpicPLAYERFoc}+{0,5,0}
+                                set camera position to {sEpicPLAYERPos}
+                                wait 3 seconds
+                                move camera focus to {sEpicPLAYER}+{0,35,0} time 13
+                                move camera position to {sEpicPLAYERPos}+{0,30,0} time 13
+                                wait 3 seconds
+                                stop visual effect oVisual
+                                invoke sEpicPLAYER EPIC_WONDER_STAGE_1
+                                invoke sEpicPLAYER EPIC_WONDER_STAGE_2
+                                play string sound "SCRIPT4_sEpicPLAYER_EXPLOSION2"
+                                wait 3 seconds
+                                invoke sEpicPLAYER EPIC_WONDER_STAGE_3
+                                invoke sEpicPLAYER EPIC_WONDER_STAGE_4
+                                play string sound "SCRIPT4_sEpicPLAYER_EXPLOSION2"
+                                enable predefined sky "siren" time 5
+                                wait 3 seconds
+                                invoke sEpicPLAYER EPIC_WONDER_STAGE_5
+                                invoke sEpicPLAYER EPIC_WONDER_STAGE_6
+                                invoke sEpicPLAYER EPIC_WONDER_STAGE_7
+                                wait 1 second
+                                play string sound "SCRIPT4_sEpicPLAYER_EPICTOWERELECTRIC2"
+                                invoke sEpicPLAYER EPIC_WONDER_STAGE_8
+                                invoke sEpicPLAYER EPIC_WONDER_STAGE_9
+                                invoke sEpicPLAYER EPIC_WONDER_STAGE_10
+                                invoke sEpicPLAYER EPIC_WONDER_STAGE_START_BEAM
+                                wait 4 seconds
+                                move camera focus to {sEpicPLAYER}+{0,170,4} time 1
+                                oVisual = create visual effect VISUAL_EFFECT_WONDER_SIREN_BEAM at {sEpicPLAYER}+{0,40,0} time -1
+                                stop sound "SCRIPT4_sEpicPLAYER_EPICTOWERELECTRIC2"
+                                play string sound "SCRIPT4_sEpicPLAYER_EXPLOSION3"
+                                wait 2 seconds
+                                set fade red 255 green 255 blue 255 time 1
+                                wait 1.5 seconds
+                                invoke sEpicPLAYER EPIC_WONDER_STAGE_END_BEAM
+                                set fade in time 1
+                                set camera focus to {SirenPos}
+                                set camera position to {SirenPos}+{0,60,40}
+                       wait 2.2 seconds
+                                invoke SirenSpell EPIC_BEAM_DOWN
+                                play string sound "SCRIPT4_sEpicPLAYER_BEAMOFLIGHTSTART1"
+                                stop music with fadetime -2
+                       invoke SirenSpell EPIC_MOVE_VILLAGERS
+                                play string sound "SCRIPT4_sEpicPLAYER_BEAMOFLIGHTLOOP7"
+                                wait 2 seconds
+                                stop visual effect oVisual2
+                                wait 4 seconds
+                       invoke SirenSpell EPIC_SHOW_SIREN
+                                wait 1.5 seconds
+                           stop sound "SCRIPT4_sEpicPLAYER_BEAMOFLIGHTLOOP7"
+        start music "sirensong"
+        set camera focus to {SirenPos}+{0,0,0}
+        set camera position to {SirenPos}+{0,20,3}
+                                    move camera position to {SirenPos}+{0,50,3} time 7
+        wait 7 seconds
+                    say "BW2T_SCRIPT_SIREN_SONG_10"
+                set camera focus to {SirenPos}+{0,35,0}
+        set camera position to {SirenPos}+{25,35,3}
+        wait 4 seconds
+                                StarVillager = get living villager at {SirenSpell} radius 150
+                                StarVillager = get star villager near {SirenSpell} radius 150
+                                StarNymph = get SirenSpell star EPIC_OBJECT_NYMPH
+                wait 6.5 seconds
+                say "BW2T_SCRIPT_SIREN_SONG_20"
+        invoke SirenSpell EPIC_SUMMON_NYMPHS
+        invoke SirenSpell EPIC_ADD_NYMPHS
+        set camera position to {SirenPos}+{-35,20,10}
+        wait 7 seconds
+        set camera position to {SirenPos}+{16,30,6}
+                wait 2 seconds
+                say "BW2T_SCRIPT_SIREN_SONG_30"
+                move camera position to {SirenPos}+{16,20,16} time 7
+                set camera focus to {SirenPos}+{0,30,0}
+        wait 4 seconds
+        set camera position to {SirenPos}+{-50,40,50}
+                wait 1 second
+                move camera position to {SirenPos}+{-30,40,60} time 6
+        wait 3 seconds
+                say "BW2T_SCRIPT_SIREN_SONG_40"
+        wait 8 seconds
+            invoke SirenSpell EPIC_TRIGGER_NYMPHS_GESTURE
+                wait 3 seconds
+            invoke SirenSpell EPIC_TRIGGER_NYMPHS
+                                    wait 1 second
+                                move camera focus to {StarVillager} time 5
+                                set camera position to {SirenPos}+{5,35,-25}
+                                    wait 7 seconds
+                   set camera position to {StarVillager}+{6,7,5}
+                                say "BW2T_SCRIPT_SIREN_SONG_50"
+                    wait 5.5 seconds
+                   move camera position to {StarVillager}+{12,7,5} time 8
+                   move camera focus to {StarVillager}-{8,-7,5} time 8
+                                say "BW2T_SCRIPT_SIREN_SONG_60"
+                                    wait 8 seconds
+                    move camera position to {SirenPos}+{5,7,-35} time 8
+                    wait 10 seconds
+                invoke SirenSpell EPIC_REMOVE_SIREN
+                                set StarVillager player 0
+                                // Set the StarVillagers home position then open the nearest gatehouse to let them get there.
+                                set StarVillager home position {oTown}
+                                set gate StarGatehouse open
+                                // These states are set so that the villagers don't get stuck, and are directed to do something else.
+                                state StarVillager VILLAGER_SUBSTATE_HUG_TREE
+                                wait 0.2 seconds
+                                state StarVillager VILLAGER_SUBSTATE_GO_HOME
+                                set villager StarVillager default speed to SCRIPT_VILLAGER_DEFAULT_SPEED_RUNNING
+                                play string sound "SCRIPT4_sEpicPLAYER_SIRENDISAPPEAR"
+                                set camera focus to {SirenPos}
+                                set camera position to {SirenPos}+{10,15,40}
+                                wait 5 seconds
+                                enable predefined sky "DEFAULT" time 5
+                   end cinema
+                                wait 4 seconds
+                                move StarVillager position to {oTown}
+                                invoke SirenSpell EPIC_SHUT_DOWN_BEAM
+                                invoke SirenSpell EPIC_END_SPELL
+                                wait 1 second
+                                invoke sEpicPLAYER EPIC_WONDER_STAGE_LAST
+                                stop visual effect oVisual
+                                disable global influence
+                                clear right clicked object
+                                clear right clicked position
+                                delete SirenSpell
+                                delete Epic
+                                oSiren = 0
+                           elsif SirenHeld != Rock1 or bindable action BINDABLE_ACTION_TYPE_CANCEL_CURRENT_ACTION performed
+                                stop visual effect SirenSeed
+                                delete Rock1
+                                stop spell SirenSpell
+                                delete SirenSpell
+                                wait 1 second
+                           else
+                                oSiren = 1                               
+                                end if
+                        until oSiren == 0
+                    end loop
+             end if
+       end if
+end loop
+end script SirMain

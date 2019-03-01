@@ -1,0 +1,958 @@
+///////////////////////////////////////////////////////////////////////////////
+//     Skirmish Setup
+//    ~~~~~~~~~~~~~~~~
+//
+//    Start date:        05.07.18            By: Boxhead
+//    Update date:    25.12.18            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+define script SK_Setup
+define script SK_ScriptManager
+define script SK_SetupCreature(PlayerID,Creature,CreaturePos)
+define script SK_SetUpRandomAI(PlayerID,AITown)
+define script LC2002_JapaneseCapitalImpressiveness
+define script LC2002_TownConversion
+define script SkirmishGenericTownObjectives
+define script SkirmishDeparture
+
+define ToPlayer1NeutralTown1Impressiveness = 8000
+define ToPlayer1NeutralTown2Impressiveness = 30000
+define ToPlayer1NeutralTown3Impressiveness = 17500
+define ToPlayer1NeutralTown4Impressiveness = 37500
+define ToPlayer1NeutralTown5Impressiveness = 5000
+define ToPlayer1NeutralTown6Impressiveness = 27500
+define ToPlayer1NeutralTown7Impressiveness = 30000
+define ToPlayer1PlayerTown2Impressiveness = 25000
+
+define ToPlayer2NeutralTown1Impressiveness = 30000
+define ToPlayer2NeutralTown2Impressiveness = 8000
+define ToPlayer2NeutralTown3Impressiveness = 37500
+define ToPlayer2NeutralTown4Impressiveness = 17500
+define ToPlayer2NeutralTown5Impressiveness = 27500
+define ToPlayer2NeutralTown6Impressiveness = 5000
+define ToPlayer2NeutralTown7Impressiveness = 30000
+define ToPlayer2PlayerTown1Impressiveness = 25000
+
+run script SK_Setup
+
+begin script SK_Setup
+
+DEBUG = 0
+test = 0
+
+start
+    
+    AISpellsActivated = 1
+
+    PlayerTown1 = get town with id 0
+    PlayerTown2 = get town with id 1
+    NeutralTown1 = get town with id 2
+    NeutralTown2 = get town with id 3
+    NeutralTown3 = get town with id 4
+    NeutralTown4 = get town with id 5
+    NeutralTown5 = get town with id 6
+    NeutralTown6 = get town with id 7
+    SpecTown1 = get town with id 8
+
+    SK_Tutorials = persistent data "SKP_Tutorials"
+    SK_Epics = persistent data "SKP_AIEpics"
+    SK_Extra = persistent data "SKP_Extras"
+
+    set toolbar state to MENU_TOOLBAR_STATE_CLOSED
+    set interaction SCRIPT_INTERFACE_LEVEL_NORMAL
+    //disable MENU_TOOLBAR_CREATURE_TEACH menu
+    enable tribute visual
+    enable toolbar
+    enable game can be lost
+    enable personalisations
+    enable load screen
+
+    add resource RESOURCE_TYPE_ORE 4000 to PlayerTown1
+    add resource RESOURCE_TYPE_WOOD 5000 to PlayerTown1
+    add resource RESOURCE_TYPE_FOOD 5000 to PlayerTown1
+    add resource RESOURCE_TYPE_ORE 4000 to PlayerTown2
+    add resource RESOURCE_TYPE_WOOD 5000 to PlayerTown2
+    add resource RESOURCE_TYPE_FOOD 5000 to PlayerTown2
+
+    run background script SK_ScriptManager
+    
+    if DEBUG == 1
+        set player 0 alignment -1.0
+        increment tribute by 9999999999
+        set research ABODE_NUMBER_C available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ABODE_NUMBER_ALTAR available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ABODE_NUMBER_STORAGE_PIT available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ABODE_NUMBER_CREATURE_PEN available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ABODE_NUMBER_FIELD available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ABODE_NUMBER_WALLTOWER_TECH0 available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_MAGIC_TYPE_WATER_RAIN available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ABODE_NUMBER_MELEE_ARMOURY available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ABODE_NUMBER_TEMPLE available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_HAND_MULTIPICKUP available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_A available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_B available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_D available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_E available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_SKYSCRAPER available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_CRECHE available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_SHRINE available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_PUB available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_TOWN_CENTRE available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_RANGED_ARMOURY available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_WORKSHOP available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_STUDY available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_UNIVERSITY available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_PRISON available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_SMELTER available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_GRANARY available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_LUMBERMILL available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_MARKET_POT available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_MARKET_STATUE available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_MARKET_PLANT available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_AMPITHEATRE available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_GRAVEYARD available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_OLD_PERSONS_HOME available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_BATHHOUSE available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_WALLTOWER_TECH1 available to RESEARCH_AVAILABILITY_NOT_AVAILABLE
+        set research ARTEFACT_ABODE_NUMBER_GATEHOUSE available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_ABODE_NUMBER_GATEHOUSE_F available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_EPIC_WONDER_NUMBER_HURRICANE available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_EPIC_WONDER_NUMBER_EARTHQUAKE available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_EPIC_WONDER_NUMBER_VOLCANO available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_EPIC_WONDER_NUMBER_SIREN available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_MAGIC_TYPE_LIFE_HEAL available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_MAGIC_TYPE_LIFE_LIFE available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_MAGIC_TYPE_DEATH_DECAY available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_MAGIC_TYPE_DEATH_DEATH available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_MAGIC_TYPE_FIRE_FIRE available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_MAGIC_TYPE_FIRE_LAVA available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_MAGIC_TYPE_EARTH_TREMOR available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_MAGIC_TYPE_EARTH_METEOR available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_MAGIC_TYPE_AIR_WIND available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_MAGIC_TYPE_AIR_TEMPEST available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_MAGIC_TYPE_WATER_STORM available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_MAGIC_TYPE_HEAL available to RESEARCH_AVAILABILITY_NOT_AVAILABLE
+        set research ARTEFACT_CREATURE_MAGIC_TYPE_WATER available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_MAGIC_TYPE_FIREBALL available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_MAGIC_TYPE_LIGHTNING available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_TOY_GOOD available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_TOY_NEUTRAL available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_TOY_EVIL available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_ROLE_BUILDER_1 available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_ROLE_BUILDER_2 available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_ROLE_BUILDER_3 available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_ROLE_BUILDER_4 available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_ROLE_GATHERER_1 available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_ROLE_GATHERER_2 available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_ROLE_GATHERER_3 available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_ROLE_GATHERER_4 available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_ROLE_SOLDIER_1 available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_ROLE_SOLDIER_2 available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_ROLE_SOLDIER_3 available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_ROLE_SOLDIER_4  available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_ROLE_ENTERTAINER_1 available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_ROLE_ENTERTAINER_2 available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_ROLE_ENTERTAINER_3 available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_CREATURE_ROLE_ENTERTAINER_4 available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_EMBELLISHMENT_INFO_GREEK_FERTILITY_STATUE available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_EMBELLISHMENT_INFO_GREEK_FOUNTAIN available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_EMBELLISHMENT_INFO_GREEK_STREETLAMP available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_EMBELLISHMENT_INFO_GREEK_TORTURE_PIT available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_EMBELLISHMENT_INFO_GREEK_COLUMN available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_EMBELLISHMENT_INFO_GREEK_GARDEN available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_EMBELLISHMENT_INFO_GREEK_WELL available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_EMBELLISHMENT_INFO_GREEK_SPIKE available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_EMBELLISHMENT_INFO_GREEK_MIRACLE_ENHANCER available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_HAND_FISTING available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_HAND_GESTURES available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_TOME_AGE_OF_GODS available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_TOME_BARREN_SEAS available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_TOME_FATE_OF_THE_EGYPTIANS available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_TOME_FRAGMENT available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_TOME_GODLESS_MIRACLES available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_TOME_IMMORTAL available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_TOME_MISSIONARIES available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_TOME_ORIGIN_OF_CREATURES available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_TOME_PARCHMENT available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_TOME_POWER_OF_THE_AZTECS available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_TOME_GREEKS available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_TOME_JAPANESE available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_TOME_NORSE available to RESEARCH_AVAILABILITY_RESEARCHED
+        set research ARTEFACT_TOME_PROPHECY available to RESEARCH_AVAILABILITY_RESEARCHED
+    end if
+
+    wait until 1 !=1
+
+end script SK_Setup
+
+begin script SK_ScriptManager
+
+Counter = 0
+PlayerAlignment = 0
+Test = 0
+AtmosMixer = create mixer
+
+start
+
+    GB_PlayerTown = get town with id 0
+    set atmos volume 0
+    set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_MAP to 0.0
+    set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_POSITIONAL to 0.0
+
+    AICreaturePos[1] = marker at {1564.68,113.59,1486.76}
+    begin loop
+        wait number from 0 to 2 seconds
+        Counter++
+        until Counter >= 25
+    end loop
+
+    begin cinema
+        set camera position to {885.00,175.00,854.46} + {75,75}
+        set camera focus to {GB_PlayerTown} + {0,15,0}
+    end cinema
+
+    if SK_Extra == 1
+        run background script Marauders(SpecTown1)
+    end if
+
+    run background script PlayerMana(0)
+    run background script SK_Music
+    run background script SK_AITownBuildingStopMusic
+    run background script SK_SetupCreature(0,0,marker at {898.87,113.84,979.10})
+    run background script SkirmishDeparture
+    //Set up player 1 (Norse AI)
+    run background script SK_SetUpRandomAI(1,PlayerTown2)
+
+    run background script LC2002_JapaneseCapitalImpressiveness
+    run background script LC2002_TownConversion
+
+    wait 15 seconds
+
+    LoadingScreenOver = 1
+
+    disable load screen
+    set fade red 0 green 0 blue 0 time 0
+    set fade in time 4
+    
+    set atmos volume 0.45
+    set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_MAP to 0.6
+    set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_POSITIONAL to 0.6
+
+    wait 2.5 seconds
+    run background script SkirmishGenericTownObjectives
+
+    wait 60 seconds
+
+    run background script SK_WinConditions
+
+end script SK_ScriptManager
+
+begin script SK_SetUpRandomAI(PlayerID,AITown)
+
+    scriptCounter = 0
+    AITownScript[SK_MaxTowns]
+
+    AIDifficulty = 0
+    EnemyIdMin = 0
+    EnemyIdMax = 0
+    Counter = 0
+    Enemy = 0
+
+start
+
+    AIDifficulty = persistent data "SKP_AIDifficulty"
+    EpicScriptRunning[PlayerID] = 0
+
+    SK_PlayerAmount += 1
+
+    run background script SK_ArmyBehaivours(PlayerID,0,0,0,0,0,0,0,0,0)
+    run background script SK_SiegeWeaponBehaivours(PlayerID,0,0,0,0,0,0,0)
+
+    while Counter < number from 100 to 1000
+        SK_Alignment[PlayerID] = number from 1 to 3
+        if AIDifficulty == 1
+            SK_AIDifficulty[PlayerID] = number from 10 to 33
+            //say "Difficulty: Easy"
+
+        elsif AIDifficulty == 2
+            SK_AIDifficulty[PlayerID] = number from 34 to 66
+            //say "Difficulty: Normal"
+
+        elsif AIDifficulty == 3
+            SK_AIDifficulty[PlayerID] = number from 67 to 100
+            //say "Difficulty: Hard"
+
+        elsif AIDifficulty == 4
+            SK_AIDifficulty[PlayerID] = number from 101 to 140
+            //say "Difficulty: Very Hard"
+
+        else
+            SK_AIDifficulty[PlayerID] = number from 10 to 140
+            //say "Difficulty: Random"
+
+        end if
+        //6 Opening Moves for each alignment
+        SK_AIOpeningMoves[PlayerID] = number from 1 to 6
+        Enemy = number from 0 to 3
+        Counter++
+    end while
+
+    if SK_Alignment[PlayerID] == 1
+        set player PlayerID alignment -1.0
+        SK_AIPersonality[PlayerID] = 1
+    elsif SK_Alignment[PlayerID] == 2
+        set player PlayerID alignment 0.0
+        SK_AIPersonality[PlayerID] = 2
+    else
+        set player PlayerID alignment 1.0
+        SK_AIPersonality[PlayerID] = 3
+    end if
+
+    if SK_AIDifficulty[PlayerID] > 100
+        SK_Escalation[PlayerID] += 12
+    end if
+
+    //say "OpeningMove = $d" with number SK_AIOpeningMoves[PlayerID]
+
+    set player PlayerID town AITown capture reason LAST_CAPTURE_AGGRESSIVE
+
+    run background script PlayerMana(PlayerID)
+    run background script SK_AIEscalation(PlayerID)
+    run background script SK_AIInit(PlayerID)
+    run background script SK_AIRecruitmentGetTown(PlayerID,AITown)
+    run background script SK_AIResources(PlayerID)
+    run background script SK_AITownBuildingGetTown(PlayerID)
+    run background script SK_SetupCreature(PlayerID,0,AICreaturePos[PlayerID])
+    run background script bimNewBimbo(AITown,PlayerID)
+
+    run background script SK_ChooseEnemy(PlayerID,Enemy)
+    run background script SK_AttackLogic(PlayerID)
+
+    SK_AIHomeTown[PlayerID] = AITown
+
+    begin loop
+        AITownScript[scriptCounter] = get town with id scriptCounter
+        run background script SK_AIVillagers(PlayerID,AITownScript[scriptCounter])
+
+        scriptCounter++
+        until scriptCounter > SK_MaxTowns
+    end loop
+
+    //test = make player 1 pour miracle MIRACLE_TYPE_TORNADO at {AITown} + {20,0,20}
+    //test = make player 1 throw miracle MIRACLE_TYPE_TORNADO from ({AITown} + {0,-3.0,0}) heading ({AITown} + {50,21,50} - {AITown})
+
+end script SK_SetUpRandomAI
+
+begin script SK_SetupCreature(PlayerID, Creature, CreaturePos)
+
+    Alignment = 0
+
+start
+
+    if PlayerID == 0
+        //Load the creature and get it into global
+        Creature = persistent data "PLAYER_CREATURE_TYPE"
+        if Creature == variable CREATURE_TYPE_LION
+            Creature = create CREATURE CREATURE_TYPE_LION at {CreaturePos}
+            set player PlayerID creature to Creature
+
+        elsif Creature == variable CREATURE_TYPE_APE
+            Creature = create CREATURE CREATURE_TYPE_APE at {CreaturePos}
+            set player PlayerID creature to Creature
+
+        elsif Creature == variable CREATURE_TYPE_GORILLA
+            Creature = create CREATURE CREATURE_TYPE_GORILLA at {CreaturePos}
+            set player PlayerID creature to Creature
+
+        elsif Creature == variable CREATURE_TYPE_WOLF
+            Creature = create CREATURE CREATURE_TYPE_WOLF at {CreaturePos}
+            set player PlayerID creature to Creature
+
+        elsif Creature == variable CREATURE_TYPE_COW
+            Creature = create CREATURE CREATURE_TYPE_COW at {CreaturePos}
+            set player PlayerID creature to Creature
+
+        else// L2PlayersCreatureCheck == variable CREATURE_TYPE_TIGER
+            Creature = create CREATURE CREATURE_TYPE_TIGER at {CreaturePos}
+            set player PlayerID creature to Creature
+
+        end if
+
+        set creature Creature happiness to maximum
+
+        AGE of Creature = persistent data "CREATURE_AGE"
+        HEIGHT of Creature = persistent data "CREATURE_SIZE"
+        STRENGTH of Creature = persistent data "CREATURE_STRENGTH"
+        ALIGNMENT of Creature = persistent data "CREATURE_ALIGNMENT"
+        FATNESS of Creature = persistent data "CREATURE_FATNESS"
+
+        release Creature
+    else
+
+        //AI CREATURES
+        Creature = number from 1 to 6
+        if Creature == 1
+            Creature = create CREATURE CREATURE_TYPE_LION at {CreaturePos}
+            set player PlayerID creature to Creature
+
+        elsif Creature == 2
+            Creature = create CREATURE CREATURE_TYPE_WOLF at {CreaturePos}
+            set player PlayerID creature to Creature
+
+        elsif Creature == 3
+            Creature = create CREATURE CREATURE_TYPE_APE at {CreaturePos}
+            set player PlayerID creature to Creature
+
+        elsif Creature == 4
+            Creature = create CREATURE CREATURE_TYPE_COW at {CreaturePos}
+            set player PlayerID creature to Creature
+
+        elsif Creature == 5
+            Creature = create CREATURE CREATURE_TYPE_TIGER at {CreaturePos}
+            set player PlayerID creature to Creature
+
+        else
+            Creature = create CREATURE CREATURE_TYPE_GORILLA at {CreaturePos}
+            set player PlayerID creature to Creature
+
+        end if
+
+        SK_AICreature[PlayerID] = Creature
+        set creature Creature happiness to maximum
+
+        Alignment = get player PlayerID alignment
+        STRENGTH of Creature = 0.75
+        ALIGNMENT of Creature = Alignment
+        FATNESS of Creature = 0.3
+
+        set research ARTEFACT_CREATURE_MAGIC_TYPE_WATER available to RESEARCH_AVAILABILITY_RESEARCHED player PlayerID
+        set research ARTEFACT_CREATURE_MAGIC_TYPE_HEAL available to RESEARCH_AVAILABILITY_RESEARCHED player PlayerID
+        set research ARTEFACT_CREATURE_MAGIC_TYPE_LIGHTNING available to RESEARCH_AVAILABILITY_RESEARCHED player PlayerID
+        set research ARTEFACT_CREATURE_MAGIC_TYPE_FIREBALL available to RESEARCH_AVAILABILITY_RESEARCHED player PlayerID
+        set research ARTEFACT_CREATURE_ROLE_BUILDER_2 available to RESEARCH_AVAILABILITY_RESEARCHED player PlayerID
+        set research ARTEFACT_CREATURE_ROLE_GATHERER_3 available to RESEARCH_AVAILABILITY_RESEARCHED player PlayerID
+        set research ARTEFACT_CREATURE_ROLE_SOLDIER_3 available to RESEARCH_AVAILABILITY_RESEARCHED player PlayerID
+
+        teach Creature all
+        disable Creature action availability LA_EAT with LO_PLAYER_VILLAGER
+        disable Creature action availability LA_EAT with LO_PLAYER_PLATOON
+        disable Creature action availability LA_EAT with LO_ROCKS
+        disable Creature action availability LA_EAT with LO_TREES
+        disable Creature action availability LA_EAT with LO_TOYS
+        disable Creature action availability LA_EAT with LO_POO
+        disable Creature action availability LA_EAT with LO_SPELL_ORBS
+        disable Creature action availability LA_POO with LO_PLAYER_VILLAGER
+        disable Creature action availability LA_POO with LO_PLAYER_PLATOON
+        disable Creature action availability LA_POO with LO_PLAYER_DEFENCES
+        disable Creature action availability LA_POO with LO_PLAYER_STORAGE_PIT
+        disable Creature action availability LA_POO with LO_PLAYER_BUILDING
+        disable Creature action availability LA_PLAY
+        disable Creature action availability LA_WATER with LO_PLAYER_VILLAGER
+        disable Creature action availability LA_WATER with LO_PLAYER_PLATOON
+        disable Creature action availability LA_HEAL with LO_OPPONENT_PLATOON
+        disable Creature action availability LA_ATTACK with LO_CREATURE_PEN
+        disable Creature action availability LA_ATTACK with LO_ROCKS
+        disable Creature action availability LA_ATTACK with LO_MINE
+        disable Creature action availability LA_ATTACK with LO_ORE_ROCKS
+        disable Creature action availability LA_ATTACK with LO_TREES
+        disable Creature action availability LA_ATTACK with LO_FIELDS
+        disable Creature action availability LA_ATTACK with LO_POO
+        disable Creature action availability LA_ATTACK with LO_SPELL_ORBS
+
+        release Creature
+
+        run background script SK_AICreature(PlayerID,Creature)
+    end if
+
+end script SK_SetupCreature
+
+begin script LC2002_JapaneseCapitalImpressiveness
+
+    Threshold = 0
+
+start
+
+    //To PlayerTown1
+    Threshold = get town NeutralTown1 impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from NeutralTown1 to PlayerTown1 ToPlayer1NeutralTown1Impressiveness - Threshold
+
+    Threshold = get town NeutralTown2 impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from NeutralTown2 to PlayerTown1 ToPlayer1NeutralTown2Impressiveness - Threshold
+
+    Threshold = get town NeutralTown3 impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from NeutralTown3 to PlayerTown1 ToPlayer1NeutralTown3Impressiveness - Threshold
+
+    Threshold = get town NeutralTown4 impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from NeutralTown4 to PlayerTown1 ToPlayer1NeutralTown4Impressiveness - Threshold
+
+    Threshold = get town NeutralTown5 impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from NeutralTown5 to PlayerTown1 ToPlayer1NeutralTown5Impressiveness - Threshold
+
+    Threshold = get town NeutralTown6 impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from NeutralTown6 to PlayerTown1 ToPlayer1NeutralTown6Impressiveness - Threshold
+
+    Threshold = get town SpecTown1 impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from SpecTown1 to PlayerTown1 ToPlayer1NeutralTown7Impressiveness - Threshold
+
+    Threshold = get town PlayerTown2 impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from PlayerTown2 to PlayerTown1 ToPlayer1PlayerTown2Impressiveness - Threshold
+
+    //To PlayerTown2
+    Threshold = get town NeutralTown1 impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from NeutralTown1 to PlayerTown2 ToPlayer2NeutralTown1Impressiveness - Threshold
+
+    Threshold = get town NeutralTown2 impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from NeutralTown2 to PlayerTown2 ToPlayer2NeutralTown2Impressiveness - Threshold
+
+    Threshold = get town NeutralTown3 impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from NeutralTown3 to PlayerTown2 ToPlayer2NeutralTown3Impressiveness - Threshold
+
+    Threshold = get town NeutralTown4 impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from NeutralTown4 to PlayerTown2 ToPlayer2NeutralTown4Impressiveness - Threshold
+
+    Threshold = get town NeutralTown5 impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from NeutralTown5 to PlayerTown2 ToPlayer2NeutralTown5Impressiveness - Threshold
+
+    Threshold = get town NeutralTown6 impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from NeutralTown6 to PlayerTown2 ToPlayer2NeutralTown6Impressiveness - Threshold
+
+    Threshold = get town SpecTown1 impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from SpecTown1 to PlayerTown2 ToPlayer2NeutralTown7Impressiveness - Threshold
+
+    Threshold = get town PlayerTown1 impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from PlayerTown1 to PlayerTown2 ToPlayer2PlayerTown1Impressiveness - Threshold
+
+end script LC2002_JapaneseCapitalImpressiveness
+
+begin script LC2002_TownConversion
+
+    isConverted1 = 0
+    isConverted2 = 0
+    isConverted3 = 0
+    isConverted4 = 0
+    isConverted5 = 0
+    isConverted6 = 0
+    isConverted7 = 0
+    isConverted8 = 0
+    isConverted9 = 0
+    a = 0
+    b = 0
+    c = 0
+    d = 0
+    e = 0
+    f = 0
+    g = 0
+    h = 0
+    i = 0
+    
+start
+
+begin loop
+
+    isConverted1 = variable get town NeutralTown1 method of last conversion
+    isConverted2 = variable get town NeutralTown2 method of last conversion
+    isConverted3 = variable get town NeutralTown3 method of last conversion
+    isConverted4 = variable get town NeutralTown4 method of last conversion
+    isConverted5 = variable get town NeutralTown5 method of last conversion
+    isConverted6 = variable get town NeutralTown6 method of last conversion
+    isConverted7 = variable get town SpecTown1 method of last conversion //(Spec Town 1)
+    isConverted8 = variable get town PlayerTown1 method of last conversion
+    isConverted9 = variable get town PlayerTown2 method of last conversion
+
+    if isConverted1 != 0 and a == 0
+        if PLAYER of NeutralTown1 == 0 or get town NeutralTown1 is migrating to == PlayerTown1
+            a = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted1 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            elsif isConverted1 == 2
+                TownsPeacefulConverted = TownsPeacefulConverted + 1
+            end if
+        end if
+    end if
+
+    if isConverted1 != 0
+        if PLAYER of NeutralTown1 >= 0
+            disable migration from NeutralTown1 to NeutralTown2
+            disable migration from NeutralTown1 to NeutralTown3
+            disable migration from NeutralTown1 to NeutralTown4
+            disable migration from NeutralTown1 to NeutralTown5
+            disable migration from NeutralTown1 to NeutralTown6
+            disable migration from NeutralTown1 to SpecTown1
+            disable migration from NeutralTown1 to PlayerTown2
+            disable migration from NeutralTown1 to PlayerTown1
+        end if
+    else
+        enable migration from NeutralTown1 to NeutralTown2
+        enable migration from NeutralTown1 to NeutralTown3
+        enable migration from NeutralTown1 to NeutralTown4
+        enable migration from NeutralTown1 to NeutralTown5
+        enable migration from NeutralTown1 to NeutralTown6
+        enable migration from NeutralTown1 to SpecTown1
+        enable migration from NeutralTown1 to PlayerTown2
+        enable migration from NeutralTown1 to PlayerTown1
+    end if
+    
+    if isConverted2 != 0 and b == 0
+        if PLAYER of NeutralTown2 == 0 or get town NeutralTown2 is migrating to == PlayerTown1
+            b = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted2 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            elsif isConverted2 == 2
+                TownsPeacefulConverted = TownsPeacefulConverted + 1
+            end if
+        end if
+    end if
+
+    if isConverted2 != 0
+        if PLAYER of NeutralTown2 >= 0
+            disable migration from NeutralTown2 to NeutralTown1
+            disable migration from NeutralTown2 to NeutralTown3
+            disable migration from NeutralTown2 to NeutralTown4
+            disable migration from NeutralTown2 to NeutralTown5
+            disable migration from NeutralTown2 to NeutralTown6
+            disable migration from NeutralTown2 to SpecTown1
+            disable migration from NeutralTown2 to PlayerTown2
+            disable migration from NeutralTown2 to PlayerTown1
+        end if
+    else
+        enable migration from NeutralTown2 to NeutralTown1
+        enable migration from NeutralTown2 to NeutralTown3
+        enable migration from NeutralTown2 to NeutralTown4
+        enable migration from NeutralTown2 to NeutralTown5
+        enable migration from NeutralTown2 to NeutralTown6
+        enable migration from NeutralTown2 to SpecTown1
+        enable migration from NeutralTown2 to PlayerTown2
+        enable migration from NeutralTown2 to PlayerTown1
+    end if
+    
+    if isConverted3 != 0 and c == 0
+        if PLAYER of NeutralTown3 == 0 or get town NeutralTown3 is migrating to == PlayerTown1
+            c = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted3 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            elsif isConverted3 == 2
+                TownsPeacefulConverted = TownsPeacefulConverted + 1
+            end if
+        end if
+    end if
+
+    if isConverted3 != 0
+        if PLAYER of NeutralTown3 >= 0
+            disable migration from NeutralTown3 to NeutralTown1
+            disable migration from NeutralTown3 to NeutralTown2
+            disable migration from NeutralTown3 to NeutralTown4
+            disable migration from NeutralTown3 to NeutralTown5
+            disable migration from NeutralTown3 to NeutralTown6
+            disable migration from NeutralTown3 to SpecTown1
+            disable migration from NeutralTown3 to PlayerTown2
+            disable migration from NeutralTown3 to PlayerTown1
+        end if
+    else
+        enable migration from NeutralTown3 to NeutralTown1
+        enable migration from NeutralTown3 to NeutralTown2
+        enable migration from NeutralTown3 to NeutralTown4
+        enable migration from NeutralTown3 to NeutralTown5
+        enable migration from NeutralTown3 to NeutralTown6
+        enable migration from NeutralTown3 to SpecTown1
+        enable migration from NeutralTown3 to PlayerTown2
+        enable migration from NeutralTown3 to PlayerTown1
+    end if
+    
+    if isConverted4 != 0 and d == 0
+        if PLAYER of NeutralTown4 == 0 or get town NeutralTown4 is migrating to == PlayerTown1
+            d = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted4 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            elsif isConverted4 == 2
+                TownsPeacefulConverted = TownsPeacefulConverted + 1
+            end if
+        end if
+    end if
+
+    if isConverted4 != 0
+        if PLAYER of NeutralTown4 >= 0
+            disable migration from NeutralTown4 to NeutralTown1
+            disable migration from NeutralTown4 to NeutralTown2
+            disable migration from NeutralTown4 to NeutralTown3
+            disable migration from NeutralTown4 to NeutralTown5
+            disable migration from NeutralTown4 to NeutralTown6
+            disable migration from NeutralTown4 to SpecTown1
+            disable migration from NeutralTown4 to PlayerTown2
+            disable migration from NeutralTown4 to PlayerTown1
+        end if
+    else
+        enable migration from NeutralTown4 to NeutralTown1
+        enable migration from NeutralTown4 to NeutralTown2
+        enable migration from NeutralTown4 to NeutralTown3
+        enable migration from NeutralTown4 to NeutralTown5
+        enable migration from NeutralTown4 to NeutralTown6
+        enable migration from NeutralTown4 to SpecTown1
+        enable migration from NeutralTown4 to PlayerTown2
+        enable migration from NeutralTown4 to PlayerTown1
+    end if
+    
+    if isConverted5 != 0 and e == 0
+        if PLAYER of NeutralTown5 == 0 or get town NeutralTown5 is migrating to == PlayerTown1
+            e = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted5 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            elsif isConverted5 == 2
+                TownsPeacefulConverted = TownsPeacefulConverted + 1
+            end if
+        end if
+    end if
+
+    if isConverted5 != 0
+        if PLAYER of NeutralTown5 >= 0
+            disable migration from NeutralTown5 to NeutralTown1
+            disable migration from NeutralTown5 to NeutralTown2
+            disable migration from NeutralTown5 to NeutralTown3
+            disable migration from NeutralTown5 to NeutralTown4
+            disable migration from NeutralTown5 to NeutralTown6
+            disable migration from NeutralTown5 to SpecTown1
+            disable migration from NeutralTown5 to PlayerTown2
+            disable migration from NeutralTown5 to PlayerTown1
+        end if
+    else
+        enable migration from NeutralTown5 to NeutralTown1
+        enable migration from NeutralTown5 to NeutralTown2
+        enable migration from NeutralTown5 to NeutralTown3
+        enable migration from NeutralTown5 to NeutralTown4
+        enable migration from NeutralTown5 to NeutralTown6
+        enable migration from NeutralTown5 to SpecTown1
+        enable migration from NeutralTown5 to PlayerTown2
+        enable migration from NeutralTown5 to PlayerTown1
+    end if
+    
+    if isConverted6 != 0 and f == 0
+        if PLAYER of NeutralTown6 == 0 or get town NeutralTown6 is migrating to == PlayerTown1
+            f = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted6 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            elsif isConverted6 == 2
+                TownsPeacefulConverted = TownsPeacefulConverted + 1
+            end if
+        end if
+    end if
+
+    if isConverted6 != 0
+        if PLAYER of NeutralTown6 >= 0
+            disable migration from NeutralTown6 to NeutralTown1
+            disable migration from NeutralTown6 to NeutralTown2
+            disable migration from NeutralTown6 to NeutralTown3
+            disable migration from NeutralTown6 to NeutralTown4
+            disable migration from NeutralTown6 to NeutralTown5
+            disable migration from NeutralTown6 to SpecTown1
+            disable migration from NeutralTown6 to PlayerTown2
+            disable migration from NeutralTown6 to PlayerTown1
+        end if
+    else
+        enable migration from NeutralTown6 to NeutralTown1
+        enable migration from NeutralTown6 to NeutralTown2
+        enable migration from NeutralTown6 to NeutralTown3
+        enable migration from NeutralTown6 to NeutralTown4
+        enable migration from NeutralTown6 to NeutralTown5
+        enable migration from NeutralTown6 to SpecTown1
+        enable migration from NeutralTown6 to PlayerTown2
+        enable migration from NeutralTown6 to PlayerTown1
+    end if
+    
+    if isConverted7 != 0 and g == 0
+        if PLAYER of SpecTown1 == 0 or get town SpecTown1 is migrating to == PlayerTown1
+            g = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted7 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            elsif isConverted7 == 2
+                TownsPeacefulConverted = TownsPeacefulConverted + 1
+            end if
+        end if
+    end if    
+
+    if isConverted7 != 0
+        if PLAYER of SpecTown1 >= 0
+            disable migration from SpecTown1 to NeutralTown1
+            disable migration from SpecTown1 to NeutralTown2
+            disable migration from SpecTown1 to NeutralTown3
+            disable migration from SpecTown1 to NeutralTown4
+            disable migration from SpecTown1 to NeutralTown5
+            disable migration from SpecTown1 to NeutralTown6
+            disable migration from SpecTown1 to PlayerTown2
+            disable migration from SpecTown1 to PlayerTown1
+        end if
+    else
+        enable migration from SpecTown1 to NeutralTown1
+        enable migration from SpecTown1 to NeutralTown2
+        enable migration from SpecTown1 to NeutralTown3
+        enable migration from SpecTown1 to NeutralTown4
+        enable migration from SpecTown1 to NeutralTown5
+        enable migration from SpecTown1 to NeutralTown6
+        enable migration from SpecTown1 to PlayerTown2
+        enable migration from SpecTown1 to PlayerTown1
+    end if
+    
+end loop
+
+end script LC2002_TownConversion
+
+
+begin script SkirmishGenericTownObjectives
+    ObjectivesComplete = 0
+start
+
+    reset all objectives for player 0
+
+    //Take over 5 town using impressiveness    
+    set player 0 objective TRIBUTE_OBJECTIVE_TAKEOVER_TOWNS_IMPRESSIVENESS with amount 4 text "BW2T_SCRIPT_GENERIC_PICKUP163" amount 4 description "BW2T_SCRIPT_03FINAL_OBJECTIVE_GOOD_11" start value 0 reward 30000 alignment 0.05
+
+    //Take over 3 towns by force 
+    set player 0 objective TRIBUTE_OBJECTIVE_TAKEOVER_TOWNS_FORCE with amount 3 text "BW2T_SCRIPT_GENERIC_PICKUP162" amount 3 description "BW2T_SCRIPT_06FINAL_OBJECTIVE_EVIL_21" start value 0 reward 30000 alignment -0.05
+
+    //TOWN OBJECTIVES
+    //Achieve metropolis status    
+    set player 0 objective TRIBUTE_OBJECTIVE_REACH_METROPOLIS_STATUS with amount 1 text "BW2T_SCRIPT_07FINAL_OBJECTIVE_NEUTRAL_30" amount 500 description "BW2T_SCRIPT_07FINAL_OBJECTIVE_NEUTRAL_31" start value 0 reward 20000
+    
+    //Build 20 embellishments    
+    set player 0 objective TRIBUTE_OBJECTIVE_BUILD_EMBELLISHMENT with amount 20 text "BW2T_SCRIPT_08FINAL_OBJECTIVE_GOOD_30" amount 20 description "BW2T_SCRIPT_08FINAL_OBJECTIVE_GOOD_31" start value 0 reward 10000 alignment 0.03
+
+    //CREATURE objectives
+    //Creature kill 10 platoons    
+    set player 0 objective TRIBUTE_OBJECTIVE_CREATURE_KILL_PLATOONS with amount 10 text "BW2T_SCRIPT_04FINAL_OBJECTIVE_EVIL_20" amount 10 description "BW2T_SCRIPT_04FINAL_OBJECTIVE_EVIL_21" start value 0 reward 10000
+
+    //Creature Builds 25 Abodes     
+    set player 0 objective TRIBUTE_OBJECTIVE_CREATURE_BUILD_ABODES with amount 25 text "BW2T_SCRIPT_04FINAL_OBJECTIVE_NEUTRAL_20" amount 25 description "BW2T_SCRIPT_04FINAL_OBJECTIVE_NEUTRAL_21"  class TRIBUTE_OBJECTIVE_CLASS_TOWN start value 0 reward 10000
+
+    //ARMY objectives    
+    //Create 10 platoons    
+    set player 0 objective TRIBUTE_OBJECTIVE_CREATE_TROOPS with amount 300 text "BW2T_SCRIPT_06FINAL_OBJECTIVE_50" amount 300 description "BW2T_SCRIPT_06FINAL_SECONDARYOBJECTIVE_71" start value 0 reward 10000 alignment -0.05
+
+    //Level up a platoon to Regular Skill    
+    set player 0 objective TRIBUTE_OBJECTIVE_LEVEL_UP_PLATOON with amount 1 text "BW2T_SCRIPT_04FINAL_OBJECTIVE_EVIL_30" amount 1 description "BW2T_SCRIPT_04FINAL_OBJECTIVE_EVIL_31" start value 0 reward 10000 alignment -0.001
+    
+    set player 0 objective class TRIBUTE_OBJECTIVE_CLASS_GOLD amount 20
+    set player 0 objective class TRIBUTE_OBJECTIVE_CLASS_SPECIAL amount 0
+    set player 0 objective class TRIBUTE_OBJECTIVE_CLASS_TOWN amount 1
+    set player 0 objective class TRIBUTE_OBJECTIVE_CLASS_ARMY amount 1
+    set player 0 objective class TRIBUTE_OBJECTIVE_CLASS_CREATURE amount 1
+    set player 0 objective class TRIBUTE_OBJECTIVE_CLASS_RESOURCES amount 1
+
+end script SkirmishGenericTownObjectives
+
+
+begin script SkirmishDeparture
+
+    GP_Scroll = 0
+    GP_ScrollBronze = 0
+    GP_ScrollPos = 0
+    AreYouSureCommentSaid = 0
+    CinemaPos = 0
+    Portal = 0
+    CSMixer = 0
+
+start
+
+    GP_ScrollPos = marker at {1022.14,84.78,1979.02}
+    GP_Scroll = create highlight GOLD name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {GP_ScrollPos}
+
+    Portal = create visual effect VISUAL_EFFECT_TELEPORTER_HOOP at {GP_ScrollPos} + {0.000,1.000,0.000} time -1
+    SCALE of Portal = 1.25
+    set Portal colour red 218 green 165 blue 32
+
+    GP_ScrollBronze = create highlight BRONZE name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {GP_ScrollPos} + {20,0,20}
+
+begin loop
+
+    if GP_ScrollBronze right clicked
+        clear right clicked object
+        begin dialogue
+            if Language == English
+                say "This scroll teleports you to god's playground."
+            elsif Language == German
+                say "Diese Schriftrolle teleportiert dich zum Spielplatz der Goetter."
+            end if
+            wait 4.5 seconds
+        end dialogue
+    end if
+
+    if GP_Scroll right clicked and AreYouSureCommentSaid == 0
+        clear right clicked object
+        begin dialogue
+            eject good spirit
+            eject evil spirit
+            //GA: "Are you sure you wish to leave the land?"
+            say "BW2T_SCRIPT_04FINAL_ADVISORS_DEPARTURE_10"
+            wait until read
+            //EA: "Click again to confirm"
+            say "BW2T_SCRIPT_04FINAL_ADVISORS_DEPARTURE_11"
+            wait until read
+            send good spirit home
+            send evil spirit home
+        end dialogue
+        AreYouSureCommentSaid = 1
+        clear right clicked object
+    elsif GP_Scroll right clicked and AreYouSureCommentSaid == 1
+        delete GP_Scroll
+        delete GP_ScrollBronze
+    end if
+
+    until GP_Scroll not exists
+end loop
+
+CinemaPos = marker at {GP_ScrollPos}
+
+set fade red 0 green 0 blue 0 time 1
+wait 1 seconds
+begin cinema
+    start music "cut_scene_sinister_02" loop 10 
+
+    wait 2 seconds
+    queue camera move with position {CinemaPos} + {10,15,10} focus {CinemaPos} + {0,5,0} time 0.0
+    queue camera move with position {CinemaPos} + {7.5,12,7.5} focus {CinemaPos} time 6.0
+    queue camera move with position {CinemaPos} + {1,1.5,1} focus {CinemaPos} time 6.0
+    play camera path with easein 4 easeout 4 method SCRIPT_CAMERAPATH_EQUALDISTANCE
+    set fade in time 2
+    wait 7.5 seconds
+    set fade red 0 green 0 blue 0 time 3
+    set mixer CSMixer channel AUDIO_MIXER_CHANNEL_GLOBAL to 0.0 with fadetime 3
+    wait 3.5 seconds
+
+    /*
+    release MyCreature
+    MyCreature = get player 0 creature
+    if MyCreature exists
+        save my_creature
+    end if
+    */
+
+    PD_ForcedSaving = 1
+    wait until PD_ForcedSaving == 1 or 10 seconds
+
+    disable game can be lost
+    run script LandExit
+    load map "./Data/Landscape/BW2/land2001.bwe"
+
+end cinema
+
+end script SkirmishDeparture

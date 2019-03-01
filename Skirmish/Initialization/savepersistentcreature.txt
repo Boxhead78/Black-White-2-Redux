@@ -1,0 +1,54 @@
+///////////////////////////////////////////////////////////////////////////////
+//        Persistent data Script
+//    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//  This script is used to save all persistent data
+//  related with creatures to "restore" the creature
+//  in skirmish.
+//
+//    Start date:        29.01.18            By: Boxhead
+//    Update date:    23.02.19            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+define script SavePersistentDataCreature
+
+
+run script SavePersistentDataCreature
+
+begin script SavePersistentDataCreature
+
+    PDC_Age = 0
+    PDC_Alignment = 0
+    PDC_Fatness = 0
+    PDC_Strength = 0
+    PDC_Size = 0
+    PDC_FirstTime = 0
+    PlayerCreature = 0
+
+start
+    
+    wait 5 seconds
+
+    begin loop
+        //if bindable action BINDABLE_ACTION_TYPE_ACTION performed or bindable action BINDABLE_ACTION_TYPE_MOVE performed or bindable action BINDABLE_ACTION_TYPE_MOVE performed
+            PlayerCreature = get player 0 creature
+            if PlayerCreature exists
+                PDC_Age = AGE of PlayerCreature
+                PDC_Alignment = ALIGNMENT of PlayerCreature
+                PDC_Fatness = FATNESS of PlayerCreature
+                PDC_Strength = STRENGTH of PlayerCreature
+                PDC_Size = HEIGHT of PlayerCreature
+
+
+                set persistent data "CREATURE_AGE" to PDC_Age
+                set persistent data "CREATURE_ALIGNMENT" to PDC_Alignment
+                set persistent data "CREATURE_FATNESS" to PDC_Fatness
+                set persistent data "CREATURE_STRENGTH" to PDC_Strength
+                set persistent data "CREATURE_SIZE" to PDC_Size
+
+                PD_ForcedSaving = 0
+                wait until PD_ForcedSaving == 1 or 300 seconds
+            end if
+        //end if
+    end loop
+
+end script SavePersistentDataCreature

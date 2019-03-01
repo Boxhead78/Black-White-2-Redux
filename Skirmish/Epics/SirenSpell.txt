@@ -1,0 +1,471 @@
+
+//--------------------------------------------------------------------------------------------------------------
+define SK_EpicRadius = 1500 //Radius in which epic effects will be heard
+define SSTrue = 1
+
+define script SetupDancerPositions(whichspell)
+define script DancerLookAtWonder(MyVillager, Wonder, Count, whichspell)
+define script SirenSpell(EnemyWonder, Siren)
+
+//--------------------------------------------------------------------------------------------------------------
+global DancePositions[20]
+global BellyPos=0
+global ATIEndFlag=0
+global Land11VolcanoCasting = 0
+global WhiChEpicSpellIsBeingCast = 0
+
+//--------------------------------------------------------------------------------------------------------------
+
+
+begin script SetupDancerPositions(whichspell)
+
+start
+
+    if whichspell == 0 //siren
+    
+        DancePositions[0]=marker at {-5.002, 5.872, 3.985}
+        DancePositions[1]=marker at {-4.460, 5.872, 5.124}
+        DancePositions[2]=marker at {-6.273, 5.872, 2.992}
+        DancePositions[3]=marker at {-6.614, 5.872, 3.953}
+        DancePositions[4]=marker at {-5.343, 5.872, 4.946}
+        DancePositions[5]=marker at {-4.072, 5.872, 5.938}
+        DancePositions[6]=marker at {-6.026, 5.872, 6.868}
+        DancePositions[7]=marker at {-7.885, 5.872, 2.961}
+        DancePositions[8]=marker at {-6.956, 5.872, 4.914}
+        DancePositions[9]=marker at {-2.801, 5.872, 6.930}
+        DancePositions[10]=marker at {-4.755, 5.872, 7.860}
+        DancePositions[11]=marker at {-8.878, 5.872, 4.232}
+        DancePositions[12]=marker at {-6.987, 5.872, 6.527}
+        DancePositions[13]=marker at {-4.135, 5.872, 9.162}
+        DancePositions[14]=marker at {-7.018, 5.872, 8.139}
+        DancePositions[15]=marker at {-8.909, 5.872, 5.844}
+        DancePositions[16]=marker at {-6.125, 5.872, 9.452}
+        DancePositions[17]=marker at {-10.184, 5.872, 4.364}
+        DancePositions[18]=marker at {-9.060, 5.872, 2.954}
+        DancePositions[19]=marker at {-8.444, 5.872, 6.993}
+
+    elsif whichspell == 1 //volcano
+
+        DancePositions[0]=marker at {0.315, 1.410, -11.642}
+        DancePositions[1]=marker at {-1.096, 1.149, -10.804}
+        DancePositions[2]=marker at {-1.338, 1.149, -12.035}
+        DancePositions[3]=marker at {-2.718, 1.149, -11.253}
+        DancePositions[4]=marker at {-4.341, 1.149, -11.701}
+        DancePositions[5]=marker at {1.216, 1.149, -10.748}
+        DancePositions[6]=marker at {2.988, 1.149, -10.841}
+        DancePositions[7]=marker at {2.205, 1.149, -12.221}
+        DancePositions[8]=marker at {0.853, 1.149, -12.594}
+        DancePositions[9]=marker at {-0.499, 1.149, -12.968}
+        DancePositions[10]=marker at {-3.352, 1.149, -13.174}
+        DancePositions[11]=marker at {-2.363, 1.149, -14.647}
+
+        DancePositions[12]=marker at {3.585, 1.149, -13.004}
+        DancePositions[13]=marker at {1.460, 1.149, -13.736}
+        DancePositions[14]=marker at {-0.051, 1.149, -14.590}
+        DancePositions[15]=marker at {-1.851, 1.149, -13.341}    
+        DancePositions[16]=marker at {2.847, 1.149, -14.232}
+        DancePositions[17]=marker at {-4.436, 1.149, -14.380}
+        DancePositions[18]=marker at {1.534, 1.149, -15.423}
+        DancePositions[19]=marker at {-2.506, 1.149, -15.979}
+
+    elsif whichspell == 2 //earthquake
+
+        DancePositions[0]=marker at {0.311, 4.174, 11.804}
+        DancePositions[1]=marker at {1.725, 4.174, 12.277}
+        DancePositions[2]=marker at {2.670, 4.174, 11.807}
+        DancePositions[3]=marker at {-2.048, 4.174, 11.800}
+        DancePositions[4]=marker at {3.140, 4.174, 12.751}
+        DancePositions[5]=marker at {-0.687, 4.174, 12.500}
+        DancePositions[6]=marker at {1.763, 4.174, 13.611}
+        DancePositions[7]=marker at {3.323, 4.174, 14.148}
+        DancePositions[8]=marker at {0.499, 4.174, 12.812}
+        DancePositions[9]=marker at {-1.584, 4.174, 12.943}
+        DancePositions[10]=marker at {0.015, 4.174, 14.284}
+        DancePositions[11]=marker at {-2.436, 4.174, 14.294}
+
+        DancePositions[12]=marker at {2.224, 4.174, 15.010}
+        DancePositions[13]=marker at {-3.546, 4.174, 12.706}
+        DancePositions[14]=marker at {0.877, 4.174, 15.384}
+        DancePositions[15]=marker at {-1.332, 4.174, 14.658}
+        DancePositions[16]=marker at {-3.783, 4.174, 14.668}
+        DancePositions[17]=marker at {3.576, 4.174, 15.863}
+        DancePositions[18]=marker at {-0.590, 4.174, 16.125}
+        DancePositions[19]=marker at {-2.552, 4.174, 15.888}
+
+    elsif whichspell == 3 //Hurricane
+
+        DancePositions[0]=marker at {0.987, 0.354, 12.999}
+        DancePositions[1]=marker at {2.807, 0.354, 12.886}
+        DancePositions[2]=marker at {-0.981, 0.354, 13.670}
+        DancePositions[3]=marker at {-2.653, 0.354, 13.226}
+        DancePositions[4]=marker at {3.625, 0.354, 14.297}
+        DancePositions[5]=marker at {1.806, 0.354, 14.410}
+        DancePositions[6]=marker at {-0.014, 0.354, 14.523}
+        DancePositions[7]=marker at {4.444, 0.354, 15.707}
+        DancePositions[8]=marker at {-3.654, 0.354, 14.750}
+        DancePositions[9]=marker at {2.624, 0.354, 15.821}
+        DancePositions[10]=marker at {0.804, 0.354, 15.934}
+        DancePositions[11]=marker at {-1.982, 0.354, 15.194}
+
+        DancePositions[12]=marker at {3.443, 0.354, 17.231}
+        DancePositions[13]=marker at {-0.737, 0.354, 16.121}
+        DancePositions[14]=marker at {-4.098, 0.354, 16.422}
+        DancePositions[15]=marker at {-2.426, 0.354, 16.866}
+        DancePositions[16]=marker at {1.623, 0.354, 17.344}
+        DancePositions[17]=marker at {-0.197, 0.354, 17.458}
+        DancePositions[18]=marker at {4.627, 0.354, 12.773}
+        DancePositions[19]=marker at {-1.608, 0.354, 18.276}
+
+    elsif whichspell == 4 // WOMD
+
+        DancePositions[0]=marker at {3.521, 1.768, 22.614}
+        DancePositions[1]=marker at {1.650, 4.882, 22.793}
+        DancePositions[2]=marker at {-0.522, 1.645, 22.752}
+        DancePositions[3]=marker at {-2.539, 1.587, 22.649}
+        DancePositions[4]=marker at {-4.802, 1.554, 22.654}
+        DancePositions[5]=marker at {-5.902, 4.516, 22.897}
+        DancePositions[6]=marker at {4.788, 1.887, 23.757}
+        DancePositions[7]=marker at {2.626, 1.792, 23.854}
+        DancePositions[8]=marker at {0.592, 1.726, 23.804}
+        DancePositions[9]=marker at {-1.886, 1.651, 23.911}
+        DancePositions[10]=marker at {-3.893, 1.609, 23.813}
+        DancePositions[11]=marker at {-5.831, 1.594, 24.056}
+
+        DancePositions[12]=marker at {3.807, 1.917, 25.455}
+        DancePositions[13]=marker at {1.559, 1.816, 25.369}
+        DancePositions[14]=marker at {-0.393, 4.933, 25.322}
+        DancePositions[15]=marker at {-2.971, 1.681, 25.435}
+        DancePositions[16]=marker at {-5.221, 1.656, 25.827}
+        DancePositions[17]=marker at {-7.495, 1.621, 25.885}
+        DancePositions[18]=marker at {6.087, 1.953, 25.018}
+        DancePositions[19]=marker at {6.128, 1.882, 22.657}
+
+    end if
+
+
+end script SetupDancerPositions
+
+//--------------------------------------------------------------------------------------------------------------
+begin script DancerLookAtWonder(MyVillager, Wonder, Count, whichspell)
+    
+    MyPos=0
+    LessEvenDudes=0
+
+start
+    
+    MyPos=marker at get world position from Wonder to {DancePositions[Count]}
+    set MyVillager position to {MyPos}
+    LessEvenDudes = number from 0 to 10
+    //wait LessEvenDudes/20 seconds
+    //play anim "a_p_dance_worship3" on MyVillager loop -1
+
+
+    if WhiChEpicSpellIsBeingCast == 0
+        //siren
+        play anim "a_p_dance_worship1" on MyVillager loop -1
+    elsif WhiChEpicSpellIsBeingCast == 2
+        //earthquake
+        play anim "a_p_dance_celebrate03" on MyVillager loop -1
+    elsif WhiChEpicSpellIsBeingCast == 1
+        //volcano
+        play anim "a_p_dance_worship2" on MyVillager loop -1
+    else//if WhiChEpicSpellIsBeingCast == 3
+        //hurricane
+        play anim "a_p_dance_worship3" on MyVillager loop -1
+    end if
+
+    set MyVillager focus to {Wonder}
+    wait 20 seconds
+
+end script DancerLookAtWonder
+
+//--------------------------------------------------------------------------------------------------------------
+begin script SirenSpell(EnemyWonder, Siren)
+
+    Shockeddude = 0
+    Wonder = 0
+    MyDance = 0
+    Dancer = 0
+    Count = 0
+
+    WonderCamPosLinkup=0
+    WonderCamFocLinkup=0
+    
+    RelCamPos=0
+    RelCamFoc=0
+
+    StarVillager=0
+    StarNymph=0
+    AboveSiren=0
+
+    MeOldMateDave=0
+    MusicEventTimer=0
+    MusicEvent1=0
+    MusicEvent2=0
+    WaitUntilPairedAnimStarts=0
+    SirenMixer=0
+    HackVillexistingTimer=0
+
+start
+
+    WhiChEpicSpellIsBeingCast = Siren
+
+
+    SirenMixer = create mixer
+    set mixer SirenMixer channel AUDIO_MIXER_CHANNEL_ANIMATION_VILLAGER to 1.0
+    set mixer SirenMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 1.0
+    set mixer SirenMixer channel AUDIO_MIXER_CHANNEL_SCRIPT_SFX to 1.0
+    
+    run script SetupDancerPositions(0)
+            
+        //focus on wonder and dancers
+        Wonder = get Siren creator
+        if Wonder not exists
+            Wonder = EnemyWonder
+        end if
+        MyDance=get Wonder dance
+        Dancer=get first in MyDance
+                            
+        while Dancer exists and Count <= 19
+            detach Dancer from MyDance     
+            run background script DancerLookAtWonder(Dancer, Wonder, Count, 0)
+            Count++
+            Dancer=get first in MyDance
+            if Count == 3
+                Shockeddude = Dancer
+            end if
+        end while
+    
+//start flame on wonder and zoom into other flame////////////////////////////////////////////////
+        
+        AboveSiren = marker at {Siren}+{0.000,3.000,0.000}
+
+        wait 2 seconds
+        
+        disable simulation sound
+        
+        //Chant music around the wonder
+        if SK_DynamicMusicIsRunning == 0
+            attach music "greek_chant" to Wonder range SK_EpicRadius
+        end if
+        
+        if camera position near {Wonder} radius SK_EpicRadius / 4
+            play string sound "SCRIPT4_SEPIC_FLAMETHROWERWHOOSH4"    //Wonder sound loop 1
+            play string sound "SCRIPT4_SEPIC_CASTSPELLFREEZE1"    //Wonder sound loop 2
+        end if
+
+        //wait 1 seconds
+        
+        //suitable sfx for thunder and other ominous, powerful sounds
+        ///////////////////////////////////////////////////////////////////////////////
+
+        wait 7 seconds
+        //wait until camera ready
+            
+        wait 3 seconds
+
+        //invoke Wonder EPIC_WONDER_STAGE_2 //Torch effect
+        invoke Wonder EPIC_WONDER_STAGE_2
+        invoke Wonder EPIC_WONDER_STAGE_3
+        invoke Wonder EPIC_WONDER_STAGE_4
+        invoke Wonder EPIC_WONDER_STAGE_5
+
+        wait 1 seconds
+        if camera position near {Wonder} radius SK_EpicRadius / 4
+            play string sound "SCRIPT4_SEPIC_EXPLOSION3"    //Zap!
+        end if
+        wait 0.5 seconds
+
+        if Shockeddude exists
+            play anim "A_P_SIREN_REACTION" on Shockeddude
+            wait 0.2 seconds
+        end if
+        
+        wait 1.4 seconds
+    
+        wait 0.2 seconds
+        //invoke Wonder EPIC_WONDER_STAGE_1 //Bottom effect explosion
+        if camera position near {Wonder} radius SK_EpicRadius / 4
+            play string sound "SCRIPT4_SEPIC_EPICTOWERELECTRIC2"    //Zap!
+        end if
+
+        //set sky colour red 0 green 33 blue 64 time 9
+        enable predefined sky "SIREN" time 9
+        
+        wait 1 second
+        invoke Wonder EPIC_WONDER_STAGE_2
+        
+        if camera position near {Wonder} radius SK_EpicRadius / 4
+            play string sound "SCRIPT4_SEPIC_FLAMETHROWERWHOOSH1"    //Zap!
+            play string sound "SCRIPT4_SEPIC_EXPLOSION1"    //Zap!
+        end if
+        wait 2 seconds
+        
+        invoke Wonder EPIC_WONDER_STAGE_3
+        if camera position near {Wonder} radius SK_EpicRadius / 4
+            play string sound "SCRIPT4_SEPIC_FLAMETHROWERWHOOSH2"    //Zap!
+            play string sound "SCRIPT4_SEPIC_EXPLOSION2"    //Zap!
+        end if
+
+        invoke Wonder EPIC_WONDER_STAGE_4
+        wait 3 seconds
+
+        //invoke Wonder EPIC_WONDER_STAGE_1 //Bottom effect explosion
+        invoke Wonder EPIC_WONDER_STAGE_5
+        wait 3 seconds
+        if camera position near {Wonder} radius SK_EpicRadius / 4
+            stop sound "SCRIPT4_SEPIC_EPICTOWERELECTRIC2"
+        end if
+        //send beam of light into the air
+
+        invoke Wonder EPIC_WONDER_STAGE_6
+        //play string sound "SCRIPT4_SEPIC_FREEZE_01"    //Long Beam Zap!
+
+        wait 0.2 seconds
+        
+        if camera position near {Wonder} radius SK_EpicRadius / 4
+            play string sound "SCRIPT4_SEPIC_EXPLOSION3"    //Zap!
+            play string sound "SCRIPT4_SEPIC_BEAMOFLIGHT11"
+        end if
+        
+        //wait until camera ready
+        disable shadows
+        wait 1.3 seconds
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        invoke Siren EPIC_MOVE_VILLAGERS //teleports enemy villagers to siren (not on screen)
+        //Stop the wonder sounds.
+        stop sound "SCRIPT4_SEPIC_FLAMETHROWERWHOOSH4"    //Wonder sound loop 1
+        stop sound "SCRIPT4_SEPIC_CASTSPELLFREEZE1"    //Wonder sound loop 2
+
+        //beam down from afar?///////////////////////////////////////////////////////////////////////
+
+        wait 0.8 seconds
+        invoke Siren EPIC_BEAM_DOWN //sEND BEAM DOWN
+        wait 0.2 seconds
+
+        wait 0.5 seconds
+
+        if camera position near {Siren} radius SK_EpicRadius / 4
+            play string sound "SCRIPT4_SEPIC_BEAMOFLIGHTSTART1"    //Short Beam Zap!
+            play string sound "SCRIPT4_SEPIC_BEAMOFLIGHT11"
+        end if
+        wait 0.5 second
+        if camera position near {Siren} radius SK_EpicRadius / 4
+            play string sound "SCRIPT4_SEPIC_BEAMOFLIGHTLOOP7"
+        end if
+    
+        MeOldMateDave = get Siren star EPIC_WONDER_VILLAGER1
+        detach music from Wonder
+        wait 2 seconds
+
+        wait 2 seconds
+
+        stop sound "SCRIPT4_SEPIC_BEAMOFLIGHT7"
+        stop sound "SCRIPT4_SEPIC_DECAYCHARGESPELL"
+        
+        invoke Siren EPIC_SHOW_SIREN //show siren
+        invoke Siren EPIC_SHUT_DOWN_BEAM
+        
+        //set mixer SirenMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 0.7        
+
+        //Once beam hits ground
+        if SK_DynamicMusicIsRunning == 0
+            attach music "SirenSong" to Siren range SK_EpicRadius
+        end if
+
+        stop sound "SCRIPT4_SEPIC_BEAMOFLIGHTLOOP7"
+
+        //Create a timer for time up counting
+        MusicEventTimer=create timer for 0 seconds
+        MusicEvent1=get music "SirenSong" event "e1" time
+        MusicEvent2=get music "SirenSong" event "e2" time
+        
+        wait 6.5 seconds
+        //wait until camera ready
+        wait 6 seconds
+            
+        wait until get MusicEventTimer time since set >= MusicEvent1
+
+        invoke Siren EPIC_SUMMON_NYMPHS
+        wait 0.5 seconds
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        invoke Siren EPIC_ADD_NYMPHS //add nymphs
+        wait 0.2 seconds
+            
+        MeOldMateDave = get Siren star EPIC_WONDER_VILLAGER1
+
+        wait 3 seconds        
+
+    //1st low tracking//////////////////////////////////////////////////////////////////////////////////
+
+        StarNymph = get Siren star EPIC_OBJECT_NYMPH
+
+        wait 6 seconds
+    
+        wait 6 seconds
+            
+        wait 5 seconds
+        //wait until get MusicEventTimer time since set >= MusicEvent2
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        //wait 2 seconds
+
+        invoke Siren EPIC_TRIGGER_NYMPHS_GESTURE //sic nymphs
+        wait 2 seconds
+        wait 1 seconds
+
+        invoke Siren EPIC_TRIGGER_NYMPHS //sic nymphs
+
+        wait 2.3 seconds
+
+        //play string sound "SCRIPT4_SEPIC_EPICTOWERLOOP1"    //Beam us up sample!
+
+        StarVillager = get Siren star EPIC_OBJECT_VILLAGER
+
+        if StarVillager exists
+
+            HackVillexistingTimer = create timer for 10 seconds
+
+            while WaitUntilPairedAnimStarts not exists or get HackVillexistingTimer time remaining <= 0
+                WaitUntilPairedAnimStarts = get Siren star EPIC_WONDER_HACK_VILLAGER
+            end while
+
+        end if
+
+        if camera position near {Siren} radius SK_EpicRadius / 4
+            play string sound "SCRIPT4_SEPIC_SIRENDISAPPEAR"
+        end if    
+        //stop sound "SCRIPT4_SEPIC_EPICTOWERLOOP1"
+
+        ///this removal sample will now be played in code
+        //play string sound "SCRIPT4_SEPIC_BEAMOFLIGHTLOOP6"
+
+        invoke Siren EPIC_REMOVE_SIREN
+
+        wait 2 seconds
+    
+        invoke Wonder EPIC_WONDER_STAGE_5            
+        invoke Wonder EPIC_WONDER_STAGE_7            
+        wait 7 seconds
+
+        //reset sky colour 3 seconds//restore sky colour to normal
+        enable predefined sky "DEFAULT" time 3
+        wait 3 seconds
+
+        enable simulation sound
+        enable shadows
+        
+        detach music from Siren
+
+        invoke Wonder EPIC_WONDER_STAGE_LAST
+
+        ATIEndFlag=1
+
+        wait 2 seconds
+
+    destroy mixer SirenMixer with fadetime 2
+
+end script SirenSpell

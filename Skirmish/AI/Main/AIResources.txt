@@ -1,0 +1,48 @@
+///////////////////////////////////////////////////////////////////////////////
+//          Skirmish AI Resources
+//    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//    Start date:        30.09.18            By: Boxhead
+//    Update date:    20.10.18            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+define script SK_AIResources(PlayerID)
+define ResourceAmount = 50
+
+begin script SK_AIResources(PlayerID)
+
+    Counter = 0
+    AITown[SK_MaxTowns]
+    TownCentre = 0
+
+start
+
+wait until SK_Escalation[PlayerID] >= 8
+
+begin loop
+
+    if Counter >= SK_MaxTowns
+        Counter = 0
+        wait 30 seconds
+    end if
+
+    AITown[Counter] = get town with id Counter
+    TownCentre = get building ABODE_NUMBER_TOWN_CENTRE in AITown[Counter] min built 1.0
+    if PLAYER of AITown[Counter] == PlayerID and TownCentre exists
+        if (get town AITown[Counter] RESOURCE_TYPE_ORE total < (ResourceAmount * SK_AIDifficulty[PlayerID]))
+            add resource RESOURCE_TYPE_ORE (ResourceAmount * SK_AIDifficulty[PlayerID] / 2) to AITown[Counter]
+        end if
+
+        if (get town AITown[Counter] RESOURCE_TYPE_WOOD total < (ResourceAmount * SK_AIDifficulty[PlayerID]))
+            add resource RESOURCE_TYPE_WOOD (ResourceAmount * SK_AIDifficulty[PlayerID] / 2) to AITown[Counter]
+        end if
+
+        if (get town AITown[Counter] RESOURCE_TYPE_FOOD total < (ResourceAmount * SK_AIDifficulty[PlayerID]))
+            add resource RESOURCE_TYPE_FOOD (ResourceAmount * SK_AIDifficulty[PlayerID] / 2) to AITown[Counter]
+        end if
+    end if
+
+    Counter++
+end loop
+
+end script SK_AIResources

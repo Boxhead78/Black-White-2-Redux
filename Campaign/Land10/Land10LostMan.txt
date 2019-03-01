@@ -1,0 +1,277 @@
+///////////////////////////////////////////////////////////////////////////////
+//    LOST BROTHER
+//    ~~~~~~~~~~~~~
+//
+//    Description:
+//    The Housewife is missing her brother.
+//     It's up to the player to find and rescue him.
+//
+//    Rewards:            10000 - 30000 tribute
+//
+//    Start date:            19.08.16            By:    Boxhead
+//    Update date:        27.10.16            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+global ABODECampfirePos = 0
+global ABODEPos = 0
+global SickDudePos = 0
+global HousewifePos = 0
+
+global ABODE = 0
+global ABODECampfire = 0
+global Housewife = 0
+global SickDude = 0
+global Scroll_LostMan = 0
+global HousewifeInf = 0
+global SickDudeInf
+
+begin script LC10_LostMan
+
+    ReminderTimer = create timer for 0 seconds
+ 
+start
+
+    ABODECampfirePos = marker at {1709.10,214.38,1408.82}
+    ABODEPos = marker at {1711.55,217.32,1421.43}
+    SickDudePos = marker at {1231.37,199.10,1131.29}
+    
+    ABODE = create HOUSE ABODE_INFO_AZTEC_HOUSE_A at {ABODEPos}
+    ABODECampfire = create SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_BONFIRE at {ABODECampfirePos}
+    
+    ANGLE of ABODE = 135
+    
+    enable ABODECampfire indestructible
+    disable ABODECampfire pickup
+    disable ABODECampfire moveable
+    enable ABODE indestructible
+    disable ABODE pickup
+    disable ABODE moveable
+    
+    Scroll_LostMan = create highlight SILVER name "HELP_TEXT_MULTIPLAYER_TAUNTS_GA_20" remind "HELP_TEXT_CREATURE_CURRENT_SOURCE_09" at {ABODE} + {0.00,5.00,0.00}
+
+    wait until Scroll_LostMan right clicked
+    
+    delete Scroll_LostMan
+    
+    run background script LC10_LostMan_Intro
+
+end script LC10_LostMan
+
+begin script LC10_LostMan_Intro
+
+start
+
+    CinemaIsRunning = 1
+
+    Housewife = create VILLAGER VILLAGER_INFO_AZTEC_HOUSEWIFE_FEMALE at {ABODEPos}
+    SickDude = create VILLAGER VILLAGER_INFO_AZTEC_FORESTER_MALE at {SickDudePos}
+    
+    set atmos volume 0
+    
+    HousewifeInf = create influence at {ABODECampfirePos} + {1.00,0.00,1.00} radius 10
+    SickDudeInf = create influence at {SickDude} radius 2
+    
+    disable Housewife pickup
+    disable Housewife moveable
+    
+    move Housewife position to {ABODECampfirePos} + {1.00,0.00,1.00}
+    
+    begin cinema
+        start music "script3_withdia" loop 1 //Dialogues included. Look "say" lines for more information
+        move camera position to {ABODECampfirePos} + {-1.00, 2, -1.00} + {2.00,0.00,1.00} time 8
+        move camera focus to {ABODECampfirePos} + {1.00,0.00,1.00} time 3
+        wait 5 seconds
+        move camera focus to {Housewife} time 3.5
+        wait 0.5 seconds
+        //say "HELP_TEXT_LOST_BROTHER_01" #Not working, Database error.
+        play anim "a_p_pray" on Housewife loop 1
+        wait 4 seconds
+        //say "HELP_TEXT_LOST_BROTHER_02" #Not working, Database error.
+        wait 4 seconds
+        //say "HELP_TEXT_LOST_BROTHER_03" #Not working, Database error.
+        run background script ExtraAnimations
+        wait 6 seconds
+        move camera position to {ABODECampfirePos} + {-15.00, 35, -13.00} time 5
+        move camera focus to {ABODECampfirePos} + {1.00,20.00,1.00} time 5
+        wait until camera ready
+    end cinema
+    
+    set atmos volume 0.45
+    
+    Scroll_LostMan = create highlight SILVER name "HELP_TEXT_MULTIPLAYER_TAUNTS_GA_20" remind "HELP_TEXT_CREATURE_CURRENT_SOURCE_09" at {ABODE} + {0.00,5.00,0.00}
+    
+    run background script LostManCheck
+    
+    CinemaIsRunning = 0
+
+end script LC10_LostMan_Intro
+
+begin script ExtraAnimations
+
+start
+
+    play anim "a_p_scared_stiff_into" on Housewife loop 1
+    wait until Housewife played
+    play anim "a_p_scared_stiff" on Housewife loop 3
+    wait until Housewife played
+    play anim "a_p_scared_stiff_outo" on Housewife loop 1
+
+end script ExtraAnimations
+
+begin script LostManCheck
+
+    ObjectiveDone = 0
+
+start
+
+begin loop
+
+    if {SickDude} near {Housewife} radius 5 and HEALTH of SickDude > 0 and ObjectiveDone == 0
+        if bindable action BINDABLE_ACTION_TYPE_ACTION performed
+            CinemaIsRunning = 1
+            wait 1 seconds
+            set atmos volume 0
+            begin cinema
+                move camera position to {ABODECampfirePos} + {-1.00, 2, -1.00} + {2.00,0.00,1.00} time 5
+                move camera focus to {Housewife} + {0.00, 1, 0.00} time 3
+                wait 3 seconds
+                move camera focus to {Housewife} + {0.00, 1, 0.00} time 2
+                wait 2 seconds
+                start music "brother_success" loop 1
+                run background script BrotherSuccessExtraAnimations
+                wait 3 seconds
+                move camera focus to {ABODE} time 5
+                run background script DeleteHousewife
+                run background script DeleteSickDude
+                wait 5 seconds
+            end cinema
+            set atmos volume 0.45
+            
+            CinemaIsRunning = 0
+            
+            wait 2 seconds
+            increment tribute by 30000
+            ObjectiveDone = 1
+        end if
+        
+    elsif {SickDude} near {Housewife} radius 5 and HEALTH of SickDude == 0 and ObjectiveDone == 0
+        if bindable action BINDABLE_ACTION_TYPE_ACTION performed
+            CinemaIsRunning = 1
+            wait 1 seconds
+            set atmos volume 0
+            begin cinema
+                move camera position to {ABODECampfirePos} + {-1.00, 2, -1.00} + {2.00,0.00,1.00} time 5
+                move camera focus to {Housewife} + {0.00, 1, 0.00} time 3
+                wait 3 seconds
+                move camera focus to {Housewife} + {0.00, 1, 0.00} time 2
+                wait 2 seconds
+                start music "brother_dead" loop 1
+                run background script BrotherDeadExtraAnimations
+                wait 4.5 seconds
+                move camera focus to {ABODE} time 5
+                run background script DeleteHousewife
+                wait 5 seconds
+            end cinema
+            set atmos volume 0.45
+            
+            CinemaIsRunning = 0
+            
+            wait 2 seconds
+            increment tribute by 10000
+            ObjectiveDone = 1
+        end if
+    
+    elsif {SickDude} near {Housewife} radius 5 and HEALTH of Housewife == 0 and ObjectiveDone == 0
+        if bindable action BINDABLE_ACTION_TYPE_ACTION performed
+            CinemaIsRunning = 1
+            wait 1 seconds
+            set atmos volume 0
+            begin cinema
+                move camera position to {ABODECampfirePos} + {-1.00, 2, -1.00} + {2.00,0.00,1.00} time 5
+                move camera focus to {Housewife} + {0.00, 1, 0.00} time 3
+                wait 3 seconds
+                move camera focus to {Housewife} + {0.00, 1, 0.00} time 2
+                wait 2 seconds
+                start music "housewive_dead" loop 1
+                wait 2.5 seconds
+                move camera focus to {ABODE} time 5
+                run background script DeleteSickDude
+                wait 5 seconds
+            end cinema
+            set atmos volume 0.45
+            
+            CinemaIsRunning = 0
+            
+            wait 2 seconds
+            increment tribute by 10000
+            ObjectiveDone = 1
+        end if
+        
+    elsif HEALTH of Housewife == 0 and HEALTH of SickDude == 0
+        ObjectiveDone = 1
+        
+    end if
+    
+    if get Timer time remaining <= 0
+        Timer = 1
+        HEALTH of SickDude = 0
+    end if
+    
+    until ObjectiveDone == 1
+end loop
+
+delete HousewifeInf
+delete SickDudeInf
+
+delete Scroll_LostMan
+disable ABODECampfire indestructible
+enable ABODECampfire pickup
+enable ABODECampfire moveable
+disable ABODE indestructible
+enable ABODE pickup
+enable ABODE moveable
+
+end script LostManCheck
+
+begin script BrotherDeadExtraAnimations
+
+start
+
+    play anim "a_p_crying" on Housewife loop 2
+
+end script BrotherDeadExtraAnimations
+
+begin script BrotherSuccessExtraAnimations
+
+start
+
+    play anim "a_p_wipe_sweat" on Housewife loop 1
+
+end script BrotherSuccessExtraAnimations
+
+begin script DeleteHousewife
+
+start
+
+    move Housewife position to {ABODE}
+    wait until {Housewife} near {ABODE}
+    delete Housewife
+
+
+end script DeleteHousewife
+
+begin script DeleteSickDude
+
+start
+
+    disable SickDude pickup
+    disable SickDude moveable
+    move SickDude position to {ABODE}
+    wait until {SickDude} near {ABODE}
+    delete SickDude 
+
+end script DeleteSickDude
+
+//-----------------------------------------------------------------------------
+// Land 10 Lost Man
+//-----------------------------------------------------------------------------

@@ -1,0 +1,88 @@
+//-----------------------------------------------------------
+define script LC2001_Intro
+
+begin script LC2001_Intro
+
+    CSMixer = 0
+    WindMixer = 0
+
+start
+
+    //Set the standard settings for skirmish
+    PD_ForcedSaving = 1
+    wait until PD_ForcedSaving == 1 or 10 seconds
+    stop script "SavePersistentDataSetData"
+    set persistent data "SKP_Extras" to 1 //Enabled
+    set persistent data "SKP_AIEpics" to 1 //Enabled
+    set persistent data "SKP_Tutorials" to 1 //Enabled
+    set persistent data "SKP_AIDifficulty" to 4 //Random
+    set persistent data "LAND_ID" to 4 //Random
+    run script SavePersistentDataGetData
+
+    WindMixer = create mixer
+    set mixer WindMixer channel AUDIO_MIXER_CHANNEL_GLOBAL to 0.0
+
+    wait 5 seconds
+    set mixer WindMixer channel AUDIO_MIXER_CHANNEL_GLOBAL to 1.0 with fadetime 2
+    wait 2 seconds
+    destroy mixer WindMixer
+
+    set game time 8.00
+
+    wait 4 seconds 
+
+    begin cinema
+    
+        CSMixer = create mixer
+        set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 0.0
+    
+        wait 2 seconds
+    
+        //34 seconds
+        reset camera path
+        queue camera move with position {2452.00,600.00,1199.84} focus {1361.05,250.00,1154.28} time 0.0
+        queue camera move with position {1793.51,200.00,951.41} focus {1679.42,175.00,912.37} time 10.0
+        queue camera move with position {1320.89,130.00,863.88} focus {1229.29,110.00,928.96} time 8.0
+        queue camera move with position {992.15,120.00,906.04} focus {904.48,100.00,990.60} time 4.0
+        queue camera move with position {885.90,110.00,1191.25} focus {967.00,100.00,1311.58} time 5.25
+        queue camera move with position {1048.09,110.00,1311.81} focus {1104.00,77.46,1293.67} time 6.0
+        queue camera move with position {1198.61,215.00,1145.66} focus {1288.42,170.00,1129.34} time 6.0
+        play camera path with easein 20 easeout 8 method SCRIPT_CAMERAPATH_EQUALDISTANCE
+    
+        start music "cut_scene_celtic_air" loop 1
+        disable load screen
+        set fade red 0 green 0 blue 0 time 0
+        set fade in time 4
+        set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 1.0 with fadetime 0
+
+        wait until camera ready
+
+        IntroFinished = 1
+
+        destroy mixer CSMixer
+
+        if Language == English
+            say "This is gods playground. On this island you can access the skirmish mode and change difficulty for campaign or skirmish."
+        elsif Language == German
+            say "Dies ist der Spielplatz der Goetter. Von hier kannst du den Gefechtsmodus betreten und Schwierigkeitsgrade fuer die Kampagne und Gefecht aendern."
+        end if
+        wait 8 seconds
+
+    end cinema
+
+    wait 2.5 seconds
+    begin dialogue
+        if Language == English
+            say "Search for nearby scrolls. Bronze scrolls right next to them will explain what they'll do."
+        elsif Language == German
+            say "Sucht nach Schriftrollen. Die bronzenen Schriftrollen werden erklaeren, was die Schriftrollen bewirken."
+        end if
+        wait 8 seconds
+    end dialogue
+
+    wait 5 seconds
+    stop music with fadetime 7
+
+end script LC2001_Intro
+
+//-----------------------------------------------------------

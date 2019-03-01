@@ -1,0 +1,101 @@
+///////////////////////////////////////////////////////////////////////////////
+//   Platoon Formation Script
+//    ~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//    This script controls player platoon formations in different lands.
+//    Platoons which have been placed by scripts need to be released first, else
+//    the formation won't be applied by this script.
+//    Below you can find some settings to edit.
+//    This file needs constants.txt from the redux mod in order to compile correctly.
+//
+//    Start date:        04.07.18            By: Boxhead
+//    Update date:    05.07.18            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+//SETTINGS START HERE
+define FM_NUM_OF_TOWNS = 15 //Number of Towns this script supports //The higher the more performance-heavy
+define FM_FORMATION_TYPE = 3//In which formation the platoons will move; 0 = Grid, 1 = Offset Grid, 2 = Rabble, 3 = Circle, 4 = Untidy Grid
+define FM_Camp = 0//When set to 0 the Platoons won't be able to set up a camp (when setting up a camp, they revert to their default formation until they move again)
+//SETTINGS END HERE
+
+define script PlatoonFormation
+define script ApplyPlatoonFormation(Platoon)
+
+run script PlatoonFormation
+
+begin script PlatoonFormation
+
+    Town[FM_NUM_OF_TOWNS]
+    Platoon = 0
+    PlatoonType = 0
+    PlatoonVillagers = 0
+    TownCounter = 0
+
+start
+
+begin loop
+
+    if TownCounter >= FM_NUM_OF_TOWNS - 1
+        TownCounter = 0
+    end if
+
+    Town[TownCounter] = get town with id TownCounter
+    if PLAYER of Town[TownCounter] == 0
+        Platoon = get platoon of player 0 nearest {Town[TownCounter]} radius 750 excluding scripted
+        if Platoon exists
+            run background script ApplyPlatoonFormation(Platoon)
+            Platoon = 0
+        end if
+    end if
+
+    TownCounter++
+end loop
+
+end script PlatoonFormation
+
+begin script ApplyPlatoonFormation(Platoon)
+
+start
+
+begin loop
+    if FM_Camp == 0
+        if FM_FORMATION_TYPE == 0 and Platoon exists
+            set army Platoon formation to FORMATION_TYPE_GRID
+
+        elsif FM_FORMATION_TYPE == 1 and Platoon exists
+            set army Platoon formation to FORMATION_TYPE_OFFSET_GRID
+
+        elsif FM_FORMATION_TYPE == 2 and Platoon exists
+            set army Platoon formation to FORMATION_TYPE_RABBLE
+        
+        elsif FM_FORMATION_TYPE == 3 and Platoon exists
+            set army Platoon formation to FORMATION_TYPE_CIRCLE
+
+        elsif FM_FORMATION_TYPE == 4 and Platoon exists
+            set army Platoon formation to FORMATION_TYPE_UNTIDY_GRID
+
+        end if
+    else
+        if not platoon Platoon idle//Make sure they can camp
+            if FM_FORMATION_TYPE == 0 and Platoon exists
+                set army Platoon formation to FORMATION_TYPE_GRID
+
+            elsif FM_FORMATION_TYPE == 1 and Platoon exists
+                set army Platoon formation to FORMATION_TYPE_OFFSET_GRID
+
+            elsif FM_FORMATION_TYPE == 2 and Platoon exists
+                set army Platoon formation to FORMATION_TYPE_RABBLE
+            
+            elsif FM_FORMATION_TYPE == 3 and Platoon exists
+                set army Platoon formation to FORMATION_TYPE_CIRCLE
+
+            elsif FM_FORMATION_TYPE == 4 and Platoon exists
+                set army Platoon formation to FORMATION_TYPE_UNTIDY_GRID
+
+            end if
+        end if
+    end if
+    until not Platoon exists
+end loop
+
+end script ApplyPlatoonFormation

@@ -1,0 +1,185 @@
+///////////////////////////////////////////////////////////////////////////////
+//    Land 11 Creature AI
+//    ~~~~~~~~~~~~~~~~~~~
+//
+//    Start date:            29.10.16            By:    Boxhead
+//    Update date:        30.10.16            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+//-----------------------------------------------------------------------------
+//    Globals
+//-----------------------------------------------------------------------------
+
+define script LC11_AICreature
+define script LC11_CreatureLogic
+
+global CreatureAttackPos[3]
+global CreatureBuildPos[2]
+global CreatureGathererPos[3]
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
+begin script LC11_AICreature
+
+start
+
+    CreatureAttackPos[0] = marker at {1287.81,307.44,1069.04}//AztecCapital
+    CreatureAttackPos[1] = marker at {1488.70,309.74,1231.34}//AztecTown1
+    CreatureAttackPos[2] = marker at {1332.90,304.73,911.53}//AztecTown2
+
+    CreatureGathererPos[0] = marker at {489.69,407.26,1152.56}//AztecCapital
+    CreatureGathererPos[1] = marker at {1912.16,343.12,1425.69}//AztecTown1
+    CreatureGathererPos[2] = marker at {1280.00,146.91,291.22}//AztecTown2
+
+    LC11_EnemyCreature = create SCRIPT_OBJECT_TYPE_CREATURE CREATURE_TYPE_GORILLA at {1642.66,311.26,1685.80}
+    
+    set creature LC11_EnemyCreature happiness to maximum
+    
+    set research ARTEFACT_CREATURE_MAGIC_TYPE_WATER available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_CREATURE_MAGIC_TYPE_LIGHTNING available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_CREATURE_MAGIC_TYPE_FIREBALL available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_CREATURE_MAGIC_TYPE_HEAL available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_CREATURE_ROLE_BUILDER_2 available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_CREATURE_ROLE_GATHERER_3 available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_CREATURE_ROLE_SOLDIER_3 available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+
+    set creature LC11_EnemyCreature CREATURE_SCRIPT_TRANSITIONAL_ATTRIBUTE_TYPE_SIZE 8.0
+    STRENGTH of LC11_EnemyCreature = 1.0
+    ALIGNMENT of LC11_EnemyCreature = -0.85
+    FATNESS of LC11_EnemyCreature = 0.2
+
+    disable LC11_EnemyCreature action availability LA_EAT with LO_PLAYER_VILLAGER
+    disable LC11_EnemyCreature action availability LA_EAT with LO_PLAYER_PLATOON
+    disable LC11_EnemyCreature action availability LA_EAT with LO_ROCKS
+    disable LC11_EnemyCreature action availability LA_EAT with LO_TREES
+    disable LC11_EnemyCreature action availability LA_EAT with LO_TOYS
+    disable LC11_EnemyCreature action availability LA_EAT with LO_POO
+    disable LC11_EnemyCreature action availability LA_EAT with LO_SPELL_ORBS
+    disable LC11_EnemyCreature action availability LA_POO with LO_PLAYER_VILLAGER
+    disable LC11_EnemyCreature action availability LA_POO with LO_PLAYER_PLATOON
+    disable LC11_EnemyCreature action availability LA_POO with LO_PLAYER_DEFENCES
+    disable LC11_EnemyCreature action availability LA_POO with LO_PLAYER_STORAGE_PIT
+    disable LC11_EnemyCreature action availability LA_POO with LO_PLAYER_BUILDING
+    disable LC11_EnemyCreature action availability LA_PLAY
+    disable LC11_EnemyCreature action availability LA_WATER with LO_PLAYER_VILLAGER
+    disable LC11_EnemyCreature action availability LA_WATER with LO_PLAYER_PLATOON
+    disable LC11_EnemyCreature action availability LA_HEAL with LO_OPPONENT_PLATOON
+    disable LC11_EnemyCreature action availability LA_ATTACK with LO_CREATURE_PEN
+    disable LC11_EnemyCreature action availability LA_ATTACK with LO_ROCKS
+    disable LC11_EnemyCreature action availability LA_ATTACK with LO_MINE
+    disable LC11_EnemyCreature action availability LA_ATTACK with LO_ORE_ROCKS
+    disable LC11_EnemyCreature action availability LA_ATTACK with LO_TREES
+    disable LC11_EnemyCreature action availability LA_ATTACK with LO_FIELDS
+    disable LC11_EnemyCreature action availability LA_ATTACK with LO_POO
+    disable LC11_EnemyCreature action availability LA_ATTACK with LO_SPELL_ORBS
+
+    teach LC11_EnemyCreature all
+    
+    set player 1 creature to LC11_EnemyCreature
+    
+    wait until IntroFinished == 1
+    
+    release LC11_EnemyCreature
+
+    run background script LC11_CreatureLogic
+
+end script LC11_AICreature
+
+begin script LC11_CreatureLogic
+
+    Number = 0
+    CreatureRollRoleTimer = create timer for 0 seconds
+    WallSegment = 0
+    Counter = 0
+    Town[16]
+
+start
+
+wait until LC11_LargeSiegeIsRunning == 1
+
+begin loop
+    if LC11_Platoon[17] exists
+        set creature LC11_EnemyCreature role to CR_SOLDIER radius 75 at {LC11_Platoon[17]}
+    end if
+    until LC11_Platoon[17] not exists or 180 seconds or HEALTH of LC11_EnemyCreature == 0.00
+end loop
+
+set creature LC11_EnemyCreature role to CR_SOLDIER radius 75 at {CreatureAttackPos[0]}
+
+wait until HEALTH of LC11_EnemyCreature == 0.00 or 300 seconds
+
+begin loop
+
+    while Counter > 14
+        Counter = 0
+    end while
+
+    if HEALTH of LC11_EnemyCreature == 0.00
+        //CreatureKilled = 1
+        wait until HEALTH of LC11_EnemyCreature > 0.00
+        set creature LC11_EnemyCreature role to CR_NONE radius 500 at {CreatureGathererPos[0]}
+        HEALTH of LC11_EnemyCreature = 1.0
+    end if
+
+    if town AztecCapital is under takeover from player 0 and HEALTH of LC11_EnemyCreature > 0
+        HEALTH of LC11_EnemyCreature = 1.0
+        set creature LC11_EnemyCreature role to CR_SOLDIER radius 100 at {AztecCapital}
+        
+        wait until HEALTH of LC11_EnemyCreature == 0.00 or not town AztecCapital is under takeover from player 0 or 1000 seconds
+    
+    elsif town AztecTown1 is under takeover from player 0 and HEALTH of LC11_EnemyCreature > 0
+        HEALTH of LC11_EnemyCreature = 1.0
+        set creature LC11_EnemyCreature role to CR_SOLDIER radius 100 at {AztecTown1}
+        
+        wait until HEALTH of LC11_EnemyCreature == 0.00 or not town AztecTown1 is under takeover from player 0 or 1000 seconds
+
+    elsif town AztecTown2 is under takeover from player 0 and HEALTH of LC11_EnemyCreature > 0
+        HEALTH of LC11_EnemyCreature = 1.0
+        set creature LC11_EnemyCreature role to CR_SOLDIER radius 100 at {AztecTown2}
+        
+        wait until HEALTH of LC11_EnemyCreature == 0.00 or not town AztecTown2 is under takeover from player 0 or 1000 seconds
+
+    elsif town Town[Counter] is under takeover from player 1 and HEALTH of LC11_EnemyCreature > 0
+        HEALTH of LC11_EnemyCreature = 1.0
+        set creature LC11_EnemyCreature role to CR_SOLDIER radius 100 at {PlayerTown}
+        
+        wait until HEALTH of LC11_EnemyCreature == 0.00 or not town PlayerTown is under takeover from player 0 or 1000 seconds
+
+    elsif LC11_Platoon[36] exists or LC11_Platoon[37] exists
+        if HEALTH of LC11_EnemyCreature > 0.00
+            HEALTH of LC11_EnemyCreature = 1.0
+            begin loop
+                if LC11_Platoon[36] exists
+                    set creature LC11_EnemyCreature role to CR_SOLDIER radius 400 at {LC11_Platoon[36]}
+                elsif LC11_Platoon[37] exists
+                    set creature LC11_EnemyCreature role to CR_SOLDIER radius 400 at {LC11_Platoon[37]}
+                end if
+                until LC11_Platoon[36] not exists and LC11_Platoon[37] not exists or 720 seconds or HEALTH of LC11_EnemyCreature == 0.00
+            end loop
+            set creature LC11_EnemyCreature role to CR_SOLDIER radius 300 at {CreatureAttackPos[0]}
+            wait until HEALTH of LC11_EnemyCreature == 0.00 or 360 seconds
+        end if
+
+    elsif HEALTH of LC11_EnemyCreature > 0.00 and get CreatureRollRoleTimer time remaining <= 0
+        Number = number from 1 to 4
+        if Number == 1 and PLAYER of AztecCapital == 1
+            set creature LC11_EnemyCreature role to CR_GATHERER radius 200 at {CreatureGathererPos[0]}
+            CreatureRollRoleTimer = create timer for 360 seconds
+            
+        elsif Number == 2 and PLAYER of AztecTown1 == 1
+            set creature LC11_EnemyCreature role to CR_GATHERER radius 200 at {CreatureGathererPos[1]}
+            CreatureRollRoleTimer = create timer for 360 seconds
+
+        elsif Number == 3 and PLAYER of AztecTown2 == 1
+            set creature LC11_EnemyCreature role to CR_GATHERER radius 200 at {CreatureGathererPos[2]}
+            CreatureRollRoleTimer = create timer for 360 seconds
+        
+        end if
+    end if
+
+    Counter++
+    
+end loop
+
+end script LC11_CreatureLogic

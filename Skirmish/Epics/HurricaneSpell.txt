@@ -1,0 +1,363 @@
+define script BodgingInTheBackground(Hurricane)
+define script DeleteBuildingsWithExplode(whichbuilding)
+define script HurricaneSpell(EnemyWonder,Hurricane)
+
+global ClearUpStuff=0
+global ReleaseTheHouses=0
+global EnemyFiringVersion=0
+
+begin script HurricaneSpell(EnemyWonder,Hurricane)
+
+MyDance = 0
+Dancer = 0
+Wonder = 0
+Count = 0
+RelCamPos=0
+RelCamFoc=0
+AboveH=0
+Beam=0
+Beam2=0
+BeamPlace=0
+
+MusicEventTimer=0
+MusicEvent1=0
+MusicEvent2=0
+MusicEvent3=0
+MusicEvent4=0
+MusicEvent5=0
+MusicEvent6=0
+MusicEvent7=0
+MusicEvent8=0
+MusicEvent9=0
+
+StarDude=0
+StarAbode=0
+
+MyHurricanePos=0
+MyHurricaneFoc=0
+MyWeather=0
+
+checkthemofo=0
+count=0
+
+LoadsOfFloatingVillagers[20]
+
+DodgyBuilding=0
+
+Imwalkingaway=0
+
+HowLongDoIWait = create timer for 0 seconds
+
+
+start
+
+WhiChEpicSpellIsBeingCast = Hurricane
+
+disable influence
+
+Wonder = get Hurricane creator
+    if Wonder not exists
+        Wonder = EnemyWonder
+    end if
+
+    run script SetupDancerPositions(3)
+    MyDance = get Wonder dance
+    Dancer = get first in MyDance
+                        
+    while Dancer exists and Count <= 19
+        detach Dancer from MyDance     
+        run background script DancerLookAtWonder(Dancer, Wonder, Count, 3)
+        Count++
+        Dancer=get first in MyDance
+    end while
+
+    count = 0
+
+    wait 2.5 seconds
+    disable simulation sound
+    if SK_DynamicMusicIsRunning == 0
+        attach music "egypt_chant_vocal " to Wonder range SK_EpicRadius
+    end if
+    detach sound "SCULLFIRE" from Hurricane
+
+    wait 4 seconds
+    //play string sound "SCRIPT3_HEPIC_SYNTH2"
+
+    wait 2.5 seconds
+
+    //set sky colour red 23 green 23 blue 23 time 10
+    enable predefined sky "HURRICANE" time 9
+            
+    invoke Wonder EPIC_WONDER_STAGE_1
+    if camera position near {Wonder} radius SK_EpicRadius / 4
+        play string sound "SCRIPT3_HEPIC_SYNTH3"
+    end if
+    //play string sound "SCRIPT3_HEPIC_EPICTOWERELECTRIC2"
+    wait 4 seconds
+    invoke Wonder EPIC_WONDER_STAGE_2
+    wait 4 seconds
+    invoke Wonder EPIC_WONDER_STAGE_3
+    if camera position near {Wonder} radius SK_EpicRadius / 4
+        play string sound "SCRIPT3_HEPIC_HURRICANELIGHTNING6"
+    end if
+    wait 2 seconds
+    invoke Wonder EPIC_WONDER_STAGE_4
+    stop sound "SCRIPT3_HEPIC_SCULLFIRE"
+    wait 2 seconds
+
+    BeamPlace = marker at get world position from Wonder to {-0.680, 81.780, 0.719}
+    Beam = create visual effect VISUAL_EFFECT_HURRICANE_BEAM at {BeamPlace}
+    Beam2 = create visual effect "ev_s_beam.ves" strength 0.3 scale 1.0 at {BeamPlace}
+    invoke Hurricane EPIC_PULSE_UP
+    //play string sound "SCRIPT3_HEPIC_BEAMOFLIGHT11"
+    if camera position near {Wonder} radius SK_EpicRadius / 4
+        play string sound "SCRIPT3_HEPIC_HURRICANELIGHTNING1"
+        play string sound "SCRIPT3_HEPIC_DECAYCHARGESPELL"
+    end if
+
+    wait 0.6 seconds
+    wait 0.6 seconds
+    if camera position near {Wonder} radius SK_EpicRadius / 4
+        play string sound "SCRIPT3_HEPIC_DECAYCHARGESPELL"
+    end if
+
+    stop sound "SCRIPT3_HEPIC_FLAMETHROWERWHOOSH4"
+    stop sound "SCRIPT3_HEPIC_CASTPSELLFREEZE1"
+    stop sound "SCRIPT3_HEPIC_EPICTOWERELECTRIC2"
+    stop sound "SCRIPT3_HEPIC_EPICTOWERLOOP2"
+    stop sound "SCRIPT3_HEPIC_EPICTOWERLOOP3"
+    stop sound "SCRIPT3_HEPIC_SYNTH3"
+    stop sound "SCRIPT3_HEPIC_HURRICANELIGHTNING6"
+    stop sound "SCRIPT3_HEPIC_HURRICANELIGHTNING1"
+    wait 1.5 seconds    
+
+    wait 1 seconds
+
+    invoke Hurricane EPIC_HURRICANE_BEAM_DOWN
+    invoke Hurricane EPIC_START_GROUND_SWIRL
+    detach music from Wonder
+    if SK_DynamicMusicIsRunning == 0
+        attach music "hurricane_music" to Hurricane range SK_EpicRadius
+    end if
+    MusicEventTimer=create timer for 0 seconds
+    MusicEvent1=get music "hurricane_music" event "1" time
+    MusicEvent2=get music "hurricane_music" event "2" time
+    MusicEvent3=get music "hurricane_music" event "3" time
+    MusicEvent4=get music "hurricane_music" event "4" time
+    MusicEvent5=get music "hurricane_music" event "5" time
+    MusicEvent6=get music "hurricane_music" event "6" time
+    MusicEvent7=get music "hurricane_music" event "7" time
+    MusicEvent8=get music "hurricane_music" event "8" time
+    MusicEvent9=get music "hurricane_music" event "9" time
+
+    attach atmos "spells" to Hurricane// range 500
+    set Hurricane atmos group 7 time 1 seconds
+
+    wait 4 seconds
+    invoke Hurricane EPIC_HURRICANE_END_BEAM
+
+    invoke Hurricane EPIC_START_TOP_SWIRL
+
+    invoke Hurricane EPIC_CREATE_CLOUDS
+    invoke Hurricane EPIC_SET_CLOUDS_STORM
+
+    //wait until get MusicEventTimer time since set >= MusicEvent1
+    wait 1 seconds
+    invoke Hurricane EPIC_MOVE_TORNADO
+
+    invoke Hurricane EPIC_EXIT_TORNADO    
+    
+    MyHurricanePos = marker at future position of epic miracle Hurricane with time 3 seconds
+    MyHurricaneFoc = marker at future focus of epic miracle Hurricane with time 3 seconds
+    set HowLongDoIWait time to 4 seconds
+
+    while StarDude not exists and get HowLongDoIWait time remaining > 0
+        StarDude = get star villager near {Hurricane}
+    end while
+
+    if StarDude exists
+        disable StarDude moveable
+        Imwalkingaway = marker at get target from {MyHurricanePos} to {StarDude} distance 2 angle 0
+        set StarDude focus to {Imwalkingaway}
+        move StarDude position to {Imwalkingaway}
+        
+        set HowLongDoIWait time to 3 seconds
+        wait until {StarDude} near {Imwalkingaway} radius 1 or get HowLongDoIWait time remaining <= 0
+        wait 1 seconds
+        enable StarDude moveable
+        //set StarDude target {Hurricane} time 12
+        set StarDude velocity heading {Hurricane} speed 50
+        wait 1 seconds
+
+    end if
+
+    set HowLongDoIWait time to 4 seconds
+    
+    while StarAbode not exists and get HowLongDoIWait time remaining > 0
+        StarAbode = get star abode near {Hurricane}
+    end while
+
+    if StarAbode exists
+        MyWeather = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_WHISPS at {StarAbode}
+        wait 0.2 seconds
+        invoke Hurricane EPIC_ENTER_TORNADO
+        wait 1 seconds
+
+        set lightning strike at {StarAbode} from MyWeather scale 1
+
+        DodgyBuilding= convert StarAbode using SCRIPT_CONVERSION_ROCK
+        
+        set DodgyBuilding target {Hurricane} time 4
+        run background script DeleteBuildingsWithExplode(DodgyBuilding)    
+        wait 2 seconds
+
+    end if
+
+    run background script BodgingInTheBackground(Hurricane)
+    invoke Hurricane EPIC_ENABLE_TORNADO_DESTRUCTION
+
+    //wait 3 seconds
+    invoke Hurricane EPIC_EXIT_TORNADO
+
+    wait 4 seconds//wait until get MusicEventTimer time since set >= MusicEvent5
+    invoke Hurricane EPIC_ENTER_TORNADO
+
+    wait 4 seconds
+    invoke Hurricane EPIC_EXIT_TORNADO
+
+    MyHurricanePos = marker at future position of epic miracle Hurricane with time 1 seconds
+    MyHurricaneFoc = marker at future focus of epic miracle Hurricane with time 1 seconds
+
+    wait 4 seconds//wait until get MusicEventTimer time since set >= MusicEvent7
+
+    wait 4 seconds//wait until get MusicEventTimer time since set >= MusicEvent8
+
+    wait 4 seconds//wait until get MusicEventTimer time since set >= MusicEvent9
+    invoke Hurricane EPIC_STOP_TORNADO
+    invoke Hurricane EPIC_CLEAR_CLOUDS
+    invoke Hurricane EPIC_END_TORNADO
+    detach atmos from Hurricane
+    invoke Wonder EPIC_WONDER_STAGE_LAST
+
+    //reset sky colour 3 seconds
+    enable predefined sky "DEFAULT" time 3
+    wait 3 seconds
+    enable influence
+
+    wait 5 seconds
+
+    detach music from Hurricane
+
+wait 15 seconds
+
+ClearUpStuff=1
+if DodgyBuilding exists
+    delete DodgyBuilding with explosion
+end if
+
+wait until ClearUpStuff==0
+wait 20 seconds
+
+WhiChEpicSpellIsBeingCast = 0
+
+
+
+end script HurricaneSpell
+//--------------------------------------------------------------------------------------------
+begin script BodgingInTheBackground(Hurricane)
+
+ItThisRidiculous[50]
+ThisIs[50]
+count=0
+howlong=0
+HOusesThatCanBeDestroyed[5]
+whichhouse=0
+howmanyhousestodestroy=50
+
+start
+
+HOusesThatCanBeDestroyed[0] = variable ABODE_A
+HOusesThatCanBeDestroyed[1] = variable ABODE_B
+HOusesThatCanBeDestroyed[2] = variable ABODE_C
+HOusesThatCanBeDestroyed[3] = variable ABODE_D
+HOusesThatCanBeDestroyed[4] = variable ABODE_E
+
+
+while count != 50
+
+        wait 0.2 seconds
+
+        if EnemyFiringVersion == 0
+
+            ItThisRidiculous[count] = get HOUSE at {Hurricane} radius 100 excluding scripted    
+
+        else
+
+            ItThisRidiculous[count] = get HOUSE constant HOusesThatCanBeDestroyed[whichhouse] at {Hurricane} radius 100 excluding scripted
+            if whichhouse < 4
+                whichhouse++
+            else
+                whichhouse = 0
+            end if
+
+        end if
+
+        if ItThisRidiculous[count] exists and variable get ItThisRidiculous[count] sub type != variable GATEHOUSE and variable get ItThisRidiculous[count] sub type != variable TOWN_CENTRE and variable get ItThisRidiculous[count] sub type != variable MINE
+            ThisIs[count] = convert ItThisRidiculous[count] using SCRIPT_CONVERSION_ROCK
+            set ThisIs[count] velocity heading {ThisIs[count]} speed 0.1
+
+            run background script DeleteBuildingsWithExplode(ThisIs[count])    
+
+        end if
+
+        count++
+
+end while
+
+//    if ItThisRidiculous[count] exists
+//        //AGC - Removing rock physics: ThisIs[count]= get ItThisRidiculous[count] physics to rock
+//        ThisIs[count] = convert ItThisRidiculous[count] using SCRIPT_CONVERSION_ROCK
+//        set ThisIs[count] velocity heading {ThisIs[count]} speed 0.1
+//        //delete ThisIs[count] with explosion
+//
+//    else
+//        ItThisRidiculous[count] = get HOUSE at {Hurricane} radius 100 excluding scripted    
+//        wait 0.2 seconds
+//        howlong++
+//    end if
+//        
+//    if ThisIs[count] exists
+//        run background script DeleteBuildingsWithExplode(ThisIs[count])    
+//        count++
+//    end if
+//
+//end while
+count = 0
+
+wait until ClearUpStuff==1
+while count != 50
+    if ThisIs[count] exists
+        delete ThisIs[count]// with explosion
+    end if
+    count++
+end while
+
+ClearUpStuff=0
+wait 2 seconds
+
+end script BodgingInTheBackground
+
+begin script DeleteBuildingsWithExplode(whichbuilding)
+
+start
+
+wait 1 seconds
+if whichbuilding exists
+    delete whichbuilding with explosion
+end if
+
+
+
+end script DeleteBuildingsWithExplode
+
+

@@ -1,0 +1,139 @@
+//--------------------------------------------------------------------------------------------------------------
+define script ThunderstormSpell(PlayerID,SpellPosition)
+define script Thunderstorm_Clouds(PlayerID,ThunderstormSpell)
+define script Thunderstorm_Lightning(ThunderstormSpell,Weather)
+define script Thunderstorm_Miracles(PlayerID,ThunderstormSpell,Weather)
+
+begin script ThunderstormSpell(PlayerID,SpellPosition)
+    Rock = 0
+    SeedEffect = 0
+    PlayerMana = 0
+    VerdantSpell = 0
+
+    BrakeLoop = 0
+
+    Effect1 = 0
+
+start
+
+    if PlayerID == 0
+        //For players
+        empty player hand
+        wait 0.25 seconds
+        Rock = create SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_BOULDER_ROUND at hand position
+        SeedEffect = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_SEED on Rock time -1
+        set SeedEffect colour red 110 green 110 blue 110
+        set Rock in player 0 hand
+        VerdantSpell = Rock
+        PlayerMana = get player PlayerID mana
+
+        set player PlayerID mana PlayerMana - 30000
+
+        wait 1 seconds
+
+        begin loop
+            if bindable action BINDABLE_ACTION_TYPE_ACTION performed
+                BrakeLoop = 1  
+                SpellPosition = marker at hand position
+            end if
+            if not Rock is HELD
+                delete Rock
+                delete SeedEffect
+                BrakeLoop = 2
+            end if
+            until BrakeLoop >= 1
+        end loop
+
+        delete Rock
+        delete SeedEffect
+    else
+        // For AIs
+        BrakeLoop = 1
+    end if
+
+    if BrakeLoop == 1
+        //Script here
+        Effect1 = create visual effect VISUAL_EFFECT_TOWN_TAKEOVER_AGGRESSOR at {SpellPosition} + {0,10,0} time 40
+        run background script Thunderstorm_Clouds(PlayerID,marker at {SpellPosition})
+    elsif BrakeLoop == 2
+        PlayerMana = get player PlayerID mana
+        set player PlayerID mana PlayerMana + 30000
+    end if
+
+end script ThunderstormSpell
+
+
+begin script Thunderstorm_Clouds(PlayerID,ThunderstormSpell)
+
+    myWeather = 0
+
+start
+
+myWeather = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {ThunderstormSpell} + {0, 0, 0}
+set cloud for myWeather above {ThunderstormSpell}
+set cloud generation 7
+set myWeather properties rainfall 1 snowfall 0 overcast 0.9
+SCALE of myWeather = 5
+
+wait 50 seconds
+
+run background script Thunderstorm_Miracles(PlayerID,ThunderstormSpell,myWeather)
+run background script Thunderstorm_Lightning(ThunderstormSpell,myWeather)
+
+wait 90 seconds
+
+delete myWeather
+
+end script Thunderstorm_Clouds
+
+
+begin script Thunderstorm_Lightning(ThunderstormSpell,Weather)
+
+    House = 0
+    Prohab = 0
+    Town = 0
+
+start
+
+Town = get TOWN at {ThunderstormSpell} radius 250
+
+begin loop
+    set lightning strike at {ThunderstormSpell} + {number from -80 to 80,0,number from -80 to 80} from Weather scale 1
+
+    if Town exists
+        House = get random home in town Town excluding scripted
+        wait number from 2 to 3 seconds
+        Prohab = number from 1 to 3
+        if Prohab == 1
+            set lightning strike at {House} from Weather scale 1
+            delete House with explode
+        end if
+    end if
+
+    wait number from 3 to 10 seconds
+
+    until Weather not exists
+end loop
+
+end script Thunderstorm_Lightning
+
+
+begin script Thunderstorm_Miracles(PlayerID,ThunderstormSpell,Weather)
+
+    WindWonderStart = 0
+    WindWonderTarget = 0
+    WindWonder = 0
+
+start
+
+begin loop
+    WindWonderStart = marker at ({Weather} + {0, 500, 0} + {number from -75 to 75, number from 485 to 515, number from -75 to 75})
+    WindWonderTarget = marker at ({WindWonderStart} + {number from -5 to 5, number from -5 to -15, number from -5 to 5})
+    WindWonder = make player PlayerID throw miracle MIRACLE_TYPE_TORNADO from ({WindWonderStart} + {0,-3.0,0}) heading ({WindWonderTarget} + {0,-21,0} - {WindWonderStart})
+
+    wait number from 2 to 10 seconds
+
+    until Weather not exists
+end loop
+
+end script Thunderstorm_Miracles

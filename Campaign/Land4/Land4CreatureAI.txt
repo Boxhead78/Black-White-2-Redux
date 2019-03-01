@@ -1,0 +1,145 @@
+///////////////////////////////////////////////////////////////////////////////
+//    Land 4 Creature AI
+//    ~~~~~~~~~~~~~~~~~~~
+//
+//    Start date:        31.10.16            By: Boxhead
+//    Update date:    06.02.17            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+//-----------------------------------------------------------------------------
+//    Globals
+//-----------------------------------------------------------------------------
+
+define script LC4_AICreature
+define script LC4_CreatureLogic
+
+global CreatureAttackPos[1]
+global CreatureGathererPos[2]
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
+begin script LC4_AICreature
+
+start
+
+    CreatureAttackPos[0] = marker at {1229.52,121.81,763.25}//PlayerTown
+
+    CreatureGathererPos[0] = marker at {1248.39,299.03,1910.71}//NorseCapital
+    CreatureGathererPos[1] = marker at {644.75,292.39,1928.62}//NorseTown
+
+    LC4_EnemyCreature = create SCRIPT_OBJECT_TYPE_CREATURE CREATURE_TYPE_WOLF at {1356.22,298.63,1947.82}
+    
+    set creature LC4_EnemyCreature happiness to maximum
+    
+    set research ARTEFACT_CREATURE_MAGIC_TYPE_WATER available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_CREATURE_ROLE_BUILDER_1 available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_CREATURE_ROLE_GATHERER_2 available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_CREATURE_ROLE_SOLDIER_1 available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+
+    set creature LC4_EnemyCreature CREATURE_SCRIPT_TRANSITIONAL_ATTRIBUTE_TYPE_SIZE 0.4
+    STRENGTH of LC4_EnemyCreature = 0.4
+    ALIGNMENT of LC4_EnemyCreature = 0.1
+    FATNESS of LC4_EnemyCreature = 0.4
+
+    disable LC4_EnemyCreature action availability LA_EAT with LO_PLAYER_VILLAGER
+    disable LC4_EnemyCreature action availability LA_EAT with LO_PLAYER_PLATOON
+    disable LC4_EnemyCreature action availability LA_EAT with LO_ROCKS
+    disable LC4_EnemyCreature action availability LA_EAT with LO_TREES
+    disable LC4_EnemyCreature action availability LA_EAT with LO_TOYS
+    disable LC4_EnemyCreature action availability LA_EAT with LO_POO
+    disable LC4_EnemyCreature action availability LA_EAT with LO_SPELL_ORBS
+    disable LC4_EnemyCreature action availability LA_POO with LO_PLAYER_VILLAGER
+    disable LC4_EnemyCreature action availability LA_POO with LO_PLAYER_PLATOON
+    disable LC4_EnemyCreature action availability LA_POO with LO_PLAYER_DEFENCES
+    disable LC4_EnemyCreature action availability LA_POO with LO_PLAYER_STORAGE_PIT
+    disable LC4_EnemyCreature action availability LA_POO with LO_PLAYER_BUILDING
+    disable LC4_EnemyCreature action availability LA_PLAY
+    disable LC4_EnemyCreature action availability LA_WATER with LO_PLAYER_VILLAGER
+    disable LC4_EnemyCreature action availability LA_WATER with LO_PLAYER_PLATOON
+    disable LC4_EnemyCreature action availability LA_HEAL with LO_OPPONENT_PLATOON
+    disable LC4_EnemyCreature action availability LA_ATTACK with LO_CREATURE_PEN
+    disable LC4_EnemyCreature action availability LA_ATTACK with LO_ROCKS
+    disable LC4_EnemyCreature action availability LA_ATTACK with LO_MINE
+    disable LC4_EnemyCreature action availability LA_ATTACK with LO_ORE_ROCKS
+    disable LC4_EnemyCreature action availability LA_ATTACK with LO_TREES
+    disable LC4_EnemyCreature action availability LA_ATTACK with LO_FIELDS
+    disable LC4_EnemyCreature action availability LA_ATTACK with LO_POO
+    disable LC4_EnemyCreature action availability LA_ATTACK with LO_SPELL_ORBS
+
+    teach LC4_EnemyCreature all
+    
+    set player 1 creature to LC4_EnemyCreature
+    
+    wait 50 seconds //wait until intro finished
+    
+    release LC4_EnemyCreature
+
+    run background script LC4_CreatureLogic
+
+end script LC4_AICreature
+
+begin script LC4_CreatureLogic
+
+    Number = 0
+    CreatureRollRoleTimer = create timer for 0 seconds
+    CreatureAttackTimer = create timer for 99999 seconds
+
+start
+
+begin loop
+
+    if HEALTH of LC4_EnemyCreature == 0.00
+        wait until HEALTH of LC4_EnemyCreature > 0.00
+        set creature LC4_EnemyCreature role to CR_NONE radius 500 at {CreatureGathererPos[0]}
+        HEALTH of LC4_EnemyCreature = 1.0
+    end if
+
+    if town NorseCapital is under takeover from player 0 and HEALTH of LC4_EnemyCreature > 0
+        HEALTH of LC4_EnemyCreature = 1.0
+        set creature LC4_EnemyCreature role to CR_SOLDIER radius 100 at {NorseCapital}
+        
+        wait until HEALTH of LC4_EnemyCreature == 0.00 or not town NorseCapital is under takeover from player 0 or 1000 seconds
+    
+    elsif town NorseTown is under takeover from player 0 and HEALTH of LC4_EnemyCreature > 0
+        HEALTH of LC4_EnemyCreature = 1.0
+        set creature LC4_EnemyCreature role to CR_SOLDIER radius 100 at {NorseTown}
+        
+        wait until HEALTH of LC4_EnemyCreature == 0.00 or not town NorseTown is under takeover from player 0 or 1000 seconds
+
+    elsif ENEMY_CREATURE_ALLOWED_TO_ATTACK == 1 and HEALTH of LC4_EnemyCreature > 0.00
+        HEALTH of LC4_EnemyCreature = 1.0
+        begin loop
+            if {LC4_Platoon[13]} near {SiegePlatoonPos[0]} radius 100
+                set creature LC4_EnemyCreature role to CR_SOLDIER radius 150 at {CreatureAttackPos[0]}
+            elsif LC4_Platoon[13] exists
+                set creature LC4_EnemyCreature role to CR_SOLDIER radius 5 at {LC4_Platoon[13]}
+            else
+                set creature LC4_EnemyCreature role to CR_SOLDIER radius 150 at {CreatureAttackPos[0]}
+            end if
+            until HEALTH of LC4_EnemyCreature == 0.00 or 1000 seconds
+        end loop
+        ENEMY_CREATURE_ALLOWED_TO_ATTACK = 0
+        CreatureAttackTimer = create timer for 1200 seconds
+
+    elsif not ENEMY_CREATURE_ALLOWED_TO_ATTACK == 1 and HEALTH of LC4_EnemyCreature > 0.00 and get CreatureRollRoleTimer time remaining <= 0
+        if PLAYER of NorseTown == 1 and PLAYER of NorseCapital == 1 Number = number from 1 to 2 else Number = number from 1 to 1 end if
+        if Number == 1 and PLAYER of NorseCapital == 1
+            set creature LC4_EnemyCreature role to CR_GATHERER radius 300 at {CreatureGathererPos[0]}
+            CreatureRollRoleTimer = create timer for 360 seconds
+            
+        elsif Number == 2 and PLAYER of NorseTown == 1
+            set creature LC4_EnemyCreature role to CR_GATHERER radius 300 at {CreatureGathererPos[1]}
+            CreatureRollRoleTimer = create timer for 360 seconds
+        
+        end if
+    end if
+    
+    if get CreatureAttackTimer time remaining <= 0 and ENEMY_CREATURE_ALLOWED_TO_ATTACK == 0
+        ENEMY_CREATURE_ALLOWED_TO_ATTACK = 1
+        CreatureAttackTimer = create timer for 600 seconds
+    end if
+    
+end loop
+
+end script LC4_CreatureLogic

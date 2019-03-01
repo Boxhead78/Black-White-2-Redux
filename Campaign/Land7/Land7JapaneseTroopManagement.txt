@@ -1,0 +1,2133 @@
+///////////////////////////////////////////////////////////////////////////////
+//    Land 7 Japanese Troop-Management
+//    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//    Start date:            02.03.18            By: Boxhead
+//    Update date:        07.03.18            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+//-----------------------------------------------------------------------------
+//    Globals
+//-----------------------------------------------------------------------------
+
+define LC7_NUM_OF_DEFENDERS                = 0 //Unused
+define LC7_NUM_OF_PLATOONS                = 32
+define LC7_NUM_OF_SIEGE_CATAPULTS         = 13
+define LC7_NUM_OF_WALL_ARCHERS            = 13
+//Army Types
+define Melee                             = 0
+define Ranged                            = 1
+//Army Behaivours
+define Attacker                            = 0
+define Escort                            = 1
+define Conqueror                        = 2 //Nearest Settlement Attacker
+define Patrol                            = 3
+define Special                            = 4
+
+define script LC7_StaticPlatoonsActions(Pos,Type,Platoon)
+define script LC7_ArmyBehaivours(Platoon,Type,Task,DefendObject,AttackingPoint,AttackingPointFallBack,PatrolRoute,Town)
+define script LC7_MoveCatapultThenAttack(Catapult,Type,Waypoint1,Waypoint2,Waypoint3)
+define script Waypoints
+
+global LC7_Defender[LC7_NUM_OF_DEFENDERS]
+global LC7_Platoon[LC7_NUM_OF_PLATOONS]
+global LC7_SiegeCatapult[LC7_NUM_OF_SIEGE_CATAPULTS]
+global LC7_WallArcher[LC7_NUM_OF_WALL_ARCHERS]
+
+global PlatoonPos[17]
+global StaticSiegePos[10]
+global AttackPos[5]
+global SiegePlatoonPos[1]
+global SiegeRoute1[7]
+global SiegeRoute2[3]
+global SiegeRoute3[3]
+global SiegeRoute4[3]
+global SiegeRoute5[3]
+global PlayerWallPos = 0
+
+global SiegeAttackPrePos[4]
+global SiegeAttackPos[4]
+
+global PatrolRouteA[5]
+global WaypointsA = 0
+global PatrolRouteB[3]
+global WaypointsB = 0
+global PatrolRouteC[2]
+global WaypointsC = 0
+global PatrolRouteD[3]
+global WaypointsD = 0
+
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//    Setting up waypoints for AI actions
+//-----------------------------------------------------------------------------
+
+run script Waypoints
+
+begin script Waypoints
+
+start
+
+    SiegeAttackPrePos[0] = marker at {1765.98,44.97,1253.20}
+    SiegeAttackPrePos[1] = marker at {1746.67,44.92,1282.76}
+    SiegeAttackPrePos[2] = marker at {1754.35,45.57,1319.86}
+    SiegeAttackPrePos[3] = marker at {1797.85,49.30,1287.24}
+
+    SiegeAttackPos[0] = marker at {2063.16,55.61,1297.50}
+    SiegeAttackPos[1] = marker at {2064.86,54.98,1324.95}
+    SiegeAttackPos[2] = marker at {2018.66,51.89,1392.97}
+    SiegeAttackPos[3] = marker at {2019.76,51.15,1319.57}
+
+    PlayerWallPos = marker at {2020.77,52.15,1335.11}
+
+    PlatoonPos[0] = marker at {2133.28,183.11,347.14}
+    PlatoonPos[1] = marker at {2168.13,160.04,411.45}
+    PlatoonPos[2] = marker at {2195.24,138.28,467.51}
+    PlatoonPos[3] = marker at {1955.59,129.56,561.49}
+    PlatoonPos[4] = marker at {1803.67,119.49,533.81}
+    PlatoonPos[5] = marker at {1782.15,121.93,500.10}
+    PlatoonPos[6] = marker at {1393.90,70.21,1422.38}
+    PlatoonPos[7] = marker at {1309.51,58.46,1906.32}
+    PlatoonPos[8] = marker at {1260.50,114.58,1677.73}
+    PlatoonPos[9] = marker at {1589.76,44.28,1021.88}
+    PlatoonPos[10] = marker at {1629.56,43.99,1116.95}
+    PlatoonPos[11] = marker at {1589.76,44.28,1021.88}
+    PlatoonPos[12] = marker at {961.04,83.25,1087.53}
+    PlatoonPos[13] = marker at {1785.09,47.56,1289.00}
+    
+    AttackPos[0] = marker at {2055.73,54.27,1316.70}//FrontAttackpos
+    AttackPos[1] = marker at {1805.29,49.78,1292.20}//FallBackAttackPos
+    AttackPos[2] = marker at {2239.44,49.73,1545.36}//BackdoorAttackPos
+    
+    SiegeRoute1[0] = marker at {2032.01,134.32,566.29}//Not variable
+    SiegeRoute1[1] = marker at {1805.29,122.75,511.40}
+    SiegeRoute1[2] = marker at {1616.72,70.81,772.60}
+    SiegeRoute1[3] = marker at {1590.34,44.28,1012.90}
+    SiegeRoute1[4] = marker at {1702.68,44.72,1223.19}//Not variable
+    SiegeRoute1[5] = marker at {1792.24,47.89,1298.54}
+    SiegeRoute1[6] = marker at {1992.90,53.69,1311.25}
+
+    //LargeSiegeRoutes
+    SiegeRoute2[0] = marker at {1706.20,44.72,1224.65}//Not variable
+    SiegeRoute2[1] = marker at {1749.70,45.50,1300.64}
+    SiegeRoute2[2] = marker at {2002.56,52.87,1314.95}
+    SiegeRoute3[0] = marker at {1706.20,44.72,1224.65}//Not variable
+    SiegeRoute3[1] = marker at {1749.70,45.50,1300.64} + {40,0,-40}
+    SiegeRoute3[2] = marker at {2002.56,52.87,1314.95} + {40,0,-40}
+    SiegeRoute4[0] = marker at {1706.20,44.72,1224.65}//Not variable
+    SiegeRoute4[1] = marker at {1749.70,45.50,1300.64} + {-40,0,40}
+    SiegeRoute4[2] = marker at {2002.56,52.87,1314.95} + {-40,0,40}
+    SiegeRoute5[0] = marker at {2030.12,134.30,566.50}//Not variable
+    SiegeRoute5[1] = marker at {1844.71,127.07,487.40}
+    SiegeRoute5[2] = marker at {1696.70,100.34,568.40}
+    
+    SiegePlatoonPos[0] = marker at {2003.39,132.57,573.31}
+
+    PatrolRouteA[0] = marker at {1360.45,85.10,724.91}
+    PatrolRouteA[1] = marker at {1265.54,84.63,790.20}
+    PatrolRouteA[2] = marker at {1210.10,83.68,1098.21}
+    PatrolRouteA[3] = marker at {1157.04,88.35,1603.71}
+    PatrolRouteA[4] = marker at {1047.39,91.69,1731.81}
+    PatrolRouteB[0] = marker at {1730.04,44.84,1275.68}
+    PatrolRouteB[1] = marker at {1473.96,45.95,1482.56}
+    PatrolRouteB[2] = marker at {1439.12,55.17,1877.40}
+    PatrolRouteC[0] = marker at {1988.22,52.02,1364.89}
+    PatrolRouteC[1] = marker at {2124.51,33.75,1579.42}
+    PatrolRouteD[0] = marker at {1842.77,125.96,499.17}
+    PatrolRouteD[1] = marker at {1286.21,84.63,797.53}
+    PatrolRouteD[2] = marker at {1242.41,90.65,1389.15}
+
+    StaticSiegePos[0] = marker at {1715.80,44.66,1202.52}
+    StaticSiegePos[1] = marker at {1680.90,44.62,1216.15}
+    StaticSiegePos[2] = marker at {1308.81,115.10,1665.70}
+    StaticSiegePos[3] = marker at {1299.25,114.78,1709.62}
+    StaticSiegePos[4] = marker at {1014.23,84.54,1073.75}
+
+    WaypointsA = create SCRIPT_OBJECT_TYPE_WAYPOINTROUTE at {0, 0, 0}
+    WaypointsB = create SCRIPT_OBJECT_TYPE_WAYPOINTROUTE at {0, 0, 0}
+    WaypointsC = create SCRIPT_OBJECT_TYPE_WAYPOINTROUTE at {0, 0, 0}
+    WaypointsD = create SCRIPT_OBJECT_TYPE_WAYPOINTROUTE at {0, 0, 0}
+
+    add {PatrolRouteA[0]} to waypoint list WaypointsA
+    add {PatrolRouteA[1]} to waypoint list WaypointsA
+    add {PatrolRouteA[2]} to waypoint list WaypointsA
+    add {PatrolRouteA[3]} to waypoint list WaypointsA
+    add {PatrolRouteA[4]} to waypoint list WaypointsA
+    add {PatrolRouteB[0]} to waypoint list WaypointsB
+    add {PatrolRouteB[1]} to waypoint list WaypointsB
+    add {PatrolRouteB[2]} to waypoint list WaypointsB
+    add {PatrolRouteC[0]} to waypoint list WaypointsC
+    add {PatrolRouteC[1]} to waypoint list WaypointsC
+    add {PatrolRouteD[0]} to waypoint list WaypointsD
+    add {PatrolRouteD[1]} to waypoint list WaypointsD
+    add {PatrolRouteD[2]} to waypoint list WaypointsD
+    add {PatrolRouteD[3]} to waypoint list WaypointsD
+
+end script Waypoints
+
+//-----------------------------------------------------------------------------
+
+begin script LC7_Platoon15Actions
+
+    oCreature = get player 0 creature
+    HeTeste3 = 0
+    TestCreature2 = 0
+    NumPat = 0
+    NumPat5 = 0
+    PlayerPlatoon1 = 0
+    WorrNum = 0
+    oTown = get town with id 0
+    oTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in oTown min built 1.0
+    ProPlatoonsLocation = 0
+    AIPlatoon1 = 0
+    Armory = 0
+    Town8 = get town with id 8
+    RandomActionP3 = 0
+    a = 1
+    Timer = create timer for 0 seconds
+    GreekGateHouse1 = 0
+    GreekGateHouse2 = 0
+    oWall = 0
+    PlayerCatapult1 = 0
+    PlayerPlatoonInRange = 0
+    FirstSiege = 1
+    Number = 0
+    NumPat1 = 0
+    PlayerSettlement = 0
+    PlayerCreature = 0
+    AttackMode = 0
+    Building = 0
+    RecalculateTimer = create timer for 0 seconds
+    
+start
+
+wait 120 seconds
+
+begin loop
+    a = 1
+    if LC7_Platoon[15] not exists
+        //PlatoonKilled = 1
+        wait until LC7_Platoon[15] exists
+    end if
+    if FirstSiege == 0
+        wait until LC7_SiegeCatapult[5] exists and LC7_Platoon[15] exists and ({LC7_SiegeCatapult[5]} near {JapaneseCapital} radius 500)
+    end if
+    disable platoon LC7_Platoon[15] camp
+    begin loop
+        TestCreature2 = get distance from {LC7_Platoon[15]} to {oCreature}
+        if TestCreature2 <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00 and LC7_Platoon[15] can navigate to {oCreature}
+            clear LC7_Platoon[15] action queue
+            begin loop
+                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_MOVING_OBJECT using oCreature to LC7_Platoon[15] action queue
+                NumPat5 = get number of villagers in platoon LC7_Platoon[15]
+                TestCreature2 = get distance from {LC7_Platoon[15]} to {oCreature}
+                until NumPat5 == 0 or SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature == 0.00 or not LC7_Platoon[15] can navigate to {oCreature} or TestCreature2 > 150
+            end loop
+        end if
+        PlayerPlatoon1 = get platoon of player 0 nearest {LC7_Platoon[15]} radius 150
+        PlayerCatapult1 = get siege weapon of player 0 nearest {LC7_Platoon[15]} radius 100
+        if PlayerPlatoon1 exists and LC7_Platoon[15] can navigate to {PlayerPlatoon1}
+            clear LC7_Platoon[15] action queue
+            begin loop
+                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_PLATOON using PlayerPlatoon1 to LC7_Platoon[15] action queue
+                NumPat5 = get number of villagers in platoon LC7_Platoon[15]
+                HeTeste3 = get number of villagers in platoon PlayerPlatoon1
+                until NumPat5 == 0 or HeTeste3 == 0 or not LC7_Platoon[15] can navigate to {PlayerPlatoon1}
+            end loop
+        elsif PlayerCatapult1 exists and LC7_Platoon[15] can navigate to {PlayerCatapult1}
+            clear LC7_Platoon[15] action queue
+            begin loop
+                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using PlayerCatapult1 to LC7_Platoon[15] action queue
+                NumPat5 = get number of villagers in platoon LC7_Platoon[15]
+                PlayerPlatoon1 = get platoon of player 0 nearest {LC7_Platoon[15]} radius 150
+                if PlayerPlatoon1 exists and LC7_Platoon[15] can navigate to {PlayerPlatoon1}
+                    PlayerPlatoonInRange = 1
+                end if
+                until NumPat5 == 0 or PlayerCatapult1 not exists or not LC7_Platoon[15] can navigate to {PlayerCatapult1} or PlayerPlatoonInRange == 1
+            end loop
+            PlayerPlatoonInRange = 0
+        end if
+        PlayerSettlement = get nearest town at {LC7_Platoon[15]} for player 0 radius 500
+        //Not a Armory, it's a towncentre.
+        Armory = get building ABODE_NUMBER_TOWN_CENTRE in PlayerSettlement min built 1.0
+        if Armory exists and PlayerSettlement != PlayerTown and PLAYER of PlayerSettlement == 0
+            if LC7_Platoon[15] can navigate to object Armory
+                clear LC7_Platoon[15] action queue
+                set LC7_Platoon[15] attack PlayerSettlement with severity 0.3 for takeover
+                a = 1
+                begin loop
+                    PlayerPlatoon1 = get platoon of player 0 nearest {LC7_Platoon[15]} radius 75
+                    PlayerCreature = get distance from {LC7_Platoon[15]} to {oCreature}
+                    if PlayerPlatoon1 exists
+                        a = 0
+                    elsif PlayerCreature <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+                        a = 0
+                    elsif not LC7_Platoon[15] can navigate to object Armory
+                        a = 0
+                    elsif LC7_Platoon[15] not exists
+                        a = 0
+                    end if
+                    until a == 0 or LC7_Platoon[15] not exists or PLAYER of PlayerSettlement == 1
+                end loop
+                clear LC7_Platoon[15] action queue
+            end if
+        end if
+        if LC7_SiegeCatapult[5] exists
+            clear LC7_Platoon[15] action queue
+            add action PLATOON_AGENDA_ACTION_DEFEND_OBJECT using LC7_SiegeCatapult[5] to LC7_Platoon[15] action queue
+            begin loop
+                TestCreature2 = get distance from {LC7_Platoon[15]} to {oCreature}
+                PlayerPlatoon1 = get platoon of player 0 nearest {LC7_Platoon[15]} radius 150
+                PlayerSettlement = get nearest town at {LC7_Platoon[15]} for player 0 radius 500
+                Armory = get building ABODE_NUMBER_TOWN_CENTRE in PlayerSettlement min built 1.0
+                if Armory exists //Armory needs to exist, else game will crash
+                    if PlayerSettlement == PlayerTown or not LC7_Platoon[15] can navigate to object Armory
+                        PlayerSettlement = 0
+                    end if
+                end if
+                until TestCreature2 <= 150 or PlayerPlatoon1 exists or LC7_Platoon[15] not exists or PlayerSettlement exists
+            end loop
+        end if
+        until LC7_SiegeCatapult5IsAttacking == 1 or LC7_SiegeCatapult[5] not exists or LC7_Platoon[15] not exists
+    end loop
+    
+    if LC7_SiegeCatapult[5] exists
+        begin loop //Attack
+            TestCreature2 = get distance from {LC7_Platoon[15]} to {oCreature}
+            if TestCreature2 <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00 and LC7_Platoon[15] can navigate to {oCreature}
+                clear LC7_Platoon[15] action queue
+                begin loop
+                    add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_MOVING_OBJECT using oCreature to LC7_Platoon[15] action queue
+                    NumPat5 = get number of villagers in platoon LC7_Platoon[15]
+                    TestCreature2 = get distance from {LC7_Platoon[15]} to {oCreature}
+                    until NumPat5 == 0 or SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature == 0.00 or not LC7_Platoon[15] can navigate to {oCreature} or TestCreature2 > 150
+                end loop
+            end if
+            PlayerPlatoon1 = get platoon of player 0 nearest {LC7_Platoon[15]} radius 150
+            PlayerCatapult1 = get siege weapon of player 0 nearest {LC7_Platoon[15]} radius 100
+            if PlayerPlatoon1 exists and LC7_Platoon[15] can navigate to {PlayerPlatoon1}
+                clear LC7_Platoon[15] action queue
+                begin loop
+                    add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_PLATOON using PlayerPlatoon1 to LC7_Platoon[15] action queue
+                    NumPat5 = get number of villagers in platoon LC7_Platoon[15]
+                    HeTeste3 = get number of villagers in platoon PlayerPlatoon1
+                    until NumPat5 == 0 or HeTeste3 == 0 or not LC7_Platoon[15] can navigate to {PlayerPlatoon1}
+                end loop
+            elsif PlayerCatapult1 exists and LC7_Platoon[15] can navigate to {PlayerCatapult1}
+                clear LC7_Platoon[15] action queue
+                begin loop
+                    add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using PlayerCatapult1 to LC7_Platoon[15] action queue
+                    NumPat5 = get number of villagers in platoon LC7_Platoon[15]
+                    PlayerPlatoon1 = get platoon of player 0 nearest {LC7_Platoon[15]} radius 150
+                    if PlayerPlatoon1 exists and LC7_Platoon[15] can navigate to {PlayerPlatoon1}
+                        PlayerPlatoonInRange = 1
+                    end if
+                    until NumPat5 == 0 or PlayerCatapult1 not exists or not LC7_Platoon[15] can navigate to {PlayerCatapult1} or PlayerPlatoonInRange == 1
+                end loop
+                PlayerPlatoonInRange = 0
+            end if
+            PlayerSettlement = get nearest town at {LC7_Platoon[15]} for player 0 radius 500
+            //Not a Armory, it's a towncentre.
+            Armory = get building ABODE_NUMBER_TOWN_CENTRE in PlayerSettlement min built 1.0
+            if Armory exists and PlayerSettlement != PlayerTown and PLAYER of PlayerSettlement == 0
+                if LC7_Platoon[15] can navigate to object Armory
+                    clear LC7_Platoon[15] action queue
+                    set LC7_Platoon[15] attack PlayerSettlement with severity 0.3 for takeover
+                    a = 1
+                    begin loop
+                        PlayerPlatoon1 = get platoon of player 0 nearest {LC7_Platoon[15]} radius 75
+                        PlayerCreature = get distance from {LC7_Platoon[15]} to {oCreature}
+                        if PlayerPlatoon1 exists
+                            a = 0
+                        elsif PlayerCreature <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+                            a = 0
+                        elsif not LC7_Platoon[15] can navigate to object Armory
+                            a = 0
+                        elsif LC7_Platoon[15] not exists
+                            a = 0
+                        end if
+                        until a == 0 or LC7_Platoon[15] not exists or PLAYER of PlayerSettlement == 1
+                    end loop
+                    clear LC7_Platoon[15] action queue
+                end if
+            end if
+            if LC7_Platoon[15] can navigate to object oTownCentre and PLAYER of PlayerTown == 0
+                //wait number from 5 to 25 seconds
+                a = 1
+                clear LC7_Platoon[15] action queue
+                Number = number from 1 to 4
+                if Number == 2 and HEALTH of MyCreature > 0 //Hunt down platoons or destroy buildings
+                    AttackMode = 1
+                    set LC7_Platoon[15] attack PlayerTown with severity 0.2
+                elsif Number == 3 or Number == 4 //Destroy value buildings
+                    AttackMode = 2
+                    Building = 0
+                    Timer = create timer for 2 seconds
+                    begin loop
+                        Number = number from 1 to 8
+                        if Number == 1 or Number == 2 or Number == 3
+                            Building = get building ALTAR in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to LC7_Platoon[15] action queue
+                            else
+                                Building = 0
+                            end if
+                        elsif Number == 4
+                            Building = get building TEMPLE in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to LC7_Platoon[15] action queue
+                            else
+                                Building = 0
+                            end if
+                        elsif Number == 5
+                            Building = get building CREATURE_PEN in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to LC7_Platoon[15] action queue
+                            else
+                                Building = 0
+                            end if
+                        elsif Number == 6
+                            Building = get building UNIVERSITY in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to LC7_Platoon[15] action queue
+                            else
+                                Building = 0
+                            end if
+                        elsif Number == 7
+                            Building = get building BATHHOUSE in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to LC7_Platoon[15] action queue
+                            else
+                                Building = 0
+                            end if
+                        elsif Number == 8
+                            Building = get building AMPITHEATRE in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to LC7_Platoon[15] action queue
+                            else
+                                Building = 0
+                            end if
+                        end if
+                        until Building != 0 or get Timer time remaining <= 0
+                    end loop
+                else //Capture Town
+                    AttackMode = 0
+                    set LC7_Platoon[15] attack PlayerTown with severity 0.3 for takeover
+                end if
+                RecalculateTimer = create timer for 40 seconds
+                begin loop
+                    PlayerPlatoon1 = get platoon of player 0 nearest {LC7_Platoon[15]} radius 150
+                    TestCreature2 = get distance from {LC7_Platoon[15]} to {MyCreature}
+                    NumPat1 = get number of villagers in platoon LC7_Platoon[15]
+                    //if PlayerPlatoon1 exists or TestCreature2 <= 150 or not LC7_Platoon[15] can navigate to object PlayerTownCentre
+                        if PlayerPlatoon1 exists and not town PlayerTown is under takeover from player 1
+                            a = 0
+                        elsif TestCreature2 <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of MyCreature > 0.00 and not town PlayerTown is under takeover from player 1
+                            a = 0
+                        elsif not LC7_Platoon[15] can navigate to object oTownCentre
+                            a = 0
+                        elsif LC7_Platoon[15] not exists
+                            a = 0
+                        elsif AttackMode == 1 and HEALTH of MyCreature == 0
+                            a = 0
+                        elsif AttackMode == 2 and Building not exists
+                            a = 0
+                        elsif AttackMode == 2 and HEALTH of Building < 0.1
+                            a = 0
+                        elsif AttackMode == 2 and Building == 0
+                            a = 0
+                        elsif not town PlayerTown is under takeover from player 1 and get RecalculateTimer time remaining <= 0
+                            a = 0
+                        end if
+                    //end if
+                    until a == 0 or LC7_Platoon[15] not exists
+                end loop
+                clear LC7_Platoon[15] action queue
+            elsif LC7_Platoon[15] can navigate to {AttackPos[0]} + {20,0,20}
+                clear LC7_Platoon[15] action queue
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackPos[0]} + {20,0,20} to LC7_Platoon[15] action queue
+            else
+                clear LC7_Platoon[15] action queue
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackPos[1]} + {20,0,20} to LC7_Platoon[15] action queue
+            end if
+            until LC7_Platoon[15] not exists
+        end loop
+    else
+        add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {SiegePlatoonPos[0]} to LC7_Platoon[15] action queue
+    end if
+    FirstSiege = 0
+end loop
+
+end script LC7_Platoon15Actions
+
+begin script LC7_Catapult5Actions
+
+    PlayerCreature = 0
+    PlayerPlatoon1 = 0
+    oCreature = get player 0 creature
+    NumPat1 = 0
+    HeTeste1 = 0
+    WorrNum = 0
+    Town0 = get town with id 0
+    Town5 = get town with id 5
+    oTown = get town with id 0
+    oTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in Town0 min built 1.0
+    Armory = get building ABODE_NUMBER_MELEE_ARMOURY in Town5 min built 1.0
+    ArmoryRanged = get building ABODE_NUMBER_RANGED_ARMOURY in Town5 min built 1.0
+    Player1Town = 0
+    a = 1
+    AISiege = 0    
+    WaypointMain[7]
+    WaypointRouteMain = 0
+    Counter = 0
+    Town8 = get town with id 8
+    Catapult = 0
+    AttackingTown = 2
+    NumPat5 = 0
+    h = 1
+    Player0Town0 = 0
+    Timer = create timer for 0 seconds
+    oWall = 0
+    GreekGateHouse1 = 0
+    GreekGateHouse2 = 0
+    AIPlatoon = 0
+    Target = 0
+    PointOn = 0
+    CatapultMoveTimer1 = 5
+    AttackTimer = 0
+    ActionTimer = create timer for 0 seconds
+    Wall1 = 0
+    Wall2 = 0
+    House = 0
+    SiegeOnPointTimer = create timer for 0 seconds
+    SiegeWeaponPoint = 0
+    SiegeStucked = 0
+    GateHouse = 0
+    SiegeAttacking = 0
+    FirstSiege = 1
+    AttackTownTimer = create timer for 0 seconds
+    PlayerSettlement = 0
+    
+start
+
+wait 175 seconds
+
+begin loop
+    a = 1
+    PointOn = 0
+    SiegeAttacking = 0
+    SiegeStucked = 0
+    LC7_SiegeCatapult5IsAttacking = 0
+    if LC7_SiegeCatapult[5] not exists and SiegeStucked == 0
+        //CatapultDestroyed = 1
+    end if
+    if FirstSiege == 1
+        FirstSiege = 0
+        PointOn = 5
+    end if
+    wait until LC7_SiegeCatapult[5] exists and LC7_Platoon[15] exists
+    wait 2 seconds
+    begin loop
+        PlayerCreature = get distance from {LC7_SiegeCatapult[5]} to {oCreature}
+        PlayerPlatoon1 = get platoon of player 0 nearest {LC7_SiegeCatapult[5]} radius 150
+        Catapult = get siege weapon of player 0 nearest {LC7_SiegeCatapult[5]} radius 150
+        
+        if PlayerCreature > 10 and PlayerPlatoon1 not exists and Catapult not exists
+            if PlayerPlatoon1 not exists
+                a = 1
+            elsif PlayerCreature > 10 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+                a = 1
+            elsif Catapult not exists
+                a = 1
+            end if
+        end if
+        
+        if PlayerCreature <= 10 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+            clear siege weapon LC7_SiegeCatapult[5] action queue
+            a = 0
+        elsif PlayerPlatoon1 exists and LC7_SiegeCatapult[5] can navigate to {PlayerPlatoon1}
+            clear siege weapon LC7_SiegeCatapult[5] action queue
+            a = 0
+        elsif Catapult exists and LC7_SiegeCatapult[5] can navigate to {Catapult}
+            clear siege weapon LC7_SiegeCatapult[5] action queue
+            a = 0
+        elsif PointOn != 7 and a == 1
+            begin loop
+                if LC7_SiegeCatapult[5] exists 
+                    if get SiegeOnPointTimer time remaining <= 0
+                        SiegeWeaponPoint = marker at {LC7_SiegeCatapult[5]}
+                        SiegeOnPointTimer = create timer for 160 seconds
+                    elsif get SiegeOnPointTimer time remaining <= 5
+                        if {LC7_SiegeCatapult[5]} near {SiegeWeaponPoint} radius 10
+                            clear siege weapon LC7_SiegeCatapult[5] action queue
+                            delete LC7_SiegeCatapult[5]
+                            SiegeStucked = 1
+                        end if
+                    end if
+                    if get CatapultMoveTimer1 time remaining <= 0
+                        if get size of LC7_SiegeCatapult[5] action queue < 1
+
+                            if PointOn == 0
+                                if LC7_SiegeCatapult[5] can navigate to {SiegeRoute1[0]}
+                                    add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {SiegeRoute1[0]} to siege weapon LC7_SiegeCatapult[5] action queue
+                                end if
+                    
+                            elsif PointOn == 1
+                                if LC7_SiegeCatapult[5] can navigate to {SiegeRoute1[1]}
+                                    add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {SiegeRoute1[1]} to siege weapon LC7_SiegeCatapult[5] action queue
+                                end if
+
+                            elsif PointOn == 2
+                                if LC7_SiegeCatapult[5] can navigate to {SiegeRoute1[2]}
+                                    add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {SiegeRoute1[2]} to siege weapon LC7_SiegeCatapult[5] action queue
+                                end if
+
+                            elsif PointOn == 3
+                                if LC7_SiegeCatapult[5] can navigate to {SiegeRoute1[3]}
+                                    add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {SiegeRoute1[3]} to siege weapon LC7_SiegeCatapult[5] action queue
+                                end if
+
+                            elsif PointOn == 4
+                                if LC7_SiegeCatapult[5] can navigate to {SiegeRoute1[4]}
+                                    add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {SiegeRoute1[4]} to siege weapon LC7_SiegeCatapult[5] action queue
+                                end if
+
+                            elsif PointOn == 5
+                                if LC7_SiegeCatapult[5] can navigate to {SiegeRoute1[5]}
+                                    add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {SiegeRoute1[5]} to siege weapon LC7_SiegeCatapult[5] action queue
+                                end if
+
+                            elsif PointOn == 6
+                                if LC7_SiegeCatapult[5] can navigate to {SiegeRoute1[6]}
+                                    add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {SiegeRoute1[6]} to siege weapon LC7_SiegeCatapult[5] action queue
+                                else
+                                    add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {SiegeRoute1[5]} to siege weapon LC7_SiegeCatapult[5] action queue
+                                end if
+
+                            CatapultMoveTimer1 = create timer for 10 seconds
+                            
+                            end if
+                        end if
+                    end if        
+
+                    if {LC7_SiegeCatapult[5]} near {SiegeRoute1[0]} radius 15 and PointOn != 1 or 60 seconds
+                        PointOn = 1
+                    elsif {LC7_SiegeCatapult[5]} near {SiegeRoute1[1]} radius 15 and PointOn != 2 or 60 seconds
+                        PointOn = 2
+                    elsif {LC7_SiegeCatapult[5]} near {SiegeRoute1[2]} radius 15 and PointOn != 3 or 60 seconds
+                        PointOn = 3
+                    elsif {LC7_SiegeCatapult[5]} near {SiegeRoute1[3]} radius 15 and PointOn != 4 or 60 seconds
+                        PointOn = 4
+                    elsif {LC7_SiegeCatapult[5]} near {SiegeRoute1[4]} radius 15 and PointOn != 5 or 60 seconds
+                        PointOn = 5
+                        if PLAYER of JapaneseTown1 == 1 and TownsConverted >= 4
+                            wait until (LC7_SiegeCatapult[9] exists and LC7_SiegeCatapult[10] exists and {LC7_SiegeCatapult[9]} near {JapaneseTown1} radius 400 and {LC7_SiegeCatapult[10]} near {JapaneseTown1} radius 400) or PLAYER of JapaneseTown1 != 1
+                        end if
+                    elsif {LC7_SiegeCatapult[5]} near {SiegeRoute1[5]} radius 15 and PointOn != 6 or 60 seconds
+                        PointOn = 6
+                    elsif {LC7_SiegeCatapult[5]} near {SiegeRoute1[6]} radius 15 and PointOn != 7 or 60 seconds
+                        PointOn = 7
+                    elsif not LC7_SiegeCatapult[5] can navigate to {SiegeRoute1[6]} and {LC7_SiegeCatapult[5]} near {SiegeRoute1[5]} radius 15 and PointOn != 7
+                        PointOn = 7
+                    end if
+                end if
+            until LC7_SiegeCatapult[5] not exists or PointOn == 7 or 180 seconds
+            end loop
+        end if
+        
+        until PointOn == 7 or LC7_SiegeCatapult[5] not exists or 180 seconds
+    end loop
+    
+    LC7_SiegeCatapult5IsAttacking = 1
+    
+    wait 5 seconds
+
+    enable siege weapon LC7_SiegeCatapult[5] auto attack
+
+    begin loop
+        if get ActionTimer time remaining <= 0
+            ActionTimer = create timer for 60 seconds
+            NumPat1 = number from 1 to 5
+            if NumPat1 == 1 or NumPat1 == 2
+                    GateHouse = get random abode of type GATEHOUSE in town PlayerTown
+                    if GateHouse exists and PLAYER of GateHouse == 0
+                        clear siege weapon LC7_SiegeCatapult[5] action queue
+                        Target = marker at get target from {LC7_SiegeCatapult[5]} to {GateHouse} distance 10 angle 180
+                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using GateHouse to siege weapon LC7_SiegeCatapult[5] action queue
+                    elsif GateHouse not exists
+                        GateHouse = get HOUSE GATEHOUSE at {LC7_SiegeCatapult[5]} radius 750
+                        if GateHouse exists and PLAYER of GateHouse == 0
+                            clear siege weapon LC7_SiegeCatapult[5] action queue
+                            Target = marker at get target from {LC7_SiegeCatapult[5]} to {GateHouse} distance 10 angle 180
+                            add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using GateHouse to siege weapon LC7_SiegeCatapult[5] action queue
+                        else
+                            ActionTimer = create timer for 2 seconds
+                        end if
+                    end if
+            elsif NumPat1 == 3
+                Wall1 = get wall segment nearest {LC7_SiegeCatapult[5]} radius 750
+                if Wall1 exists and PLAYER of Wall1 == 0
+                    clear siege weapon LC7_SiegeCatapult[5] action queue
+                    Target = marker at get target from {LC7_SiegeCatapult[5]} to {Wall1} distance 10 angle 180
+                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Wall1 to siege weapon LC7_SiegeCatapult[5] action queue
+                else
+                    ActionTimer = create timer for 2 seconds
+                end if
+            else
+                House = get building ALTAR in PlayerTown min built 0.75
+                if House exists and PLAYER of House == 0 and LC7_SiegeCatapult[5] can navigate to object oTownCentre
+                    clear siege weapon LC7_SiegeCatapult[5] action queue
+                    Target = marker at get target from {LC7_SiegeCatapult[5]} to {House} distance 10 angle 180
+                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using House to siege weapon LC7_SiegeCatapult[5] action queue
+                else
+                    ActionTimer = create timer for 2 seconds
+                end if
+            end if
+        end if
+
+        until LC7_SiegeCatapult[5] not exists
+    end loop
+    
+    if SiegeAttacking == 1 and UnderAttack != 0
+        UnderAttack = UnderAttack - 1
+    end if
+    
+end loop
+
+end script LC7_Catapult5Actions
+
+begin script LC7_Platoon16Actions
+
+    TestPlatoonGuards = 0
+    DistanceG = 0
+    disvolcano = 0
+    Position1 = 0
+    Position2 = 0
+    Position3 = 0
+    Position4 = 0
+    PlayerCreature = 0
+    PlayerPlatoon1 = 0
+    TestSiege = 0
+    oCreature = get player 0 creature
+    NumPat1 = 0
+    HeTeste1 = 0
+    WorrNum = 0
+    HomeTown = get town with id 4
+    Catapult = 0
+    Armory = get building ABODE_NUMBER_MELEE_ARMOURY in HomeTown min built 1.0
+    ArmoryRanged = get building ABODE_NUMBER_RANGED_ARMOURY in HomeTown min built 1.0
+    PlayerPlatoon1Distance = 0
+    PlayerCatapultDistance = 0
+    a = 0
+    oTown = get town with id 0
+    oTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in oTown min built 1.0
+    Number = 0
+    PlatoonFirstTime = 1
+    PlayerSettlement = 0
+    AttackMode = 0
+    Building = 0
+    TestCreature2 = 0
+    Timer = 0
+    RecalculateTimer = create timer for 0 seconds
+    
+start
+
+wait 120 seconds
+
+begin loop
+    a = 0
+    if LC7_Platoon[16] not exists
+        //PlatoonKilled = 1
+        wait until LC7_Platoon[16] exists
+    end if
+    wait until LC7_Platoon[16] exists
+    begin loop
+
+        PlayerCreature = get distance from {LC7_Platoon[16]} to {oCreature}
+        if PlayerCreature <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00 and LC7_Platoon[16] can navigate to {oCreature}
+            clear LC7_Platoon[16] action queue
+            begin loop
+                PlayerCreature = get distance from {LC7_Platoon[16]} to {oCreature}
+                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_MOVING_OBJECT using oCreature to LC7_Platoon[16] action queue
+                NumPat1 = get number of villagers in platoon LC7_Platoon[16]
+                until NumPat1 == 0 or SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature == 0.00 or not LC7_Platoon[16] can navigate to {oCreature} or PlayerCreature > 150
+            end loop
+            clear LC7_Platoon[16] action queue
+        end if
+        
+        PlayerPlatoon1 = get platoon of player 0 nearest {LC7_Platoon[16]} radius 75
+        Catapult = get siege weapon of player 0 nearest {LC7_Platoon[16]} radius 50
+        if PlayerPlatoon1 exists and LC7_Platoon[16] can navigate to {PlayerPlatoon1}
+            clear LC7_Platoon[16] action queue
+            begin loop
+                PlayerPlatoon1 = get platoon of player 0 nearest {LC7_Platoon[16]} radius 75
+                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_PLATOON using PlayerPlatoon1 to LC7_Platoon[16] action queue
+                NumPat1 = get number of villagers in platoon LC7_Platoon[16]
+                HeTeste1 = get number of villagers in platoon PlayerPlatoon1
+                until NumPat1 == 0 or HeTeste1 == 0 or not LC7_Platoon[16] can navigate to {PlayerPlatoon1} or PlayerPlatoon1 not exists
+            end loop
+            clear LC7_Platoon[16] action queue
+        elsif Catapult exists and LC7_Platoon[16] can navigate to {Catapult}
+            clear LC7_Platoon[16] action queue
+            a = 0
+            begin loop
+                Catapult = get siege weapon of player 0 nearest {LC7_Platoon[16]} radius 50
+                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Catapult to LC7_Platoon[16] action queue
+                NumPat1 = get number of villagers in platoon LC7_Platoon[16]
+                PlayerPlatoon1 = get platoon of player 0 nearest {LC7_Platoon[16]} radius 75
+                if PlayerPlatoon1 exists and LC7_Platoon[16] can navigate to {PlayerPlatoon1}
+                    a = 1
+                end if
+                until NumPat1 == 0 or Catapult not exists or not LC7_Platoon[16] can navigate to {Catapult} or a == 1 or Catapult not exists
+            end loop
+            clear LC7_Platoon[16] action queue
+            a = 0
+        end if
+
+        PlayerSettlement = get nearest town at {LC7_Platoon[16]} for player 0 radius 500
+        //Not a Armory, it's a towncentre.
+        Armory = get building ABODE_NUMBER_TOWN_CENTRE in PlayerSettlement min built 1.0
+        if Armory exists and PlayerSettlement != PlayerTown and PLAYER of PlayerSettlement == 0
+            if LC7_Platoon[16] can navigate to object Armory
+                clear LC7_Platoon[16] action queue
+                set LC7_Platoon[16] attack PlayerSettlement with severity 0.3 for takeover
+                a = 1
+                begin loop
+                    PlayerPlatoon1 = get platoon of player 0 nearest {LC7_Platoon[16]} radius 75
+                    PlayerCreature = get distance from {LC7_Platoon[16]} to {oCreature}
+                    if PlayerPlatoon1 exists
+                        a = 0
+                    elsif PlayerCreature <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+                        a = 0
+                    elsif not LC7_Platoon[16] can navigate to object Armory
+                        a = 0
+                    elsif LC7_Platoon[16] not exists
+                        a = 0
+                    end if
+                    until a == 0 or LC7_Platoon[16] not exists or PLAYER of PlayerSettlement == 1
+                end loop
+                clear LC7_Platoon[16] action queue
+            end if
+        end if
+        
+        if PlatoonFirstTime == 1
+            PlatoonFirstTime = 0
+            move LC7_Platoon[16] along WaypointsC with patrol WAYPOINTROUTE_TRAVERSAL_TYPE_FORWARDS
+            begin loop
+                PlayerPlatoon1 = get platoon of player 0 nearest {LC7_Platoon[16]} radius 75
+                PlayerCreature = get distance from {LC7_Platoon[16]} to {oCreature}
+                NumPat1 = get number of villagers in platoon LC7_Platoon[16]
+                if PlayerPlatoon1 exists or PlayerCreature <= 150 or not LC7_Platoon[16] can navigate to object oTownCentre
+                    if PlayerPlatoon1 exists and not town PlayerTown is under takeover from player 1
+                        a = 0
+                    elsif PlayerCreature <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00 and not town PlayerTown is under takeover from player 1
+                        a = 0
+                    elsif {LC7_Platoon[16]} near {PatrolRouteC[1]} radius 20
+                        a = 0
+                    elsif LC7_Platoon[16] not exists
+                        a = 0
+                    end if
+                end if
+                until a == 0 or LC7_Platoon[16] not exists
+            end loop
+        end if
+
+        //if get size of LC7_Platoon[16] action queue < 1
+            if LC7_Platoon[16] can navigate to object oTownCentre and PlatoonFirstTime == 0 and PLAYER of PlayerTown == 0
+                //wait number from 5 to 25 seconds
+                a = 1
+                clear LC7_Platoon[16] action queue
+                Number = number from 1 to 4
+                if Number == 2 and HEALTH of MyCreature > 0 //Hunt down platoons or destroy buildings
+                    AttackMode = 1
+                    set LC7_Platoon[16] attack PlayerTown with severity 0.2
+                elsif Number == 3 or Number == 4 //Destroy value buildings
+                    AttackMode = 2
+                    Building = 0
+                    Timer = create timer for 2 seconds
+                    begin loop
+                        Number = number from 1 to 8
+                        if Number == 1 or Number == 2 or Number == 3
+                            Building = get building ALTAR in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to LC7_Platoon[16] action queue
+                            else
+                                Building = 0
+                            end if
+                        elsif Number == 4
+                            Building = get building TEMPLE in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to LC7_Platoon[16] action queue
+                            else
+                                Building = 0
+                            end if
+                        elsif Number == 5
+                            Building = get building CREATURE_PEN in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to LC7_Platoon[16] action queue
+                            else
+                                Building = 0
+                            end if
+                        elsif Number == 6
+                            Building = get building UNIVERSITY in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to LC7_Platoon[16] action queue
+                            else
+                                Building = 0
+                            end if
+                        elsif Number == 7
+                            Building = get building BATHHOUSE in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to LC7_Platoon[16] action queue
+                            else
+                                Building = 0
+                            end if
+                        elsif Number == 8
+                            Building = get building AMPITHEATRE in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to LC7_Platoon[16] action queue
+                            else
+                                Building = 0
+                            end if
+                        end if
+                        until Building != 0 or get Timer time remaining <= 0
+                    end loop
+                else //Capture Town
+                    AttackMode = 0
+                    set LC7_Platoon[16] attack PlayerTown with severity 0.3 for takeover
+                end if
+                RecalculateTimer = create timer for 40 seconds
+                begin loop
+                    PlayerPlatoon1 = get platoon of player 0 nearest {LC7_Platoon[16]} radius 150
+                    TestCreature2 = get distance from {LC7_Platoon[16]} to {MyCreature}
+                    NumPat1 = get number of villagers in platoon LC7_Platoon[16]
+                    //if PlayerPlatoon1 exists or TestCreature2 <= 150 or not LC7_Platoon[16] can navigate to object PlayerTownCentre
+                        if PlayerPlatoon1 exists and not town PlayerTown is under takeover from player 1
+                            a = 0
+                        elsif TestCreature2 <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of MyCreature > 0.00 and not town PlayerTown is under takeover from player 1
+                            a = 0
+                        elsif not LC7_Platoon[16] can navigate to object oTownCentre
+                            a = 0
+                        elsif LC7_Platoon[16] not exists
+                            a = 0
+                        elsif AttackMode == 1 and HEALTH of MyCreature == 0
+                            a = 0
+                        elsif AttackMode == 2 and Building not exists
+                            a = 0
+                        elsif AttackMode == 2 and HEALTH of Building < 0.1
+                            a = 0
+                        elsif AttackMode == 2 and Building == 0
+                            a = 0
+                        elsif not town PlayerTown is under takeover from player 1 and get RecalculateTimer time remaining <= 0
+                            a = 0
+                        end if
+                    //end if
+                    until a == 0 or LC7_Platoon[16] not exists
+                end loop
+                clear LC7_Platoon[16] action queue
+            elsif LC7_Platoon[16] can navigate to {AttackPos[2]}
+                clear LC7_Platoon[16] action queue
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackPos[2]} to LC7_Platoon[16] action queue
+            else
+                clear LC7_Platoon[16] action queue
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackPos[1]} to LC7_Platoon[16] action queue
+            end if
+        //end if
+
+        until LC7_Platoon[16] not exists
+    end loop
+end loop
+
+end script LC7_Platoon16Actions
+
+begin script LC7_Platoon17Actions
+
+    TestPlatoonGuards = 0
+    DistanceG = 0
+    disvolcano = 0
+    Position1 = 0
+    Position2 = 0
+    Position3 = 0
+    Position4 = 0
+    PlayerCreature = 0
+    PlayerPlatoon1 = 0
+    TestSiege = 0
+    oCreature = get player 0 creature
+    NumPat1 = 0
+    HeTeste1 = 0
+    WorrNum = 0
+    HomeTown = get town with id 4
+    Catapult = 0
+    Armory = get building ABODE_NUMBER_MELEE_ARMOURY in HomeTown min built 1.0
+    ArmoryRanged = get building ABODE_NUMBER_RANGED_ARMOURY in HomeTown min built 1.0
+    PlayerPlatoon1Distance = 0
+    PlayerCatapultDistance = 0
+    a = 0
+    oTown = get town with id 0
+    oTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in oTown min built 1.0
+    DidWaypointRoute = 0
+    Number = 0
+    PlayerSettlement = 0
+    AttackMode = 0
+    Building = 0
+    TestCreature2 = 0
+    Timer = 0
+    RecalculateTimer = create timer for 0 seconds
+    
+start
+
+begin loop
+    DidWaypointRoute = 0
+    a = 0
+    if LC7_Platoon[17] not exists
+        //PlatoonKilled = 1
+        wait until LC7_Platoon[17] exists
+    end if
+    wait until LC7_Platoon[17] exists
+    begin loop
+
+        PlayerCreature = get distance from {LC7_Platoon[17]} to {oCreature}
+        if PlayerCreature <= 200 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00 and LC7_Platoon[17] can navigate to {oCreature}
+            clear LC7_Platoon[17] action queue
+            begin loop
+                PlayerCreature = get distance from {LC7_Platoon[17]} to {oCreature}
+                add action PLATOON_AGENDA_ACTION_RANGED_ATTACK using oCreature to LC7_Platoon[17] action queue
+                NumPat1 = get number of villagers in platoon LC7_Platoon[17]
+                until NumPat1 == 0 or SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature == 0.00 or not LC7_Platoon[17] can navigate to {oCreature} or PlayerCreature > 200
+            end loop
+            clear LC7_Platoon[17] action queue
+        end if
+        
+        PlayerPlatoon1 = get platoon of player 0 nearest {LC7_Platoon[17]} radius 200
+        Catapult = get siege weapon of player 0 nearest {LC7_Platoon[17]} radius 155
+        if PlayerPlatoon1 exists and LC7_Platoon[17] can navigate to {PlayerPlatoon1}
+            clear LC7_Platoon[17] action queue
+            begin loop
+                PlayerPlatoon1 = get platoon of player 0 nearest {LC7_Platoon[17]} radius 200
+                add action PLATOON_AGENDA_ACTION_RANGED_ATTACK using PlayerPlatoon1 to LC7_Platoon[17] action queue
+                NumPat1 = get number of villagers in platoon LC7_Platoon[17]
+                HeTeste1 = get number of villagers in platoon PlayerPlatoon1
+                until NumPat1 == 0 or HeTeste1 == 0 or not LC7_Platoon[17] can navigate to {PlayerPlatoon1} or PlayerPlatoon1 not exists
+            end loop
+            clear LC7_Platoon[17] action queue
+        elsif Catapult exists and LC7_Platoon[17] can navigate to {Catapult}
+            clear LC7_Platoon[17] action queue
+            a = 0
+            begin loop
+                Catapult = get siege weapon of player 0 nearest {LC7_Platoon[17]} radius 155
+                add action PLATOON_AGENDA_ACTION_RANGED_ATTACK using Catapult to LC7_Platoon[17] action queue
+                NumPat1 = get number of villagers in platoon LC7_Platoon[17]
+                PlayerPlatoon1 = get platoon of player 0 nearest {LC7_Platoon[17]} radius 200
+                if PlayerPlatoon1 exists and LC7_Platoon[17] can navigate to {PlayerPlatoon1}
+                    a = 1
+                end if
+                until NumPat1 == 0 or Catapult not exists or not LC7_Platoon[17] can navigate to {Catapult} or a == 1 or Catapult not exists
+            end loop
+            clear LC7_Platoon[17] action queue
+            a = 0
+        end if
+
+        PlayerSettlement = get nearest town at {LC7_Platoon[17]} for player 0 radius 500
+        //Not a Armory, it's a towncentre.
+        Armory = get building ABODE_NUMBER_TOWN_CENTRE in PlayerSettlement min built 1.0
+        if Armory exists and PlayerSettlement != PlayerTown and PLAYER of PlayerSettlement == 0
+            if LC7_Platoon[17] can navigate to object Armory
+                clear LC7_Platoon[17] action queue
+                set LC7_Platoon[17] attack PlayerSettlement with severity 0.3 for takeover
+                a = 1
+                begin loop
+                    PlayerPlatoon1 = get platoon of player 0 nearest {LC7_Platoon[17]} radius 75
+                    PlayerCreature = get distance from {LC7_Platoon[17]} to {oCreature}
+                    if PlayerPlatoon1 exists
+                        a = 0
+                    elsif PlayerCreature <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+                        a = 0
+                    elsif not LC7_Platoon[17] can navigate to object Armory
+                        a = 0
+                    elsif LC7_Platoon[17] not exists
+                        a = 0
+                    end if
+                    until a == 0 or LC7_Platoon[17] not exists or PLAYER of PlayerSettlement == 1
+                end loop
+                clear LC7_Platoon[17] action queue
+            end if
+        end if
+        
+        if not {LC7_Platoon[17]} near {PatrolRouteD[2]} radius 200 and DidWaypointRoute == 0
+            move LC7_Platoon[17] along WaypointsD with patrol WAYPOINTROUTE_TRAVERSAL_TYPE_FORWARDS
+        end if
+        
+        if {LC7_Platoon[17]} near {PatrolRouteD[2]} radius 200 or DidWaypointRoute == 1
+            DidWaypointRoute = 1
+            if LC7_Platoon[17] can navigate to object oTownCentre and PLAYER of PlayerTown == 0
+                //wait number from 5 to 25 seconds
+                a = 1
+                clear LC7_Platoon[17] action queue
+                Number = number from 1 to 4
+                if Number == 2 and HEALTH of MyCreature > 0 //Hunt down platoons or destroy buildings
+                    AttackMode = 1
+                    set LC7_Platoon[17] attack PlayerTown with severity 0.2
+                elsif Number == 3 or Number == 4 //Destroy value buildings
+                    AttackMode = 2
+                    Building = 0
+                    Timer = create timer for 2 seconds
+                    begin loop
+                        Number = number from 1 to 8
+                        if Number == 1 or Number == 2 or Number == 3
+                            Building = get building ALTAR in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to LC7_Platoon[17] action queue
+                            else
+                                Building = 0
+                            end if
+                        elsif Number == 4
+                            Building = get building TEMPLE in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to LC7_Platoon[17] action queue
+                            else
+                                Building = 0
+                            end if
+                        elsif Number == 5
+                            Building = get building CREATURE_PEN in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to LC7_Platoon[17] action queue
+                            else
+                                Building = 0
+                            end if
+                        elsif Number == 6
+                            Building = get building UNIVERSITY in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to LC7_Platoon[17] action queue
+                            else
+                                Building = 0
+                            end if
+                        elsif Number == 7
+                            Building = get building BATHHOUSE in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to LC7_Platoon[17] action queue
+                            else
+                                Building = 0
+                            end if
+                        elsif Number == 8
+                            Building = get building AMPITHEATRE in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to LC7_Platoon[17] action queue
+                            else
+                                Building = 0
+                            end if
+                        end if
+                        until Building != 0 or get Timer time remaining <= 0
+                    end loop
+                else //Capture Town
+                    AttackMode = 0
+                    set LC7_Platoon[17] attack PlayerTown with severity 0.3 for takeover
+                end if
+                RecalculateTimer = create timer for 40 seconds
+                begin loop
+                    PlayerPlatoon1 = get platoon of player 0 nearest {LC7_Platoon[17]} radius 150
+                    TestCreature2 = get distance from {LC7_Platoon[17]} to {MyCreature}
+                    NumPat1 = get number of villagers in platoon LC7_Platoon[17]
+                    //if PlayerPlatoon1 exists or TestCreature2 <= 150 or not LC7_Platoon[17] can navigate to object PlayerTownCentre
+                        if PlayerPlatoon1 exists and not town PlayerTown is under takeover from player 1
+                            a = 0
+                        elsif TestCreature2 <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of MyCreature > 0.00 and not town PlayerTown is under takeover from player 1
+                            a = 0
+                        elsif not LC7_Platoon[17] can navigate to object oTownCentre
+                            a = 0
+                        elsif LC7_Platoon[17] not exists
+                            a = 0
+                        elsif AttackMode == 1 and HEALTH of MyCreature == 0
+                            a = 0
+                        elsif AttackMode == 2 and Building not exists
+                            a = 0
+                        elsif AttackMode == 2 and HEALTH of Building < 0.1
+                            a = 0
+                        elsif AttackMode == 2 and Building == 0
+                            a = 0
+                        elsif not town PlayerTown is under takeover from player 1 and get RecalculateTimer time remaining <= 0
+                            a = 0
+                        end if
+                    //end if
+                    until a == 0 or LC7_Platoon[17] not exists
+                end loop
+                clear LC7_Platoon[17] action queue
+            elsif LC7_Platoon[17] can navigate to {AttackPos[0]}
+                clear LC7_Platoon[17] action queue
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackPos[0]} to LC7_Platoon[17] action queue
+            else
+                clear LC7_Platoon[17] action queue
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackPos[1]} to LC7_Platoon[17] action queue
+            end if
+        end if
+
+        until LC7_Platoon[17] not exists
+    end loop
+end loop
+
+end script LC7_Platoon17Actions
+
+begin script LC7_StaticPlatoonsActions(Pos,Type,Platoon)
+
+    TestPlatoonGuards = 0
+    DistanceG = 0
+    disvolcano = 0
+    Position1 = 0
+    Position2 = 0
+    Position3 = 0
+    Position4 = 0
+    PlayerCreature = 0
+    PlayerPlatoon1 = 0
+    TestSiege = 0
+    oCreature = get player 0 creature
+    NumPat1 = 0
+    HeTeste1 = 0
+    Catapult = 0
+    PlayerPlatoon1Distance = 0
+    PlayerCatapultDistance = 0
+    a = 0
+    PlayerSettlement = 0
+
+start
+
+begin loop
+
+    if Type == Melee
+        PlayerCreature = get distance from {Platoon} to {oCreature}
+        if PlayerCreature <= 200 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00 and Platoon can navigate to {oCreature}
+            clear Platoon action queue
+            begin loop
+                PlayerCreature = get distance from {Platoon} to {oCreature}
+                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_MOVING_OBJECT using oCreature to Platoon action queue
+                NumPat1 = get number of villagers in platoon Platoon
+                until NumPat1 == 0 or SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature == 0.00 or not Platoon can navigate to {oCreature} or PlayerCreature > 200
+            end loop
+            clear Platoon action queue
+        end if
+        
+        PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 200
+        Catapult = get siege weapon of player 0 nearest {Platoon} radius 155
+        if PlayerPlatoon1 exists and Platoon can navigate to {PlayerPlatoon1}
+            clear Platoon action queue
+            begin loop
+                PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 200
+                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_PLATOON using PlayerPlatoon1 to Platoon action queue
+                NumPat1 = get number of villagers in platoon Platoon
+                HeTeste1 = get number of villagers in platoon PlayerPlatoon1
+                until NumPat1 == 0 or HeTeste1 == 0 or not Platoon can navigate to {PlayerPlatoon1} or PlayerPlatoon1 not exists
+            end loop
+            clear Platoon action queue
+        elsif Catapult exists and Platoon can navigate to {Catapult}
+            clear Platoon action queue
+            a = 0
+            begin loop
+                Catapult = get siege weapon of player 0 nearest {Platoon} radius 155
+                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Catapult to Platoon action queue
+                NumPat1 = get number of villagers in platoon Platoon
+                PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 200
+                if PlayerPlatoon1 exists and Platoon can navigate to {PlayerPlatoon1}
+                    a = 1
+                end if
+                until NumPat1 == 0 or Catapult not exists or not Platoon can navigate to {Catapult} or a == 1 or Catapult not exists
+            end loop
+            clear Platoon action queue
+            a = 0
+        end if
+
+    elsif Type == Ranged
+        PlayerCreature = get distance from {Platoon} to {oCreature}
+        if PlayerCreature <= 200 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00 and Platoon can navigate to {oCreature}
+            clear Platoon action queue
+            begin loop
+                PlayerCreature = get distance from {Platoon} to {oCreature}
+                add action PLATOON_AGENDA_ACTION_RANGED_ATTACK_MAINTAINING_DISTANCE using oCreature to Platoon action queue
+                NumPat1 = get number of villagers in platoon Platoon
+                until NumPat1 == 0 or SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature == 0.00 or not Platoon can navigate to {oCreature} or PlayerCreature > 200
+            end loop
+            clear Platoon action queue
+        end if
+        
+        PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 200
+        Catapult = get siege weapon of player 0 nearest {Platoon} radius 155
+        if PlayerPlatoon1 exists and Platoon can navigate to {PlayerPlatoon1}
+            clear Platoon action queue
+            begin loop
+                PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 200
+                add action PLATOON_AGENDA_ACTION_RANGED_ATTACK_MAINTAINING_DISTANCE using PlayerPlatoon1 to Platoon action queue
+                NumPat1 = get number of villagers in platoon Platoon
+                HeTeste1 = get number of villagers in platoon PlayerPlatoon1
+                until NumPat1 == 0 or HeTeste1 == 0 or not Platoon can navigate to {PlayerPlatoon1} or PlayerPlatoon1 not exists
+            end loop
+            clear Platoon action queue
+        elsif Catapult exists and Platoon can navigate to {Catapult}
+            clear Platoon action queue
+            a = 0
+            begin loop
+                Catapult = get siege weapon of player 0 nearest {Platoon} radius 155
+                add action PLATOON_AGENDA_ACTION_RANGED_ATTACK_MAINTAINING_DISTANCE using Catapult to Platoon action queue
+                NumPat1 = get number of villagers in platoon Platoon
+                PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 200
+                if PlayerPlatoon1 exists and Platoon can navigate to {PlayerPlatoon1}
+                    a = 1
+                end if
+                until NumPat1 == 0 or Catapult not exists or not Platoon can navigate to {Catapult} or a == 1 or Catapult not exists
+            end loop
+            clear Platoon action queue
+            a = 0
+        end if
+    end if
+
+    if get size of Platoon action queue < 1 and {Platoon} not near {Pos} radius 25
+        add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {Pos} to Platoon action queue
+    end if
+
+    until Platoon not exists
+end loop
+
+end script LC7_StaticPlatoonsActions
+
+begin script LC7_ArmyBehaivours(Platoon,Type,Task,DefendObject,AttackingPoint,AttackingPointFallBack,PatrolRoute,Town)
+
+    TestPlatoonGuards = 0
+    DistanceG = 0
+    disvolcano = 0
+    Position1 = 0
+    Position2 = 0
+    Position3 = 0
+    Position4 = 0
+    PlayerCreature = 0
+    PlayerPlatoon1 = 0
+    TestSiege = 0
+    oCreature = get player 0 creature
+    NumPat1 = 0
+    HeTeste1 = 0
+    Catapult = 0
+    PlayerPlatoon1Distance = 0
+    PlayerCatapultDistance = 0
+    a = 0
+    PlayerSettlement = 0
+    Armory = 0
+    oTown = get town with id 0
+    oTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in oTown min built 1.0
+    Number = 0
+    AttackMode = 0
+    Building = 0
+    TestCreature2 = 0
+    Timer = 0
+    RecalculateTimer = create timer for 0 seconds
+    FirstAttack = 1
+    Ready = 0
+    FirstSiege = 1
+
+start
+
+//Group Attackers up first
+
+if Platoon == LC7_Platoon[22] or Platoon == LC7_Platoon[23]
+    wait until LC7_SiegeCatapult[9] exists and LC7_Platoon[22] exists and LC7_SiegeCatapult[10] exists and LC7_Platoon[23] exists and {LC7_SiegeCatapult[9]} near {JapaneseTown1} radius 400 and {LC7_SiegeCatapult[10]} near {JapaneseTown1} radius 400
+    if Platoon == LC7_Platoon[22]
+        DefendObject = LC7_SiegeCatapult[9]
+    else
+        DefendObject = LC7_SiegeCatapult[10]
+    end if
+end if
+
+begin loop
+
+    if Type == Melee and Task != Special
+        PlayerCreature = get distance from {Platoon} to {oCreature}
+        if PlayerCreature <= 200 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00 and Platoon can navigate to {oCreature}
+            clear Platoon action queue
+            begin loop
+                PlayerCreature = get distance from {Platoon} to {oCreature}
+                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_MOVING_OBJECT using oCreature to Platoon action queue
+                NumPat1 = get number of villagers in platoon Platoon
+                until NumPat1 == 0 or SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature == 0.00 or not Platoon can navigate to {oCreature} or PlayerCreature > 200
+            end loop
+            clear Platoon action queue
+        end if
+        
+        PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 200
+        Catapult = get siege weapon of player 0 nearest {Platoon} radius 155
+        if PlayerPlatoon1 exists and Platoon can navigate to {PlayerPlatoon1}
+            clear Platoon action queue
+            begin loop
+                PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 200
+                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_PLATOON using PlayerPlatoon1 to Platoon action queue
+                NumPat1 = get number of villagers in platoon Platoon
+                HeTeste1 = get number of villagers in platoon PlayerPlatoon1
+                until NumPat1 == 0 or HeTeste1 == 0 or not Platoon can navigate to {PlayerPlatoon1} or PlayerPlatoon1 not exists
+            end loop
+            clear Platoon action queue
+        elsif Catapult exists and Platoon can navigate to {Catapult}
+            clear Platoon action queue
+            a = 0
+            begin loop
+                Catapult = get siege weapon of player 0 nearest {Platoon} radius 155
+                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Catapult to Platoon action queue
+                NumPat1 = get number of villagers in platoon Platoon
+                PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 200
+                if PlayerPlatoon1 exists and Platoon can navigate to {PlayerPlatoon1}
+                    a = 1
+                end if
+                until NumPat1 == 0 or Catapult not exists or not Platoon can navigate to {Catapult} or a == 1 or Catapult not exists
+            end loop
+            clear Platoon action queue
+            a = 0
+        end if
+
+    elsif Type == Ranged and Task != Special
+        PlayerCreature = get distance from {Platoon} to {oCreature}
+        if PlayerCreature <= 200 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00 and Platoon can navigate to {oCreature}
+            clear Platoon action queue
+            begin loop
+                PlayerCreature = get distance from {Platoon} to {oCreature}
+                add action PLATOON_AGENDA_ACTION_RANGED_ATTACK_MAINTAINING_DISTANCE using oCreature to Platoon action queue
+                NumPat1 = get number of villagers in platoon Platoon
+                until NumPat1 == 0 or SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature == 0.00 or not Platoon can navigate to {oCreature} or PlayerCreature > 200
+            end loop
+            clear Platoon action queue
+        end if
+        
+        PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 200
+        Catapult = get siege weapon of player 0 nearest {Platoon} radius 155
+        if PlayerPlatoon1 exists and Platoon can navigate to {PlayerPlatoon1}
+            clear Platoon action queue
+            begin loop
+                PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 200
+                add action PLATOON_AGENDA_ACTION_RANGED_ATTACK_MAINTAINING_DISTANCE using PlayerPlatoon1 to Platoon action queue
+                NumPat1 = get number of villagers in platoon Platoon
+                HeTeste1 = get number of villagers in platoon PlayerPlatoon1
+                until NumPat1 == 0 or HeTeste1 == 0 or not Platoon can navigate to {PlayerPlatoon1} or PlayerPlatoon1 not exists
+            end loop
+            clear Platoon action queue
+        elsif Catapult exists and Platoon can navigate to {Catapult}
+            clear Platoon action queue
+            a = 0
+            begin loop
+                Catapult = get siege weapon of player 0 nearest {Platoon} radius 155
+                add action PLATOON_AGENDA_ACTION_RANGED_ATTACK_MAINTAINING_DISTANCE using Catapult to Platoon action queue
+                NumPat1 = get number of villagers in platoon Platoon
+                PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 200
+                if PlayerPlatoon1 exists and Platoon can navigate to {PlayerPlatoon1}
+                    a = 1
+                end if
+                until NumPat1 == 0 or Catapult not exists or not Platoon can navigate to {Catapult} or a == 1 or Catapult not exists
+            end loop
+            clear Platoon action queue
+            a = 0
+        end if
+    end if
+
+    PlayerSettlement = get nearest town at {Platoon} for player 0 radius 500
+    //Not a Armory, it's a towncentre.
+    Armory = get building ABODE_NUMBER_TOWN_CENTRE in PlayerSettlement min built 1.0
+    if Armory exists and PlayerSettlement != PlayerTown and PLAYER of PlayerSettlement == 0 and Task != Conqueror
+        if Platoon can navigate to object Armory
+            clear Platoon action queue
+            set Platoon attack PlayerSettlement with severity 0.3 for takeover
+            a = 1
+            begin loop
+                PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 150
+                PlayerCreature = get distance from {Platoon} to {oCreature}
+                if PlayerPlatoon1 exists
+                    a = 0
+                elsif PlayerCreature <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+                    a = 0
+                elsif not Platoon can navigate to object Armory
+                    a = 0
+                elsif Platoon not exists
+                    a = 0
+                end if
+                until a == 0 or Platoon not exists or PLAYER of PlayerSettlement == 1
+            end loop
+            clear Platoon action queue
+        end if
+    end if
+
+    if Task == Attacker
+        //if get size of Platoon action queue < 1
+            if Platoon can navigate to object oTownCentre and PLAYER of PlayerTown == 0
+                wait number from 5 to 25 seconds
+                a = 1
+                clear Platoon action queue
+                Number = number from 1 to 4
+                if Number == 2 and HEALTH of MyCreature > 0 //Hunt down platoons or destroy buildings
+                    AttackMode = 1
+                    set Platoon attack PlayerTown with severity 0.2
+                elsif Number == 3 or Number == 4 //Destroy value buildings
+                    AttackMode = 2
+                    Building = 0
+                    Timer = create timer for 2 seconds
+                    begin loop
+                        Number = number from 1 to 8
+                        if Number == 1 or Number == 2 or Number == 3
+                            Building = get building ALTAR in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                            else
+                                Building = 0
+                            end if
+                        elsif Number == 4
+                            Building = get building TEMPLE in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                            else
+                                Building = 0
+                            end if
+                        elsif Number == 5
+                            Building = get building CREATURE_PEN in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                            else
+                                Building = 0
+                            end if
+                        elsif Number == 6
+                            Building = get building UNIVERSITY in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                            else
+                                Building = 0
+                            end if
+                        elsif Number == 7
+                            Building = get building BATHHOUSE in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                            else
+                                Building = 0
+                            end if
+                        elsif Number == 8
+                            Building = get building AMPITHEATRE in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                            else
+                                Building = 0
+                            end if
+                        end if
+                        until Building != 0 or get Timer time remaining <= 0
+                    end loop
+                else //Capture Town
+                    AttackMode = 0
+                    set Platoon attack PlayerTown with severity 0.3 for takeover
+                end if
+                RecalculateTimer = create timer for 40 seconds
+                begin loop
+                    PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 150
+                    TestCreature2 = get distance from {Platoon} to {MyCreature}
+                    NumPat1 = get number of villagers in platoon Platoon
+                    //if PlayerPlatoon1 exists or TestCreature2 <= 150 or not Platoon can navigate to object PlayerTownCentre
+                        if PlayerPlatoon1 exists and not town PlayerTown is under takeover from player 1
+                            a = 0
+                        elsif TestCreature2 <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of MyCreature > 0.00 and not town PlayerTown is under takeover from player 1
+                            a = 0
+                        elsif not Platoon can navigate to object oTownCentre
+                            a = 0
+                        elsif Platoon not exists
+                            a = 0
+                        elsif AttackMode == 1 and HEALTH of MyCreature == 0
+                            a = 0
+                        elsif AttackMode == 2 and Building not exists
+                            a = 0
+                        elsif AttackMode == 2 and HEALTH of Building < 0.1
+                            a = 0
+                        elsif AttackMode == 2 and Building == 0
+                            a = 0
+                        elsif not town PlayerTown is under takeover from player 1 and get RecalculateTimer time remaining <= 0
+                            a = 0
+                        end if
+                    //end if
+                    until a == 0 or Platoon not exists
+                end loop
+                clear Platoon action queue
+            elsif Platoon can navigate to {AttackingPoint}
+                clear Platoon action queue
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPoint} to Platoon action queue
+            else
+                clear Platoon action queue
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPointFallBack} to Platoon action queue
+            end if
+        //end if
+
+    elsif Task == Escort
+        if DefendObject exists
+            clear Platoon action queue
+            add action PLATOON_AGENDA_ACTION_DEFEND_OBJECT using DefendObject to Platoon action queue
+            begin loop
+                TestCreature2 = get distance from {Platoon} to {oCreature}
+                PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 150
+                PlayerSettlement = get nearest town at {Platoon} for player 0 radius 500
+                Armory = get building ABODE_NUMBER_TOWN_CENTRE in PlayerSettlement min built 1.0
+                if Armory exists //Armory needs to exist, else game will crash
+                    if PlayerSettlement == PlayerTown or not Platoon can navigate to object Armory
+                        PlayerSettlement = 0
+                    end if
+                end if
+                until TestCreature2 <= 150 or PlayerPlatoon1 exists or Platoon not exists or PlayerSettlement exists or DefendObject not exists
+            end loop
+        elsif DefendObject not exists
+            if Platoon can navigate to object oTownCentre and PLAYER of PlayerTown == 0
+                wait number from 5 to 25 seconds
+                a = 1
+                clear Platoon action queue
+                Number = number from 1 to 4
+                if Number == 2 and HEALTH of MyCreature > 0 //Hunt down platoons or destroy buildings
+                    AttackMode = 1
+                    set Platoon attack PlayerTown with severity 0.2
+                elsif Number == 3 or Number == 4 //Destroy value buildings
+                    AttackMode = 2
+                    Building = 0
+                    Timer = create timer for 2 seconds
+                    begin loop
+                        Number = number from 1 to 8
+                        if Number == 1 or Number == 2 or Number == 3
+                            Building = get building ALTAR in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                            else
+                                Building = 0
+                            end if
+                        elsif Number == 4
+                            Building = get building TEMPLE in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                            else
+                            Building = 0
+                            end if
+                        elsif Number == 5
+                            Building = get building CREATURE_PEN in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                            else
+                                Building = 0
+                            end if
+                        elsif Number == 6
+                            Building = get building UNIVERSITY in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                            else
+                                Building = 0
+                            end if
+                        elsif Number == 7
+                            Building = get building BATHHOUSE in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                            else
+                                Building = 0
+                            end if
+                        elsif Number == 8
+                            Building = get building AMPITHEATRE in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                            else
+                                Building = 0
+                            end if
+                        end if
+                        until Building != 0 or get Timer time remaining <= 0
+                    end loop
+                else //Capture Town
+                    AttackMode = 0
+                    set Platoon attack PlayerTown with severity 0.3 for takeover
+                end if
+                RecalculateTimer = create timer for 40 seconds
+                begin loop
+                    PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 150
+                    TestCreature2 = get distance from {Platoon} to {MyCreature}
+                    NumPat1 = get number of villagers in platoon Platoon
+                    //if PlayerPlatoon1 exists or TestCreature2 <= 150 or not Platoon can navigate to object PlayerTownCentre
+                        if PlayerPlatoon1 exists and not town PlayerTown is under takeover from player 1
+                            a = 0
+                        elsif TestCreature2 <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of MyCreature > 0.00 and not town PlayerTown is under takeover from player 1
+                            a = 0
+                        elsif not Platoon can navigate to object oTownCentre
+                            a = 0
+                        elsif Platoon not exists
+                            a = 0
+                        elsif AttackMode == 1 and HEALTH of MyCreature == 0
+                            a = 0
+                        elsif AttackMode == 2 and Building not exists
+                            a = 0
+                        elsif AttackMode == 2 and HEALTH of Building < 0.1
+                            a = 0
+                        elsif AttackMode == 2 and Building == 0
+                            a = 0
+                        elsif not town PlayerTown is under takeover from player 1 and get RecalculateTimer time remaining <= 0
+                            a = 0
+                        end if
+                    //end if
+                    until a == 0 or Platoon not exists
+                end loop
+                clear Platoon action queue
+            elsif Platoon can navigate to {AttackingPoint}
+                clear Platoon action queue
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPoint} to Platoon action queue
+            else
+                clear Platoon action queue
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPointFallBack} to Platoon action queue
+            end if
+        end if
+
+    elsif Task == Conqueror
+        oTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in NearestSettlement min built 1.0
+        DefendObject = LC7_SiegeCatapult[11]
+        if not Platoon can navigate to object oTownCentre and DefendObject exists
+            AttackingPoint = marker at {DefendObject} + {number from 20 to -20,0,number from 20 to -20}
+            clear Platoon action queue 
+            add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPoint} to Platoon action queue
+            wait 10 seconds
+        end if
+
+        oTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in NearestSettlement min built 1.0
+        //if get size of Platoon action queue < 1
+            if Platoon can navigate to object oTownCentre
+                wait number from 5 to 25 seconds
+                a = 1
+                clear Platoon action queue
+                Number = number from 1 to 4
+                if Number == 2 and HEALTH of MyCreature > 0 //Hunt down platoons or destroy buildings
+                    AttackMode = 1
+                    set Platoon attack NearestSettlement with severity 0.2 for takeover
+                elsif Number == 3 or Number == 4 //Destroy value buildings
+                    AttackMode = 2
+                    Building = 0
+                    Timer = create timer for 2 seconds
+                    begin loop
+                        Number = number from 1 to 8
+                        if Number == 1 or Number == 2 or Number == 3
+                            Building = get building ALTAR in NearestSettlement min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                            else
+                                Building = 0
+                            end if
+                        elsif Number == 4
+                            Building = get building TEMPLE in NearestSettlement min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                            else
+                                Building = 0
+                            end if
+                        elsif Number == 5
+                            Building = get building CREATURE_PEN in NearestSettlement min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                            else
+                                Building = 0
+                            end if
+                        elsif Number == 6
+                            Building = get building UNIVERSITY in NearestSettlement min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                            else
+                                Building = 0
+                            end if
+                        elsif Number == 7
+                            Building = get building BATHHOUSE in NearestSettlement min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                            else
+                                Building = 0
+                            end if
+                        elsif Number == 8
+                            Building = get building AMPITHEATRE in NearestSettlement min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                            else
+                                Building = 0
+                            end if
+                        end if
+                        until Building != 0 or get Timer time remaining <= 0
+                    end loop
+                else //Capture Town
+                    AttackMode = 0
+                    set Platoon attack NearestSettlement with severity 0.3 for takeover
+                end if
+                RecalculateTimer = create timer for 40 seconds
+                begin loop
+                    PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 150
+                    TestCreature2 = get distance from {Platoon} to {MyCreature}
+                    NumPat1 = get number of villagers in platoon Platoon
+                    //if PlayerPlatoon1 exists or TestCreature2 <= 150 or not Platoon can navigate to object PlayerTownCentre
+                        if PlayerPlatoon1 exists and not town NearestSettlement is under takeover from player 1
+                            a = 0
+                        elsif TestCreature2 <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of MyCreature > 0.00 and not town NearestSettlement is under takeover from player 1
+                            a = 0
+                        elsif not Platoon can navigate to object oTownCentre
+                            a = 0
+                        elsif Platoon not exists
+                            a = 0
+                        elsif AttackMode == 1 and HEALTH of MyCreature == 0
+                            a = 0
+                        elsif AttackMode == 2 and Building not exists
+                            a = 0
+                        elsif AttackMode == 2 and HEALTH of Building < 0.1
+                            a = 0
+                        elsif AttackMode == 2 and Building == 0
+                            a = 0
+                        elsif not town NearestSettlement is under takeover from player 1 and get RecalculateTimer time remaining <= 0
+                            a = 0
+                        end if
+                    //end if
+                    until a == 0 or Platoon not exists
+                end loop
+                clear Platoon action queue
+            else
+                clear Platoon action queue
+            end if
+        //end if
+
+    elsif Task == Patrol
+        if get size of Platoon action queue < 1
+            move Platoon along PatrolRoute with patrol WAYPOINTROUTE_TRAVERSAL_TYPE_CIRCULAR
+        end if
+
+    elsif Task == Special
+        //if get size of Platoon action queue < 1
+            if LC7_LargeSiegeLaunchAttack == 1
+                if Platoon can navigate to object oTownCentre and PLAYER of PlayerTown == 0
+                    wait number from 5 to 25 seconds
+                    a = 1
+                    clear Platoon action queue
+                    Number = number from 1 to 4
+                    if Number == 2 and HEALTH of MyCreature > 0 //Hunt down platoons or destroy buildings
+                        AttackMode = 1
+                        set Platoon attack PlayerTown with severity 0.2
+                    elsif Number == 3 or Number == 4 //Destroy value buildings
+                        AttackMode = 2
+                        Building = 0
+                        Timer = create timer for 2 seconds
+                        begin loop
+                            Number = number from 1 to 8
+                            if Number == 1 or Number == 2 or Number == 3
+                                Building = get building ALTAR in PlayerTown min built 0.75
+                                if Building exists
+                                    add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                else
+                                    Building = 0
+                                end if
+                            elsif Number == 4
+                                Building = get building TEMPLE in PlayerTown min built 0.75
+                                if Building exists
+                                    add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                else
+                                    Building = 0
+                                end if
+                            elsif Number == 5
+                                Building = get building CREATURE_PEN in PlayerTown min built 0.75
+                                if Building exists
+                                    add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                else
+                                    Building = 0
+                                end if
+                            elsif Number == 6
+                                Building = get building UNIVERSITY in PlayerTown min built 0.75
+                                if Building exists
+                                    add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                else
+                                    Building = 0
+                                end if
+                            elsif Number == 7
+                                Building = get building BATHHOUSE in PlayerTown min built 0.75
+                                if Building exists
+                                    add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                else
+                                    Building = 0
+                                end if
+                            elsif Number == 8
+                                Building = get building AMPITHEATRE in PlayerTown min built 0.75
+                                if Building exists
+                                    add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                else
+                                    Building = 0
+                                end if
+                            end if
+                            until Building != 0 or get Timer time remaining <= 0
+                        end loop
+                    else //Capture Town
+                        AttackMode = 0
+                        set Platoon attack PlayerTown with severity 0.3 for takeover
+                    end if
+                    RecalculateTimer = create timer for 40 seconds
+                    begin loop
+                        PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 150
+                        TestCreature2 = get distance from {Platoon} to {MyCreature}
+                        NumPat1 = get number of villagers in platoon Platoon
+                        //if PlayerPlatoon1 exists or TestCreature2 <= 150 or not Platoon can navigate to object PlayerTownCentre
+                            if PlayerPlatoon1 exists and not town PlayerTown is under takeover from player 1
+                                a = 0
+                            elsif TestCreature2 <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of MyCreature > 0.00 and not town PlayerTown is under takeover from player 1
+                                a = 0
+                            elsif not Platoon can navigate to object oTownCentre
+                                a = 0
+                            elsif Platoon not exists
+                                a = 0
+                            elsif AttackMode == 1 and HEALTH of MyCreature == 0
+                                a = 0
+                            elsif AttackMode == 2 and Building not exists
+                                a = 0
+                            elsif AttackMode == 2 and HEALTH of Building < 0.1
+                                a = 0
+                            elsif AttackMode == 2 and Building == 0
+                                a = 0
+                            elsif not town PlayerTown is under takeover from player 1 and get RecalculateTimer time remaining <= 0
+                                a = 0
+                            end if
+                        //end if
+                        until a == 0 or Platoon not exists
+                    end loop
+                    clear Platoon action queue
+                elsif Platoon can navigate to {AttackingPoint}
+                    clear Platoon action queue
+                    add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPoint} to Platoon action queue
+                else
+                    clear Platoon action queue
+                    add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPointFallBack} to Platoon action queue
+                end if
+            elsif LC7_LargeSiegeLaunchAttack == 0
+                clear Platoon action queue
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPointFallBack} to Platoon action queue
+            end if
+        //end if
+
+    end if
+
+    until Platoon not exists
+end loop
+
+end script LC7_ArmyBehaivours
+
+begin script LC7_MoveCatapultThenAttack(SiegeWeapon,Type,Waypoint1,Waypoint2,Waypoint3)
+
+    PlayerCreature = 0
+    PlayerPlatoon1 = 0
+    oCreature = get player 0 creature
+    NumPat1 = 0
+    HeTeste1 = 0
+    WorrNum = 0
+    Town0 = get town with id 0
+    Town5 = get town with id 5
+    oTown = get town with id 0
+    oTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in Town0 min built 1.0
+    Armory = get building ABODE_NUMBER_MELEE_ARMOURY in Town5 min built 1.0
+    ArmoryRanged = get building ABODE_NUMBER_RANGED_ARMOURY in Town5 min built 1.0
+    Player1Town = 0
+    a = 1
+    AISiege = 0    
+    WaypointMain[7]
+    WaypointRouteMain = 0
+    Counter = 0
+    Town8 = get town with id 8
+    Catapult = 0
+    AttackingTown = 2
+    NumPat5 = 0
+    h = 1
+    Player0Town0 = 0
+    Timer = create timer for 0 seconds
+    oWall = 0
+    GreekGateHouse1 = 0
+    GreekGateHouse2 = 0
+    AIPlatoon = 0
+    Target = 0
+    PointOn = 0
+    CatapultMoveTimer1 = create timer for 0 seconds
+    AttackTimer = 0
+    ActionTimer = create timer for 0 seconds
+    Wall1 = 0
+    Wall2 = 0
+    House = 0
+    SiegeOnPointTimer = create timer for 0 seconds
+    SiegeWeaponPoint = 0
+    SiegeStucked = 0
+    GateHouse = 0
+    SiegeAttacking = 0
+    AttackTownTimer = create timer for 0 seconds
+    PlayerSettlement = 0
+
+start
+
+//begin loop
+
+    a = 1
+    PointOn = 0
+    SiegeAttacking = 0
+    SiegeStucked = 0
+
+    if SiegeWeapon == LC7_SiegeCatapult[9] or SiegeWeapon == LC7_SiegeCatapult[10]
+        wait until LC7_SiegeCatapult[9] exists and LC7_Platoon[22] exists and LC7_SiegeCatapult[10] exists and LC7_Platoon[23] exists
+    end if
+
+    disable siege weapon SiegeWeapon auto attack
+
+    if Type != Conqueror
+        begin loop
+            if PointOn != 3
+                if SiegeWeapon exists
+                    if get SiegeOnPointTimer time remaining <= 0
+                        SiegeWeaponPoint = marker at {SiegeWeapon}
+                        SiegeOnPointTimer = create timer for 40 seconds
+                    elsif get SiegeOnPointTimer time remaining <= 5
+                        if {SiegeWeapon} near {SiegeWeaponPoint} radius 10
+                            clear siege weapon SiegeWeapon action queue
+                            delete SiegeWeapon
+                            SiegeStucked = 1
+                        end if
+                    end if
+                    if get CatapultMoveTimer1 time remaining <= 0
+                        if get size of SiegeWeapon action queue < 1
+
+                            if PointOn == 0
+                                if SiegeWeapon can navigate to {Waypoint1}
+                                    add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {Waypoint1} to siege weapon SiegeWeapon action queue
+                                end if
+                    
+                            elsif PointOn == 1
+                                if SiegeWeapon can navigate to {Waypoint2}
+                                    add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {Waypoint2} to siege weapon SiegeWeapon action queue
+                                end if
+
+                            elsif PointOn == 2
+                                if SiegeWeapon can navigate to {Waypoint3}
+                                    add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {Waypoint3} to siege weapon SiegeWeapon action queue
+                                end if
+
+                            CatapultMoveTimer1 = create timer for 10 seconds
+                            
+                            end if
+                        end if
+                    end if        
+
+                    if {SiegeWeapon} near {Waypoint1} radius 15 and PointOn != 1
+                        PointOn = 1
+                    elsif {SiegeWeapon} near {Waypoint2} radius 15 and PointOn != 2
+                        PointOn = 2
+                    elsif {SiegeWeapon} near {Waypoint3} radius 15 and PointOn != 3
+                        PointOn = 3
+                    elsif not SiegeWeapon can navigate to {Waypoint3} and {SiegeWeapon} near {Waypoint2} radius 15 and PointOn != 3
+                        PointOn = 3
+                    end if
+                end if
+            end if
+
+            if get ActionTimer time remaining <= 0 and PointOn == 3
+                enable siege weapon SiegeWeapon auto attack
+                ActionTimer = create timer for 60 seconds
+                House = get building ALTAR in PlayerTown min built 0.75
+                if House exists and PLAYER of House == 0 and SiegeWeapon can navigate to object oTownCentre
+                    NumPat1 = number from 1 to 5
+                else
+                    NumPat1 = number from 1 to 3
+                end if
+                if NumPat1 == 1 or NumPat1 == 2
+                    GateHouse = get random abode of type GATEHOUSE in town PlayerTown
+                    if GateHouse exists and PLAYER of GateHouse == 0
+                        clear siege weapon SiegeWeapon action queue
+                        Target = marker at get target from {SiegeWeapon} to {GateHouse} distance 10 angle 180
+                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using GateHouse to siege weapon SiegeWeapon action queue
+                    elsif GateHouse not exists
+                        GateHouse = get HOUSE GATEHOUSE at {SiegeWeapon} radius 750
+                        if GateHouse exists and PLAYER of GateHouse == 0
+                            clear siege weapon SiegeWeapon action queue
+                            Target = marker at get target from {SiegeWeapon} to {GateHouse} distance 10 angle 180
+                            add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using GateHouse to siege weapon SiegeWeapon action queue
+                        else
+                            ActionTimer = create timer for 2 seconds
+                        end if
+                    end if
+                elsif NumPat1 == 3
+                    Wall1 = get wall segment nearest {SiegeWeapon} radius 750
+                    if Wall1 exists and PLAYER of Wall1 == 0
+                        clear siege weapon SiegeWeapon action queue
+                        Target = marker at get target from {SiegeWeapon} to {Wall1} distance 10 angle 180
+                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Wall1 to siege weapon SiegeWeapon action queue
+                    else
+                        ActionTimer = create timer for 2 seconds
+                    end if
+                else
+                    House = get building ALTAR in PlayerTown min built 0.75
+                    if House exists and PLAYER of House == 0 and SiegeWeapon can navigate to object oTownCentre
+                        clear siege weapon SiegeWeapon action queue
+                        Target = marker at get target from {SiegeWeapon} to {House} distance 10 angle 180
+                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using House to siege weapon SiegeWeapon action queue
+                    else
+                        ActionTimer = create timer for 2 seconds
+                    end if
+                end if
+            end if
+
+            until SiegeWeapon not exists
+        end loop
+    else    
+        begin loop
+            if get SiegeOnPointTimer time remaining <= 0
+                SiegeWeaponPoint = marker at {SiegeWeapon}
+                SiegeOnPointTimer = create timer for 160 seconds
+            elsif get SiegeOnPointTimer time remaining <= 5 and not {SiegeWeapon} near {NearestSettlement} radius 400
+                if {SiegeWeapon} near {SiegeWeaponPoint} radius 10
+                    clear siege weapon SiegeWeapon action queue
+                    delete SiegeWeapon
+                    SiegeStucked = 1
+                end if
+            end if
+            if get ActionTimer time remaining <= 0
+                ActionTimer = create timer for 60 seconds
+                NumPat1 = number from 1 to 7
+                if NumPat1 == 1 or NumPat1 == 2
+                    GateHouse = get random abode of type GATEHOUSE in town NearestSettlement
+                    if GateHouse exists and PLAYER of GateHouse == 0
+                        clear siege weapon SiegeWeapon action queue
+                        Target = marker at get target from {SiegeWeapon} to {GateHouse} distance 10 angle 180
+                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using GateHouse to siege weapon SiegeWeapon action queue
+                    elsif GateHouse not exists
+                        GateHouse = get HOUSE GATEHOUSE at {SiegeWeapon} radius 750
+                        if GateHouse exists and PLAYER of GateHouse == 0
+                            clear siege weapon SiegeWeapon action queue
+                            Target = marker at get target from {SiegeWeapon} to {GateHouse} distance 10 angle 180
+                            add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using GateHouse to siege weapon SiegeWeapon action queue
+                        else
+                            ActionTimer = create timer for 2 seconds
+                        end if
+                    end if
+                elsif NumPat1 == 3
+                    Wall1 = get wall segment nearest {NearestSettlement} radius 400
+                    if Wall1 exists and PLAYER of Wall1 == 0
+                        clear siege weapon SiegeWeapon action queue
+                        Target = marker at get target from {SiegeWeapon} to {Wall1} distance 10 angle 180
+                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Wall1 to siege weapon SiegeWeapon action queue
+                    else
+                        ActionTimer = create timer for 2 seconds
+                    end if
+                elsif NumPat1 == 4 or NumPat1 == 5
+                    House = get building ALTAR in NearestSettlement min built 0.75
+                    if House exists and PLAYER of House == 0 and SiegeWeapon can navigate to object oTownCentre
+                        clear siege weapon SiegeWeapon action queue
+                        Target = marker at get target from {SiegeWeapon} to {House} distance 10 angle 180
+                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using House to siege weapon SiegeWeapon action queue
+                    else
+                        ActionTimer = create timer for 2 seconds
+                    end if
+                elsif NumPat1 == 6
+                    House = get building STORAGE_YARD in NearestSettlement min built 0.75
+                    if House exists and PLAYER of House == 0 and SiegeWeapon can navigate to object oTownCentre
+                        clear siege weapon SiegeWeapon action queue
+                        Target = marker at get target from {SiegeWeapon} to {House} distance 10 angle 180
+                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using House to siege weapon SiegeWeapon action queue
+                    else
+                        ActionTimer = create timer for 2 seconds
+                    end if
+                else
+                    House = get building TEMPLE in NearestSettlement min built 0.75
+                    if House exists and PLAYER of House == 0 and SiegeWeapon can navigate to object oTownCentre
+                        clear siege weapon SiegeWeapon action queue
+                        Target = marker at get target from {SiegeWeapon} to {House} distance 10 angle 180
+                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using House to siege weapon SiegeWeapon action queue
+                    else
+                        ActionTimer = create timer for 2 seconds
+                    end if
+                end if
+            end if
+            until SiegeWeapon not exists
+        end loop
+    end if
+
+//end loop
+
+end script LC7_MoveCatapultThenAttack

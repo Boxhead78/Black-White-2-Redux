@@ -1,0 +1,141 @@
+//--------------------------------------------------------------------------------------------------------------
+define script MeteorSpell(PlayerID,SpellPosition)
+define script Meteor_Meteorid(PlayerID,MeteorSpell)
+
+
+begin script MeteorSpell(PlayerID,SpellPosition)
+    Effect1 = 0
+    Rock = 0
+    SeedEffect = 0
+    PlayerMana = 0
+    MeteorSpell = 0
+
+    BrakeLoop = 0
+
+start
+
+    if PlayerID == 0
+        //For players
+        empty player hand
+        wait 0.25 seconds
+        Rock = create SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_BOULDER_ROUND at hand position
+        SeedEffect = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_SEED on Rock time -1
+        set SeedEffect colour red 178 green 58 blue 238
+        set Rock in player 0 hand
+        MeteorSpell = Rock
+        PlayerMana = get player PlayerID mana
+
+        set player PlayerID mana PlayerMana - 42500
+
+        wait 1 seconds
+
+        begin loop
+            if bindable action BINDABLE_ACTION_TYPE_ACTION performed
+                BrakeLoop = 1
+                SpellPosition = marker at hand position
+            end if
+            if not Rock is HELD
+                delete Rock
+                delete SeedEffect
+                BrakeLoop = 2
+            end if
+            until BrakeLoop >= 1
+        end loop
+
+        delete Rock
+        delete SeedEffect
+    else
+        // For AIs
+        BrakeLoop = 1
+    end if
+
+    if BrakeLoop == 1
+        //Script here
+        //Balance this and add meteor
+        Effect1 = create visual effect VISUAL_EFFECT_TOWN_TAKEOVER_AGGRESSOR at {SpellPosition} + {0,10,0} time 40
+        set Effect1 colour red 178 green 58 blue 238
+        wait 20 seconds
+        run background script Meteor_Meteorid(PlayerID,marker at {SpellPosition})
+    elsif BrakeLoop == 2
+        PlayerMana = get player PlayerID mana
+        set player PlayerID mana PlayerMana + 42500
+    end if
+    
+end script MeteorSpell
+
+
+begin script Meteor_Meteorid(PlayerID,MeteorSpell)
+
+    Alignment = 0
+    Effect1 = 0
+    Effect2 = 0
+    Effect3 = 0
+
+    Counter = 0
+    MeteorStart = 0
+    MeteorTarget = 0
+    Meteorid = 0
+    MeteorPre = 0
+    Number = 0
+    Villager = 0
+
+start
+
+    MeteorPre  = create visual effect "gp_s_godly_explode.ves" strength 1 scale 1 at {MeteorSpell} + {200,400,200} time -1
+    wait 1.5 seconds
+    //Meteorid = create visual effect "mt_s_strike.ves" strength 0.25 scale 1 at {MeteorSpell} + {75,400,-75} time -1 direction {MeteorSpell}     //Meteorid = create ROCK_OBJECT ERODED_ROCK_HUGE at {MeteorSpell} + {300,400,300}
+
+    MeteorStart = marker at {MeteorSpell} + {200, 400, 200}
+    MeteorTarget = marker at {MeteorSpell}
+    Meteorid = make player PlayerID throw miracle MIRACLE_TYPE_METEOR from ({MeteorStart} + {0,-3.0,0}) heading ({MeteorTarget} + {0,-12,0} - {MeteorStart})
+
+    SCALE of Meteorid = 50.0
+    //set Meteorid velocity heading {MeteorSpell} speed 0.5
+
+    wait 1.35 seconds
+
+    Alignment = get ground alignment at {MeteorSpell}
+
+    set physics at position {MeteorSpell} with strength {20.000,30.000,20.000} radius 125 random 1
+    Effect1 = create visual effect VISUAL_EFFECT_WEATHER_LIGHTNING_FLASH at {MeteorSpell} time 0.5
+    SCRIPT_OBJECT_PROPERTY_TYPE_SCALE of Effect1 = 1.5
+    Effect2 = create visual effect VISUAL_EFFECT_EPIC_DOOMSDAY_EXPLODE at {MeteorSpell} + {0,25,0} time 10
+    SCRIPT_OBJECT_PROPERTY_TYPE_SCALE of Effect2 = 0.1875
+    Effect3 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_EXPLOSION at {MeteorSpell} time 0.5
+    SCRIPT_OBJECT_PROPERTY_TYPE_SCALE of Effect3 = 0.75
+    play string sound "SCRIPT1_VEPIC_EXPLOSION3"
+    add effect EFFECT_TYPE_BURN at {MeteorSpell} strength 0.75 radius 75
+    add effect EFFECT_TYPE_HIT at {MeteorSpell} strength 0.33 radius 150
+    add effect EFFECT_TYPE_CRUSH at {MeteorSpell} strength 0.25 radius 150
+    set ground alignment to -2 at {MeteorSpell} radius 200 amount 1
+
+    delete Meteorid
+
+    while Counter < 30
+        Villager = get living villager at {MeteorSpell} radius 200
+        if Villager exists
+            Number = number from 1 to 2
+            if Number == 1
+                HEALTH of Villager = 0.0
+            end if
+        end if 
+        Counter++
+    end while
+
+    wait 300 seconds
+
+    set ground alignment to Alignment - 1.5 at {MeteorSpell} radius 200 amount 0
+    wait 6 seconds
+    set ground alignment to Alignment - 1.25 at {MeteorSpell} radius 200 amount 0
+    wait 6 seconds
+    set ground alignment to Alignment - 1 at {MeteorSpell} radius 200 amount 0
+    wait 6 seconds
+    set ground alignment to Alignment - 0.75 at {MeteorSpell} radius 200 amount 0
+    wait 6 seconds
+    set ground alignment to Alignment - 0.5 at {MeteorSpell} radius 200 amount 0
+    wait 6 seconds
+    set ground alignment to Alignment - 0.25 at {MeteorSpell} radius 200 amount 0
+    wait 6 seconds
+    set ground alignment to Alignment at {MeteorSpell} radius 200 amount 0
+
+end script Meteor_Meteorid

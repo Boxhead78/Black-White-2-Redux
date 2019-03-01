@@ -1,0 +1,115 @@
+///////////////////////////////////////////////////////////////////////////////
+//     Initial Town Platoon Level
+//    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//    This script controls platoons initial level, depending on how many 
+//    armories has been built.
+//  Maximum recruting level = 5
+//
+//    Start date:        22.05.18            By: Boxhead
+//    Update date:    03.06.18            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+define script TownPlatoonLevel
+
+run script TownPlatoonLevel
+
+begin script TownPlatoonLevel
+
+    Counter = 0
+    Town[16]
+
+    Armory[16]
+    ArmoryRanged[16]
+    ArmorySiege[16]
+
+    ArmoriesTotal = 0
+    ArmoriesRangedTotal = 0
+    ArmoriesSiegeTotal = 0
+    UndeadArmy = 0
+
+start
+
+begin loop
+
+    if Counter >= 15
+        Counter = 0
+        ArmoriesTotal = 0
+        ArmoriesRangedTotal = 0
+        ArmoriesSiegeTotal = 0
+        wait 1 seconds
+    end if
+
+    Town[Counter] = get town with id Counter
+    if PLAYER of Town[Counter] == 0 //Only do this with player towns
+        Armory[Counter] = 0
+        Armory[Counter] = get number of type HOUSE MELEE_ARMOURY in Town[Counter] min built 1.0
+        ArmoriesTotal += Armory[Counter]
+    end if
+
+    if ArmoriesTotal == 1 and Counter == 14
+        set initial level of player melee platoon to ARMY_UNIT_TYPE_MELEE_1
+
+    elsif ArmoriesTotal == 2 and Counter == 14
+        set initial level of player melee platoon to ARMY_UNIT_TYPE_MELEE_2
+
+    elsif ArmoriesTotal == 3 and Counter == 14
+        set initial level of player melee platoon to ARMY_UNIT_TYPE_MELEE_3
+
+    elsif ArmoriesTotal == 4 and Counter == 14
+        set initial level of player melee platoon to ARMY_UNIT_TYPE_MELEE_4
+
+    elsif ArmoriesTotal >= 5 and Counter == 14
+        set initial level of player melee platoon to ARMY_UNIT_TYPE_MELEE_5
+
+    end if
+
+
+    if PLAYER of Town[Counter] == 0 //Only do this with player towns
+        ArmoryRanged[Counter] = 0
+        ArmoryRanged[Counter] = get number of type HOUSE RANGED_ARMOURY in Town[Counter] min built 1.0
+        ArmoriesRangedTotal += ArmoryRanged[Counter]
+    end if
+    if ArmoriesRangedTotal == 1 and Counter == 14
+        set initial level of player ranged platoon to ARMY_UNIT_TYPE_RANGED_1
+
+    elsif ArmoriesRangedTotal == 2 and Counter == 14
+        set initial level of player ranged platoon to ARMY_UNIT_TYPE_RANGED_2
+
+    elsif ArmoriesRangedTotal == 3 and Counter == 14
+        set initial level of player ranged platoon to ARMY_UNIT_TYPE_RANGED_3
+
+    elsif ArmoriesRangedTotal == 4 and Counter == 14
+        set initial level of player ranged platoon to ARMY_UNIT_TYPE_RANGED_4
+
+    elsif ArmoriesRangedTotal >= 5 and Counter == 14
+        set initial level of player ranged platoon to ARMY_UNIT_TYPE_RANGED_5
+
+    end if
+
+    if PLAYER of Town[Counter] == 0 //Only do this with player towns
+        ArmorySiege[Counter] = 0
+        ArmorySiege[Counter] = get number of type HOUSE WORKSHOP in Town[Counter] min built 1.0
+        ArmoriesSiegeTotal += ArmorySiege[Counter]
+    end if
+    if ArmoriesSiegeTotal == 1 and Counter == 14
+        set initial level of player siege weapon to SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_1
+
+    elsif ArmoriesSiegeTotal == 2 and Counter == 14
+        set initial level of player siege weapon to SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_2
+
+    elsif ArmoriesSiegeTotal == 3 and Counter == 14
+        set initial level of player siege weapon to SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3
+
+    elsif ArmoriesSiegeTotal == 4 and Counter == 14
+        set initial level of player siege weapon to SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_4
+
+    elsif ArmoriesSiegeTotal >= 5 and Counter == 14
+        set initial level of player siege weapon to SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_5
+
+    end if
+
+    Counter++
+end loop
+
+end script TownPlatoonLevel

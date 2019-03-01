@@ -1,0 +1,347 @@
+////////////////////////
+// GOD ENGINE HEADER //
+//////////////////////
+/*##############################
+# Version:      0.9 Beta
+#
+# Description:  Behavoir constants and API documentation
+#
+# Credits:      Godplex
+#               Daxter (for original idea and a bit of his code)
+#
+# Notes:        Everything you need to code your own AI in BW2 is
+#               right here. I'd encourage you to check out the (bad)
+#               AI I coded called Bimbo to get an idea of how
+#               everything fits together.
+#
+# Features:     Check the script reference for all the cool stuff you can do.
+#
+####      CONVENTIONS USED      ###
+# - Public members prefix:  ge[Identifier]
+#  ^- ARE for use outside GodEngine.txt
+# - Private members prefix: ge_[Identifier]
+#  ^- ARE NOT for use outside GodEngine.txt
+# - PascalCase params, camelCase locals, prefix globals, GE_CAPS_AND_PREFIX global-constants & enums
+#  ^- Reference params prefix with "r" (ex. rMyReferenceParam)
+#  ^- Non-reference params must be stored in local variable of same name
+#       but different casing (ex. myByValParam = MyByValParam)
+# - Methods return values via reference paramaters with the prefix o
+#  ^- (ex. geMyMethod(oMethodOutput))
+#
+###      FILES      ###
+# GodEngineH.txt - This is the header file. GodEngine.txt requires
+#                  this to be included before it in your challenge.txt
+#                ^- Public globals, public enums, and documentation
+#                   of public scripts goes here.
+#
+# GodEngine.txt  - This is the body/implementation file. All the cool,
+#                  behind-the-scenes stuff happens here. ONLY look in
+#                  this file if you are interested in seeing the core
+#                  implementation (not needed for API use,) or if you
+#                  want to gawk at my genius ;)
+#                ^- ge_[anything] goes here
+#
+##################################*/
+
+
+/* #################################################
+#####   God Engine Public Constants   ##############
+####################################################
+# CAUTION: CHANGING THESE DURING RUNTIME MAY       #
+#          HAVE UNDESIRABLE CONCEQUENCES.          #
+##################################################*/
+
+/*
+// Default Avatar
+global constant geAvatarScriptType = SCRIPT_OBJECT_TYPE_FEATURE
+global constant geAvatarObjectType = FEATURE_INFO_POINTER_HAND
+global constant geAvatarVisualEffect = VISUAL_EFFECT_HAND
+global geAvatarAngle = 0.0
+global geAvatarScale = 1.0
+*/
+
+//(These are the original settings from Daxter's God AI)
+global constant geAvatarScriptType = SCRIPT_OBJECT_TYPE_FEATURE
+global constant geAvatarObjectType = FEATURE_INFO_HAND_POSED
+global constant geAvatarVisualEffect = VISUAL_EFFECT_HAND
+global geAvatarAngle = 0.0
+global geAvatarScale = 0.000001
+global geGlowEffectScale = 2.0
+
+// Movement
+global geGodAltitude = 14.0
+global geArrivalRadius = 9.0 // generally, god will consider itself "arrived" at object when this close
+global geGodSpeed = 90.0
+
+// Resource Gathering
+global gePickupResourceAltitude = 9.0
+global geGodResourceGatherSpeed = 90 // Resource per 0.1 seconds
+
+// Building
+global geGodBuildAltitude = 12.0
+global geGodBuildEfficiency = 1.2 // Higher is worse
+global geGodBuildRate = 50 // Resources per 0.1 second
+
+// Throwing (Changes will effect accuracy)
+global geGodThrowAltitude = 30.0
+global gePickUpObjectAltitude = 9.0
+global geCarriedObjectAltitudeDifference = 1.0 // Negative (delete?)
+global geThrowSpeed = 40.0
+global geGodThrowRadius = 50.0
+global geThrowArc = 21.0
+
+// Physics Throwing
+global geSpeedMod = 1.5
+global geAngleMod = 1.2
+
+// Mana
+global geGodStartingMana = 1500
+global geGodStartingManaPerSecond = 0.0
+
+// Miracle Mana Cost
+global geManaCostHeal = 3000
+global geManaCostLife = 100     // Does not work
+global geManaCostDecay = 100    // Does not work
+global geManaCostDeath = 100    // Does not work
+global geManaCostFire = 4750
+global geManaCostLava = 100     // Does not work
+global geManaCostTremor = 100   // Does not work
+global geManaCostMeteor = 9000
+global geManaCostWind = 100     // Does not work
+global geManaCostTornado = 4500
+global geManaCostWater = 1750
+global geManaCostStorm = 5500
+global geManaCostVerdant = 10000
+global geManaCostFirerain = 20000
+global geManaCostThunderstorm = 30000
+global geManaCostMeteorid = 50000
+
+
+/* #################################################
+#####   God Engine Public Enums   ##################
+####################################################
+# DANGER: DO NOT MODIFY ANY OF THESE!              #
+#         CHANGING THEM WILL BREAK THE ENGINE!     #
+####################################################
+#
+#  Boolean
+#  -------
+#  GE_TRUE
+#  GE_FALSE
+#
+#  Resource Type
+#  -------------
+#  GE_HT_EMPTY
+#  GE_HT_FOOD
+#  GE_HT_WOOD
+#  GE_HT_ORE
+#  GE_HT_OTHER
+#
+#   Miracle Type
+#  -------------
+#  GE_MIRACLE_TYPE_NONE
+#  GE_MIRACLE_TYPE_HEAL
+#  GE_MIRACLE_TYPE_LIFE         Does not work
+#  GE_MIRACLE_TYPE_DECAY        Does not work
+#  GE_MIRACLE_TYPE_DEATH        Does not work
+#  GE_MIRACLE_TYPE_FIRE
+#  GE_MIRACLE_TYPE_LAVA         Does not work
+#  GE_MIRACLE_TYPE_TREMOR       Does not work
+#  GE_MIRACLE_TYPE_METEOR
+#  GE_MIRACLE_TYPE_WIND         Does not work
+#  GE_MIRACLE_TYPE_TORNADO
+#  GE_MIRACLE_TYPE_WATER
+#  GE_MIRACLE_TYPE_STORM
+#  GE_MIRACLE_TYPE_LAST
+#
+#  Disciple Type
+#  -------------
+#  GE_VILLAGER_DISCIPLE_NONE
+#  GE_VILLAGER_DISCIPLE_FARMER
+#  GE_VILLAGER_DISCIPLE_FORESTER
+#  GE_VILLAGER_DISCIPLE_FISHERMAN     Does not work
+#  GE_VILLAGER_DISCIPLE_BUILDER
+#  GE_VILLAGER_DISCIPLE_BREEDER
+#  GE_VILLAGER_DISCIPLE_PROTECTION    Does not work
+#  GE_VILLAGER_DISCIPLE_MISSIONARY    Does not work
+#  GE_VILLAGER_DISCIPLE_CRAFTSMAN     Does not work
+#  GE_VILLAGER_DISCIPLE_TRADER        Does not work
+#  GE_VILLAGER_DISCIPLE_CHANGE_HOUSE  Does not work
+#  GE_VILLAGER_DISCIPLE_WORSHIP
+#  GE_VILLAGER_DISCIPLE_PROTESTOR     Does not work
+#  GE_VILLAGER_DISCIPLE_RESEARCHER    Does not work
+#  GE_VILLAGER_DISCIPLE_MINER
+#  GE_VILLAGER_DISCIPLE_PILGRIM       Does not work
+#  GE_VILLAGER_DISCIPLE_REFINER
+#
+##################################################*/
+
+
+/* ################################
+##### Public Script Reference #####
+###################################
+# -------------------
+# Actions Reference -
+# -------------------
+# define script geDeleteGod(GodHandle)
+# define script geMoveToObject(GodHandle,rObject)
+# define script gePickupResource(GodHandle,rResourceObject,rResourceType,ResourceQuantity)
+# define script geDropInStorehouse(GodHandle,rStorehouse,ResourceQuantity)
+# define script geThrowMiracle(GodHandle, MiracleType, rTargetObject)
+# define script geGodBuild(GodHandle,rBuilding,ResourceGatherRadius)
+# define script geCreateDisciple(GodHandle,DiscipleType)
+# define script geRemoveDisciple(GodHandle,DiscipleType,TownRadius)
+#
+# Script: geDeleteGod(GodHandle)
+# -----------------------------------------
+# Desc:   Permanently deletes a god instance from the game. Call this
+#         after your AI loop ends to release the memory and internal loop.
+#
+# Params: GodHandle   - Valid handle for an existing god instance.
+#
+#
+# Script: geMoveToObject(GodHandle,rObject)
+# -----------------------------------------
+# Desc:   Causes the god hand to move to desired object.
+#
+# Params: GodHandle - Valid handle for an existing god instance.
+#         rObject   - Object in the game you want god hand to move to.
+#
+#
+# Script: gePickupResource(GodHandle,rResourceObject,rResourceType,ResourceQuantity)
+# -----------------------------------------
+# Desc:   Causes the god hand to move to resource object and pick up a quantity. If god is already
+#         holding a resource of a different type, the first resource will disappear. (ex. if god is
+#         holding food, and you go pick up ore, the food will disappear.)
+#
+# Params: GodHandle        - Valid handle for an existing god instance.
+#         rResourceObject  - Object containing resource (storehouse, tree, ore rock, construction site)
+#         rResourceType    - Member of GE Resource Type enum (ex. GE_HT_ORE)
+#         ResourceQuantity - Desired quantity to pick up (-1 for all in object)
+#
+#
+# Script: geDropInStorehouse(GodHandle,rStorehouse,ResourceQuantity)
+# -----------------------------------------
+# Desc:   Causes the god hand to move to object (building) and drop held resource in it.
+#
+# Params: GodHandle        - Valid handle for an existing god instance.
+#         rStorehouse      - Object wanting resource (storehouse, construction site)
+#         ResourceQuantity - Desired quantity to drop (-1 for all in hand)
+#
+#
+# Script: geThrowMiracle(GodHandle, MiracleType, rTargetObject)
+# -----------------------------------------
+# Desc:   Causes the god hand to move within range and fire desired miracle. God
+#         will only fire miracle if it has enough mana, and mana will be reduced
+#         by cost when the miracle is cast. Casting one of the miracles that is not 
+#         implemented in BW2 can cause weird effects (try it for yourself.)
+#
+# Params: GodHandle        - Valid handle for an existing god instance.
+#         MiracleType      - Member of GE miracle enum (ex. GE_MIRACLE_TYPE_HEAL)
+#         rTargetObject    - Object to hit with the miracle.
+#
+#
+# Script: geGodBuild(GodHandle,rBuilding,ResourceGatherRadius)
+# -----------------------------------------
+# Desc:   Causes the god hand to get required resources and build/repair building. If
+#         there is not enough X resource in storehouses throughout the city, god
+#         will gather from trees/rocks within a radius of its town.
+# Note:   Repairing buildings works, but causes weirdness; the repaired building will
+#         still look as if it's damaged, even though it's fixed.
+#
+# Params: GodHandle              - Valid handle for an existing god instance.
+#         rBuilding              - Building to build or repair
+#         ResourceGatherRadius   - God will gather resources within this radius of
+#                                  its home town if there is not enough in storehouses
+#
+#
+# Script: geCreateDisciple(GodHandle,DiscipleType)
+# -----------------------------------------
+# Desc:   Causes the god hand to find a non-disciple villager and make him 
+#         into a specific disciple type. Only males will be chosen for breeders.
+#
+# Params: GodHandle      - Valid handle for an existing god instance.
+#         DiscipleType   - Member of GE disciple enum (ex. GE_VILLAGER_DISCIPLE_MINER)
+#
+#
+# Script: geRemoveDisciple(GodHandle,DiscipleType,TownRadius)
+# -----------------------------------------
+# Desc:   Causes the god hand to find a villager of specific disciple type and make
+#         him back into a non-disciple.
+#
+# Params: GodHandle      - Valid handle for an existing god instance.
+#         DiscipleType   - Member of GE disciple enum (ex. GE_VILLAGER_DISCIPLE_FORESTER)
+#         TownRadius     - Radius from home town, within to look for the disciple type
+#                          to remove. Should probably be set to whatever you use for
+#                          resourcing, or something of similar size.
+#
+#
+# -------------------
+#   Get Reference   -
+# -------------------
+# How to use: Currently, the system for getting data (which will eventually change)
+#             requires 3 lines of code. One calling the accessor, the next storing
+#             the output, and the next unlocking the return global for the next
+#             call. geGetNewGodHandle is the only accessor that does NOT require
+#             a valid god handle to be passed in (because it creates one.)
+#
+# Example:    run script geGetNewGodHandle(townForNewGod) // All other get methods require a valid god handle
+#             myNewGodHandle = geReturnVal // Store into a local variable as soon as possible
+#             run script geUnlockReturn  // Unlock the return global so the script doesn't freeze
+#
+#
+# define script geGetNewGodHandle(rHomeTown)
+# define script geGetTypeInHand(GodHandle)
+# define script geGetQuantityInHand(GodHandle)
+# define script geGetHomeTown(GodHandle)
+# define script geGetMana(GodHandle)
+# define script geGetManaPerSecond(GodHandle)
+#
+#
+# -------------------
+#   Set Reference   -
+# -------------------
+# How to use: Simply call script with the new value to store.
+#             ex. run script geSetManaPerSecond(myGodHandle,newManaRechargeRate)
+#
+# define script geSetMana(GodHandle,NewValue)
+# define script geSetManaPerSecond(GodHandle,NewValue)
+#
+##########################*/
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////
+// TODO: EVERYTHING BELOW THIS LINE MUST BE DEPRICATED BEFORE RELEASE //
+//       Need to find a better way to pass both values and objects    //
+////////////////////////////////////////////////////////////////////////
+
+global GE_TRUE = 1
+global GE_FALSE = 0
+
+global geReturnVal
+global geReturnLock = 0 // INITIALIZE TO GE_FALSE
+
+define script geReturn(Value)
+define script geUnlockReturn
+
+begin script geReturn(Value)
+start
+    wait until geReturnLock == GE_FALSE
+    geReturnLock = GE_TRUE
+    geReturnVal = Value
+end script geReturn
+
+/*    DEPRICATED
+begin script geLockReturn
+start
+    geReturnLock = GE_TRUE
+end script geLockReturn
+*/
+
+begin script geUnlockReturn
+start
+    geReturnLock = GE_FALSE
+end script geUnlockReturn

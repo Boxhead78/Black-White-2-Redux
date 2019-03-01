@@ -1,0 +1,1022 @@
+///////////////////////////////////////////////////////////////////////////////
+//          Skirmish AI Recruitment
+//    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//    Start date:        30.09.18            By: Boxhead
+//    Update date:    22.10.18            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+define script SK_AIRecruitmentGetTown(PlayerID,AICapital)
+define script SK_AIRecruitmentGetArmories(PlayerID)
+define script SK_AIRecruitment(PlayerID,AITown,AICapital)
+define script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,Platoon,Size,Type,Task,Path,AICapital,AttackImmediately)
+define script SK_AIRecruitmentRecruitSiegeWeapon(PlayerID,AITown,SiegeWeapon,Path,AICapital,AttackImmediately)
+define script SK_AIRecruitmentGenericPlatoon(Platoon,PlayerID)
+define script SK_AIRecruitmentGenericCatapult(Catapult,PlayerID)
+define script SK_DeleteVillagers(PlayerID,AITown,Amount)
+
+define RecruitmentWaitTime = 300
+define RecruitmentWaitTimeMinimum = 30
+define RecruitmentLastPlatoonMultiplier = 2
+
+global AmountOfArmoriesMelee[SK_MaxPlayers]
+global AmountOfArmoriesRanged[SK_MaxPlayers]
+global RecruitmentTimer[SK_MaxPlayers]
+global RecruitPlatoon[SK_MaxPlayers]
+
+
+begin script SK_AIRecruitmentGetTown(PlayerID,AICapital)
+
+    Counter = 0
+    AITown[SK_MaxTowns]
+
+start
+
+run background script SK_AIRecruitmentGetArmories(PlayerID)
+
+begin loop
+    if Counter > SK_MaxTowns - 1
+        wait until 1 != 1
+    end if
+
+    AITown[Counter] = get town with id Counter
+    run background script SK_AIRecruitment(PlayerID,AITown[Counter],AICapital)
+
+    Counter++
+end loop
+
+end script SK_AIRecruitmentGetTown
+
+begin script SK_AIRecruitmentGetArmories(PlayerID)
+
+    Counter = 0
+    Town[SK_MaxTowns]
+    Armory[SK_MaxTowns]
+    ArmoryRanged[SK_MaxTowns]
+    ArmorySiege[SK_MaxTowns]
+
+    ArmoriesTotal = 0
+    ArmoriesRangedTotal = 0
+
+    GotAllTowns = 0
+
+start
+
+AmountOfArmoriesMelee[PlayerID] = 1
+AmountOfArmoriesRanged[PlayerID] = 1
+
+begin loop
+
+    if Counter > SK_MaxTowns
+        Counter = 0
+        ArmoriesTotal = 0
+        ArmoriesRangedTotal = 0
+        wait 1 seconds
+    end if
+
+
+    Town[Counter] = get town with id Counter
+    if PLAYER of Town[Counter] == PlayerID
+        Armory[Counter] = get number of type HOUSE MELEE_ARMOURY in Town[Counter] min built 1.0
+    else
+        Armory[Counter] = 0
+    end if
+
+    ArmoriesTotal = Armory[Counter] + ArmoriesTotal
+    if ArmoriesTotal == 1 and Counter >= SK_MaxTowns
+        AmountOfArmoriesMelee[PlayerID] = 1
+
+    elsif ArmoriesTotal == 2 and Counter >= SK_MaxTowns
+        AmountOfArmoriesMelee[PlayerID] = 2
+
+    elsif ArmoriesTotal == 3 and Counter >= SK_MaxTowns
+        AmountOfArmoriesMelee[PlayerID] = 3
+
+    elsif ArmoriesTotal == 4 and Counter >= SK_MaxTowns
+        AmountOfArmoriesMelee[PlayerID] = 4
+
+    elsif ArmoriesTotal >= 5 and Counter >= SK_MaxTowns
+        AmountOfArmoriesMelee[PlayerID] = 5
+
+    end if
+
+
+    if PLAYER of Town[Counter] == PlayerID
+        ArmoryRanged[Counter] = get number of type HOUSE RANGED_ARMOURY in Town[Counter] min built 1.0
+    else
+        ArmoryRanged[Counter] = 0
+    end if
+
+    ArmoriesRangedTotal = ArmoryRanged[Counter] + ArmoriesRangedTotal
+    if ArmoriesRangedTotal == 1 and Counter >= SK_MaxTowns
+        AmountOfArmoriesRanged[PlayerID] = 1
+
+    elsif ArmoriesRangedTotal == 2 and Counter >= SK_MaxTowns
+        AmountOfArmoriesRanged[PlayerID] = 2
+
+    elsif ArmoriesRangedTotal == 3 and Counter >= SK_MaxTowns
+        AmountOfArmoriesRanged[PlayerID] = 3
+
+    elsif ArmoriesRangedTotal == 4 and Counter >= SK_MaxTowns
+        AmountOfArmoriesRanged[PlayerID] = 4
+
+    elsif ArmoriesRangedTotal >= 5 and Counter >= SK_MaxTowns
+        AmountOfArmoriesRanged[PlayerID] = 5
+
+    end if
+
+    Counter++
+end loop
+
+end script SK_AIRecruitmentGetArmories
+
+begin script SK_AIRecruitment(PlayerID,AITown,AICapital)
+
+    AIPlatoon[999]
+    ConquerorTimer = create timer for number from 420 to 600 seconds
+    ConquerorNumber = 0
+    SpecTimer = create timer for number from 600 to 720 seconds
+    SpecNumber = 0
+    FirstAttackPlatoonProhab = 0
+    Number = 0
+    NumberOfTowns = 0
+    SideTownTimer = create timer for 0 seconds
+
+start
+
+set town AITown maximum population to 50
+disable AITown town manager
+RecruitPlatoon[PlayerID] = 0
+SK_AllowRecruiting[PlayerID] = 0
+FirstAttackPlatoonProhab = number from 1 to 4
+
+begin loop
+
+    if PLAYER of AITown == PlayerID
+        NumberOfTowns = get player PlayerID town total
+        //For HomeTown
+        if get RecruitmentTimer[PlayerID] time remaining <= 0 and AITown == SK_AIHomeTown[PlayerID]
+            //Opening Moves
+            if SK_AIPersonality[PlayerID] == 1 and SK_AllowRecruiting[PlayerID] == 0
+                //Standard Opening Move
+                if SK_AIOpeningMoves[PlayerID] == 1
+                    SK_AllowRecruiting[PlayerID] = 1
+
+                //4/4 Rush
+                elsif SK_AIOpeningMoves[PlayerID] == 2
+                    if get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in SK_AIHomeTown[PlayerID] min built 1.0 >= 4 and get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in SK_AIHomeTown[PlayerID] min built 1.0 >= 4
+                        if adult size of AITown > 130 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 20 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 20 and PLAYER of AITown == PlayerID
+                            run script SK_DeleteVillagers(PlayerID,AITown,20)
+                            run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,20,1,0,1,AICapital,1)
+                            run script SK_DeleteVillagers(PlayerID,AITown,20)
+                            run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,20,1,0,1,AICapital,1)
+                            run script SK_DeleteVillagers(PlayerID,AITown,20)
+                            run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,20,2,0,1,AICapital,1)
+                            run script SK_DeleteVillagers(PlayerID,AITown,20)
+                            run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,20,2,0,1,AICapital,1)
+                            run script SK_DeleteVillagers(PlayerID,AITown,10)
+                            run script SK_AIRecruitmentRecruitSiegeWeapon(PlayerID,AITown,0,1,AICapital,1)
+
+                            wait 180 seconds
+                            SK_AllowRecruiting[PlayerID] = 1
+                        end if
+                    end if
+
+                //Epic Rush
+                elsif SK_AIOpeningMoves[PlayerID] == 3
+                    SK_AllowRecruiting[PlayerID] = 1
+
+                //Save Build   
+                elsif SK_AIOpeningMoves[PlayerID] == 4
+                    SK_AllowRecruiting[PlayerID] = 1
+
+                //Archer Rush
+                elsif SK_AIOpeningMoves[PlayerID] == 5
+                    if get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in SK_AIHomeTown[PlayerID] min built 1.0 >= 3
+                        if adult size of AITown > 130 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 45 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 45 and PLAYER of AITown == PlayerID
+                            run script SK_DeleteVillagers(PlayerID,AITown,45)
+                            run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,45,2,0,1,AICapital,1)
+                            run script SK_DeleteVillagers(PlayerID,AITown,45)
+                            run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,45,2,0,1,AICapital,1)
+
+                            wait 180 seconds
+                            SK_AllowRecruiting[PlayerID] = 1
+                        end if
+                    end if
+
+                //Siege Weapon Rush
+                elsif SK_AIOpeningMoves[PlayerID] == 6
+                    if get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in SK_AIHomeTown[PlayerID] min built 1.0 >= 2
+                        if adult size of AITown > 80 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 10 and PLAYER of AITown == PlayerID
+                            run script SK_DeleteVillagers(PlayerID,AITown,10)
+                            run script SK_AIRecruitmentRecruitSiegeWeapon(PlayerID,AITown,0,1,AICapital,1)
+                            run script SK_DeleteVillagers(PlayerID,AITown,10)
+                            run script SK_AIRecruitmentRecruitSiegeWeapon(PlayerID,AITown,0,2,AICapital,1)
+                            run script SK_DeleteVillagers(PlayerID,AITown,10)
+                            run script SK_AIRecruitmentRecruitSiegeWeapon(PlayerID,AITown,0,3,AICapital,1)
+                            run script SK_DeleteVillagers(PlayerID,AITown,10)
+                            run script SK_AIRecruitmentRecruitSiegeWeapon(PlayerID,AITown,0,1,AICapital,1)
+
+                            wait 90 seconds
+                            SK_AllowRecruiting[PlayerID] = 1
+                        end if
+                    end if
+
+                end if
+            elsif SK_AIPersonality[PlayerID] == 2 and SK_AllowRecruiting[PlayerID] == 0
+                //Standard Opening Move
+                if SK_AIOpeningMoves[PlayerID] == 1
+                    SK_AllowRecruiting[PlayerID] = 1
+                    
+                //Fast rush
+                elsif SK_AIOpeningMoves[PlayerID] == 2
+                    if adult size of AITown >= 60 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 20 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 20 and PLAYER of AITown == PlayerID
+                        run script SK_DeleteVillagers(PlayerID,AITown,20)
+                        run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,20,0,1,0,AICapital,1)
+                        wait 60 seconds
+                        SK_AllowRecruiting[PlayerID] = 1
+                    end if
+
+                //Epic Rush
+                elsif SK_AIOpeningMoves[PlayerID] == 3
+                    SK_AllowRecruiting[PlayerID] = 1
+
+                //Save Build   
+                elsif SK_AIOpeningMoves[PlayerID] == 4
+                    SK_AllowRecruiting[PlayerID] = 1
+
+                //Archer Rush
+                elsif SK_AIOpeningMoves[PlayerID] == 5
+                    if get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in SK_AIHomeTown[PlayerID] min built 1.0 >= 3
+                        if adult size of AITown > 130 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 45 and PLAYER of AITown == PlayerID
+                            run script SK_DeleteVillagers(PlayerID,AITown,45)
+                            run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,45,2,0,1,AICapital,1)
+                            run script SK_DeleteVillagers(PlayerID,AITown,45)
+                            run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,45,2,0,1,AICapital,1)
+
+                            wait 180 seconds
+                            SK_AllowRecruiting[PlayerID] = 1
+                        end if
+                    end if
+
+                //Siege Weapon Rush
+                elsif SK_AIOpeningMoves[PlayerID] == 6
+                    if get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in SK_AIHomeTown[PlayerID] min built 1.0 >= 2
+                        if adult size of AITown > 80 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 10 and PLAYER of AITown == PlayerID
+                            run script SK_DeleteVillagers(PlayerID,AITown,10)
+                            run script SK_AIRecruitmentRecruitSiegeWeapon(PlayerID,AITown,0,1,AICapital,1)
+                            run script SK_DeleteVillagers(PlayerID,AITown,10)
+                            run script SK_AIRecruitmentRecruitSiegeWeapon(PlayerID,AITown,0,2,AICapital,1)
+                            run script SK_DeleteVillagers(PlayerID,AITown,10)
+                            run script SK_AIRecruitmentRecruitSiegeWeapon(PlayerID,AITown,0,3,AICapital,1)
+                            run script SK_DeleteVillagers(PlayerID,AITown,10)
+                            run script SK_AIRecruitmentRecruitSiegeWeapon(PlayerID,AITown,0,1,AICapital,1)
+
+                            wait 90 seconds
+                            SK_AllowRecruiting[PlayerID] = 1
+                        end if
+                    end if
+
+                end if
+
+            elsif SK_AIPersonality[PlayerID] == 3 and SK_AllowRecruiting[PlayerID] == 0
+                //Standard Opening Move
+                if SK_AIOpeningMoves[PlayerID] == 1
+                    SK_AllowRecruiting[PlayerID] = 1
+                    
+                //Impressiveness Rush
+                elsif SK_AIOpeningMoves[PlayerID] == 2
+                    SK_AllowRecruiting[PlayerID] = 1
+
+                //Epic Rush   
+                elsif SK_AIOpeningMoves[PlayerID] == 3
+                    SK_AllowRecruiting[PlayerID] = 1
+
+                //Save Build   
+                elsif SK_AIOpeningMoves[PlayerID] == 4
+                    SK_AllowRecruiting[PlayerID] = 1
+
+                //2 Epics
+                elsif SK_AIOpeningMoves[PlayerID] == 5
+                    SK_AllowRecruiting[PlayerID] = 1
+
+                //Siege Weapon Rush
+                elsif SK_AIOpeningMoves[PlayerID] == 6
+                    if get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in SK_AIHomeTown[PlayerID] min built 1.0 >= 2
+                        if adult size of AITown > 100 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 10 and PLAYER of AITown == PlayerID
+                            run script SK_DeleteVillagers(PlayerID,AITown,10)
+                            run script SK_AIRecruitmentRecruitSiegeWeapon(PlayerID,AITown,0,1,AICapital,1)
+                            run script SK_DeleteVillagers(PlayerID,AITown,10)
+                            run script SK_AIRecruitmentRecruitSiegeWeapon(PlayerID,AITown,0,2,AICapital,1)
+                            run script SK_DeleteVillagers(PlayerID,AITown,10)
+                            run script SK_AIRecruitmentRecruitSiegeWeapon(PlayerID,AITown,0,3,AICapital,1)
+                            run script SK_DeleteVillagers(PlayerID,AITown,10)
+                            run script SK_AIRecruitmentRecruitSiegeWeapon(PlayerID,AITown,0,1,AICapital,1)
+
+                            wait 90 seconds
+                            SK_AllowRecruiting[PlayerID] = 1
+                        end if
+                    end if
+                    
+                end if
+
+            end if
+            //General Recruting //If Town recruits two platoons with the adult size, move the higher PlatoonCounter to the bottom of it.
+            if SK_AllowRecruiting[PlayerID] == 1
+                if SK_AIDifficulty[PlayerID] > 66 or SK_Escalation[PlayerID] > 50
+                    if get ConquerorTimer time remaining <= 0 and NumberOfTowns < 3 and AITown == SK_AIHomeTown[PlayerID]
+                        ConquerorTimer = create timer for number from 240 to 360 seconds
+                        if SK_AIPersonality[PlayerID] == 1
+                            ConquerorNumber = number from 1 to 3
+                        elsif SK_AIPersonality[PlayerID] == 2
+                            ConquerorNumber = number from 1 to 6
+                        else
+                            ConquerorNumber = number from 1 to 32
+                        end if
+                        if ConquerorNumber == 1 and adult size of AITown >= 60 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 20 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 20 and PLAYER of AITown == PlayerID
+                            run script SK_DeleteVillagers(PlayerID,AITown,20)
+                            run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,20,0,1,0,AICapital,1)
+                        end if
+                    end if
+                    if SK_Extra == 1 and AITown == SK_AIHomeTown[PlayerID]
+                        if SpecTown1 != 0 and PLAYER of SpecTown1 != PlayerID and get SpecTimer time remaining <= 0
+                            SpecTimer = create timer for number from 300 to 600 seconds
+                            if SK_AIPersonality[PlayerID] == 1
+                                SpecNumber = number from 1 to 1
+                            elsif SK_AIPersonality[PlayerID] == 2
+                                SpecNumber = number from 1 to 3
+                            else
+                                SpecNumber = number from 1 to 9
+                            end if
+                            if SK_Escalation[PlayerID] > 75
+                                if SpecNumber == 1 and adult size of AITown >= 400 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 75 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 75 and PLAYER of AITown == PlayerID
+                                    run script SK_DeleteVillagers(PlayerID,AITown,75)
+                                    run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,75,0,2,0,AICapital,0)
+                                    run script SK_DeleteVillagers(PlayerID,AITown,75)
+                                    run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,75,0,2,0,AICapital,0)
+                                end if
+                            elsif SK_Escalation[PlayerID] > 50
+                                if SpecNumber == 1 and adult size of AITown >= 300 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 60 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 60 and PLAYER of AITown == PlayerID
+                                    run script SK_DeleteVillagers(PlayerID,AITown,60)
+                                    run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,60,0,2,0,AICapital,0)
+                                    run script SK_DeleteVillagers(PlayerID,AITown,60)
+                                    run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,60,0,2,0,AICapital,0)
+                                end if
+                            elsif SK_Escalation[PlayerID] > 25
+                                if SpecNumber == 1 and adult size of AITown >= 200 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 45 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 45 and PLAYER of AITown == PlayerID
+                                    run script SK_DeleteVillagers(PlayerID,AITown,45)
+                                    run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,45,0,2,0,AICapital,0)
+                                    run script SK_DeleteVillagers(PlayerID,AITown,45)
+                                    run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,45,0,2,0,AICapital,0)
+                                end if
+                            elsif SK_Escalation[PlayerID] > 10
+                                if SpecNumber == 1 and adult size of AITown >= 150 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 30 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 30 and PLAYER of AITown == PlayerID
+                                    run script SK_DeleteVillagers(PlayerID,AITown,30)
+                                    run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,30,0,2,0,AICapital,0)
+                                    run script SK_DeleteVillagers(PlayerID,AITown,30)
+                                    run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,30,0,2,0,AICapital,0)
+                                end if
+                            end if
+                        end if
+                        if SpecTown2 != 0 and PLAYER of SpecTown2 != PlayerID and get SpecTimer time remaining <= 0
+                            SpecTimer = create timer for number from 400 to 800 seconds
+                            if SK_AIPersonality[PlayerID] == 1
+                                SpecNumber = number from 1 to 1
+                            elsif SK_AIPersonality[PlayerID] == 2
+                                SpecNumber = number from 1 to 3
+                            else
+                                SpecNumber = number from 1 to 9
+                            end if
+                            if SpecNumber == 1 and adult size of AITown >= 200 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 60 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 60 and PLAYER of AITown == PlayerID
+                                run script SK_DeleteVillagers(PlayerID,AITown,60)
+                                run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,60,0,2,0,AICapital,0)
+                                run script SK_DeleteVillagers(PlayerID,AITown,60)
+                                run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,60,0,2,0,AICapital,0)
+                            end if
+                        end if
+                        if SpecTown3 != 0 and PLAYER of SpecTown3 != PlayerID and get SpecTimer time remaining <= 0
+                            SpecTimer = create timer for number from 400 to 800 seconds
+                            if SK_AIPersonality[PlayerID] == 1
+                                SpecNumber = number from 1 to 1
+                            elsif SK_AIPersonality[PlayerID] == 2
+                                SpecNumber = number from 1 to 3
+                            else
+                                SpecNumber = number from 1 to 9
+                            end if
+                            if SpecNumber == 1 and adult size of AITown >= 200 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 60 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 60 and PLAYER of AITown == PlayerID
+                                run script SK_DeleteVillagers(PlayerID,AITown,60)
+                                run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,60,0,2,0,AICapital,0)
+                                run script SK_DeleteVillagers(PlayerID,AITown,60)
+                                run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,60,0,2,0,AICapital,0)
+                            end if
+                        end if
+                    end if
+                end if
+
+                if SK_AIPersonality[PlayerID] == 1
+                    if capacity of AITown > size of AITown and adult size of AITown > 675 and SK_PlatoonCounter[PlayerID] < 8 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 100 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 100 and PLAYER of AITown == PlayerID
+                        run script SK_DeleteVillagers(PlayerID,AITown,200)
+                        run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,200,0,0,0,AICapital,0)
+
+                    elsif capacity of AITown > size of AITown and adult size of AITown > 525 and SK_PlatoonCounter[PlayerID] < 7 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 100 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 100 and PLAYER of AITown == PlayerID
+                        run script SK_DeleteVillagers(PlayerID,AITown,100)
+                        run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,100,0,0,0,AICapital,0)
+
+                    elsif capacity of AITown > size of AITown and adult size of AITown > 400 and SK_PlatoonCounter[PlayerID] < 6 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 75 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 75 and PLAYER of AITown == PlayerID
+                        run script SK_DeleteVillagers(PlayerID,AITown,75)
+                        run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,75,0,0,0,AICapital,0)
+
+                    elsif capacity of AITown > size of AITown and adult size of AITown > 300 and SK_PlatoonCounter[PlayerID] < 5 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 75 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 75 and PLAYER of AITown == PlayerID
+                        run script SK_DeleteVillagers(PlayerID,AITown,75)
+                        run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,75,0,0,0,AICapital,0)
+
+                    elsif capacity of AITown > size of AITown and adult size of AITown > 250 and SK_PlatoonCounter[PlayerID] < 4 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 40 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 40 and PLAYER of AITown == PlayerID
+                        run script SK_DeleteVillagers(PlayerID,AITown,40)
+                        run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,40,2,0,0,AICapital,0)
+
+                    elsif capacity of AITown > size of AITown and adult size of AITown > 200 and SK_PlatoonCounter[PlayerID] < 3 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 40 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 40 and PLAYER of AITown == PlayerID
+                        run script SK_DeleteVillagers(PlayerID,AITown,40)
+                        run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,40,1,0,0,AICapital,0)
+
+                    elsif capacity of AITown > size of AITown and adult size of AITown > 150 and SK_PlatoonCounter[PlayerID] < 2 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 25 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 25 and PLAYER of AITown == PlayerID
+                        run script SK_DeleteVillagers(PlayerID,AITown,25)
+                        run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,25,1,0,0,AICapital,0)
+            
+                    elsif capacity of AITown > size of AITown and FirstAttackPlatoonProhab <= 1 and adult size of AITown > 100 and SK_PlatoonCounter[PlayerID] < 2 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 20 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 20 and PLAYER of AITown == PlayerID
+                        run script SK_DeleteVillagers(PlayerID,AITown,20)
+                        run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,20,0,0,0,AICapital,0)
+
+                    end if
+                    //Siege Weapons here
+                    if adult size of AITown > 750 and SK_SiegeWeaponCounter[PlayerID] < 7 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 10 and PLAYER of AITown == PlayerID
+                        run script SK_AIRecruitmentRecruitSiegeWeapon(PlayerID,AITown,0,0,AICapital,0)
+
+                    elsif adult size of AITown > 600 and SK_SiegeWeaponCounter[PlayerID] < 6 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 10 and PLAYER of AITown == PlayerID
+                        run script SK_AIRecruitmentRecruitSiegeWeapon(PlayerID,AITown,0,0,AICapital,0)
+
+                    elsif adult size of AITown > 450 and SK_SiegeWeaponCounter[PlayerID] < 5 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 10 and PLAYER of AITown == PlayerID
+                        run script SK_AIRecruitmentRecruitSiegeWeapon(PlayerID,AITown,0,0,AICapital,0)
+
+                    elsif adult size of AITown > 300 and SK_SiegeWeaponCounter[PlayerID] < 4 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 10 and PLAYER of AITown == PlayerID
+                        run script SK_AIRecruitmentRecruitSiegeWeapon(PlayerID,AITown,0,0,AICapital,0)
+
+                    elsif adult size of AITown > 250 and SK_SiegeWeaponCounter[PlayerID] < 3 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 10 and PLAYER of AITown == PlayerID
+                        run script SK_AIRecruitmentRecruitSiegeWeapon(PlayerID,AITown,0,0,AICapital,0)
+
+                    elsif adult size of AITown > 200 and SK_SiegeWeaponCounter[PlayerID] < 2 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 10 and PLAYER of AITown == PlayerID
+                        run script SK_AIRecruitmentRecruitSiegeWeapon(PlayerID,AITown,0,0,AICapital,0)
+
+                    elsif adult size of AITown > 150 and SK_SiegeWeaponCounter[PlayerID] < 1 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 10 and PLAYER of AITown == PlayerID
+                        run script SK_AIRecruitmentRecruitSiegeWeapon(PlayerID,AITown,0,0,AICapital,0)
+
+                    end if
+
+                elsif SK_AIPersonality[PlayerID] == 2
+                    if capacity of AITown > size of AITown and adult size of AITown > 720 and SK_PlatoonCounter[PlayerID] < 9 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 150 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 150 and PLAYER of AITown == PlayerID
+                        run script SK_DeleteVillagers(PlayerID,AITown,150)
+                        run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,150,0,0,0,AICapital,0)
+
+                    elsif capacity of AITown > size of AITown and adult size of AITown > 600 and SK_PlatoonCounter[PlayerID] < 8 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 90 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 90 and PLAYER of AITown == PlayerID
+                        run script SK_DeleteVillagers(PlayerID,AITown,90)
+                        run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,90,0,0,0,AICapital,0)
+
+                    elsif capacity of AITown > size of AITown and adult size of AITown > 500 and SK_PlatoonCounter[PlayerID] < 7 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 90 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 90 and PLAYER of AITown == PlayerID
+                        run script SK_DeleteVillagers(PlayerID,AITown,90)
+                        run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,90,0,0,0,AICapital,0)
+
+                    elsif capacity of AITown > size of AITown and adult size of AITown > 400 and SK_PlatoonCounter[PlayerID] < 6 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 60 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 60 and PLAYER of AITown == PlayerID
+                        run script SK_DeleteVillagers(PlayerID,AITown,60)
+                        run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,60,0,0,0,AICapital,0)
+
+                    elsif capacity of AITown > size of AITown and adult size of AITown > 320 and SK_PlatoonCounter[PlayerID] < 5 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 60 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 60 and PLAYER of AITown == PlayerID
+                        run script SK_DeleteVillagers(PlayerID,AITown,60)
+                        run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,60,0,0,0,AICapital,0)
+
+                    elsif capacity of AITown > size of AITown and adult size of AITown > 260 and SK_PlatoonCounter[PlayerID] < 4 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 30 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 30 and PLAYER of AITown == PlayerID
+                        run script SK_DeleteVillagers(PlayerID,AITown,30)
+                        run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,30,2,0,0,AICapital,0)
+
+                    elsif capacity of AITown > size of AITown and adult size of AITown > 200 and SK_PlatoonCounter[PlayerID] < 3 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 30 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 30 and PLAYER of AITown == PlayerID
+                        run script SK_DeleteVillagers(PlayerID,AITown,30)
+                        run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,30,1,0,0,AICapital,0)
+
+                    elsif capacity of AITown > size of AITown and adult size of AITown > 160 and SK_PlatoonCounter[PlayerID] < 2 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 20 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 20 and PLAYER of AITown == PlayerID
+                        run script SK_DeleteVillagers(PlayerID,AITown,20)
+                        run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,20,1,0,0,AICapital,0)
+            
+                    elsif capacity of AITown > size of AITown and adult size of AITown > 120 and SK_PlatoonCounter[PlayerID] < 2 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 20 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 20 and PLAYER of AITown == PlayerID
+                        run script SK_DeleteVillagers(PlayerID,AITown,20)
+                        run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,20,0,0,0,AICapital,0)
+
+                    end if
+                    //Siege Weapons here
+                    if adult size of AITown > 750 and SK_SiegeWeaponCounter[PlayerID] < 7 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 10 and PLAYER of AITown == PlayerID
+                        run script SK_AIRecruitmentRecruitSiegeWeapon(PlayerID,AITown,0,0,AICapital,0)
+
+                    elsif adult size of AITown > 600 and SK_SiegeWeaponCounter[PlayerID] < 6 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 10 and PLAYER of AITown == PlayerID
+                        run script SK_AIRecruitmentRecruitSiegeWeapon(PlayerID,AITown,0,0,AICapital,0)
+
+                    elsif adult size of AITown > 450 and SK_SiegeWeaponCounter[PlayerID] < 5 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 10 and PLAYER of AITown == PlayerID
+                        run script SK_AIRecruitmentRecruitSiegeWeapon(PlayerID,AITown,0,0,AICapital,0)
+
+                    elsif adult size of AITown > 300 and SK_SiegeWeaponCounter[PlayerID] < 4 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 10 and PLAYER of AITown == PlayerID
+                        run script SK_AIRecruitmentRecruitSiegeWeapon(PlayerID,AITown,0,0,AICapital,0)
+
+                    elsif adult size of AITown > 250 and SK_SiegeWeaponCounter[PlayerID] < 3 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 10 and PLAYER of AITown == PlayerID
+                        run script SK_AIRecruitmentRecruitSiegeWeapon(PlayerID,AITown,0,0,AICapital,0)
+
+                    elsif adult size of AITown > 200 and SK_SiegeWeaponCounter[PlayerID] < 2 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 10 and PLAYER of AITown == PlayerID
+                        run script SK_AIRecruitmentRecruitSiegeWeapon(PlayerID,AITown,0,0,AICapital,0)
+
+                    elsif adult size of AITown > 150 and SK_SiegeWeaponCounter[PlayerID] < 1 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 10 and PLAYER of AITown == PlayerID
+                        run script SK_AIRecruitmentRecruitSiegeWeapon(PlayerID,AITown,0,0,AICapital,0)
+
+                    end if
+
+                elsif SK_AIPersonality[PlayerID] == 3
+                    if capacity of AITown > size of AITown and adult size of AITown > 700 and SK_PlatoonCounter[PlayerID] < 5 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 100 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 100 and PLAYER of AITown == PlayerID
+                        run script SK_DeleteVillagers(PlayerID,AITown,100)
+                        run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,100,0,0,0,AICapital,0)
+
+                    elsif capacity of AITown > size of AITown and adult size of AITown > 550 and SK_PlatoonCounter[PlayerID] < 4 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 100 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 100 and PLAYER of AITown == PlayerID
+                        run script SK_DeleteVillagers(PlayerID,AITown,100)
+                        run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,100,0,0,0,AICapital,0)
+
+                    elsif capacity of AITown > size of AITown and adult size of AITown > 400 and SK_PlatoonCounter[PlayerID] < 3 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 100 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 100 and PLAYER of AITown == PlayerID
+                        run script SK_DeleteVillagers(PlayerID,AITown,100)
+                        run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,100,0,0,0,AICapital,0)
+
+                    elsif capacity of AITown > size of AITown and adult size of AITown > 250 and SK_PlatoonCounter[PlayerID] < 2 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 40 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 40 and PLAYER of AITown == PlayerID
+                        run script SK_DeleteVillagers(PlayerID,AITown,40)
+                        run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,40,0,0,0,AICapital,0)
+
+                    elsif capacity of AITown > size of AITown and adult size of AITown > 150 and SK_PlatoonCounter[PlayerID] < 1 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 40 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 40 and PLAYER of AITown == PlayerID
+                        run script SK_DeleteVillagers(PlayerID,AITown,40)
+                        run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,40,0,0,0,AICapital,0)
+
+                    end if
+                    //Siege Weapons here
+                    if adult size of AITown > 800 and SK_SiegeWeaponCounter[PlayerID] < 4 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 10 and PLAYER of AITown == PlayerID
+                        run script SK_AIRecruitmentRecruitSiegeWeapon(PlayerID,AITown,0,0,AICapital,0)
+
+                    elsif adult size of AITown > 600 and SK_SiegeWeaponCounter[PlayerID] < 3 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 10 and PLAYER of AITown == PlayerID
+                        run script SK_AIRecruitmentRecruitSiegeWeapon(PlayerID,AITown,0,0,AICapital,0)
+
+                    elsif adult size of AITown > 400 and SK_SiegeWeaponCounter[PlayerID] < 2 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 10 and PLAYER of AITown == PlayerID
+                        run script SK_AIRecruitmentRecruitSiegeWeapon(PlayerID,AITown,0,0,AICapital,0)
+
+                    elsif adult size of AITown > 200 and SK_SiegeWeaponCounter[PlayerID] < 1 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 10 and PLAYER of AITown == PlayerID
+                        run script SK_AIRecruitmentRecruitSiegeWeapon(PlayerID,AITown,0,0,AICapital,0)
+
+                    end if
+
+                end if
+            end if
+        end if
+
+        //For all other towns
+        if get SideTownTimer time remaining <= 0 and AITown != SK_AIHomeTown[PlayerID]
+            if SK_AIPersonality[PlayerID] == 1
+                if capacity of AITown > size of AITown and adult size of AITown > 250 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 75 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 75 and PLAYER of AITown == PlayerID
+                    SideTownTimer = create timer for 500 - SK_AIDifficulty[PlayerID] * 1.5 seconds
+                    run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,75,0,0,0,AITown,0)
+
+                elsif capacity of AITown > size of AITown and adult size of AITown > 125 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 50 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 50 and PLAYER of AITown == PlayerID
+                    SideTownTimer = create timer for 500 - SK_AIDifficulty[PlayerID] * 1.5 seconds
+                    run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,50,0,0,0,AITown,0)
+
+                elsif capacity of AITown > size of AITown and adult size of AITown > 50 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 25 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 25 and PLAYER of AITown == PlayerID
+                    SideTownTimer = create timer for 500 - SK_AIDifficulty[PlayerID] * 1.5 seconds
+                    run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,25,0,0,0,AITown,0)
+
+                end if
+
+            elsif SK_AIPersonality[PlayerID] == 2
+                if capacity of AITown > size of AITown and adult size of AITown > 300 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 90 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 90 and PLAYER of AITown == PlayerID
+                    SideTownTimer = create timer for 500 - SK_AIDifficulty[PlayerID] * 1.5 seconds
+                    run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,90,0,0,0,AITown,0)
+
+                elsif capacity of AITown > size of AITown and adult size of AITown > 200 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 60 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 60 and PLAYER of AITown == PlayerID
+                    SideTownTimer = create timer for 500 - SK_AIDifficulty[PlayerID] * 1.5 seconds
+                    run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,60,0,0,0,AITown,0)
+
+                elsif capacity of AITown > size of AITown and adult size of AITown > 100 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 30 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 30 and PLAYER of AITown == PlayerID
+                    SideTownTimer = create timer for 500 - SK_AIDifficulty[PlayerID] * 1.5 seconds
+                    run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,30,0,0,0,AITown,0)
+
+                end if
+
+            elsif SK_AIPersonality[PlayerID] == 3
+                if capacity of AITown > size of AITown and adult size of AITown > 350 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 120 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 120 and PLAYER of AITown == PlayerID
+                    SideTownTimer = create timer for 500 - SK_AIDifficulty[PlayerID] * 1.5 seconds
+                    run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,120,0,0,0,AITown,0)
+
+                elsif capacity of AITown > size of AITown and adult size of AITown > 250 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 90 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 90 and PLAYER of AITown == PlayerID
+                    SideTownTimer = create timer for 500 - SK_AIDifficulty[PlayerID] * 1.5 seconds
+                    run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,90,0,0,0,AITown,0)
+
+                elsif capacity of AITown > size of AITown and adult size of AITown > 150 and can town AITown recruit ARMY_UNIT_TYPE_MELEE_1 platoon of size 50 and can town AITown recruit ARMY_UNIT_TYPE_RANGED_1 platoon of size 50 and PLAYER of AITown == PlayerID
+                    SideTownTimer = create timer for 500 - SK_AIDifficulty[PlayerID] * 1.5 seconds
+                    run script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,0,50,0,0,0,AITown,0)
+
+                end if
+            end if
+        end if
+    end if
+
+end loop
+
+end script SK_AIRecruitment
+
+begin script SK_AIRecruitmentRecruitPlatoon(PlayerID,AITown,Platoon,Size,Type,Task,Path,AICapital,AttackImmediately)
+
+    RecruitmentTime = create timer for 0 seconds
+    LastPlatoonSize = 0
+    Number = 0
+    AttackPath[4]
+
+start
+
+//say "Type = $d" with number Type
+
+wait RecruitmentWaitTimeMinimum seconds
+
+//Is it Melee or Ranged?
+if Type == 1
+    Number = 1
+
+elsif Type == 2
+    Number = 2
+
+else
+    Number = number from 1 to 2
+
+end if
+//Recruit Platoon
+if Number == 1
+    if AmountOfArmoriesMelee[PlayerID] == 1
+        Platoon = recruit ARMY_UNIT_TYPE_MELEE_1 town AITown platoon of size Size
+
+    elsif AmountOfArmoriesMelee[PlayerID] == 2
+        Platoon = recruit ARMY_UNIT_TYPE_MELEE_2 town AITown platoon of size Size
+
+    elsif AmountOfArmoriesMelee[PlayerID] == 3
+        Platoon = recruit ARMY_UNIT_TYPE_MELEE_3 town AITown platoon of size Size
+
+    elsif AmountOfArmoriesMelee[PlayerID] == 4
+        Platoon = recruit ARMY_UNIT_TYPE_MELEE_4 town AITown platoon of size Size
+
+    else
+        Platoon = recruit ARMY_UNIT_TYPE_MELEE_5 town AITown platoon of size Size
+
+    end if
+
+    wait until not Platoon recruiting
+    enable platoon Platoon respond to town AITown attack
+    enable platoon Platoon respond to local platoon attack
+
+    if Path == 0
+        Path = number from 1 to 3
+    end if
+    if PlayerID == 1
+        if Path == 1
+            AttackPath[0] = AttackPathCenterPlayer1[0]
+            AttackPath[1] = AttackPathCenterPlayer1[1]
+            AttackPath[2] = AttackPathCenterPlayer1[2]
+            AttackPath[3] = AttackPathCenterPlayer1[3]
+
+        elsif Path == 2
+            AttackPath[0] = AttackPathFlankPlayer1[0]
+            AttackPath[1] = AttackPathFlankPlayer1[1]
+            AttackPath[2] = AttackPathFlankPlayer1[2]
+            AttackPath[3] = AttackPathFlankPlayer1[3]
+
+        elsif Path == 3
+            AttackPath[0] = AttackPathBackdoorPlayer1[0]
+            AttackPath[1] = AttackPathBackdoorPlayer1[1]
+            AttackPath[2] = AttackPathBackdoorPlayer1[2]
+            AttackPath[3] = AttackPathBackdoorPlayer1[3]
+
+        end if
+
+    elsif PlayerID == 2
+        if Path == 1
+            AttackPath[0] = AttackPathCenterPlayer2[0]
+            AttackPath[1] = AttackPathCenterPlayer2[1]
+            AttackPath[2] = AttackPathCenterPlayer2[2]
+            AttackPath[3] = AttackPathCenterPlayer2[3]
+
+        elsif Path == 2
+            AttackPath[0] = AttackPathFlankPlayer2[0]
+            AttackPath[1] = AttackPathFlankPlayer2[1]
+            AttackPath[2] = AttackPathFlankPlayer2[2]
+            AttackPath[3] = AttackPathFlankPlayer2[3]
+
+        elsif Path == 3
+            AttackPath[0] = AttackPathBackdoorPlayer2[0]
+            AttackPath[1] = AttackPathBackdoorPlayer2[1]
+            AttackPath[2] = AttackPathBackdoorPlayer2[2]
+            AttackPath[3] = AttackPathBackdoorPlayer2[3]
+
+        end if
+
+    elsif PlayerID == 3
+        if Path == 1
+            AttackPath[0] = AttackPathCenterPlayer3[0]
+            AttackPath[1] = AttackPathCenterPlayer3[1]
+            AttackPath[2] = AttackPathCenterPlayer3[2]
+            AttackPath[3] = AttackPathCenterPlayer3[3]
+
+        elsif Path == 2
+            AttackPath[0] = AttackPathFlankPlayer3[0]
+            AttackPath[1] = AttackPathFlankPlayer3[1]
+            AttackPath[2] = AttackPathFlankPlayer3[2]
+            AttackPath[3] = AttackPathFlankPlayer3[3]
+
+        elsif Path == 3
+            AttackPath[0] = AttackPathBackdoorPlayer3[0]
+            AttackPath[1] = AttackPathBackdoorPlayer3[1]
+            AttackPath[2] = AttackPathBackdoorPlayer3[2]
+            AttackPath[3] = AttackPathBackdoorPlayer3[3]
+
+        end if
+    end if
+    run background script SK_ArmyBehaivours(PlayerID,Platoon,1,Task,AttackImmediately,AttackPath[0],AttackPath[1],AttackPath[2],AttackPath[3],AICapital)
+
+else
+    if AmountOfArmoriesRanged[PlayerID] == 1
+        Platoon = recruit ARMY_UNIT_TYPE_RANGED_1 town AITown platoon of size Size
+
+    elsif AmountOfArmoriesRanged[PlayerID] == 2
+        Platoon = recruit ARMY_UNIT_TYPE_RANGED_2 town AITown platoon of size Size
+
+    elsif AmountOfArmoriesRanged[PlayerID] == 3
+        Platoon = recruit ARMY_UNIT_TYPE_RANGED_3 town AITown platoon of size Size
+
+    elsif AmountOfArmoriesRanged[PlayerID] == 4
+        Platoon = recruit ARMY_UNIT_TYPE_RANGED_4 town AITown platoon of size Size
+
+    else
+        Platoon = recruit ARMY_UNIT_TYPE_RANGED_5 town AITown platoon of size Size
+
+    end if
+
+    wait until not Platoon recruiting
+    enable platoon Platoon respond to town AITown attack
+    enable platoon Platoon respond to local platoon attack
+
+    if Path == 0
+        Path = number from 1 to 3
+    end if
+    if PlayerID == 1
+        if Path == 1
+            AttackPath[0] = AttackPathCenterPlayer1[0]
+            AttackPath[1] = AttackPathCenterPlayer1[1]
+            AttackPath[2] = AttackPathCenterPlayer1[2]
+            AttackPath[3] = AttackPathCenterPlayer1[3]
+
+        elsif Path == 2
+            AttackPath[0] = AttackPathFlankPlayer1[0]
+            AttackPath[1] = AttackPathFlankPlayer1[1]
+            AttackPath[2] = AttackPathFlankPlayer1[2]
+            AttackPath[3] = AttackPathFlankPlayer1[3]
+
+        elsif Path == 3
+            AttackPath[0] = AttackPathBackdoorPlayer1[0]
+            AttackPath[1] = AttackPathBackdoorPlayer1[1]
+            AttackPath[2] = AttackPathBackdoorPlayer1[2]
+            AttackPath[3] = AttackPathBackdoorPlayer1[3]
+
+        end if
+
+    elsif PlayerID == 2
+        if Path == 1
+            AttackPath[0] = AttackPathCenterPlayer2[0]
+            AttackPath[1] = AttackPathCenterPlayer2[1]
+            AttackPath[2] = AttackPathCenterPlayer2[2]
+            AttackPath[3] = AttackPathCenterPlayer2[3]
+
+        elsif Path == 2
+            AttackPath[0] = AttackPathFlankPlayer2[0]
+            AttackPath[1] = AttackPathFlankPlayer2[1]
+            AttackPath[2] = AttackPathFlankPlayer2[2]
+            AttackPath[3] = AttackPathFlankPlayer2[3]
+
+        elsif Path == 3
+            AttackPath[0] = AttackPathBackdoorPlayer2[0]
+            AttackPath[1] = AttackPathBackdoorPlayer2[1]
+            AttackPath[2] = AttackPathBackdoorPlayer2[2]
+            AttackPath[3] = AttackPathBackdoorPlayer2[3]
+
+        end if
+
+    elsif PlayerID == 3
+        if Path == 1
+            AttackPath[0] = AttackPathCenterPlayer3[0]
+            AttackPath[1] = AttackPathCenterPlayer3[1]
+            AttackPath[2] = AttackPathCenterPlayer3[2]
+            AttackPath[3] = AttackPathCenterPlayer3[3]
+
+        elsif Path == 2
+            AttackPath[0] = AttackPathFlankPlayer3[0]
+            AttackPath[1] = AttackPathFlankPlayer3[1]
+            AttackPath[2] = AttackPathFlankPlayer3[2]
+            AttackPath[3] = AttackPathFlankPlayer3[3]
+
+        elsif Path == 3
+            AttackPath[0] = AttackPathBackdoorPlayer3[0]
+            AttackPath[1] = AttackPathBackdoorPlayer3[1]
+            AttackPath[2] = AttackPathBackdoorPlayer3[2]
+            AttackPath[3] = AttackPathBackdoorPlayer3[3]
+
+        end if
+    end if
+    run background script SK_ArmyBehaivours(PlayerID,Platoon,2,Task,AttackImmediately,AttackPath[0],AttackPath[1],AttackPath[2],AttackPath[3],AICapital)
+
+end if
+
+//Set RecruitmentTimer
+LastPlatoonSize = Size
+if LastPlatoonSize == 0
+    LastPlatoonSize = 1
+end if
+RecruitmentTime = (RecruitmentWaitTime / (SK_AIDifficulty[PlayerID] / 4) + RecruitmentWaitTimeMinimum) + (LastPlatoonSize * RecruitmentLastPlatoonMultiplier - (SK_AIDifficulty[PlayerID] / 1.5))
+RecruitmentTimer[PlayerID] = create timer for RecruitmentTime seconds
+
+run background script SK_AIRecruitmentGenericPlatoon(Platoon,PlayerID)
+
+SK_PlatoonCounter[PlayerID]++
+
+end script SK_AIRecruitmentRecruitPlatoon
+
+begin script SK_AIRecruitmentRecruitSiegeWeapon(PlayerID,AITown,SiegeWeapon,Path,AICapital,AttackImmediately)
+
+    RecruitmentTime = create timer for 0 seconds
+    AttackPath[4]
+
+start
+
+wait RecruitmentWaitTimeMinimum seconds
+
+//Recruit SiegeWeapon
+    if AmountOfArmoriesMelee[PlayerID] == 1
+        SiegeWeapon = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_1 town AITown siege weapon
+
+    elsif AmountOfArmoriesMelee[PlayerID] == 2
+        SiegeWeapon = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_2 town AITown siege weapon
+
+    elsif AmountOfArmoriesMelee[PlayerID] == 3
+        SiegeWeapon = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town AITown siege weapon
+
+    elsif AmountOfArmoriesMelee[PlayerID] == 4
+        SiegeWeapon = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_4 town AITown siege weapon
+
+    else
+        SiegeWeapon = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_5 town AITown siege weapon
+
+    end if
+
+    if Path == 0
+        Path = number from 1 to 3
+    end if
+    if PlayerID == 1
+        if Path == 1
+            AttackPath[0] = AttackPathCenterPlayer1[0]
+            AttackPath[1] = AttackPathCenterPlayer1[1]
+            AttackPath[2] = AttackPathCenterPlayer1[2]
+            AttackPath[3] = AttackPathCenterPlayer1[3]
+
+        elsif Path == 2
+            AttackPath[0] = AttackPathFlankPlayer1[0]
+            AttackPath[1] = AttackPathFlankPlayer1[1]
+            AttackPath[2] = AttackPathFlankPlayer1[2]
+            AttackPath[3] = AttackPathFlankPlayer1[3]
+
+        elsif Path == 3
+            AttackPath[0] = AttackPathBackdoorPlayer1[0]
+            AttackPath[1] = AttackPathBackdoorPlayer1[1]
+            AttackPath[2] = AttackPathBackdoorPlayer1[2]
+            AttackPath[3] = AttackPathBackdoorPlayer1[3]
+
+        end if
+
+    elsif PlayerID == 2
+        if Path == 1
+            AttackPath[0] = AttackPathCenterPlayer2[0]
+            AttackPath[1] = AttackPathCenterPlayer2[1]
+            AttackPath[2] = AttackPathCenterPlayer2[2]
+            AttackPath[3] = AttackPathCenterPlayer2[3]
+
+        elsif Path == 2
+            AttackPath[0] = AttackPathFlankPlayer2[0]
+            AttackPath[1] = AttackPathFlankPlayer2[1]
+            AttackPath[2] = AttackPathFlankPlayer2[2]
+            AttackPath[3] = AttackPathFlankPlayer2[3]
+
+        elsif Path == 3
+            AttackPath[0] = AttackPathBackdoorPlayer2[0]
+            AttackPath[1] = AttackPathBackdoorPlayer2[1]
+            AttackPath[2] = AttackPathBackdoorPlayer2[2]
+            AttackPath[3] = AttackPathBackdoorPlayer2[3]
+
+        end if
+
+    elsif PlayerID == 3
+        if Path == 1
+            AttackPath[0] = AttackPathCenterPlayer3[0]
+            AttackPath[1] = AttackPathCenterPlayer3[1]
+            AttackPath[2] = AttackPathCenterPlayer3[2]
+            AttackPath[3] = AttackPathCenterPlayer3[3]
+
+        elsif Path == 2
+            AttackPath[0] = AttackPathFlankPlayer3[0]
+            AttackPath[1] = AttackPathFlankPlayer3[1]
+            AttackPath[2] = AttackPathFlankPlayer3[2]
+            AttackPath[3] = AttackPathFlankPlayer3[3]
+
+        elsif Path == 3
+            AttackPath[0] = AttackPathBackdoorPlayer3[0]
+            AttackPath[1] = AttackPathBackdoorPlayer3[1]
+            AttackPath[2] = AttackPathBackdoorPlayer3[2]
+            AttackPath[3] = AttackPathBackdoorPlayer3[3]
+
+        end if
+    end if
+    run background script SK_SiegeWeaponBehaivours(PlayerID,SiegeWeapon,AttackImmediately,AttackPath[0],AttackPath[1],AttackPath[2],AttackPath[3],AICapital)
+
+    run background script SK_AIRecruitmentGenericCatapult(SiegeWeapon,PlayerID)
+
+    SK_SiegeWeaponCounter[PlayerID]++
+
+end script SK_AIRecruitmentRecruitSiegeWeapon
+
+begin script SK_AIRecruitmentGenericPlatoon(Platoon,PlayerID)
+
+    Counter = 0
+    AITown[SK_MaxTowns]
+
+start
+
+begin loop
+    if Counter > SK_MaxTowns
+        Counter = 0
+        wait 10 seconds
+    end if
+    AITown[Counter] = get town with id Counter
+    if PLAYER of AITown[Counter] == PlayerID
+        enable platoon Platoon respond to town AITown[Counter] attack
+    end if
+
+    Counter++
+    until Platoon not exists
+end loop
+
+SK_PlatoonCounter[PlayerID]--
+
+end script SK_AIRecruitmentGenericPlatoon
+
+begin script SK_AIRecruitmentGenericCatapult(Catapult,PlayerID)
+
+start
+
+wait until Catapult not exists
+
+SK_SiegeWeaponCounter[PlayerID]--
+
+end script SK_AIRecruitmentGenericCatapult
+
+begin script SK_DeleteVillagers(PlayerID,AITown,Amount)
+
+myDisciple = 0
+myHome = 0
+myPlatoon = 0
+Villager = 0
+
+start
+
+RecruitPlatoon[PlayerID] = 0
+//Hurts low difficulties much more
+if size of AITown < 333
+    while Amount > 0
+        myHome = get random home in town AITown
+        Villager = get VILLAGER at {myHome} radius 500
+        myPlatoon = get platoon nearest {Villager} radius 15
+        myDisciple = get disciple VILLAGER_DISCIPLE_WORSHIP at {Villager} radius 5
+        if PLAYER of Villager == PlayerID and myPlatoon not exists and myDisciple not exists and HEALTH of Villager > 0
+            delete Villager
+            if size of AITown < 100
+                Amount -= 1
+            elsif size of AITown < 150
+                Amount -= 2
+            elsif size of AITown < 250
+                Amount -= 3
+            else
+                Amount -= 4
+            end if
+        end if
+    end while
+end if
+
+RecruitPlatoon[PlayerID] = 1
+
+end script SK_DeleteVillagers

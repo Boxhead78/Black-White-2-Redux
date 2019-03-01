@@ -1,0 +1,57 @@
+///////////////////////////////////////////////////////////////////////////////
+//          Fisting Balance Script
+//    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//    This script makes fisting cost mana.
+//    Also fisting isn't available if the player has equal or less to 1000 mana,
+//  making defending from attacking enemies and some quests harder.
+//
+//    Start date:        08.03.18            By: Boxhead
+//    Update date:    07.04.18            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+global FistingBought = 0
+
+run script Fisting
+
+begin script Fisting
+
+    AntiInfluence = 0
+    FistingActive = 1
+    ManaTimer = create timer for 0 seconds
+    PlayerMana = 0
+    Town = get town with id 0
+
+start
+
+begin loop
+
+    if get research ARTEFACT_HAND_FISTING available == variable RESEARCH_AVAILABILITY_RESEARCHED and FistingBought == 0
+        FistingBought = 1
+    end if
+
+    PlayerMana = get player 0 mana
+
+    if PlayerMana > 1000 and FistingBought == 1 and FistingActive == 0
+        FistingActive = 1
+        enable interface action MANACOST_BALANCE_TYPE_INITIATEFIST
+    elsif PlayerMana <= 1000 and FistingBought == 1 and FistingActive == 1
+        FistingActive = 0
+        
+        AntiInfluence = create anti influence on Town radius 999999 //Interrupts player's fisting
+        disable interface action MANACOST_BALANCE_TYPE_INITIATEFIST
+        wait 1.5 seconds
+        delete AntiInfluence
+
+    end if
+
+    if PlayerMana > 0
+        if variable get hand state == variable HAND_STATE_FIST_STRONG or variable get hand state == variable HAND_STATE_FIST_WEAK and get ManaTimer time remaining <= 0
+            ManaTimer = create timer for 0.25 seconds
+            set player 0 mana PlayerMana - 50
+        end if
+    end if
+
+end loop
+
+end script Fisting

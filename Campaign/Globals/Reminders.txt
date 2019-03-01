@@ -1,0 +1,297 @@
+
+// StandardReminder scrtipt called by the game
+define script StandardReminder(AdvisorSpeak)
+define script StandardBanter(AdvisorGroupID)
+define script TownReminders
+
+run script TownReminders
+
+begin interruptible script StandardReminder(AdvisorSpeak) 
+
+start
+    begin dialogue
+        if good spirit speaks AdvisorSpeak
+            eject good spirit
+        elsif evil spirit speaks AdvisorSpeak
+            eject evil spirit
+        end if        
+        
+        //say single line "We need to do reminder text from ID function!"
+        say database id AdvisorSpeak 
+        wait until read
+        
+        send good spirit home
+        send evil spirit home
+    end dialogue
+
+end script StandardReminder
+
+begin interruptible script StandardBanter(AdvisorGroupID) 
+    Counter = 0
+start
+    begin dialogue
+        if good spirit speaks in AdvisorGroupID
+            eject good spirit
+        end if
+        
+        if evil spirit speaks in AdvisorGroupID
+            eject evil spirit
+        end if
+        
+        begin loop
+            say line Counter from group AdvisorGroupID
+            wait until read
+
+            Counter ++
+            until Counter == get number of lines in AdvisorGroupID
+        end loop
+        
+        send good spirit home
+        send evil spirit home
+        
+    end dialogue
+
+end script StandardBanter
+
+begin script TownReminders
+
+    AdvisorNumber = 0
+    Number = 0
+    AdvisorTimer = create timer for 750 seconds
+
+    TownCounter = 1
+    Town[15]//Support this for 15 towns max.
+    Town0 = get town with id 0
+
+start
+
+begin loop
+
+    if TownCounter >= 14
+        TownCounter = 1
+    end if
+
+    Town[TownCounter] = get town with id TownCounter
+
+    if get AdvisorTimer time remaining == 0 and PLAYER of Town0 == 0
+        AdvisorNumber = number from 1 to 5
+        if AdvisorNumber == 1
+            if get Town0 desire TOWN_DESIRE_FOR_FOOD > 0.85
+                AdvisorTimer = create timer for 400 seconds
+                Number = number from 1 to 4
+                if Number == 1
+                    GB_DialogueIsRunning = 1
+                    begin dialogue
+                        eject evil spirit
+                        say "BW2T_HELP_TEXT_GUIDANCE_TOWN_ALERT_EA_01"
+                        wait until read
+                        send evil spirit home
+                    end dialogue
+                    GB_DialogueIsRunning = 0
+                elsif Number == 2
+                    GB_DialogueIsRunning = 1
+                    begin dialogue
+                        eject good spirit
+                        say "BW2T_HELP_TEXT_GUIDANCE_TOWN_ALERT_GA_01"
+                        wait until read
+                        send good spirit home
+                    end dialogue
+                    GB_DialogueIsRunning = 0
+                elsif Number == 3
+                    GB_DialogueIsRunning = 1
+                    begin dialogue
+                        eject evil spirit
+                        say "BW2T_HELP_TEXT_GUIDANCE_TOWN_ALERT_EA_03"
+                        wait until read
+                        send evil spirit home
+                    end dialogue
+                    GB_DialogueIsRunning = 0
+                else
+                    GB_DialogueIsRunning = 1
+                    begin dialogue
+                        eject good spirit
+                        say "BW2T_HELP_TEXT_GUIDANCE_TOWN_ALERT_GA_03"
+                        wait until read
+                        send good spirit home
+                    end dialogue
+                    GB_DialogueIsRunning = 0
+                end if
+            end if
+        elsif AdvisorNumber == 2
+            if get Town0 desire TOWN_DESIRE_FOR_WOOD > 0.85
+                AdvisorTimer = create timer for 400 seconds
+                Number = number from 1 to 4
+                if Number == 1
+                    GB_DialogueIsRunning = 1
+                    begin dialogue
+                        eject evil spirit
+                        say "BW2T_HELP_TEXT_GUIDANCE_TOWN_ALERT_EA_06"
+                        wait until read
+                        send evil spirit home
+                    end dialogue
+                    GB_DialogueIsRunning = 0
+                elsif Number == 2
+                    GB_DialogueIsRunning = 1
+                    begin dialogue
+                        eject good spirit
+                        say "BW2T_HELP_TEXT_GUIDANCE_TOWN_ALERT_GA_06"
+                        wait until read
+                        send good spirit home
+                    end dialogue
+                    GB_DialogueIsRunning = 0
+                elsif Number == 3
+                    GB_DialogueIsRunning = 1
+                    begin dialogue
+                        eject evil spirit
+                        say "BW2T_HELP_TEXT_GUIDANCE_TOWN_ALERT_EA_04"
+                        wait until read
+                        send evil spirit home
+                    end dialogue
+                    GB_DialogueIsRunning = 0
+                else
+                    GB_DialogueIsRunning = 1
+                    begin dialogue
+                        eject good spirit
+                        say "BW2T_HELP_TEXT_GUIDANCE_TOWN_ALERT_GA_04"
+                        wait until read
+                        send good spirit home
+                    end dialogue
+                    GB_DialogueIsRunning = 0
+                end if
+            end if
+        elsif AdvisorNumber == 3
+            if get Town0 desire TOWN_DESIRE_TO_BREED > 0.8
+                AdvisorTimer = create timer for 400 seconds
+                Number = number from 1 to 4
+                if Number == 1
+                    GB_DialogueIsRunning = 1
+                    begin dialogue
+                        eject evil spirit
+                        say "BW2T_HELP_TEXT_GUIDANCE_TOWN_ALERT_EA_12"
+                        wait until read
+                        send evil spirit home
+                    end dialogue
+                    GB_DialogueIsRunning = 0
+                elsif Number == 2
+                    GB_DialogueIsRunning = 1
+                    begin dialogue
+                        eject good spirit
+                        say "BW2T_HELP_TEXT_GUIDANCE_TOWN_ALERT_GA_12"
+                        wait until read
+                        send good spirit home
+                    end dialogue
+                    GB_DialogueIsRunning = 0
+                elsif Number == 3
+                    GB_DialogueIsRunning = 1
+                    begin dialogue
+                        eject evil spirit
+                        say "BW2T_HELP_TEXT_GUIDANCE_TOWN_ALERT_EA_13"
+                        wait until read
+                        send evil spirit home
+                    end dialogue
+                    GB_DialogueIsRunning = 0
+                else
+                    GB_DialogueIsRunning = 1
+                    begin dialogue
+                        eject good spirit
+                        say "BW2T_HELP_TEXT_GUIDANCE_TOWN_ALERT_GA_13"
+                        wait until read
+                        send good spirit home
+                    end dialogue
+                    GB_DialogueIsRunning = 0
+                end if
+            end if
+        elsif AdvisorNumber == 4
+            if get Town0 desire TOWN_DESIRE_FOR_MERCY > 0.6
+                AdvisorTimer = create timer for 400 seconds
+                Number = number from 1 to 4
+                if Number == 1
+                    GB_DialogueIsRunning = 1
+                    begin dialogue
+                        eject evil spirit
+                        say "BW2T_HELP_TEXT_GUIDANCE_TOWN_ALERT_EA_08"
+                        wait until read
+                        send evil spirit home
+                    end dialogue
+                    GB_DialogueIsRunning = 0
+                elsif Number == 2
+                    GB_DialogueIsRunning = 1
+                    begin dialogue
+                        eject good spirit
+                        say "BW2T_HELP_TEXT_GUIDANCE_KILLING_GA_01"
+                        wait until read
+                        send good spirit home
+                    end dialogue
+                    GB_DialogueIsRunning = 0
+                elsif Number == 3
+                    GB_DialogueIsRunning = 1
+                    begin dialogue
+                        eject evil spirit
+                        say "BW2T_HELP_TEXT_GUIDANCE_TOWN_ALERT_EA_09"
+                        wait until read
+                        send evil spirit home
+                    end dialogue
+                    GB_DialogueIsRunning = 0
+                else
+                    GB_DialogueIsRunning = 1
+                    begin dialogue
+                        eject good spirit
+                        say "BW2T_HELP_TEXT_GUIDANCE_KILLING_GA_02"
+                        wait until read
+                        send good spirit home
+                    end dialogue
+                    GB_DialogueIsRunning = 0
+                end if
+            end if
+        elsif AdvisorNumber == 6//Deactivated
+            if PLAYER of Town[TownCounter] == 0 and variable get town Town[TownCounter] status == variable TOWN_STATUS_MIGRATION_STARTED
+                if get Town[TownCounter] desire TOWN_DESIRE_FOR_FOOD > 0.75 or get Town[TownCounter] desire TOWN_DESIRE_FOR_WOOD > 0.75
+                    AdvisorTimer = create timer for 400 seconds
+                    Number = number from 1 to 4
+                    if Number == 1
+                        GB_DialogueIsRunning = 1
+                        begin dialogue
+                            eject evil spirit
+                            say "BW2T_HELP_TEXT_GUIDANCE_TOWN_ALERT_EA_20"
+                            wait until read
+                            send evil spirit home
+                        end dialogue
+                        GB_DialogueIsRunning = 0
+                    elsif Number == 2
+                        GB_DialogueIsRunning = 1
+                        begin dialogue
+                            eject good spirit
+                            say "BW2T_HELP_TEXT_GUIDANCE_TOWN_ALERT_GA_20"
+                            wait until read
+                            send good spirit home
+                        end dialogue
+                        GB_DialogueIsRunning = 0
+                    elsif Number == 3
+                        GB_DialogueIsRunning = 1
+                        begin dialogue
+                            eject evil spirit
+                            say "BW2T_HELP_TEXT_GUIDANCE_TOWN_ALERT_EA_19"
+                            wait until read
+                            send evil spirit home
+                        end dialogue
+                        GB_DialogueIsRunning = 0
+                    else
+                        GB_DialogueIsRunning = 1
+                        begin dialogue
+                            eject good spirit
+                            say "BW2T_HELP_TEXT_GUIDANCE_TOWN_ALERT_GA_23"
+                            wait until read
+                            send good spirit home
+                        end dialogue
+                        GB_DialogueIsRunning = 0
+                    end if
+                end if
+            end if
+        end if
+    end if
+
+    TownCounter++
+end loop
+
+end script TownReminders
+

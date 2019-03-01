@@ -1,0 +1,181 @@
+///////////////////////////////////////////////////////////////////////////////
+//    Land 7 Creature AI
+//    ~~~~~~~~~~~~~~~~~~~
+//
+//    Start date:     02.03.18            By: Boxhead
+//    Update date: 08.03.18            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+//-----------------------------------------------------------------------------
+//    Globals
+//-----------------------------------------------------------------------------
+
+define script LC7_CreatureAI
+define script LC7_CreatureLogic
+
+global CreatureAttackPos[3]
+global CreatureGathererPos[3]
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
+begin script LC7_CreatureAI
+
+start
+
+    CreatureAttackPos[0] = marker at {2063.62,54.90,1336.72}//PlayerTown
+    CreatureAttackPos[1] = marker at {1770.19,46.10,1284.13}//PlayerTownPreAttackPos
+
+    CreatureGathererPos[0] = marker at {2049.92,139.28,529.26}//JapaneseCapital
+    CreatureGathererPos[1] = marker at {1523.56,44.27,1122.55}//JapaneseTown1
+    CreatureGathererPos[2] = marker at {1049.26,84.59,990.35}//JapaneseTown2
+
+    LC7_EnemyCreature = create SCRIPT_OBJECT_TYPE_CREATURE CREATURE_TYPE_TIGER at {1997.37,131.74,569.71}
+    
+    set creature LC7_EnemyCreature happiness to maximum
+    
+    set research ARTEFACT_CREATURE_MAGIC_TYPE_WATER available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_CREATURE_MAGIC_TYPE_HEAL available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_CREATURE_MAGIC_TYPE_LIGHTNING available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_CREATURE_ROLE_BUILDER_2 available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_CREATURE_ROLE_GATHERER_3 available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_CREATURE_ROLE_SOLDIER_2 available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+
+    set creature LC7_EnemyCreature CREATURE_SCRIPT_TRANSITIONAL_ATTRIBUTE_TYPE_SIZE 0.8
+    STRENGTH of LC7_EnemyCreature = 0.7
+    ALIGNMENT of LC7_EnemyCreature = -0.25
+    FATNESS of LC7_EnemyCreature = 0.4
+
+    teach LC7_EnemyCreature all
+
+    disable LC7_EnemyCreature action availability LA_EAT with LO_PLAYER_VILLAGER
+    disable LC7_EnemyCreature action availability LA_EAT with LO_PLAYER_PLATOON
+    disable LC7_EnemyCreature action availability LA_EAT with LO_ROCKS
+    disable LC7_EnemyCreature action availability LA_EAT with LO_TREES
+    disable LC7_EnemyCreature action availability LA_EAT with LO_TOYS
+    disable LC7_EnemyCreature action availability LA_EAT with LO_POO
+    disable LC7_EnemyCreature action availability LA_EAT with LO_SPELL_ORBS
+    disable LC7_EnemyCreature action availability LA_POO with LO_PLAYER_VILLAGER
+    disable LC7_EnemyCreature action availability LA_POO with LO_PLAYER_PLATOON
+    disable LC7_EnemyCreature action availability LA_POO with LO_PLAYER_DEFENCES
+    disable LC7_EnemyCreature action availability LA_POO with LO_PLAYER_STORAGE_PIT
+    disable LC7_EnemyCreature action availability LA_POO with LO_PLAYER_BUILDING
+    disable LC7_EnemyCreature action availability LA_PLAY
+    disable LC7_EnemyCreature action availability LA_WATER with LO_PLAYER_VILLAGER
+    disable LC7_EnemyCreature action availability LA_WATER with LO_PLAYER_PLATOON
+    disable LC7_EnemyCreature action availability LA_HEAL with LO_OPPONENT_PLATOON
+    disable LC7_EnemyCreature action availability LA_ATTACK with LO_CREATURE_PEN
+    disable LC7_EnemyCreature action availability LA_ATTACK with LO_ROCKS
+    disable LC7_EnemyCreature action availability LA_ATTACK with LO_MINE
+    disable LC7_EnemyCreature action availability LA_ATTACK with LO_ORE_ROCKS
+    disable LC7_EnemyCreature action availability LA_ATTACK with LO_TREES
+    disable LC7_EnemyCreature action availability LA_ATTACK with LO_FIELDS
+    disable LC7_EnemyCreature action availability LA_ATTACK with LO_POO
+    disable LC7_EnemyCreature action availability LA_ATTACK with LO_SPELL_ORBS
+    
+    set player 1 creature to LC7_EnemyCreature
+    
+    wait until IntroFinished == 1
+    
+    release LC7_EnemyCreature
+
+    run background script LC7_CreatureLogic
+
+end script LC7_CreatureAI
+
+begin script LC7_CreatureLogic
+
+    Number = 0
+    CreatureRollRoleTimer = create timer for 0 seconds
+    CreatureAttackTimer = create timer for 0 seconds
+    Town[16]
+    Counter = 0
+
+start
+
+begin loop
+
+    while Counter > 14
+        Counter = 0
+    end while
+
+    if HEALTH of LC7_EnemyCreature == 0.00
+        //CreatureKilled = 1
+        wait until HEALTH of LC7_EnemyCreature > 0.00
+        set creature LC7_EnemyCreature role to CR_NONE radius 500 at {CreatureGathererPos[0]}
+        HEALTH of LC7_EnemyCreature = 1.0
+    end if
+
+    if town JapaneseCapital is under takeover from player 0 and HEALTH of LC7_EnemyCreature > 0
+        HEALTH of LC7_EnemyCreature = 1.0
+        set creature LC7_EnemyCreature role to CR_SOLDIER radius 100 at {JapaneseCapital}
+        
+        wait until HEALTH of LC7_EnemyCreature == 0.00 or not town JapaneseCapital is under takeover from player 0 or 1000 seconds
+    
+    elsif town JapaneseTown1 is under takeover from player 0 and HEALTH of LC7_EnemyCreature > 0
+        HEALTH of LC7_EnemyCreature = 1.0
+        set creature LC7_EnemyCreature role to CR_SOLDIER radius 100 at {JapaneseTown1}
+        
+        wait until HEALTH of LC7_EnemyCreature == 0.00 or not town JapaneseTown1 is under takeover from player 0 or 1000 seconds
+
+    elsif town JapaneseTown2 is under takeover from player 0 and HEALTH of LC7_EnemyCreature > 0
+        HEALTH of LC7_EnemyCreature = 1.0
+        set creature LC7_EnemyCreature role to CR_SOLDIER radius 100 at {JapaneseTown2}
+        
+        wait until HEALTH of LC7_EnemyCreature == 0.00 or not town JapaneseTown2 is under takeover from player 0 or 1000 seconds
+
+    elsif town Town[Counter] is under takeover from player 1 and HEALTH of LC7_EnemyCreature > 0
+        HEALTH of LC7_EnemyCreature = 1.0
+        set creature LC7_EnemyCreature role to CR_SOLDIER radius 100 at {PlayerTown}
+        
+        wait until HEALTH of LC7_EnemyCreature == 0.00 or not town PlayerTown is under takeover from player 0 or 1000 seconds
+
+    elsif LC7_LargeSiegeIsRunning == 1 and HEALTH of LC7_EnemyCreature > 0.00 and get CreatureAttackTimer time remaining <= 0
+        CreatureAttackTimer = create timer for 600 seconds
+        HEALTH of LC7_EnemyCreature = 1.0
+        if LC7_LargeSiegeIsRunning == 1
+            begin loop
+                set creature LC7_EnemyCreature role to CR_SOLDIER radius 100 at {CreatureAttackPos[1]}
+                until HEALTH of LC7_EnemyCreature == 0.00 or LC7_LargeSiegeLaunchAttack == 1
+            end loop
+        end if
+        if LC7_LargeSiegeIsRunning == 1
+            begin loop
+                set creature LC7_EnemyCreature role to CR_SOLDIER radius 100 at {CreatureAttackPos[0]}
+                until HEALTH of LC7_EnemyCreature == 0.00 or 500 seconds
+            end loop
+        end if
+    elsif LC7_Platoon[17] exists and {LC7_Platoon[17]} near {JapaneseCapital} radius 500 and HEALTH of LC7_EnemyCreature > 0.00 and get CreatureAttackTimer time remaining <= 0
+        CreatureAttackTimer = create timer for 600 seconds
+        HEALTH of LC7_EnemyCreature = 1.0
+        begin loop
+            if LC7_Platoon[17] exists and not {LC7_Platoon[17]} near {AttackPos[0]} radius 350
+                set creature LC7_EnemyCreature role to CR_SOLDIER radius 5 at {LC7_Platoon[17]}
+            else
+                set creature LC7_EnemyCreature role to CR_SOLDIER radius 100 at {CreatureAttackPos[0]}
+            end if
+            until HEALTH of LC7_EnemyCreature == 0.00 or 1000 seconds
+        end loop
+
+    elsif HEALTH of LC7_EnemyCreature > 0.00 and get CreatureRollRoleTimer time remaining <= 0
+        Number = number from 1 to 3
+        if Number == 1 and PLAYER of JapaneseCapital == 1
+            set creature LC7_EnemyCreature role to CR_GATHERER radius 200 at {CreatureGathererPos[0]}
+            CreatureRollRoleTimer = create timer for 360 seconds
+            
+        elsif Number == 2 and PLAYER of JapaneseTown1 == 1
+            set creature LC7_EnemyCreature role to CR_GATHERER radius 200 at {CreatureGathererPos[1]}
+            CreatureRollRoleTimer = create timer for 360 seconds
+
+        elsif Number == 3 and PLAYER of JapaneseTown2 == 1
+            set creature LC7_EnemyCreature role to CR_GATHERER radius 200 at {CreatureGathererPos[2]}
+            CreatureRollRoleTimer = create timer for 360 seconds
+        
+        end if
+    end if
+    
+    Counter++
+
+end loop
+
+end script LC7_CreatureLogic

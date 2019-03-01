@@ -1,0 +1,116 @@
+//-----------------------------------------------------------
+
+define script LC10_Intro
+
+begin script LC10_Intro
+
+    CSMixer = 0
+    GreekPlatoon[3]
+    GreekPlatoonPos[3]
+    AztecPlatoon[2]
+    WindMixer = 0
+
+start
+
+    PD_ForcedSaving = 1
+    wait until PD_ForcedSaving == 1 or 10 seconds
+    stop script "SavePersistentDataSetData"
+    set persistent data "PREVLAND_OVER" to 0
+    run script SavePersistentDataGetData
+
+    WindMixer = create mixer
+    set mixer WindMixer channel AUDIO_MIXER_CHANNEL_GLOBAL to 0.0
+
+    wait 5 seconds
+    set mixer WindMixer channel AUDIO_MIXER_CHANNEL_GLOBAL to 1.0 with fadetime 2
+    wait 2 seconds
+    destroy mixer WindMixer
+
+    GreekPlatoonPos[0] = marker at {1456.32,186.70,721.30}
+    GreekPlatoonPos[1] = marker at {1442.07,186.14,743.11}
+    GreekPlatoonPos[2] = marker at {1397.13,186.69,723.60}
+
+    set game time 8.00
+
+    wait 13 seconds //Long loading-screen; time to get the volcano up
+
+    AztecPlatoon[0] = get platoon of player 1 nearest {1556.80,185.07,740.00} radius 50
+    AztecPlatoon[1] = get platoon of player 1 nearest {1582.10,184.93,773.35} radius 50
+
+    begin cinema
+    
+        CSMixer = create mixer
+        set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 0.0
+    
+        wait 2 seconds
+
+        GreekPlatoon[0] = create platoon PLATOON_INFO_GREEK_MELEE_4 at {GreekPlatoonPos[0]} with 25 men and 0 women
+        GreekPlatoon[1] = create platoon PLATOON_INFO_GREEK_MELEE_4 at {GreekPlatoonPos[1]} with 25 men and 0 women
+        GreekPlatoon[2] = create platoon PLATOON_INFO_GREEK_RANGED_4 at {GreekPlatoonPos[2]} with 25 men and 0 women
+
+        attach GreekPlatoon[0] to PlayerTown
+        PLAYER of GreekPlatoon[0] = 0
+        attach GreekPlatoon[1] to PlayerTown
+        PLAYER of GreekPlatoon[1] = 0
+        attach GreekPlatoon[2] to PlayerTown
+        PLAYER of GreekPlatoon[2] = 0
+    
+        //40 seconds
+        reset camera path
+        queue camera move with position {1280.15,270.00,1917.59} focus {1651.36,250.00,711.19} time 0.0
+        queue camera move with position {1325.95,250.00,1511.28} focus {1651.36,200.00,711.19} time 20.0
+        queue camera move with position {1613.16,215.00,761.94} focus {1651.36,197.00,711.19} time 6.0
+        queue camera move with position {1449.62,240.00,737.71} focus {1612.43,185.14,721.83} time 15.0
+        play camera path with easein 20 easeout 8 method SCRIPT_CAMERAPATH_EQUALDISTANCE
+    
+        start music "cut_scene_battle_03 " loop 1
+        disable load screen
+        set fade red 0 green 0 blue 0 time 0
+        set fade in time 4
+        set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 1.0 with fadetime 0
+        
+        wait 10 seconds
+        
+        if alignment of player < -0.3
+            say "BW2T_SCRIPT_09FINAL_ADVISORS_INTRO_70"
+            wait until read
+        elsif alignment of player > 0.3
+            say "BW2T_SCRIPT_09FINAL_ADVISORS_INTRO_50"
+            wait until read
+        else
+            say "BW2T_SCRIPT_09FINAL_ADVISORS_INTRO_60"
+            wait until read
+        end if
+
+        wait 4 seconds
+        
+        eject good spirit
+        eject evil spirit
+        
+        say "BW2T_SCRIPT_10FINAL_ADVISORS_INTRO_10"
+        wait until read
+
+        add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_PLATOON using AztecPlatoon[0] to GreekPlatoon[0] action queue
+        add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_PLATOON using AztecPlatoon[1] to GreekPlatoon[1] action queue
+        add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {1490.93,185.54,754.74} to GreekPlatoon[2] action queue
+
+        say "BW2T_SCRIPT_10FINAL_ADVISORS_INTRO_35"
+        wait until read        
+        say "BW2T_SCRIPT_10FINAL_ADVISORS_INTRO_30"
+        wait until read
+        //say "BW2T_SCRIPT_10FINAL_ADVISORS_INTRO_40"
+        //wait until read
+        wait 1 seconds
+        
+        send good spirit home
+        send evil spirit home
+
+        IntroFinished = 1
+
+        destroy mixer CSMixer
+        
+    end cinema
+
+end script LC10_Intro
+
+//-----------------------------------------------------------

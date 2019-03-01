@@ -1,0 +1,285 @@
+///////////////////////////////////////////////////////////////////////////////
+//    Angry Creature
+//    ~~~~~~~~~~~~~~
+//
+//    Description:
+//    A bunch of creatures are attacking the player town.
+//     The player must eliminate them in order to gain peace again.
+//
+//    Rewards:            30000 tribute
+//
+//    Start date:            27.04.18            By: Boxhead
+//    Update date:        28.04.18            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+define script LC9_AngryCreature
+define script LC9_AngryCreatureReminder
+define script LC9_AngryCreature_Intro
+define script LC9_AngryCreatureAI
+define script LC9_AngryCreatureQuestCheck
+
+global AngryCreaturePos1 = 0
+global AngryCreaturePos2 = 0
+
+global AngryCreature[2]
+
+begin script LC9_AngryCreature
+ 
+start
+
+    wait 60 seconds
+
+    AngryCreaturePos1 = marker at {1910.06,20.00,116.47}
+
+    wait until get distance from camera position to {AngryCreaturePos1} > 100
+
+    /*
+
+    AngryCreature[0] = create CREATURE CREATURE_TYPE_WOLF at {AngryCreaturePos1}
+    set player 2 creature to AngryCreature[0]
+    set research ARTEFACT_CREATURE_MAGIC_TYPE_WATER available to RESEARCH_AVAILABILITY_RESEARCHED player 2
+    set research ARTEFACT_CREATURE_MAGIC_TYPE_LIGHTNING available to RESEARCH_AVAILABILITY_RESEARCHED player 2
+    set research ARTEFACT_CREATURE_MAGIC_TYPE_FIREBALL available to RESEARCH_AVAILABILITY_RESEARCHED player 2
+    set research ARTEFACT_CREATURE_MAGIC_TYPE_HEAL available to RESEARCH_AVAILABILITY_RESEARCHED player 2
+    set research ARTEFACT_CREATURE_ROLE_BUILDER_2 available to RESEARCH_AVAILABILITY_RESEARCHED player 2
+    set research ARTEFACT_CREATURE_ROLE_GATHERER_2 available to RESEARCH_AVAILABILITY_RESEARCHED player 2
+    set research ARTEFACT_CREATURE_ROLE_SOLDIER_2 available to RESEARCH_AVAILABILITY_RESEARCHED player 2
+    teach AngryCreature[0] all
+    set creature AngryCreature[0] CREATURE_SCRIPT_TRANSITIONAL_ATTRIBUTE_TYPE_SIZE 0.72
+    STRENGTH of AngryCreature[0] = 0.6
+    ALIGNMENT of AngryCreature[0] = -0.25
+    FATNESS of AngryCreature[0] = 0.3
+    HEALTH of AngryCreature[0] = 1.0
+
+    */
+
+    AngryCreaturePos2 = marker at {1898.51,20.00,88.83}
+
+    AngryCreature[1] = create CREATURE CREATURE_TYPE_WOLF at {AngryCreaturePos2}
+    set player 3 creature to AngryCreature[1]
+    set research ARTEFACT_CREATURE_MAGIC_TYPE_WATER available to RESEARCH_AVAILABILITY_RESEARCHED player 3
+    set research ARTEFACT_CREATURE_MAGIC_TYPE_LIGHTNING available to RESEARCH_AVAILABILITY_RESEARCHED player 3
+    set research ARTEFACT_CREATURE_MAGIC_TYPE_FIREBALL available to RESEARCH_AVAILABILITY_RESEARCHED player 3
+    set research ARTEFACT_CREATURE_MAGIC_TYPE_HEAL available to RESEARCH_AVAILABILITY_RESEARCHED player 3
+    set research ARTEFACT_CREATURE_ROLE_BUILDER_2 available to RESEARCH_AVAILABILITY_RESEARCHED player 3
+    set research ARTEFACT_CREATURE_ROLE_GATHERER_2 available to RESEARCH_AVAILABILITY_RESEARCHED player 3
+    set research ARTEFACT_CREATURE_ROLE_SOLDIER_2 available to RESEARCH_AVAILABILITY_RESEARCHED player 3
+    teach AngryCreature[1] all
+    set creature AngryCreature[1] CREATURE_SCRIPT_TRANSITIONAL_ATTRIBUTE_TYPE_SIZE 1.0
+    STRENGTH of AngryCreature[1] = 1.0
+    ALIGNMENT of AngryCreature[1] = -1.0
+    FATNESS of AngryCreature[1] = 0.2
+    HEALTH of AngryCreature[1] = 1.0
+
+    run background script LC9_AngryCreatureQuestCheck
+    run background script LC9_AngryCreatureAI
+    run background script LC9_AngryCreatureReminder
+    //run background script LC9_AngryCreature_Intro
+    
+end script LC9_AngryCreature
+
+begin script LC9_AngryCreatureReminder
+
+    ReminderTimer = create timer for 0 seconds
+
+start
+    
+    begin loop
+        if get ReminderTimer time remaining <= 0
+            if camera position near {AngryCreature[0]} radius 150 and HEALTH of AngryCreature[0] > 0.00 and get ReminderTimer time remaining <= 0
+                begin dialogue
+                    eject good spirit
+                    make good spirit point at {AngryCreature[0]}
+                    say "BW2T_SCRIPT_10FINAL_SMOKESIGNALS_REMINDER_10"
+                    wait until read
+                    stop good spirit pointing
+                    send good spirit home
+                end dialogue
+                set ReminderTimer time to 90 seconds
+            end if
+            if camera position near {AngryCreature[1]} radius 150 and HEALTH of AngryCreature[1] > 0.00 and get ReminderTimer time remaining <= 0
+                begin dialogue
+                    eject good spirit
+                    make good spirit point at {AngryCreature[1]}
+                    say "BW2T_SCRIPT_10FINAL_SMOKESIGNALS_REMINDER_10"
+                    wait until read
+                    stop good spirit pointing
+                    send good spirit home
+                end dialogue
+                set ReminderTimer time to 90 seconds
+            end if
+        end if
+    until HEALTH of AngryCreature[1] == 0
+    end loop
+
+end script LC9_AngryCreatureReminder
+
+begin script LC9_AngryCreature_Intro
+
+    AtmosMixer = create mixer
+
+start
+
+    wait until CinemaIsRunning ==  0
+
+    release AngryCreature[0]
+    release AngryCreature[1]
+
+    set AngryCreature[0] focus to {1825.91,20.00,73.12}
+    set AngryCreature[1] focus to {1825.91,20.00,73.12}
+    wait 2.5 seconds
+
+    CinemaIsRunning = 1
+    
+    set atmos volume 0
+    set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_MAP to 0.0
+    set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_POSITIONAL to 0.0
+    begin cinema
+        set fade red 0 green 0 blue 0 time 2
+        wait 2 seconds
+        set fade in time 2
+        start music "lc9_creatures_intro" loop 1
+        set camera position to {AngryCreature[1]} + {-30,7,5}
+        set camera focus to {AngryCreature[1]} + {0.00,6.00,0.00}
+        wait 2 seconds
+        move camera position to {AngryCreature[1]} + {-50.00,5.00,-10.00} time 15
+        move camera focus to {AngryCreature[1]} + {0.00,6.00,0.00} time 15
+        wait 10 seconds
+        move camera position to {AngryCreature[1]} + {-50.00,55.00,20.00} time 4
+        move camera focus to {AngryCreature[1]} + {0.00,30.00,0.00} time 4
+        wait 4 seconds
+    end cinema
+    set atmos volume 0.45
+    set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_MAP to 0.6
+    set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_POSITIONAL to 0.6
+
+    release AngryCreature[0]
+    release AngryCreature[1]
+    
+    CinemaIsRunning = 0
+
+end script LC9_AngryCreature_Intro
+
+begin script LC9_AngryCreatureAI
+
+    Creature1AttackPos[3]
+    Creature1IdlePos[4]
+
+    Creature2AttackPos[3]
+    Creature2IdlePos[4]
+
+    Number = 0
+
+    AttackTimer = create timer for 100 seconds
+
+start
+
+Creature1AttackPos[0] = marker at {1691.71,62.15,351.10}
+Creature1AttackPos[1] = marker at {1607.50,61.59,371.99}
+Creature1AttackPos[2] = marker at {1630.18,61.79,318.97}
+Creature1IdlePos[0] = marker at {1888.54,20.00,131.48}
+Creature1IdlePos[1] = marker at {1897.14,20.00,90.44}
+Creature1IdlePos[2] = marker at {1885.40,20.00,103.60}
+Creature1IdlePos[3] = marker at {1925.92,20.00,101.37}
+
+Creature2AttackPos[0] = marker at {1679.34,62.16,365.18}
+Creature2AttackPos[1] = marker at {1578.26,61.53,357.95}
+Creature2AttackPos[2] = marker at {1681.59,62.82,321.87}
+Creature2IdlePos[0] = marker at {1903.70,20.00,115.16}
+Creature2IdlePos[1] = marker at {1879.88,20.00,76.26}
+Creature2IdlePos[2] = marker at {1868.08,20.00,107.23}
+Creature2IdlePos[3] = marker at {1949.88,20.56,90.16}
+
+begin loop
+
+    if get AttackTimer time remaining <= 0
+        if HEALTH of AngryCreature[0] > 0.00
+            Number = number from 1 to 3
+            if Number == 1
+                set creature AngryCreature[0] role to CR_SOLDIER radius 100 at {Creature1AttackPos[0]}
+                
+            elsif Number == 2
+                set creature AngryCreature[0] role to CR_SOLDIER radius 100 at {Creature1AttackPos[1]}
+
+            elsif Number == 3
+                set creature AngryCreature[0] role to CR_SOLDIER radius 100 at {Creature1AttackPos[1]}        
+            end if
+        end if
+
+        if HEALTH of AngryCreature[1] > 0.00
+            Number = number from 1 to 3
+            if Number == 1
+                set creature AngryCreature[1] role to CR_SOLDIER radius 100 at {Creature2AttackPos[0]}
+                
+            elsif Number == 2
+                set creature AngryCreature[1] role to CR_SOLDIER radius 100 at {Creature2AttackPos[1]}
+
+            elsif Number == 3
+                set creature AngryCreature[1] role to CR_SOLDIER radius 100 at {Creature2AttackPos[2]}    
+            end if
+        end if
+
+        wait 160 seconds
+        AttackTimer = create timer for 300 seconds
+    else
+        wait number from 5 to 10 seconds
+        Number = number from 1 to 4
+        if Number == 1
+            set creature AngryCreature[0] role to CR_SOLDIER radius 15 at {Creature1IdlePos[0]}
+                
+        elsif Number == 2
+            set creature AngryCreature[0] role to CR_SOLDIER radius 15 at {Creature1IdlePos[1]}
+
+        elsif Number == 3
+            set creature AngryCreature[0] role to CR_SOLDIER radius 15 at {Creature1IdlePos[2]}
+            
+        elsif Number == 4
+            set creature AngryCreature[0] role to CR_SOLDIER radius 15 at {Creature1IdlePos[3]}
+        end if
+
+        wait number from 5 to 10 seconds
+        Number = number from 1 to 4
+        if Number == 1
+            set creature AngryCreature[1] role to CR_SOLDIER radius 15 at {Creature1IdlePos[0]}
+                
+        elsif Number == 2
+            set creature AngryCreature[1] role to CR_SOLDIER radius 15 at {Creature1IdlePos[1]}
+
+        elsif Number == 3
+            set creature AngryCreature[1] role to CR_SOLDIER radius 15 at {Creature1IdlePos[2]}
+            
+        elsif Number == 4
+            set creature AngryCreature[1] role to CR_SOLDIER radius 15 at {Creature1IdlePos[3]}
+        end if
+
+    end if
+    
+    until HEALTH of AngryCreature[0] == 0 and HEALTH of AngryCreature[1] == 0
+end loop
+
+end script LC9_AngryCreatureAI
+
+begin script LC9_AngryCreatureQuestCheck
+
+start
+
+    wait until HEALTH of AngryCreature[1] == 0.00
+    wait 3 seconds
+    
+    increment tribute by 30000
+
+    wait 75 seconds
+    wait until get distance from camera position to {AngryCreature[1]} > 400
+    if AngryCreature[0] exists
+        delete AngryCreature[0]
+    end if
+    if AngryCreature[1] exists
+        delete AngryCreature[1]
+    end if
+
+
+end script LC9_AngryCreatureQuestCheck
+
+//-----------------------------------------------------------------------------
+// Angry Creature
+//-----------------------------------------------------------------------------

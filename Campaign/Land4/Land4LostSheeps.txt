@@ -1,0 +1,352 @@
+///////////////////////////////////////////////////////////////////////////////
+//    Lost Sheeps
+//    ~~~~~~~~~~~~~
+//
+//    Description:
+//    The farmer slept and his sheeps ran aways.
+//    It's up to the player to find and bring back the sheeps.
+//  
+//    Rewards:            20000 tribute
+//
+//    Start date:            03.11.16            By:    Boxhead
+//    Update date:        28.05.16            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+define script LC4_LostSheeps
+define script LC4_LostSheeps_Intro
+define script LC4_LostSheeps_ExtraAnimations1
+define script LC4_LostSheeps_Guy1Behaviour
+define script LC4_LostSheeps_ConditionCheck
+define script LC4_LostSheeps_OutroGood
+define script LC4_LostSheeps_OutroEvil
+
+global Scroll_LostSheeps = 0
+global LostSheeps_ScrollPos = 0
+global LostSheeps_Abode = 0
+global LostSheeps_Influence1 = 0
+global LostSheeps_Influence2 = 0
+global LostSheeps_Influence3 = 0
+global LostSheeps_Influence4 = 0
+global LostSheeps_Influence5 = 0 
+global LostSheeps_Guy1Pos = 0
+global LostSheeps_Guy1 = 0
+global LostSheeps_Sheep1 = 0
+global LostSheeps_Sheep2 = 0
+global LostSheeps_Sheep3 = 0
+global LostSheeps_Sheep4 = 0
+global LostSheeps_Sheep1Pos = 0
+global LostSheeps_Sheep2Pos = 0
+global LostSheeps_Sheep3Pos = 0
+global LostSheeps_Sheep4Pos = 0
+global LostSheeps_SheepPos = 0
+global AllSheepsRescued = 0
+global SheepsRescued = 0
+global SheepsDead = 0
+
+global L4ShowingLostSheepsObjective = 0
+
+begin script LC4_LostSheeps
+
+    ReminderTimer = create timer for 0 seconds
+ 
+start
+
+    LostSheeps_Abode = get HOUSE at {1351.06,100.47,593.43}
+    LostSheeps_ScrollPos = marker at {1351.06,100.47,593.43} + {0.00,5.00,0.00}
+    LostSheeps_Guy1Pos = marker at {1345.58,102.10,588.22}
+    LostSheeps_Sheep1Pos = marker at {1029.30,203.11,977.46}
+    LostSheeps_Sheep2Pos = marker at {1161.19,110.06,453.62}
+    LostSheeps_Sheep3Pos = marker at {885.37,126.30,913.89}
+    LostSheeps_Sheep4Pos = marker at {1520.47,195.11,1034.98}
+    LostSheeps_SheepPos = marker at {1338.47,100.95,600.90}
+    
+    LostSheeps_Sheep1 = create ANIMAL SHEEP at {LostSheeps_Sheep1Pos}
+    SCALE of LostSheeps_Sheep1 = 1.75
+    LostSheeps_Sheep2 = create ANIMAL SHEEP at {LostSheeps_Sheep2Pos}
+    SCALE of LostSheeps_Sheep2 = 1.75
+    LostSheeps_Sheep3 = create ANIMAL SHEEP at {LostSheeps_Sheep3Pos}
+    SCALE of LostSheeps_Sheep3 = 1.75
+    LostSheeps_Sheep4 = create ANIMAL SHEEP at {LostSheeps_Sheep4Pos}
+    SCALE of LostSheeps_Sheep4 = 1.75
+
+    enable LostSheeps_Abode indestructible
+    disable LostSheeps_Abode pickup
+    disable LostSheeps_Abode moveable
+    
+    if Language == German
+        Scroll_LostSheeps = create highlight SILVER name "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_04" remind "HELP_TEXT_CREATURE_MENTAL_PROBLEM_01" at {LostSheeps_ScrollPos}
+    elsif Language == English
+        Scroll_LostSheeps = create highlight SILVER name "HELP_TEXT_MULTIPLAYER_SETUP_SPELL_11" remind "HELP_TEXT_CREATURE_MENTAL_PROBLEM_01" at {LostSheeps_ScrollPos}
+    end if
+
+    wait until Scroll_LostSheeps right clicked
+    
+    delete Scroll_LostSheeps
+    
+    LostSheeps_Influence1 = create influence at {LostSheeps_SheepPos} radius 15
+    LostSheeps_Influence2 = create influence at {LostSheeps_Sheep1} radius 15
+    LostSheeps_Influence3 = create influence at {LostSheeps_Sheep2} radius 15
+    LostSheeps_Influence4 = create influence at {LostSheeps_Sheep3} radius 15
+    LostSheeps_Influence5 = create influence at {LostSheeps_Sheep4} radius 15
+    
+    run background script LC4_LostSheeps_Intro
+
+end script LC4_LostSheeps
+
+begin script LC4_LostSheeps_Intro
+
+start
+
+    LostSheeps_Guy1 = create VILLAGER VILLAGER_INFO_NORSE_FORESTER_MALE at {LostSheeps_Abode}
+    move LostSheeps_Guy1 position to {1345.58,100.53,588.22}
+    
+    disable LostSheeps_Guy1 pickup
+    disable LostSheeps_Guy1 moveable
+
+    wait 2 seconds
+    
+    begin cinema
+        start music "lc4_lostsheeps_intro" loop 1
+        move camera position to {1344.74,101.50,585.51} time 7
+        move camera focus to {LostSheeps_Guy1Pos} + {-1.00,0.00,1.00} time 7
+        wait 1 seconds
+        run background script LC4_LostSheeps_ExtraAnimations1
+        wait 13 seconds
+        set camera position to {1023.29,205.37,991.82}
+        set camera focus to {1043.93,201.40,956.72}
+        move camera position to {1023.29,205.37,991.82} + {7.00,3.00,-7.00} time 7
+        move camera focus to {1043.93,194.40,956.72} time 7
+        wait 7 seconds
+        set camera position to {1344.74,101.50,585.51}
+        set camera focus to {LostSheeps_Guy1Pos} + {-1.00,0.00,1.00}
+        wait 2 seconds
+        move camera position to {1344.74,101.10,585.51} + {35.00,15.00,-20.00} time 6
+        move camera focus to {LostSheeps_Guy1Pos} + {-1.00,0.00,1.00} time 6
+        wait 3 seconds
+    end cinema
+    
+    run background script LC4_LostSheeps_ConditionCheck
+    
+    if Language == German
+        Scroll_LostSheeps = create highlight SILVER name "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_04" remind "HELP_TEXT_CREATURE_MENTAL_PROBLEM_01" at {LostSheeps_ScrollPos}
+        set player 0 objective TRIBUTE_OBJECTIVE_LAND_1 with amount 1 text "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_04" amount 1 description "HELP_TEXT_CREATURE_MENTAL_PROBLEM_01" start value 0 reward 20000
+    elsif Language == English
+        Scroll_LostSheeps = create highlight SILVER name "HELP_TEXT_MULTIPLAYER_SETUP_SPELL_11" remind "HELP_TEXT_CREATURE_MENTAL_PROBLEM_01" at {LostSheeps_ScrollPos}
+        set player 0 objective TRIBUTE_OBJECTIVE_LAND_1 with amount 1 text "HELP_TEXT_MULTIPLAYER_SETUP_SPELL_11" amount 1 description "HELP_TEXT_CREATURE_MENTAL_PROBLEM_01" start value 0 reward 20000
+    end if
+    L4ShowingLostSheepsObjective = 1
+
+end script LC4_LostSheeps_Intro
+
+begin script LC4_LostSheeps_ExtraAnimations1
+
+start
+
+play anim "a_p_walk_tired_eyes" on LostSheeps_Guy1 loop 1
+
+wait 4 seconds
+
+play anim "a_p_yawn2" on LostSheeps_Guy1 loop 1
+
+wait 7 seconds
+
+play anim "a_p_yawn" on LostSheeps_Guy1 loop 2
+
+end script LC4_LostSheeps_ExtraAnimations1
+
+begin script LC4_LostSheeps_Guy1Behaviour
+
+start
+
+begin loop
+    if not {LostSheeps_Guy1} near {1345.58,100.53,588.22} radius 5
+        move LostSheeps_Guy1 position to {1345.58,100.53,588.22}
+    else
+        wait 1 seconds
+    end if
+end loop
+
+end script LC4_LostSheeps_Guy1Behaviour
+
+begin script LC4_LostSheeps_ConditionCheck
+
+    a = 0
+    b = 0
+    c = 0
+    d = 0
+    e = 0
+    f = 0
+    g = 0
+    Sheepsremaining = 4
+
+start
+
+begin loop
+
+    if {LostSheeps_Sheep1} near {LostSheeps_SheepPos} radius 15 and AllSheepsRescued == 0 and a == 0 and not LostSheeps_Sheep1 is HELD
+        a = 1
+        Sheepsremaining = Sheepsremaining -1
+        if HEALTH of LostSheeps_Sheep1 == 0.00
+            SheepsDead = SheepsDead + 1
+        else
+            SheepsRescued = SheepsRescued + 1
+        end if
+    end if
+    //Sheep on spot?
+    
+    if {LostSheeps_Sheep2} near {LostSheeps_SheepPos} radius 15 and AllSheepsRescued == 0 and b == 0 and not LostSheeps_Sheep2 is HELD
+        b = 1
+        Sheepsremaining = Sheepsremaining -1
+        if HEALTH of LostSheeps_Sheep2 == 0.00
+            SheepsDead = SheepsDead + 1
+        else
+            SheepsRescued = SheepsRescued + 1
+        end if
+    end if
+    
+    if {LostSheeps_Sheep3} near {LostSheeps_SheepPos} radius 15 and AllSheepsRescued == 0 and c == 0 and not LostSheeps_Sheep3 is HELD
+        c = 1
+        Sheepsremaining = Sheepsremaining -1
+        if HEALTH of LostSheeps_Sheep3 == 0.00
+            SheepsDead = SheepsDead + 1
+        else
+            SheepsRescued = SheepsRescued + 1
+        end if
+    end if
+    
+    if {LostSheeps_Sheep4} near {LostSheeps_SheepPos} radius 15 and AllSheepsRescued == 0 and d == 0 and not LostSheeps_Sheep4 is HELD
+        d = 1
+        Sheepsremaining = Sheepsremaining -1
+        if HEALTH of LostSheeps_Sheep4 == 0.00
+            SheepsDead = SheepsDead + 1
+        else
+            SheepsRescued = SheepsRescued + 1
+        end if
+    end if
+    
+    if SheepsRescued == 1 and a == 1
+        a = 2
+        start music "lc4_sheep_1" loop 1
+    end if
+    
+    if SheepsRescued == 2 and b == 1
+        b = 2
+        start music "lc4_sheep_2" loop 1
+    end if
+    
+    if SheepsRescued == 3 and c == 1
+        c = 2
+        start music "lc4_sheep_3" loop 1
+    end if
+    
+    if SheepsDead == 1 and e == 0
+        e = 1
+        start music "lc4_sheep_dead_1" loop 1
+    end if
+    
+    if (Sheepsremaining == 0 or SheepsDead == 2) and g == 0
+        g = 1
+    end if
+    
+    if HEALTH of LostSheeps_Guy1 == 0.00
+        g = 1
+    end if
+
+    until g == 1
+end loop
+
+if HEALTH of LostSheeps_Guy1 > 0.00
+    if SheepsDead < 2
+        start music "lc4_sheep_end_1" loop 1
+        wait 6 seconds
+    end if
+
+    if SheepsDead >= 2 or HEALTH of LostSheeps_Guy1 == 0.00
+        run background script LC4_LostSheeps_OutroEvil
+    else
+        run background script LC4_LostSheeps_OutroGood
+    end if
+else
+    delete LostSheeps_Influence1
+    delete LostSheeps_Influence2
+    delete LostSheeps_Influence3
+    delete LostSheeps_Influence4
+    delete LostSheeps_Influence5
+    
+    stop script "LC4_LostSheeps_Guy1Behaviour"
+    
+    release LostSheeps_Guy1
+    release LostSheeps_Sheep1
+    release LostSheeps_Sheep2
+    release LostSheeps_Sheep3
+    release LostSheeps_Sheep4
+
+    wait 2 seconds
+    delete Scroll_LostSheeps
+end if
+
+end script LC4_LostSheeps_ConditionCheck
+
+begin script LC4_LostSheeps_OutroEvil
+
+start
+
+    start music "lc4_sheep_dead_2" loop 1
+
+    delete LostSheeps_Influence1
+    delete LostSheeps_Influence2
+    delete LostSheeps_Influence3
+    delete LostSheeps_Influence4
+    delete LostSheeps_Influence5
+    
+    stop script "LC4_LostSheeps_Guy1Behaviour"
+    
+    release LostSheeps_Guy1
+    release LostSheeps_Sheep1
+    release LostSheeps_Sheep2
+    release LostSheeps_Sheep3
+    release LostSheeps_Sheep4
+
+    PLAYER of LostSheeps_Guy1 = 0
+    enable LostSheeps_Guy1 pickup
+    enable LostSheeps_Guy1 moveable
+
+    wait 2 seconds
+    delete Scroll_LostSheeps
+    
+end script LC4_LostSheeps_OutroEvil
+
+begin script LC4_LostSheeps_OutroGood
+
+start
+
+    start music "lc4_sheep_end_2" loop 1
+    
+    delete LostSheeps_Influence1
+    delete LostSheeps_Influence2
+    delete LostSheeps_Influence3
+    delete LostSheeps_Influence4
+    delete LostSheeps_Influence5
+    
+    stop script "LC4_LostSheeps_Guy1Behaviour"
+    
+    release LostSheeps_Guy1
+    release LostSheeps_Sheep1
+    release LostSheeps_Sheep2
+    release LostSheeps_Sheep3
+    release LostSheeps_Sheep4
+    
+    PLAYER of LostSheeps_Guy1 = 0
+    enable LostSheeps_Guy1 pickup
+    enable LostSheeps_Guy1 moveable
+
+    wait 2 seconds
+    delete Scroll_LostSheeps
+    
+    set player 0 objective TRIBUTE_OBJECTIVE_LAND_1 status to TRIBUTE_OBJECTIVE_STATE_COMPLETE
+
+end script LC4_LostSheeps_OutroGood
+
+//-----------------------------------------------------------------------------
+// Land 4 Lost Sheeps
+//-----------------------------------------------------------------------------

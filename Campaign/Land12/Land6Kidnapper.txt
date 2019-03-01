@@ -1,0 +1,394 @@
+///////////////////////////////////////////////////////////////////////////////
+//      Kidnapper
+//    ~~~~~~~~~~~~~~
+//
+//    Description:
+//    A lonely man steals children from the player town.
+//     The player can kill the kidnapper or let his creature take care of him.
+//
+//    Rewards:            25000 tribute
+//
+//    Start date:            14.09.17            By: Boxhead
+//    Update date:        09.03.18            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+define script LC6_Kidnapper
+define script LC6_Kidnapper_Intro
+define script LC6_KidnapperBeforeIntro
+define script LC6_KidnapperLogic
+define script LC6_KidnapperReactions
+define script LC6_KidnapperConditions
+define script LC6_SpawnChildren
+
+global KidnapperScrollPos = 0
+global CrechePos = 0
+global KidnapperHousePos = 0
+
+global Creche = 0
+global Scroll_Kidnapper = 0
+global KidnapperHouse = 0
+
+global LC6_KidnapperWoman = 0
+global LC6_Napper = 0
+global LC6_Child = 0
+global LC6_KidnapperIntroDone = 0
+global KidnapperIsInHouse = 0
+
+begin script LC6_Kidnapper
+
+    RelPos = 0
+
+start
+
+    wait number from 300 to 360 seconds
+
+    Creche = get building CRECHE in PlayerTown min built 1.0
+    CrechePos = marker at {Creche}
+    KidnapperHousePos = marker at {950.77,41.99,1018.56}
+    RelPos = marker at get world position from Creche to {9,0,9}
+
+    if Language == German
+        Scroll_Kidnapper = create highlight SILVER name "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_02" remind "HELP_TEXT_CREATURE_CURRENT_SOURCE_09" at {CrechePos} + {0.00,5.00,0.00}
+    elsif Language == English
+        Scroll_Kidnapper = create highlight SILVER name "HELP_TEXT_MULTIPLAYER_SETUP_FIELDS_ALLOWED_01" remind "HELP_TEXT_CREATURE_CURRENT_SOURCE_09" at {CrechePos} + {0.00,5.00,0.00}
+    end if
+    LC6_KidnapperWoman = create VILLAGER VILLAGER_INFO_GREEK_HOUSEWIFE_FEMALE at {RelPos}
+    KidnapperHouse = create HOUSE ABODE_INFO_NORSE_HOUSE_B at {KidnapperHousePos}
+
+    enable LC6_KidnapperWoman indestructible
+    disable LC6_KidnapperWoman pickup
+    disable LC6_KidnapperWoman moveable
+    enable KidnapperHouse indestructible
+    disable KidnapperHouse pickup
+    disable KidnapperHouse moveable
+    attach LC6_KidnapperWoman to PlayerTown
+
+    run background script LC6_KidnapperBeforeIntro
+
+    wait until Scroll_Kidnapper right clicked    
+
+    delete Scroll_Kidnapper
+
+    run background script LC6_Kidnapper_Intro
+    
+end script LC6_Kidnapper
+
+begin script LC6_Kidnapper_Intro
+
+start
+
+    stop script "LC6_KidnapperBeforeIntro"
+
+    if LC6_Napper exists
+        delete LC6_Napper
+    end if
+
+    if LC6_Child exists
+        delete LC6_Child
+    end if
+
+    CinemaIsRunning = 1
+    begin cinema
+        start music "lc6_kidnapper_intro" loop 1
+        set LC6_KidnapperWoman focus to {LC6_KidnapperWoman} + {2,1.5,2}
+        play anim "a_p_crying" on LC6_KidnapperWoman loop 2
+        move camera position to {LC6_KidnapperWoman} + {2,1.5,2} time 5
+        move camera focus to {LC6_KidnapperWoman} + {1,1.35,0} time 5
+        wait 10.5 seconds
+        LC6_Napper = create VILLAGER VILLAGER_INFO_NORSE_FORESTER_MALE at {973.21,39.79,1013.84}
+        move LC6_Napper position to {PlayerTown}
+        set camera position to {LC6_Napper} + {3,1.5,-3}
+        set camera focus to {LC6_Napper}
+        move camera position to {LC6_Napper} + {14,2,-14} time 7.5
+        move camera focus to {LC6_Napper} time 7.5
+        wait 7.5 seconds
+        set camera position to {KidnapperHouse} + {12,5,12}
+        set camera focus to {KidnapperHouse}
+        move camera position to {KidnapperHouse} + {12,6,-12} time 6.5
+        move camera focus to {KidnapperHouse} time 6.5
+        delete LC6_Napper
+        wait 6.5 seconds
+        set camera position to {LC6_KidnapperWoman} + {2,1.5,2}
+        set camera focus to {LC6_KidnapperWoman} + {1,1.35,0}
+        play anim "a_p_crying" on LC6_KidnapperWoman loop 2
+        wait 8.5 seconds
+        move camera position to {LC6_KidnapperWoman} + {30,40,30} time 5
+        move camera focus to {LC6_KidnapperWoman} time 5
+        wait 5 seconds
+    end cinema
+    CinemaIsRunning = 0
+
+    delete LC6_Napper
+    if Language == German
+        Scroll_Kidnapper = create highlight SILVER name "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_02" remind "HELP_TEXT_CREATURE_CURRENT_SOURCE_09" at {CrechePos} + {0.00,5.00,0.00}
+    elsif Language == English
+        Scroll_Kidnapper = create highlight SILVER name "HELP_TEXT_MULTIPLAYER_SETUP_FIELDS_ALLOWED_01" remind "HELP_TEXT_CREATURE_CURRENT_SOURCE_09" at {CrechePos} + {0.00,5.00,0.00}
+    end if
+
+    run background script LC6_KidnapperLogic
+    run background script LC6_KidnapperReactions
+    run background script LC6_KidnapperConditions
+
+end script LC6_Kidnapper_Intro
+
+begin script LC6_KidnapperBeforeIntro
+
+    KidnapperIsKidnapping = 1
+    KidnapperTimer = create timer for 0 seconds
+    StopKidnapping = 0
+
+start
+
+begin loop
+
+    StopKidnapping = 0
+    //Steal Child Section
+    if get distance from camera position to {KidnapperHouse} > 100 and get KidnapperTimer time remaining <= 0
+        LC6_Child = create CHILD GREEK_TRADER at {CrechePos} + {number from -10 to 10,0,number from -10 to 10}
+        LC6_Napper = create VILLAGER VILLAGER_INFO_NORSE_FORESTER_MALE at {KidnapperHouse}
+        attach LC6_Child to PlayerTown
+        enable LC6_Napper indestructible
+        detach reaction LC6_Child
+        detach reaction LC6_Napper
+        begin loop
+            SPEED of LC6_Napper = 0.75
+            move LC6_Napper position to {LC6_Child} + {2,0,2} using NAV_FAILURE_MODE_GO_TO_CLOSEST_POINT navigation
+            wait 7.5 seconds
+            until {LC6_Napper} near {LC6_Child} radius 5 or HEALTH of LC6_Child == 0 or {LC6_Napper} under water or LC6_Napper is drowning
+        end loop
+        begin loop
+            SPEED of LC6_Napper = 1.05
+            SPEED of LC6_Child = 1.0
+            move LC6_Napper position to {KidnapperHouse} using NAV_FAILURE_MODE_GO_TO_CLOSEST_POINT navigation
+            move LC6_Child position to {KidnapperHouse} using NAV_FAILURE_MODE_GO_TO_CLOSEST_POINT navigation
+            if {LC6_Napper} near {KidnapperHouse} radius 2.5 and {LC6_Child} near {KidnapperHouse} radius 2.5
+                StopKidnapping = 1
+            elsif {LC6_Napper} near {KidnapperHouse} radius 2.5 and HEALTH of LC6_Child == 0
+                StopKidnapping = 1
+            elsif {LC6_Napper} near {KidnapperHouse} radius 2.5 and LC6_Child not exists
+                StopKidnapping = 1
+            elsif {LC6_Napper} under water
+                StopKidnapping = 1
+            elsif LC6_Napper is drowning
+                StopKidnapping = 1
+            end if
+            wait 7.5 seconds
+            until StopKidnapping == 1
+        end loop
+        delete LC6_Napper
+        if HEALTH of LC6_Child > 0
+            delete LC6_Child
+        end if
+        KidnapperTimer = create timer for number from 30 to 60 seconds
+    end if
+
+end loop
+
+end script LC6_KidnapperBeforeIntro
+
+begin script LC6_KidnapperLogic
+
+    KidnapperIsKidnapping = 1
+    KidnapperTimer = create timer for 0 seconds
+    StopKidnapping = 0
+
+start
+
+begin loop
+
+    StopKidnapping = 0
+    //Steal Child Section
+    if get distance from camera position to {KidnapperHouse} > 100 and get KidnapperTimer time remaining <= 0
+        KidnapperIsInHouse = 0
+        LC6_Child = create CHILD GREEK_TRADER at {CrechePos} + {number from -10 to 10,0,number from -10 to 10}
+        LC6_Napper = create VILLAGER VILLAGER_INFO_NORSE_FORESTER_MALE at {KidnapperHouse}
+        detach reaction LC6_Child
+        detach reaction LC6_Napper
+        attach LC6_Child to PlayerTown
+        enable LC6_Napper indestructible
+        begin loop
+            SPEED of LC6_Napper = 0.75
+            move LC6_Napper position to {LC6_Child} + {2,0,2} using NAV_FAILURE_MODE_GO_TO_CLOSEST_POINT navigation
+            wait 7.5 seconds
+            until {LC6_Napper} near {LC6_Child} radius 5 or HEALTH of LC6_Child == 0 or {LC6_Napper} under water or LC6_Napper is drowning
+        end loop
+        begin loop
+            SPEED of LC6_Napper = 1.05
+            SPEED of LC6_Child = 1.0
+            move LC6_Napper position to {KidnapperHouse} using NAV_FAILURE_MODE_GO_TO_CLOSEST_POINT navigation
+            move LC6_Child position to {KidnapperHouse} using NAV_FAILURE_MODE_GO_TO_CLOSEST_POINT navigation
+            if {LC6_Napper} near {KidnapperHouse} radius 2.5 and {LC6_Child} near {KidnapperHouse} radius 2.5
+                StopKidnapping = 1
+            elsif {LC6_Napper} near {KidnapperHouse} radius 2.5 and HEALTH of LC6_Child == 0
+                StopKidnapping = 1
+            elsif {LC6_Napper} near {KidnapperHouse} radius 2.5 and LC6_Child not exists
+                StopKidnapping = 1
+            elsif {LC6_Napper} under water
+                StopKidnapping = 1
+            elsif LC6_Napper is drowning
+                StopKidnapping = 1
+            end if
+            wait 7.5 seconds
+            until StopKidnapping == 1
+        end loop
+        delete LC6_Napper
+        if HEALTH of LC6_Child > 0
+            delete LC6_Child
+        end if
+        KidnapperTimer = create timer for number from 30 to 60 seconds
+    end if
+    KidnapperIsInHouse = 1
+
+end loop
+
+end script LC6_KidnapperLogic
+
+begin script LC6_KidnapperReactions
+
+    HouseKidnapperTimer = create timer for 0 seconds
+    KidnapperTimer = create timer for 0 seconds
+    Number = 0
+
+start
+
+begin loop
+
+    if get distance from camera position to {KidnapperHousePos} < 50 and KidnapperIsInHouse == 1 and get HouseKidnapperTimer time remaining <= 0
+        HouseKidnapperTimer = create timer for 15 seconds
+        Number = number from 1 to 4
+        if Number == 1
+            start music "lc6_kidnapper_house_1" loop 1
+        elsif Number == 2
+            start music "lc6_kidnapper_house_2" loop 1
+        elsif Number == 3
+            start music "lc6_kidnapper_house_3" loop 1
+        else
+            start music "lc6_kidnapper_house_4" loop 1
+        end if
+    elsif get distance from camera position to {LC6_Napper} < 30 and get KidnapperTimer time remaining <= 0
+        KidnapperTimer = create timer for 10 seconds
+        Number = number from 1 to 5
+        if Number == 1
+            start music "lc6_kidnapper_kill_me_1" loop 1
+        elsif Number == 2
+            start music "lc6_kidnapper_kill_me_1" loop 1
+        elsif Number == 3
+            start music "lc6_kidnapper_kill_me_3" loop 1
+        elsif Number == 4
+            start music "lc6_kidnapper_kill_me_4" loop 1
+        else
+            start music "lc6_kidnapper_kill_me_5" loop 1
+        end if
+    end if
+
+end loop
+
+end script LC6_KidnapperReactions
+
+begin script LC6_KidnapperConditions
+
+    CreatureHolding = 0
+    GoodWay = 0
+    BadWay = 0
+
+start
+
+    begin loop
+        CreatureHolding = get object in MyCreature hand
+        if CreatureHolding == LC6_Napper
+            GoodWay = 1
+        end if
+        until GoodWay == 1
+    end loop
+
+    stop script "LC6_KidnapperLogic"
+    stop script "LC6_KidnapperReactions"
+
+    CinemaIsRunning = 1
+    begin cinema
+        set MyCreature focus to {MyCreature} + {15,5,15}
+        move camera position to {MyCreature} + {15,5,15} time 3
+        move camera focus to {MyCreature} + {0,5,0} time 3
+        wait 2 seconds
+        start music "lc6_kidnapper_good_creature_1" loop 1
+        wait 5.5 seconds
+        start music "lc6_kidnapper_good_creature_2" loop 1
+        move camera position to {KidnapperHouse} + {12,7,-12} time 5
+        move camera focus to {KidnapperHouse} time 5
+        wait 5 seconds
+    end cinema
+    CinemaIsRunning = 0
+
+    wait 6 seconds
+    release MyCreature
+    disable LC6_Napper indestructible
+
+    begin loop
+        CreatureHolding = get object in MyCreature hand
+        if CreatureHolding != LC6_Napper and HEALTH of LC6_Napper > 0 and {LC6_Napper} near {KidnapperHousePos} radius 25 and not LC6_Napper is HELD
+            GoodWay = 2
+        end if
+        if HEALTH of LC6_Napper == 0 or LC6_Napper not exists
+            BadWay = 1
+        end if
+        until GoodWay == 2 or BadWay == 1
+    end loop
+
+    if GoodWay == 2
+        run background script LC6_SpawnChildren
+
+        start music "lc6_kidnapper_good_1" loop 1
+        wait 3 seconds
+        start music "lc6_kidnapper_good_2" loop 1
+        wait 4 seconds
+        start music "lc6_kidnapper_good_3" loop 1
+    elsif BadWay == 1
+        //Nothing special
+    end if
+
+    wait 2 seconds
+
+    increment tribute by 25000
+
+    delete Scroll_Kidnapper
+    disable LC6_Napper indestructible
+    disable LC6_KidnapperWoman indestructible
+    enable LC6_KidnapperWoman pickup
+    enable LC6_KidnapperWoman moveable
+    disable KidnapperHouse indestructible
+    enable KidnapperHouse pickup
+    enable KidnapperHouse moveable
+
+    attach LC6_Napper to PlayerTown
+
+    release LC6_Napper
+    release LC6_KidnapperWoman
+
+    if LC6_Child exists
+        attach LC6_Child to PlayerTown
+        release LC6_Child
+    end if
+
+end script LC6_KidnapperConditions
+
+begin script LC6_SpawnChildren
+
+    Counter = 0
+    Child[7]
+
+start
+
+    while Counter <= 6
+        if Child[Counter] not exists and Counter != 6
+            Child[Counter] = create CHILD GREEK_TRADER at {KidnapperHousePos}
+            attach Child[Counter] to PlayerTown
+            release Child[Counter]
+            Counter++
+        end if
+    end while
+
+end script LC6_SpawnChildren
+
+//-----------------------------------------------------------------------------
+// Kidnapper
+//-----------------------------------------------------------------------------

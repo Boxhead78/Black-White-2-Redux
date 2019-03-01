@@ -1,0 +1,259 @@
+//--------------------------------------------------------------------------------------------------------------
+define script VerdantSpell(PlayerID,SpellPosition)
+define script Verdant_GroundAlignment(PrevAlignment,VerdantSpell)
+define script Verdant_Trees(VerdantSpell)
+define script Verdant_TreesGrow(Tree,Growth)
+define script Verdant_Animals(VerdantSpell)
+define script Verdant_AnimalsGrow(Animal)
+define script Verdant_Effects(VerdantSpell)
+define script Verdant_EffectGrow(VerdantSpell)
+
+global Verdant_MaxTreesLarge = 13
+global Verdant_MaxTreesSmall = 15
+global Verdant_MaxAnimals = 20
+
+begin script VerdantSpell(PlayerID,SpellPosition)
+
+    Alignment = 0
+    Counter = 0
+    Rock = 0
+    SeedEffect = 0
+    PlayerMana = 0
+    VerdantSpell = 0
+    Heal = 0
+
+    BrakeLoop = 0
+
+start
+
+    if PlayerID == 0
+        //For players
+        empty player hand
+        wait 0.25 seconds
+        Rock = create SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_BOULDER_ROUND at hand position
+        SeedEffect = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_SEED on Rock time -1
+        set SeedEffect colour red 30 green 195 blue 30
+        set Rock in player 0 hand
+        VerdantSpell = Rock
+        PlayerMana = get player PlayerID mana
+
+        set player PlayerID mana PlayerMana - 10000
+
+        wait 1 seconds
+
+        begin loop
+            if bindable action BINDABLE_ACTION_TYPE_ACTION performed
+                BrakeLoop = 1
+                SpellPosition = marker at hand position
+            end if
+            if not Rock is HELD
+                delete Rock
+                delete SeedEffect
+                BrakeLoop = 2
+            end if
+            until BrakeLoop >= 1
+        end loop
+
+        delete Rock
+        delete SeedEffect
+    else
+        // For AIs
+        BrakeLoop = 1
+    end if
+
+    if BrakeLoop == 1
+        //Script here
+        Alignment = get ground alignment at {SpellPosition}
+        Heal = make player PlayerID throw miracle MIRACLE_TYPE_HEAL from ({SpellPosition} + {0,1.5,0}) heading ({SpellPosition} + {0,-6,0} - {SpellPosition})
+        //run background script Verdant_GroundAlignment(Alignment,marker at {SpellPosition})
+        run background script Verdant_Animals(marker at {SpellPosition})
+        run background script Verdant_Effects(marker at {SpellPosition})
+        run background script Verdant_Trees(marker at {SpellPosition})
+    elsif BrakeLoop == 2
+        PlayerMana = get player PlayerID mana
+        set player PlayerID mana PlayerMana + 10000
+    end if
+
+end script VerdantSpell
+
+
+begin script Verdant_GroundAlignment(PrevAlignment,VerdantSpell)
+
+start
+
+    set ground alignment to PrevAlignment + 0.2 at {VerdantSpell} radius 100 amount 1
+    wait 6 seconds
+    set ground alignment to PrevAlignment + 0.4 at {VerdantSpell} radius 100 amount 1
+    wait 6 seconds
+    set ground alignment to PrevAlignment + 0.6 at {VerdantSpell} radius 100 amount 1
+    wait 6 seconds
+    set ground alignment to PrevAlignment + 0.8 at {VerdantSpell} radius 100 amount 1
+    wait 6 seconds
+    set ground alignment to PrevAlignment + 1.0 at {VerdantSpell} radius 100 amount 1
+
+    wait 45 seconds
+
+    set ground alignment to PrevAlignment at {VerdantSpell} radius 100 amount 0
+    wait 6 seconds
+    /*set ground alignment to PrevAlignment - 0.4 at {VerdantSpell} radius 100 amount 0
+    wait 6 seconds
+    set ground alignment to PrevAlignment - 0.6 at {VerdantSpell} radius 100 amount 0
+    wait 6 seconds
+    set ground alignment to PrevAlignment - 0.8 at {VerdantSpell} radius 100 amount 0
+    wait 6 seconds
+    set ground alignment to PrevAlignment - 1.0 at {VerdantSpell} radius 100 amount 0*/
+
+end script Verdant_GroundAlignment
+
+
+begin script Verdant_Trees(VerdantSpell)
+
+    Counter = 0
+    RandomNumber = 0
+    Tree[64]
+
+start
+
+    while Counter <= Verdant_MaxTreesLarge
+        RandomNumber = number from 1 to 3
+        if RandomNumber == 1
+            Tree[Counter] = create with angle 0 and scale 0.05 TREE TREE_INFO_SPRUCE at {VerdantSpell} + {number from -30 to 30, number from -30 to 30}
+        elsif RandomNumber == 2
+            Tree[Counter] = create with angle 0 and scale 0.05 TREE TREE_INFO_CEDAR at {VerdantSpell} + {number from -30 to 30, number from -30 to 30}
+        elsif RandomNumber == 3
+            Tree[Counter] = create with angle 0 and scale 0.05 TREE TREE_INFO_OAK at {VerdantSpell} + {number from -30 to 30, number from -30 to 30}
+        end if
+        run background script Verdant_TreesGrow(Tree[Counter],0.75)
+        wait number from 1 to 2 seconds
+        Counter++
+    end while
+
+    Counter = 0
+    while Counter <= Verdant_MaxTreesSmall
+        RandomNumber = number from 1 to 3
+        if RandomNumber == 1
+            Tree[Counter] = create with angle 0 and scale 0.05 TREE TREE_INFO_SPRUCE at {VerdantSpell} + {number from -30 to 30, number from -30 to 30}
+        elsif RandomNumber == 2
+            Tree[Counter] = create with angle 0 and scale 0.05 TREE TREE_INFO_CEDAR at {VerdantSpell} + {number from -30 to 30, number from -30 to 30}
+        elsif RandomNumber == 3
+            Tree[Counter] = create with angle 0 and scale 0.05 TREE TREE_INFO_OAK at {VerdantSpell} + {number from -30 to 30, number from -30 to 30}
+        end if
+        run background script Verdant_TreesGrow(Tree[Counter],0.2)
+        wait number from 1 to 2 seconds
+        Counter++
+    end while
+
+end script Verdant_Trees
+
+
+begin script Verdant_TreesGrow(Tree,Growth)
+
+start
+
+    while SCALE of Tree < Growth and Tree exists
+        SCALE of Tree += 0.1
+        wait 1.5 seconds
+    end while
+
+    while SCALE of Tree < 0.95 and Tree exists
+        SCALE of Tree += 0.05
+        wait 5 seconds
+    end while
+
+end script Verdant_TreesGrow
+
+
+begin script Verdant_Animals(VerdantSpell)
+
+    Counter = 0
+    RandomNumber = 0
+    Animal[32]
+
+start
+
+    while Counter <= Verdant_MaxAnimals
+        RandomNumber = number from 1 to 3
+        if RandomNumber == 1
+            Animal[Counter] = create with angle 0 and scale 0.05 ANIMAL SHEEP at {VerdantSpell} + {number from -30 to 30, number from -30 to 30}
+        elsif RandomNumber == 2
+            Animal[Counter] = create with angle 0 and scale 0.05 ANIMAL PIG at {VerdantSpell} + {number from -30 to 30, number from -30 to 30}
+        elsif RandomNumber == 3
+            Animal[Counter] = create with angle 0 and scale 0.05 ANIMAL COW at {VerdantSpell} + {number from -30 to 30, number from -30 to 30}
+        end if
+        run background script Verdant_AnimalsGrow(Animal[Counter])
+        wait number from 2 to 3 seconds
+        Counter++
+    end while
+
+end script Verdant_Animals
+
+
+begin script Verdant_AnimalsGrow(Animal)
+
+start
+
+    while SCALE of Animal < 1.0 and Animal exists
+        SCALE of Animal += 0.1
+        wait 1.5 seconds
+    end while
+
+end script Verdant_AnimalsGrow
+
+//VISUAL_EFFECT_CREATURE_DUST
+begin script Verdant_Effects(VerdantSpell)
+
+    Counter = 0
+    Effect1[32]
+    Effect2[32]
+
+start
+
+    //run background script Verdant_EffectGrow(VerdantSpell)
+
+    while Counter < 9
+        Effect1[Counter] = create visual effect VISUAL_EFFECT_SWARM_BUTTERFLIES at {VerdantSpell} + {number from -30 to 30,1,number from -30 to 30} time -1 target {VerdantSpell} + {0,50,0}
+        SCALE of Effect1[Counter] = 1.5
+        Effect2[Counter] = create visual effect VISUAL_EFFECT_SWARM_FIREFLIES at {VerdantSpell} + {number from -30 to 30,1,number from -30 to 30} time -1 target {VerdantSpell} + {0,50,0}
+        SCALE of Effect2[Counter] = 2.0
+        wait number from 1 to 2 seconds
+        Counter++
+    end while
+
+    wait 45 seconds
+
+    Counter = 0
+    while Counter < 9
+        delete Effect1[Counter]
+        delete Effect2[Counter]
+        wait number from 1 to 2 seconds
+        Counter++
+    end while
+
+end script Verdant_Effects
+
+
+begin script Verdant_EffectGrow(VerdantSpell)
+
+    Effect = 0
+
+start
+
+    Effect = create visual effect VISUAL_EFFECT_SIREN_BODYGLOW at {VerdantSpell} + {0,15,0} time -1 target {VerdantSpell} + {0,50,0}
+    SCALE of Effect = 0.5
+    set Effect colour red 30 green 195 blue 30
+
+    while SCALE of Effect < 7.5 and Effect exists
+        SCALE of Effect += 0.25
+        wait 1 seconds
+    end while
+
+    wait 30 seconds
+
+    while SCALE of Effect < 0.05 and Effect exists
+        SCALE of Effect -= 0.25
+        wait 1 seconds
+    end while
+
+    delete Effect
+
+end script Verdant_EffectGrow

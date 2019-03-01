@@ -1,0 +1,208 @@
+///////////////////////////////////////////////////////////////////////////////
+//    Land 8 Outro
+//    ~~~~~~~~~~~~~
+//
+//    Start date:        28.03.18            By: Boxhead
+//    Update date:    04.04.18            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+define script LC8_Outro
+define script LC8_Departure
+
+begin script LC8_Outro
+
+JapaneseL = 0
+JapaneseR = 0
+Town6 = get town with id 6
+Town5 = get town with id 5
+PlayerAlignment = 0
+
+start
+
+    wait until PLAYER of JapaneseCapital != 1 and PLAYER of JapaneseTown1 != 1 and PLAYER of JapaneseTown2 != 1 and PLAYER of PlayerTown != 1
+
+    PD_ForcedSaving = 1
+    wait until PD_ForcedSaving == 1 or 10 seconds
+    stop script "SavePersistentDataSetData"
+    set persistent data "PREVLAND_OVER" to 1
+    run script SavePersistentDataGetData
+
+    set town PlayerTown capture all enemy towns
+    disable dialogue manager
+    disable game can be lost
+    set player 0 objective TRIBUTE_OBJECTIVE_SCRIPT_CONTROLLED_WIN_LAND value 1
+    //increment tribute by 250000
+    PlayerAlignment = get player 0 alignment
+    if PLAYER of JapaneseCapital == 0
+        PlayerAlignment = PlayerAlignment - 0.15
+        ALIGNMENT of MyCreature = ALIGNMENT of MyCreature - 0.1
+    else
+        PlayerAlignment = PlayerAlignment + 0.15
+        ALIGNMENT of MyCreature = ALIGNMENT of MyCreature + 0.1
+    end if
+    set player 0 alignment PlayerAlignment
+    stop script "LC8_Speeches"
+    stop script "LC8_GateHouseManager"
+    stop script "LC8_CreatureLogic"
+    stop script "LC8_MusicManager"
+
+    wait 2 seconds
+
+    stop dynamic music
+
+    JapaneseL = create VILLAGER VILLAGER_INFO_TARANAGA at {1454.28,247.09,1735.31}
+    JapaneseR = create VILLAGER VILLAGER_INFO_HIROKU at {1449.55,246.58,1737.32}
+    
+    set JapaneseL focus to {1151.01,122.88,1033.51}
+    set JapaneseR focus to {1151.01,122.88,1033.51}
+    play anim "a_p_chatting_paired01_a" on JapaneseL loop -1
+    play anim "a_p_talk2_male" on JapaneseR loop -1
+
+    
+    begin cinema
+        //AGC: Moved fade out & wait inside the cinema block
+        set fade red 0 green 0 blue 0 time 2
+        wait 2 seconds
+
+        run background script LC8_Departure
+
+        start music "cut_scene_sad_34s_01" loop 100
+        wait 2 seconds
+        
+    
+        
+        reset camera path
+        queue camera move with position {1447.94,247.87,1720.74} focus {1455.66,248.18,1734.13} time 0.0
+        queue camera move with position {1306.64,255.00,1573.06} focus {1455.66,245.18,1734.13} time 24.0
+        
+        queue camera move with position {1171.88,235.00,1381.06} focus {1455.66,227.18,1734.13} time 9.0
+        
+        queue camera move with position {1221.64,270.50,1001.68} focus {1393.72,195.00,1513.76} time 9.0
+        
+        queue camera move with position {1357.42,250.00,1077.61} focus {1373.97,226.07,1101.75} time 7.0
+        play camera path with easein 20 easeout 8 method SCRIPT_CAMERAPATH_EQUALDISTANCE    
+        set fade in time 2
+        
+        
+        
+        wait 2 seconds
+        //Gen of city:The Greeks beat the Norse and then they humbled us. Come the final battle we must support them.        
+        say "BW2T_SCRIPT_08FINAL_PDM_ENDLAND_10"
+        wait until read
+        //Gen of War:Agreed. Even the Teachings of War were no help against these Greeks. They are surely worthy of our respect.        
+        say "BW2T_SCRIPT_08FINAL_PDM_ENDLAND_20"
+        wait until read
+        //Gen of War:But to defeat the Aztecs they will need guile and cunning.        
+        say "BW2T_SCRIPT_08FINAL_PDM_ENDLAND_30"
+        wait until read
+        //Gen of War:They can stop the Aztec Epic Miracles if they are clever.        
+        say "BW2T_SCRIPT_08FINAL_PDM_ENDLAND_40"
+        wait until read
+        //Gen of War:To do this the Greeks must cross the dead deserts to the Aztec sacrificial lands.        
+        say "BW2T_SCRIPT_08FINAL_PDM_ENDLAND_50"
+        wait until read
+        
+        if not PLAYER of Town5 == 0 or not PLAYER of Town6 == 0
+            eject evil spirit
+            say "BW2T_SCRIPT_08FINAL_ADVISORS_OUTRO_20"
+            wait until read
+            send evil spirit home
+        end if
+        
+        wait until camera ready
+        stop music with fadetime 5
+
+    end cinema
+
+end script LC8_Outro
+
+begin script LC8_Departure
+
+    DepartureScrollPos = marker at {1379.11,225.76,1104.15}
+    DepartureScroll = 0
+    Portal = 0
+    
+start
+
+    enable global influence
+
+    Portal = create visual effect VISUAL_EFFECT_TELEPORTER_HOOP at {DepartureScrollPos} + {0, 1.5, 0} time -1
+
+    DepartureScroll = create highlight GOLD name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {DepartureScrollPos}
+    ALTITUDE of DepartureScroll = 3
+
+    wait until DepartureScroll right clicked
+
+    begin dialogue
+        eject good spirit
+        //say "Are you sure you wish to leave the land?"
+        say "BW2T_SCRIPT_03FINAL_ADVISORS_TUT_934"
+        wait until read
+        //say "Click again to confirm"
+        say "BW2T_SCRIPT_03FINAL_ADVISORS_TUT_933"
+        wait until read
+        send good spirit home
+    end dialogue
+    
+    clear right clicked object
+    wait until DepartureScroll right clicked
+    delete DepartureScroll
+
+    release MyCreature
+    MyCreature = get player 0 creature
+    if MyCreature exists
+        save my_creature
+    end if
+    
+    // Get the dialogue for the enemy and for the advisors
+    
+    set fade red 0 green 0 blue 0 time 2
+    wait 2 seconds
+    begin cinema
+        start music "farming_communtiy_land2" loop 10
+        wait 2 seconds
+    
+        set camera position to {1369.98,245.00,1092.81}
+        set camera focus to {1379.11,225.76,1104.15}
+        move camera position to {1379.11,228.76,1104.15} time 15
+        move camera focus to {1379.11,225.76,1104.15} time 15
+        set fade in time 1
+        eject evil spirit
+        eject good spirit
+        say "BW2T_SCRIPT_08FINAL_ADVISORS_PLAYERWINS_30"
+        wait until read
+        say "BW2T_SCRIPT_08FINAL_ADVISORS_PLAYERWINS_40"
+        wait until read
+        send good spirit home
+        send evil spirit home 
+        set fade red 0 green 0 blue 0 time 3
+        wait 3.5 seconds
+        wait 1 seconds
+    end cinema
+
+    if L8ShowingChickenWolfGrainObjective == 0
+        set player 0 objective TRIBUTE_OBJECTIVE_LAND_7 with amount 1 text "BW2T_SCRIPT_08FINAL_CHALLENGE_CHICKEN_WOLF_GRAIN_MISC_40" amount 1 description "BW2T_SCRIPT_08FINAL_CHALLENGE_CHICKEN_WOLF_GRAIN_REMINDER" start value 0 reward 30000
+    end if
+    
+    if L8ShowingOilBaronObjective == 0
+        set player 0 objective TRIBUTE_OBJECTIVE_LAND_9 with amount 1 text "BW2T_SCRIPT_08FINAL_CHALLENGE_OIL_BARON_SCROLL_10" amount 1 description "BW2T_SCRIPT_08FINAL_CHALLENGE_OIL_BARON_REMINDER" start value 0 reward 30000
+    end if
+    
+    if L8ShowingMonsterMineObjective  == 0
+    set player 0 objective TRIBUTE_OBJECTIVE_LAND_10 with amount 1 text "BW2T_SCRIPT_08FINAL_MONSTERMINE_580" amount 1 description "BW2T_SCRIPT_08FINAL_MONSTERMINE_590" start value 0 reward GLOBAL_VALUE_TRIBUTE_LAND_8_MONSTERMINE    
+    end if        
+    
+    ////
+    //TRIGGER processing of land end objectives
+    process land end objectives
+    wait until land end objectives processed    
+    
+    disable game can be lost
+    run script LandExit
+    PD_ForcedSaving = 1
+    wait until PD_ForcedSaving == 1 or 10 seconds
+    load map "./Data/Landscape/BW2/Land9.bwe"
+
+    wait 3 seconds
+
+end script LC8_Departure

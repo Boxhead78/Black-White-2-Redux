@@ -1,0 +1,129 @@
+///////////////////////////////////////////////////////////////////////////////
+//          Skirmish AI Escalation
+//    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//    Start date:        20.10.18            By: Boxhead
+//    Update date:    31.10.18            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+define script SK_AICreatueTown(PlayerID)
+define script SK_AICreature(PlayerID,AICreature)
+
+global AICHomeTown[SK_MaxPlayers]
+
+begin script SK_AICreatueTown(PlayerID)
+
+    AITown[SK_MaxTowns]
+    Counter = 0
+    NumberOfTowns = 0
+    TownCentre = 0
+
+start
+
+begin loop
+    if Counter >= SK_MaxTowns
+        Counter = 0
+    end if
+
+    AITown[Counter] = get town with id Counter
+    TownCentre = get building ABODE_NUMBER_TOWN_CENTRE in AITown[Counter] min built 1.0
+    if PLAYER of AITown[Counter] == PlayerID and TownCentre exists
+        AICHomeTown[PlayerID] = AITown[Counter]
+        wait 300 seconds
+    end if
+
+    NumberOfTowns = get player PlayerID town total
+    Counter += number from 1 to NumberOfTowns
+end loop
+
+end script SK_AICreatueTown
+
+begin script SK_AICreature(PlayerID,AICreature)
+
+    Number = 0
+    CreatureAttackTimer = create timer for 0 seconds
+    CreatureRollRoleTimer = create timer for 0 seconds
+    Counter = 0
+    myPlatoon = 0
+    PlayerCounter = 0
+    AITown[SK_MaxTowns]
+    TownCentre = 0
+    Position = 0
+    Villager = 0
+
+start
+
+run background script SK_AICreatueTown(PlayerID)
+
+wait 10 seconds
+
+begin loop
+
+    //say "Creature Script"
+
+    if PlayerCounter > SK_MaxPlayers
+        PlayerCounter = 0
+    end if
+
+    if PlayerID != PlayerCounter
+        AITown[Counter] = get town with id Counter
+        TownCentre = get building ABODE_NUMBER_TOWN_CENTRE in AITown[Counter] min built 1.0
+        myPlatoon = get platoon of player PlayerID nearest {AITown[Counter]} radius 1000
+
+        if Counter > SK_MaxTowns
+            Counter = 0
+        end if
+        if HEALTH of AICreature == 0.00
+            wait until HEALTH of AICreature > 0.00
+            HEALTH of AICreature = 1.0
+        end if
+
+        if town AITown[Counter] is under takeover from player PlayerID and HEALTH of AICreature > 0 and PLAYER of AITown[Counter] == PlayerID and TownCentre exists
+            HEALTH of AICreature = 1.0
+            set creature AICreature role to CR_SOLDIER radius 100 at {AITown[Counter]}
+            wait until HEALTH of AICreature == 0.00 or not town AITown[Counter] is under takeover from player PlayerID or 360 seconds
+
+        elsif myPlatoon exists and PLAYER of AITown[Counter] == PlayerCounter and TownCentre exists and get CreatureAttackTimer time remaining <= 0
+            begin loop
+                myPlatoon = get platoon of player PlayerID nearest {AITown[Counter]} radius 1000
+                set creature AICreature role to CR_SOLDIER radius number from 50 to 100 at {myPlatoon} + {number from -100 to 100,number from -100 to 100}
+                wait 25 seconds
+                until HEALTH of AICreature == 0.00 or myPlatoon not exists or 600 seconds
+            end loop
+            CreatureAttackTimer = create timer for 900 seconds
+            wait 30  seconds
+
+        elsif HEALTH of AICreature > 0.00 and get CreatureRollRoleTimer time remaining <= 0
+            Number = number from 1 to 4
+            CreatureRollRoleTimer = create timer for 150 seconds
+            begin loop
+                Villager = get VILLAGER in AICHomeTown[PlayerID]
+                Position = marker at {AICHomeTown[PlayerID]} + {number from 100 to -100,number from 100 to -100}
+                until not {Position} under water and Villager can navigate to {Position} and Villager can navigate to {Position} + {6,0} and Villager can navigate to {Position} + {-6,0} and Villager can navigate to {Position} + {0,6} and Villager can navigate to {Position} + {0,-6}
+            end loop
+            if Number == 1
+                set creature AICreature role to CR_NONE radius 200 at {Position}
+                //say "NONE"
+            
+            elsif Number == 2
+                set creature AICreature role to CR_GATHERER radius 200 at {Position}
+                //say "GATHERER"
+
+            elsif Number == 3
+                set creature AICreature role to CR_BUILDER radius 200 at {Position}
+                //say "BUILDER"
+
+            else
+                set creature AICreature role to CR_ENTERTAINER radius 200 at {Position}
+                //say "ENTERTAINER"
+
+            end if
+        end if
+
+        Counter++
+    end if
+
+    PlayerCounter++
+end loop
+
+end script SK_AICreature

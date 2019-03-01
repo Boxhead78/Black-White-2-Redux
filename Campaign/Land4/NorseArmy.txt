@@ -1,0 +1,129 @@
+///////////////////////////////////////////////////////////////////////////////
+//       JAPANESE ARMY Script
+//    ~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//    This scripts give you the abilty to use different tribes melee ranged.
+//    The one that you can use is under the name of the script, you can edit this script to use
+//     any other different tribes army that d on Black and White 2. You need to start a new
+//     land in order to use this script.
+//
+//
+//    Start date:    04.07.18            By: Boxhead
+//    Update date:    09.07.18            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+//Defines
+define FM_NUM_OF_TOWNS = 15
+
+
+//Global Constants
+//You can replace the platoon tribe here
+global constant GREEK_ARMY_MELEE = PLATOON_INFO_NORSE_MELEE_1
+global constant GREEK_ARMY_RANGED = PLATOON_INFO_NORSE_RANGED_1
+
+
+//Script Defines
+define script PlatoonFinder
+define script CreateMeleePlatoon(Town, Platoon)
+define script CreateRangedPlatoon(Town, Platoon)
+
+run script PlatoonFinder
+
+begin script PlatoonFinder
+
+    Town[FM_NUM_OF_TOWNS]
+    Platoon = 0
+    TownCounter = 0
+    RandomAbode = 0
+
+start
+
+begin loop
+
+    if TownCounter >= FM_NUM_OF_TOWNS - 1
+        TownCounter = 0
+    end if
+
+    Town[TownCounter] = get town with id TownCounter
+    if PLAYER of Town[TownCounter] == 0
+        RandomAbode = get random abode in town Town[TownCounter]
+        Platoon = get platoon of tribe TRIBE_TYPE_GREEK nearest {RandomAbode} radius 750
+        if Platoon exists
+            if not Platoon recruiting and platoon Platoon melee
+                  run script CreateMeleePlatoon(Town[TownCounter], Platoon)
+            elsif not Platoon recruiting and platoon Platoon ranged
+                run script CreateRangedPlatoon(Town[TownCounter],Platoon)
+            end if
+        end if
+    end if
+
+    TownCounter++
+end loop
+
+end script PlatoonFinder
+
+begin script CreateMeleePlatoon(Town, Platoon)
+
+NewPlatoonDestination = 0
+PlatoonSize = 0
+NewPlatoon = 0
+UnitType = 0
+
+//variables to collect last platoon experience    
+Experience = 0
+CurrExperience = 0
+
+start
+
+NewPlatoonDestination = marker at {Platoon}
+PlatoonSize = get number of villagers in platoon Platoon
+Experience = get platoon Platoon experience
+
+NewPlatoon = create platoon GREEK_ARMY_MELEE at {NewPlatoonDestination} with PlatoonSize men and 0 women
+delete Platoon
+PLAYER of NewPlatoon = 0
+attach NewPlatoon to Town
+CurrExperience = get platoon NewPlatoon experience
+if Experience > CurrExperience
+    begin loop
+        increment platoon NewPlatoon experience
+        CurrExperience = get platoon NewPlatoon experience
+
+        until CurrExperience >= Experience
+    end loop
+end if
+
+end script CreateMeleePlatoon
+
+begin script CreateRangedPlatoon(Town, Platoon)
+
+NewPlatoonDestination = 0
+PlatoonSize = 0
+NewPlatoon = 0
+UnitType = 0
+
+//variables to collect last platoon experience    
+Experience = 0
+CurrExperience = 0
+
+start
+
+NewPlatoonDestination = marker at {Platoon}
+PlatoonSize = get number of villagers in platoon Platoon
+Experience = get platoon Platoon experience
+
+NewPlatoon = create platoon GREEK_ARMY_RANGED at {NewPlatoonDestination} with PlatoonSize men and 0 women
+delete Platoon
+PLAYER of NewPlatoon = 0
+attach NewPlatoon to Town
+CurrExperience = get platoon NewPlatoon experience
+if Experience > CurrExperience
+    begin loop
+        increment platoon NewPlatoon experience
+        CurrExperience = get platoon NewPlatoon experience
+
+        until CurrExperience >= Experience
+    end loop
+end if
+
+end script CreateRangedPlatoon

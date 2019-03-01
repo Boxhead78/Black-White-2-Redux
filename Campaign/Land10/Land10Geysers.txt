@@ -1,0 +1,106 @@
+//=================================================================
+// Land 10 Geysers 
+// Matt.L
+//=================================================================
+
+//-----------------------------------------------------------------
+// Cosntants
+//-----------------------------------------------------------------
+define GB_FALSE = 0
+define GB_TRUE = 1
+
+//Pre conditions
+define GB_MAX_GEYSERS_FIRING_AT_ONCE = 2
+define GB_MIN_START_TIME = 25
+define GB_MAX_START_TIME = 50
+define GB_START_IMMEDIATLEY = GB_TRUE
+
+//Actual geyser conditions
+define GB_TIME_TO_EXPLODE_MIN = 30
+define GB_TIME_TO_EXPLODE_MAX = 50
+
+//-----------------------------------------------------------------
+// Globals
+//-----------------------------------------------------------------
+global GB_GeyserPositions[6]
+
+//-----------------------------------------------------------------
+// Script Defines
+//-----------------------------------------------------------------
+define script LC10_Geysers
+define script GB_Geyser(Position)
+
+//-----------------------------------------------------------------
+// Land 10 Geysers
+//-----------------------------------------------------------------
+begin script LC10_Geysers
+    GeyserLoop = 0
+start
+    
+    GB_GeyserPositions[0] = marker at {1176.44,229.11,863.20}
+    GB_GeyserPositions[1] = marker at {1709.30,254.48,1304.28}
+    GB_GeyserPositions[2] = marker at {1220.80,140.22,1577.05}
+    GB_GeyserPositions[3] = marker at {1084.90,141.91,1173.22}
+    GB_GeyserPositions[4] = marker at {1670.07,223.28,809.56}
+    GB_GeyserPositions[5] = -1
+
+    while GB_GeyserPositions[GeyserLoop] != -1
+        run background script GB_Geyser(marker at {GB_GeyserPositions[GeyserLoop]})
+        GeyserLoop++
+    end while
+
+end script LC10_Geysers
+
+//-----------------------------------------------------------------
+// Individual geysers
+//-----------------------------------------------------------------
+begin script GB_Geyser(Position)
+    StartFX = 0
+    StartWait = 0
+    ExplodeFX = 0
+    ExplodeTime = 0
+    ExplodeTimer = create timer for 0 seconds
+    CloseScale = 0
+    ExitBlast = 0
+start    
+
+    begin loop
+
+        StartWait = number from GB_MIN_START_TIME to GB_MAX_START_TIME
+        wait StartWait seconds
+
+        ExplodeTime = number from GB_TIME_TO_EXPLODE_MIN to GB_TIME_TO_EXPLODE_MAX
+        ExplodeTime = 3
+        ExplodeTimer = create timer for ExplodeTime seconds    
+        ExplodeFX = create visual effect "gp_s_geyser.ves" strength 1 scale 1 at {Position} time ExplodeTime
+
+        /*
+        gp_s_geyser.ves - normal geyser
+        gp_s_geyserlarge.ves 0 larger geyser
+        gp_s_sgeyser.ves - inactive? waftable geyser side geyser
+        gp_s_sgeyserlarge.ves - larger version of the above
+        eeq_s_steamvent.ves
+        */
+
+        //Blast stuff
+        while get ExplodeTimer time remaining > 0
+            set physics at position {Position} with strength {834.097,245.041,907.830} radius 5 random 1
+            wait 0.1 seconds
+        end while
+
+        //close visual effect
+        /*
+        CloseScale = 1
+        while CloseScale > 0
+            CloseScale -= 0.01
+            ExitBlast = CloseScale*15
+            SCALE of ExplodeFX = CloseScale
+            set physics at position {Position} with strength {833.191,244.647,908.467} radius ExitBlast random 1
+            wait 0.3 seconds
+        end while    
+        */
+
+        stop visual effect ExplodeFX
+    end loop
+
+end script GB_Geyser

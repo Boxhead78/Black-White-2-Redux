@@ -1,0 +1,155 @@
+define script SK_WinConditions
+
+begin script SK_WinConditions
+
+    Counter = 0
+    Town[SK_MaxTowns]
+
+    PlayerLost[5]
+    PlayersDefeated = 0
+    PlayersNumber = 0
+    whichPlayer = 0
+    TargetTown = 0
+    TownStatus = 0
+
+start
+
+PlayersNumber = SK_PlayerAmount
+
+begin loop
+    if PLAYER of PlayerTown1 != 0 and PlayerLost[0] == 0
+        TownStatus = variable get town PlayerTown1 status
+        // Check for armies taking over or impressing
+        if PLAYER of PlayerTown1 == 0 
+            TargetTown = PlayerTown1
+
+        elsif TownStatus == variable TOWN_STATUS_MIGRATION_STARTED
+            TargetTown = get town PlayerTown1 is migrating to
+
+        end if    
+
+        while Counter < SK_MaxTowns
+            if PLAYER of Town[Counter] == 0
+                start migration from Town[Counter] to TargetTown
+            end if
+            Counter++
+        end while
+
+        PlayersDefeated = -1
+        PlayerLost[0] = 1
+        //say "PlayerLost[0] = 1"
+        Counter = 0
+        TargetTown = 0
+        TownStatus = 0
+    end if
+
+    if PLAYER of PlayerTown2 != 1 and PlayerLost[1] == 0
+        TownStatus = variable get town PlayerTown2 status
+        // Check for armies taking over or impressing
+        if PLAYER of PlayerTown2 == 1
+            TargetTown = PlayerTown2
+
+        elsif TownStatus == variable TOWN_STATUS_MIGRATION_STARTED
+            TargetTown = get town PlayerTown2 is migrating to
+
+        end if    
+
+        while Counter < SK_MaxTowns
+            if PLAYER of Town[Counter] == 1
+                start migration from Town[Counter] to TargetTown
+            end if
+            Counter++
+        end while
+
+        PlayerLost[1] = 1
+        //say "PlayerLost[1] = 1"
+        PlayersDefeated += 1
+        Counter = 0
+        TargetTown = 0
+        TownStatus = 0
+    end if
+
+    if PLAYER of PlayerTown3 != 2 and PlayerLost[2] == 0 and PlayersNumber >= 2
+        TownStatus = variable get town PlayerTown3 status
+        // Check for armies taking over or impressing
+        if PLAYER of PlayerTown3 == 2
+            TargetTown = PlayerTown3
+
+        elsif TownStatus == variable TOWN_STATUS_MIGRATION_STARTED
+            TargetTown = get town PlayerTown3 is migrating to
+
+        end if    
+
+        while Counter < SK_MaxTowns
+            if PLAYER of Town[Counter] == 2
+                start migration from Town[Counter] to TargetTown
+            end if
+            Counter++
+        end while
+
+        PlayerLost[2] = 1
+        //say "PlayerLost[2] = 1"
+        PlayersDefeated += 1
+        Counter = 0
+        TargetTown = 0
+        TownStatus = 0
+    end if
+
+    if PLAYER of PlayerTown4 != 3 and PlayerLost[3] == 0 and PlayersNumber >= 3
+        TownStatus = variable get town PlayerTown4 status
+        // Check for armies taking over or impressing
+        if PLAYER of PlayerTown4 == 3
+            TargetTown = PlayerTown4
+
+        elsif TownStatus == variable TOWN_STATUS_MIGRATION_STARTED
+            TargetTown = get town PlayerTown4 is migrating to
+
+        end if    
+
+        while Counter < SK_MaxTowns
+            if PLAYER of Town[Counter] == 3
+                start migration from Town[Counter] to TargetTown
+            end if
+            Counter++
+        end while
+
+        PlayerLost[3] = 1
+        //say "PlayerLost[3] = 1"
+        PlayersDefeated += 1
+        Counter = 0
+        TargetTown = 0
+        TownStatus = 0
+    end if
+
+    if PLAYER of PlayerTown5 != 4 and PlayerLost[4] == 0 and PlayersNumber >= 4
+        TownStatus = variable get town PlayerTown5 status
+        // Check for armies taking over or impressing
+        if PLAYER of PlayerTown5 == 4
+            TargetTown = PlayerTown5
+
+        elsif TownStatus == variable TOWN_STATUS_MIGRATION_STARTED
+            TargetTown = get town PlayerTown5 is migrating to
+
+        end if    
+
+        while Counter < SK_MaxTowns
+            if PLAYER of Town[Counter] == 4
+                start migration from Town[Counter] to TargetTown
+            end if
+            Counter++
+        end while
+
+        PlayerLost[4] = 1
+        //say "PlayerLost[4] = 1"
+        PlayersDefeated += 1
+        Counter = 0
+        TargetTown = 0
+        TownStatus = 0
+    end if
+
+    until PlayersDefeated >= SK_PlayerAmount
+end loop
+
+enable global influence
+
+end script SK_WinConditions

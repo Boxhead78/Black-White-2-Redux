@@ -1,0 +1,273 @@
+///////////////////////////////////////////////////////////////////////////////
+//              Difficulties
+//    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//    Start date:        16.12.18            By: Boxhead
+//    Update date:    18.12.18            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+define script DifficultySelection
+define script DifficultySelectionSkirmish
+define script DifficultyModifiers
+
+define Peaceful = 0
+define Easy = 1
+define Normal = 2
+define Hard = 3
+define VeryHard = 3
+
+define SK_Easy = 0
+define SK_Normal = 1
+define SK_Hard = 2
+define SK_Random = 3
+
+global Difficulty = 0
+global RecruitModifier = 0
+global RecruitSizeModifier = 0
+global EpicModifier = 0
+global BuilderModifier = 0
+global ImpressivenessModifier = 0
+
+
+begin script DifficultySelection
+
+    DifficultyTemp = 0
+    LandID = 0
+    BronzeScrolls[4]
+    GoldenScrolls[4]
+    GoldenScrollRightClicked[4]
+    ScrollEffects[8]
+    ScrollPos = 0
+
+start
+
+    ScrollPos = marker at {1802.49,1785.61}
+
+    GoldenScrolls[0] = create highlight SILVER name "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_14" remind "HELP_TEXT_CREATURE_CURRENT_SOURCE_09" at {ScrollPos} + {0,3,0}
+    BronzeScrolls[0] = create highlight BRONZE name "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_14" remind "HELP_TEXT_CREATURE_CURRENT_SOURCE_09" at {ScrollPos} + {0,3,-20}
+
+    begin loop
+        if GoldenScrolls[0] right clicked
+            clear right clicked object
+            DifficultyTemp++
+            if DifficultyTemp == 1 or DifficultyTemp == 6
+                if DifficultyTemp == 6
+                    DifficultyTemp = 1
+                end if
+                begin dialogue
+                    if Language == English
+                        say "Campaign-Difficulty set to Peaceful."
+                    elsif Language == German
+                        say "Kampagnen-Schwierigkeitsgrad: Friedlich."
+                    end if
+                    wait until GoldenScrolls[0] right clicked or BronzeScrolls[0] right clicked or 5 seconds
+                end dialogue
+            elsif DifficultyTemp == 2
+                begin dialogue
+                    if Language == English
+                        say "Campaign-Difficulty set to Easy."
+                    elsif Language == German
+                        say "Kampagnen-Schwierigkeitsgrad: Einfach."
+                    end if
+                    wait until GoldenScrolls[0] right clicked or BronzeScrolls[0] right clicked or 5 seconds
+                end dialogue
+            elsif DifficultyTemp == 3
+                begin dialogue
+                    if Language == English
+                        say "Campaign-Difficulty set to Normal."
+                    elsif Language == German
+                        say "Kampagnen-Schwierigkeitsgrad: Normal."
+                    end if
+                    wait until GoldenScrolls[0] right clicked or BronzeScrolls[0] right clicked or 5 seconds
+                end dialogue
+
+            elsif DifficultyTemp == 4
+                begin dialogue
+                    if Language == English
+                        say "Campaign-Difficulty set to Hard."
+                    elsif Language == German
+                        say "Kampagnen-Schwierigkeitsgrad: Schwer."
+                    end if
+                    wait until GoldenScrolls[0] right clicked or BronzeScrolls[0] right clicked or 5 seconds
+                end dialogue
+            else
+                begin dialogue
+                    if Language == English
+                        say "Campaign-Difficulty set to Very Hard."
+                    elsif Language == German
+                        say "Kampagnen-Schwierigkeitsgrad: Sehr Schwer."
+                    end if
+                    wait until GoldenScrolls[0] right clicked or BronzeScrolls[0] right clicked or 5 seconds
+                end dialogue
+            end if
+            PD_ForcedSaving = 1
+            wait until PD_ForcedSaving == 1 or 10 seconds
+            stop script "SavePersistentDataSetData"
+            set persistent data "DIFFICULTY_ID" to DifficultyTemp
+            run script SavePersistentDataGetData
+        end if
+
+        if BronzeScrolls[0] right clicked
+            clear right clicked object
+            begin dialogue
+                if Language == English
+                    say "Click the nearby silver scroll to change the campaign difficulty."
+                elsif Language == German
+                    say "Klicke auf die silberne Schriftrolle, um den Kampagnen-Schwierigkeitsgrad zu aendern."
+                end if
+                wait until GoldenScrolls[0] right clicked or BronzeScrolls[0] right clicked or 5 seconds
+            end dialogue
+        end if
+    end loop
+
+end script DifficultySelection
+
+
+begin script DifficultySelectionSkirmish
+    DifficultyTemp = 0
+    LandID = 0
+    BronzeScrolls[4]
+    GoldenScrolls[4]
+    GoldenScrollRightClicked[4]
+    ScrollEffects[8]
+    ScrollPos = 0
+
+start
+
+    ScrollPos = marker at {1785.48,76.56,1299.95}
+
+    GoldenScrolls[0] = create highlight SILVER name "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_14" remind "HELP_TEXT_CREATURE_CURRENT_SOURCE_09" at {ScrollPos} + {0,3,0}
+
+    begin loop
+        if GoldenScrolls[0] right clicked
+            clear right clicked object
+            DifficultyTemp++
+            if DifficultyTemp == 1 or DifficultyTemp == 6
+                if DifficultyTemp == 6
+                    DifficultyTemp = 1
+                end if
+                begin dialogue
+                    if Language == English
+                        say "Skirmish-Difficulty set to Easy."
+                    elsif Language == German
+                        say "Gefechts-Schwierigkeitsgrad: Einfach."
+                    end if
+                    wait until GoldenScrolls[0] right clicked or 3 seconds
+                end dialogue
+            elsif DifficultyTemp == 2
+                begin dialogue
+                    if Language == English
+                        say "Skirmish-Difficulty set to Normal."
+                    elsif Language == German
+                        say "Gefechts-Schwierigkeitsgrad: Normal."
+                    end if
+                    wait until GoldenScrolls[0] right clicked or 3 seconds
+                end dialogue
+            elsif DifficultyTemp == 3
+                begin dialogue
+                    if Language == English
+                        say "Skirmish-Difficulty set to Hard."
+                    elsif Language == German
+                        say "Gefechts-Schwierigkeitsgrad: Schwer."
+                    end if
+                    wait until GoldenScrolls[0] right clicked or 3 seconds
+                end dialogue
+            elsif DifficultyTemp == 4
+                begin dialogue
+                    if Language == English
+                        say "Skirmish-Difficulty set to Very Hard."
+                    elsif Language == German
+                        say "Gefechts-Schwierigkeitsgrad: Sehr Schwer."
+                    end if
+                    wait until GoldenScrolls[0] right clicked or 3 seconds
+                end dialogue
+            else
+                begin dialogue
+                    if Language == English
+                        say "Skirmish-Difficulty set to Random."
+                    elsif Language == German
+                        say "Gefechts-Schwierigkeitsgrad: Zufall."
+                    end if
+                    wait until GoldenScrolls[0] right clicked or 3 seconds
+                end dialogue
+            end if
+            PD_ForcedSaving = 1
+            wait until PD_ForcedSaving == 1 or 10 seconds
+            stop script "SavePersistentDataSetData"
+            set persistent data "SKP_AIDifficulty" to DifficultyTemp
+            run script SavePersistentDataGetData
+        end if
+    end loop
+
+end script DifficultySelectionSkirmish
+
+
+begin script DifficultyModifiers
+
+    DifficultyTemp = 0
+
+start
+
+    DifficultyTemp = persistent data "DIFFICULTY_ID"
+    Difficulty = DifficultyTemp 
+    if Difficulty == 0
+        Difficulty = 3
+    end if
+
+    if DifficultyTemp == 1
+        //Difficulty = Peaceful
+        RecruitSizeModifier = 0.75
+        RecruitModifier = 5.0
+        EpicModifier = 3.0
+        BuilderModifier = 1.5
+        ImpressivenessModifier = 0.75
+
+    elsif DifficultyTemp == 2
+        //Difficulty = Easy
+        RecruitSizeModifier = 0.75
+        RecruitModifier = 2.5
+        EpicModifier = 2.25
+        BuilderModifier = 1.5
+        ImpressivenessModifier = 1.0
+
+    elsif DifficultyTemp == 3
+        //Difficulty = Normal
+        RecruitSizeModifier = 1.0
+        RecruitModifier = 1.33
+        EpicModifier = 1.5
+        BuilderModifier = 1.25
+        ImpressivenessModifier = 1.0
+
+    elsif DifficultyTemp == 4
+        //Difficulty = Hard
+        RecruitSizeModifier = 1.0
+        RecruitModifier = 1.25
+        EpicModifier = 1.0
+        BuilderModifier = 1.0
+        ImpressivenessModifier = 1.25
+
+    elsif DifficultyTemp == 5
+        //Difficulty = Very Hard
+        RecruitSizeModifier = 1.25
+        RecruitModifier = 1.0
+        EpicModifier = 0.75
+        BuilderModifier = 1.0
+        ImpressivenessModifier = 1.5
+
+    else
+        //Difficulty = Normal
+        PD_ForcedSaving = 1
+        wait until PD_ForcedSaving == 1 or 10 seconds
+        stop script "SavePersistentDataSetData"
+        set persistent data "DIFFICULTY_ID" to 3
+        run script SavePersistentDataGetData
+
+        RecruitSizeModifier = 1.0
+        RecruitModifier = 1.25
+        EpicModifier = 1.5
+        BuilderModifier = 1.25
+        ImpressivenessModifier = 1.0
+
+    end if
+
+end script DifficultyModifiers

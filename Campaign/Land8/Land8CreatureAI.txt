@@ -1,0 +1,219 @@
+///////////////////////////////////////////////////////////////////////////////
+//    Land 8 Creature AI
+//    ~~~~~~~~~~~~~~~~~~~
+//
+//    Start date:  28.03.18            By: Boxhead
+//    Update date: 06.04.18            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+//-----------------------------------------------------------------------------
+//    Globals
+//-----------------------------------------------------------------------------
+
+define script LC8_CreatureAI
+define script LC8_CreatureLogic
+
+global CreatureAttackPos[3]
+global CreatureGathererPos[3]
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
+begin script LC8_CreatureAI
+
+start
+
+    CreatureAttackPos[0] = marker at {1278.60,151.48,867.86}//PlayerTown
+    CreatureAttackPos[1] = marker at {1274.57,99.30,1219.41}//PlayerTownPreAttackPos
+    CreatureAttackPos[2] = marker at {1666.55,157.00,810.82}//PlayerTownFlank
+
+    CreatureGathererPos[0] = marker at {1752.24,148.78,1918.05}//JapaneseCapital
+    CreatureGathererPos[1] = marker at {838.18,135.96,2030.69}//JapaneseTown1
+    CreatureGathererPos[2] = marker at {1405.30,79.99,1534.11}//JapaneseTown2
+
+    LC8_EnemyCreature = create SCRIPT_OBJECT_TYPE_CREATURE CREATURE_TYPE_TIGER at {1570.08,128.99,1976.78}
+    
+    set creature LC8_EnemyCreature happiness to maximum
+    
+    set research ARTEFACT_CREATURE_MAGIC_TYPE_WATER available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_CREATURE_MAGIC_TYPE_HEAL available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_CREATURE_MAGIC_TYPE_LIGHTNING available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_CREATURE_MAGIC_TYPE_FIREBALL available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_CREATURE_ROLE_BUILDER_2 available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_CREATURE_ROLE_GATHERER_3 available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_CREATURE_ROLE_SOLDIER_2 available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+
+    set creature LC8_EnemyCreature CREATURE_SCRIPT_TRANSITIONAL_ATTRIBUTE_TYPE_SIZE 0.8
+    STRENGTH of LC8_EnemyCreature = 0.75
+    ALIGNMENT of LC8_EnemyCreature = -0.4
+    FATNESS of LC8_EnemyCreature = 0.4
+
+    teach LC8_EnemyCreature all
+
+    disable LC8_EnemyCreature action availability LA_EAT with LO_PLAYER_VILLAGER
+    disable LC8_EnemyCreature action availability LA_EAT with LO_PLAYER_PLATOON
+    disable LC8_EnemyCreature action availability LA_EAT with LO_ROCKS
+    disable LC8_EnemyCreature action availability LA_EAT with LO_TREES
+    disable LC8_EnemyCreature action availability LA_EAT with LO_TOYS
+    disable LC8_EnemyCreature action availability LA_EAT with LO_POO
+    disable LC8_EnemyCreature action availability LA_EAT with LO_SPELL_ORBS
+    disable LC8_EnemyCreature action availability LA_POO with LO_PLAYER_VILLAGER
+    disable LC8_EnemyCreature action availability LA_POO with LO_PLAYER_PLATOON
+    disable LC8_EnemyCreature action availability LA_POO with LO_PLAYER_DEFENCES
+    disable LC8_EnemyCreature action availability LA_POO with LO_PLAYER_STORAGE_PIT
+    disable LC8_EnemyCreature action availability LA_POO with LO_PLAYER_BUILDING
+    disable LC8_EnemyCreature action availability LA_PLAY
+    disable LC8_EnemyCreature action availability LA_WATER with LO_PLAYER_VILLAGER
+    disable LC8_EnemyCreature action availability LA_WATER with LO_PLAYER_PLATOON
+    disable LC8_EnemyCreature action availability LA_HEAL with LO_OPPONENT_PLATOON
+    disable LC8_EnemyCreature action availability LA_ATTACK with LO_CREATURE_PEN
+    disable LC8_EnemyCreature action availability LA_ATTACK with LO_ROCKS
+    disable LC8_EnemyCreature action availability LA_ATTACK with LO_MINE
+    disable LC8_EnemyCreature action availability LA_ATTACK with LO_ORE_ROCKS
+    disable LC8_EnemyCreature action availability LA_ATTACK with LO_TREES
+    disable LC8_EnemyCreature action availability LA_ATTACK with LO_FIELDS
+    disable LC8_EnemyCreature action availability LA_ATTACK with LO_POO
+    disable LC8_EnemyCreature action availability LA_ATTACK with LO_SPELL_ORBS
+    
+    set player 1 creature to LC8_EnemyCreature
+    
+    wait until IntroFinished == 1
+    
+    release LC8_EnemyCreature
+
+    run background script LC8_CreatureLogic
+
+end script LC8_CreatureAI
+
+begin script LC8_CreatureLogic
+
+    Number = 0
+    CreatureRollRoleTimer = create timer for 0 seconds
+    Altar1Pos = marker at {1299.71,132.52,986.85}//PlayerFrontWall
+    Altar2Pos = marker at {1695.63,150.56,832.54}//PlayerFlankWall
+    Altar1 = 0
+    Altar2 = 0
+    Altar1Built = 0
+    Altar2Built = 0
+    Counter = 0
+    Town[16]
+
+start
+
+begin loop
+
+    while Counter > 14
+        Counter = 0
+    end while
+
+    if HEALTH of LC8_EnemyCreature == 0.00
+        //CreatureKilled = 1
+        wait until HEALTH of LC8_EnemyCreature > 0.00
+        set creature LC8_EnemyCreature role to CR_NONE radius 500 at {CreatureGathererPos[0]}
+        HEALTH of LC8_EnemyCreature = 1.0
+    end if
+
+    if town JapaneseCapital is under takeover from player 0 and HEALTH of LC8_EnemyCreature > 0
+        HEALTH of LC8_EnemyCreature = 1.0
+        set creature LC8_EnemyCreature role to CR_SOLDIER radius 100 at {JapaneseCapital}
+        
+        wait until HEALTH of LC8_EnemyCreature == 0.00 or not town JapaneseCapital is under takeover from player 0 or 1000 seconds
+    
+    elsif town JapaneseTown1 is under takeover from player 0 and HEALTH of LC8_EnemyCreature > 0
+        HEALTH of LC8_EnemyCreature = 1.0
+        set creature LC8_EnemyCreature role to CR_SOLDIER radius 100 at {JapaneseTown1}
+        
+        wait until HEALTH of LC8_EnemyCreature == 0.00 or not town JapaneseTown1 is under takeover from player 0 or 1000 seconds
+
+    elsif town JapaneseTown2 is under takeover from player 0 and HEALTH of LC8_EnemyCreature > 0
+        HEALTH of LC8_EnemyCreature = 1.0
+        set creature LC8_EnemyCreature role to CR_SOLDIER radius 100 at {JapaneseTown2}
+        
+        wait until HEALTH of LC8_EnemyCreature == 0.00 or not town JapaneseTown2 is under takeover from player 0 or 1000 seconds
+
+    elsif town Town[Counter] is under takeover from player 1 and HEALTH of LC8_EnemyCreature > 0
+        HEALTH of LC8_EnemyCreature = 1.0
+        set creature LC8_EnemyCreature role to CR_SOLDIER radius 100 at {PlayerTown}
+        
+        wait until HEALTH of LC8_EnemyCreature == 0.00 or not town PlayerTown is under takeover from player 0 or 1000 seconds
+
+    elsif AltarsActivated == 1 and HEALTH of LC8_EnemyCreature > 0.00 and Altar1Built == 0
+        Altar1Built = 1
+        HEALTH of LC8_EnemyCreature = 1.0
+        set creature LC8_EnemyCreature role to CR_BUILDER radius 40 at {Altar1Pos}
+        Altar1 = get HOUSE ALTAR at {Altar1Pos} radius 15
+        wait until HEALTH of LC8_EnemyCreature == 0.00 or HEALTH of Altar1 == 1.0 or 300 seconds or Altar1 not exists
+        set creature LC8_EnemyCreature role to CR_SOLDIER radius 100 at {Altar1Pos}
+        wait until HEALTH of LC8_EnemyCreature == 0.00 or 180 seconds or HEALTH of Altar1 < 1.0 or Altar1 not exists
+
+    elsif AltarsActivated == 1 and HEALTH of LC8_EnemyCreature > 0.00 and Altar2Built == 0
+        Altar2Built = 1
+        HEALTH of LC8_EnemyCreature = 1.0
+        set creature LC8_EnemyCreature role to CR_BUILDER radius 40 at {Altar2Pos}
+        Altar2 = get HOUSE ALTAR at {Altar2Pos} radius 15
+        wait until HEALTH of LC8_EnemyCreature == 0.00 or HEALTH of Altar2 == 1.0 or 300 seconds or Altar2 not exists
+        set creature LC8_EnemyCreature role to CR_SOLDIER radius 100 at {Altar2Pos}
+        wait until HEALTH of LC8_EnemyCreature == 0.00 or 180 seconds or HEALTH of Altar2 < 1.0 or Altar2 not exists
+
+    elsif LC8_LargeSiegeIsRunning == 1 and HEALTH of LC8_EnemyCreature > 0.00
+        CreatureAttackTimer = create timer for 600 seconds
+        HEALTH of LC8_EnemyCreature = 1.0
+        if LC8_LargeSiegeIsRunning == 1
+            begin loop
+                set creature LC8_EnemyCreature role to CR_SOLDIER radius 100 at {CreatureAttackPos[1]}
+                until HEALTH of LC8_EnemyCreature == 0.00 or LC8_LargeSiegeLaunchAttack == 1
+            end loop
+        end if
+        if LC8_LargeSiegeIsRunning == 1
+            begin loop
+                set creature LC8_EnemyCreature role to CR_SOLDIER radius 100 at {CreatureAttackPos[0]}
+                until HEALTH of LC8_EnemyCreature == 0.00 or 500 seconds
+            end loop
+        end if
+
+    elsif LC8_Platoon[24] exists and {LC8_Platoon[24]} near {JapaneseTown2} radius 500 and HEALTH of LC8_EnemyCreature > 0.00 and get CreatureAttackTimer time remaining <= 0 and AltarsActivated == 0
+        CreatureAttackTimer = create timer for 1500 seconds
+        HEALTH of LC8_EnemyCreature = 1.0
+        begin loop
+            if LC8_Platoon[24] exists and not {LC8_Platoon[24]} near {AttackPos[0]} radius 350
+                set creature LC8_EnemyCreature role to CR_SOLDIER radius 5 at {LC8_Platoon[24]}
+            else
+                set creature LC8_EnemyCreature role to CR_SOLDIER radius 100 at {CreatureAttackPos[0]}
+            end if
+            until HEALTH of LC8_EnemyCreature == 0.00 or 750 seconds or LC8_LargeSiegeIsRunning == 1 or PLAYER of JapaneseTown2 != 1
+        end loop
+
+    elsif LC8_Platoon[35] exists and {LC8_Platoon[35]} near {JapaneseTown1} radius 500 and HEALTH of LC8_EnemyCreature > 0.00 and get CreatureAttackTimer time remaining <= 0
+        CreatureAttackTimer = create timer for 1500 seconds
+        HEALTH of LC8_EnemyCreature = 1.0
+        begin loop
+            if LC8_Platoon[35] exists and not {LC8_Platoon[35]} near {AttackPos[0]} radius 350
+                set creature LC8_EnemyCreature role to CR_SOLDIER radius 5 at {LC8_Platoon[35]}
+            else
+                set creature LC8_EnemyCreature role to CR_SOLDIER radius 100 at {CreatureAttackPos[0]}
+            end if
+            until HEALTH of LC8_EnemyCreature == 0.00 or 750 seconds or LC8_LargeSiegeIsRunning == 1 or PLAYER of JapaneseTown1 != 1
+        end loop
+
+    elsif HEALTH of LC8_EnemyCreature > 0.00 and get CreatureRollRoleTimer time remaining <= 0
+        Number = number from 1 to 3
+        if Number == 1 and PLAYER of JapaneseCapital == 1
+            set creature LC8_EnemyCreature role to CR_GATHERER radius 200 at {CreatureGathererPos[0]}
+            CreatureRollRoleTimer = create timer for 360 seconds
+            
+        elsif Number == 2 and PLAYER of JapaneseTown1 == 1
+            set creature LC8_EnemyCreature role to CR_GATHERER radius 200 at {CreatureGathererPos[1]}
+            CreatureRollRoleTimer = create timer for 360 seconds
+
+        elsif Number == 3 and PLAYER of JapaneseTown2 == 1
+            set creature LC8_EnemyCreature role to CR_GATHERER radius 200 at {CreatureGathererPos[2]}
+            CreatureRollRoleTimer = create timer for 360 seconds
+        
+        end if
+    end if
+
+    Counter++
+    
+end loop
+
+end script LC8_CreatureLogic

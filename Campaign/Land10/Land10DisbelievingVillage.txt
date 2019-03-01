@@ -1,0 +1,883 @@
+///////////////////////////////////////////////////////////////////////////////
+//    Disbelieving Village
+//    ~~~~~~~~~~~~~~~~~~~~
+//
+//    Description:
+//    A Settlement has been spawned near the player town.
+//     The Settlement will send Soldiers to attack the player.
+//  The player can either destroy the Temple or kill all Villagers of the Settlement.
+//
+//    Rewards:            40000 tribute
+//
+//    Start date:            25.10.16            By: Boxhead
+//    Update date:        17.05.18            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+define script LC10_DisbelievingVillage
+define script SetUpVillage
+define script DisbelieverTownArmies
+define script LC10_DisbelievingVillage_Intro
+define script DT_TempleGuys
+define script DT_RandomPrayers1
+define script DT_RandomPrayers2
+define script DT_CheckForConditions
+define script DT_Platoon0Actions
+define script DT_Platoon1Actions
+define script DT_Platoon2Actions
+
+global DisbelievingScrollPos = 0
+global TemplePos = 0
+global StoragePos = 0
+global ArmoryPos = 0
+global Abode1Pos = 0
+global Abode2Pos = 0
+global Abode3Pos = 0
+global Abode4Pos = 0
+global Abode5Pos = 0
+global Abode6Pos = 0
+global DT_VillagerPos = 0
+global DT_Platoon1DefPos = 0
+global DT_Platoon2DefPos = 0
+global DTPlatoon3Pos = 0
+global DT_TempleGuyPos1 = 0
+global DT_TempleGuyPos2 = 0
+global DT_TempleGuyPos3 = 0
+global DT_TempleGuyPos4 = 0
+global DT_TempleGuyPos5 = 0
+global DT_RandomPrayerPos1 = 0
+global DT_RandomPrayerPos2 = 0
+global DT_RandomPrayerPos3 = 0
+global DT_RandomPrayerPos4 = 0
+global DT_RandomPrayerPos5 = 0
+global Scroll_DisbelievingVillage = 0
+global DT_Temple = 0
+global DT_StoragePit = 0
+global DT_Armory = 0
+global DT_Abode1 = 0
+global DT_Abode2 = 0
+global DT_Abode3 = 0
+global DT_Abode4 = 0
+global DT_Abode5 = 0
+global DT_Abode6 = 0
+global DT_Villager[17]
+global DTDone = 0
+global DT_TempleGuy1 = 0
+global DT_TempleGuy2 = 0
+global DT_TempleGuy3 = 0
+global DT_TempleGuy4 = 0
+global DT_TempleGuy5 = 0
+global DT_RandomTempleGuy = 0
+global DT_RandomTempleGuy2 = 0
+global DT_VillagerCounter = 0
+
+global DT_Platoon[3]
+
+begin script LC10_DisbelievingVillage
+
+    ReminderTimer = create timer for 0 seconds
+
+start
+
+    DisbelievingScrollPos = marker at {1180.61,98.55,1060.57}
+    disable migration from DisbelieverTown to PlayerTown
+    
+    run background script SetUpVillage
+    run background script DT_CheckForConditions
+
+    Scroll_DisbelievingVillage = create highlight SILVER name "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_01" remind "HELP_TEXT_CREATURE_CURRENT_SOURCE_20" at {DisbelievingScrollPos} + {0.00,5.00,0.00}
+
+    begin loop
+        if camera position near {DisbelievingScrollPos} radius 150
+            if get ReminderTimer time remaining <= 0
+                begin dialogue
+                    eject good spirit
+                    make good spirit point at {Scroll_DisbelievingVillage}
+                    say "BW2T_SCRIPT_10FINAL_SMOKESIGNALS_REMINDER_10"
+                    wait until read
+                    stop good spirit pointing
+                    send good spirit home
+                end dialogue
+                set ReminderTimer time to 50 seconds
+            end if
+        end if
+    until Scroll_DisbelievingVillage right clicked or DTDone == 1
+    end loop
+    
+    if DTDone == 0 
+        delete Scroll_DisbelievingVillage 
+    end if
+
+    if DTDone == 0 
+        run background script LC10_DisbelievingVillage_Intro 
+    end if
+    
+end script LC10_DisbelievingVillage
+
+begin script SetUpVillage
+
+start
+
+    TemplePos = marker at {1185.55,98.44,1036.18}
+    StoragePos = marker at {1235.56,98.50,998.99}
+    ArmoryPos = marker at {1191.29,98.66,986.46}
+    Abode1Pos = marker at {1169.96,98.59,1066.85}
+    Abode2Pos = marker at {1225.41,98.72,1058.31}
+    Abode3Pos = marker at {1240.31,99.01,1055.41}
+    Abode4Pos = marker at {1270.56,98.74,1045.93}
+    Abode5Pos = marker at {1281.73,98.56,1042.72}
+    Abode6Pos = marker at {1258.17,98.47,1002.01}
+    DT_VillagerPos = marker at {1219.65,98.49,1035.86}
+    DT_Platoon1DefPos = marker at {1204.61,98.57,1014.15}
+    DT_Platoon2DefPos = marker at {1270.18,98.44,1023.76}
+
+    build all town DisbelieverTown buildings in group 0
+    DT_Temple = get HOUSE ABODE_NUMBER_TEMPLE at {TemplePos} radius 15
+    DT_StoragePit = get HOUSE ABODE_NUMBER_STORAGE_PIT at {StoragePos} radius 15
+    DT_Armory = get HOUSE ABODE_NUMBER_MELEE_ARMOURY at {ArmoryPos} radius 15
+    DT_Abode1 = get HOUSE at {Abode1Pos} radius 5
+    DT_Abode2 = get HOUSE at {Abode2Pos} radius 5
+    DT_Abode3 = get HOUSE at {Abode3Pos} radius 5
+    DT_Abode4 = get HOUSE at {Abode4Pos} radius 5
+    DT_Abode5 = get HOUSE at {Abode5Pos} radius 5
+    DT_Abode6 = get HOUSE at {Abode6Pos} radius 5
+    
+    SCRIPT_OBJECT_PROPERTY_TYPE_BUILT_PERCENTAGE of DT_Temple = 1.0
+    SCRIPT_OBJECT_PROPERTY_TYPE_BUILT_PERCENTAGE of DT_StoragePit = 1.0
+    SCRIPT_OBJECT_PROPERTY_TYPE_BUILT_PERCENTAGE of DT_Armory = 1.0
+    SCRIPT_OBJECT_PROPERTY_TYPE_BUILT_PERCENTAGE of DT_Abode1 = 1.0
+    SCRIPT_OBJECT_PROPERTY_TYPE_BUILT_PERCENTAGE of DT_Abode2 = 1.0
+    SCRIPT_OBJECT_PROPERTY_TYPE_BUILT_PERCENTAGE of DT_Abode3 = 1.0
+    SCRIPT_OBJECT_PROPERTY_TYPE_BUILT_PERCENTAGE of DT_Abode4 = 1.0
+    SCRIPT_OBJECT_PROPERTY_TYPE_BUILT_PERCENTAGE of DT_Abode5 = 1.0
+    SCRIPT_OBJECT_PROPERTY_TYPE_BUILT_PERCENTAGE of DT_Abode6 = 1.0
+    
+    run background script DisbelieverTownArmies
+
+    while DT_VillagerCounter != 17
+        if DT_Villager[DT_VillagerCounter] not exists and DT_VillagerCounter != 17
+            DT_Villager[DT_VillagerCounter] = create random villager of tribe TRIBE_TYPE_AZTEC at {DT_VillagerPos}
+            attach DT_Villager[DT_VillagerCounter] to DisbelieverTown
+            release DT_Villager[DT_VillagerCounter]
+            DT_VillagerCounter++
+        end if
+    end while
+    add resource RESOURCE_TYPE_ORE 250 to DisbelieverTown
+    add resource RESOURCE_TYPE_WOOD 1000 to DisbelieverTown
+    add resource RESOURCE_TYPE_FOOD 1500 to DisbelieverTown
+    
+    begin loop
+        wait 2 seconds
+
+        if PLAYER of DisbelieverTown == 1
+            if (get town DisbelieverTown RESOURCE_TYPE_ORE total < 250)
+                add resource RESOURCE_TYPE_ORE 261 to DisbelieverTown
+            elsif (get town DisbelieverTown RESOURCE_TYPE_WOOD total < 1000)
+                add resource RESOURCE_TYPE_WOOD 682 to DisbelieverTown
+            elsif (get town DisbelieverTown RESOURCE_TYPE_FOOD total < 1500)
+                add resource RESOURCE_TYPE_FOOD 385 to DisbelieverTown
+            end if
+        end if
+        
+        until DTDone == 1
+    end loop
+    
+end script SetUpVillage
+
+begin script DisbelieverTownArmies
+
+    DT_RecruitTimer = create timer for 90 seconds
+
+start
+
+    run background script DT_Platoon0Actions
+    run background script DT_Platoon1Actions
+    run background script DT_Platoon2Actions
+
+    DTPlatoon3Pos = marker at {1255.30,99.41,983.16}
+    
+    DT_Platoon[0] = create platoon PLATOON_INFO_AZTEC_MELEE_5 at {DTPlatoon3Pos} with 40 * RecruitSizeModifier men and 0 women
+    attach DT_Platoon[0] to DisbelieverTown
+    PLAYER of DT_Platoon[0] = 1
+    disable platoon DT_Platoon[0] camp
+    disable platoon DT_Platoon[0] respond to local platoon attack
+    set DT_Platoon[0] focus to {DT_Temple}
+
+    DT_Platoon[1] = create platoon PLATOON_INFO_AZTEC_MELEE_5 at {DTPlatoon3Pos} with 40 * RecruitSizeModifier men and 0 women
+    attach DT_Platoon[1] to DisbelieverTown
+    PLAYER of DT_Platoon[1] = 1
+    disable platoon DT_Platoon[1] camp
+    disable platoon DT_Platoon[1] respond to local platoon attack
+    set DT_Platoon[1] focus to {DT_Temple}
+
+begin loop
+
+    if DT_Platoon[0] not exists and get DT_RecruitTimer time remaining <= 0
+        DT_RecruitTimer = create timer for 240 seconds
+        if DTDone == 0 DT_Platoon[0] = recruit PLATOON_INFO_AZTEC_MELEE_6 town DisbelieverTown platoon of size 40 * RecruitSizeModifier end if
+    end if
+    
+    if DT_Platoon[1] not exists and get DT_RecruitTimer time remaining <= 0
+        DT_RecruitTimer = create timer for 240 seconds
+        if DTDone == 0 DT_Platoon[1] = recruit PLATOON_INFO_AZTEC_MELEE_6 town DisbelieverTown platoon of size 40 * RecruitSizeModifier end if
+    end if
+
+    if DT_Platoon[2] not exists and get DT_RecruitTimer time remaining <= 0
+        DT_RecruitTimer = create timer for 240 seconds
+        if DTDone == 0 DT_Platoon[2] = recruit PLATOON_INFO_AZTEC_MELEE_6 town DisbelieverTown platoon of size 80 * RecruitSizeModifier end if
+    end if
+
+    until DTDone == 1
+end loop
+    
+end script DisbelieverTownArmies
+
+begin script LC10_DisbelievingVillage_Intro
+
+    AtmosMixer = create mixer
+
+start
+
+    CinemaIsRunning = 1
+
+    begin cinema
+        set fade red 0 green 0 blue 0 time 3
+        wait 2.8 seconds
+        
+        run background script DT_TempleGuys
+        
+        wait 1 seconds
+        
+        disable atmos sound
+        set atmos volume 0
+        set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_MAP to 0.0
+        set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_POSITIONAL to 0.0
+
+        set fade in time 4
+        
+        reset camera path
+        queue camera move with position {1220.67,102.63,1017.15} focus {1166.65,104.69,1019.45} time 0.0
+        queue camera move with position {1224.55,102.63,1051.55} focus {1168.45,104.82,1054.67} time 17.0
+        play camera path with easein 20 easeout 8 method SCRIPT_CAMERAPATH_EQUALDISTANCE
+        
+        wait 0.5 seconds
+        
+        start music "gregorian" loop 2
+        
+        wait 13.5 seconds
+
+        set fade red 0 green 0 blue 0 time 3
+        wait 3.1 seconds
+        
+        reset camera path
+        set camera position to {1268.96,99.07,986.54} + {0,50,0}
+        set camera focus to {DT_Temple} + {25,10,25}
+        
+        Scroll_DisbelievingVillage = create highlight SILVER name "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_01" remind "HELP_TEXT_CREATURE_CURRENT_SOURCE_20" at {DisbelievingScrollPos} + {0.00,5.00,0.00}
+        set player 0 objective TRIBUTE_OBJECTIVE_LAND_1 with amount 1 text "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_01" amount 1 description "HELP_TEXT_CREATURE_CURRENT_SOURCE_20" start value 0 reward 40000
+        
+        wait 0.5 seconds
+        
+        enable atmos sound
+        set atmos volume 0.45
+        set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_MAP to 0.6
+        set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_POSITIONAL to 0.6
+
+        set fade in time 6
+        
+    end cinema
+    
+    CinemaIsRunning = 0
+
+end script LC10_DisbelievingVillage_Intro
+
+begin script DT_TempleGuys
+
+start
+
+    DT_TempleGuyPos1 = marker at {1212.86,98.53,1022.34}
+    DT_TempleGuyPos2 = marker at {1213.27,98.50,1027.95}
+    DT_TempleGuyPos3 = marker at {1213.55,98.47,1034.35}
+    DT_TempleGuyPos4 = marker at {1214.50,98.46,1040.52}
+    DT_TempleGuyPos5 = marker at {1215.22,98.47,1046.93}
+
+    DT_TempleGuy1 = create random villager of tribe TRIBE_TYPE_AZTEC at {DT_TempleGuyPos1}
+    attach DT_TempleGuy1 to DisbelieverTown
+    set DT_TempleGuy1 focus to {DT_Temple}
+    play anim "a_p_pray" on DT_TempleGuy1 loop -1
+    
+    DT_TempleGuy2 = create random villager of tribe TRIBE_TYPE_AZTEC at {DT_TempleGuyPos2}
+    attach DT_TempleGuy2 to DisbelieverTown
+    set DT_TempleGuy2 focus to {DT_Temple}
+    play anim "a_p_pray" on DT_TempleGuy2 loop -1
+    
+    DT_TempleGuy3 = create random villager of tribe TRIBE_TYPE_AZTEC at {DT_TempleGuyPos3}
+    attach DT_TempleGuy3 to DisbelieverTown
+    set DT_TempleGuy3 focus to {DT_Temple}
+    play anim "a_p_pray" on DT_TempleGuy3 loop -1
+    
+    DT_TempleGuy4 = create random villager of tribe TRIBE_TYPE_AZTEC at {DT_TempleGuyPos4}
+    attach DT_TempleGuy4 to DisbelieverTown
+    set DT_TempleGuy4 focus to {DT_Temple}
+    play anim "a_p_pray" on DT_TempleGuy4 loop -1
+    
+    DT_TempleGuy5 = create random villager of tribe TRIBE_TYPE_AZTEC at {DT_TempleGuyPos5}
+    attach DT_TempleGuy5 to DisbelieverTown
+    set DT_TempleGuy5 focus to {DT_Temple}
+    play anim "a_p_pray" on DT_TempleGuy5 loop -1
+
+    wait 18 seconds
+    
+    delete DT_TempleGuy1
+    delete DT_TempleGuy2
+    delete DT_TempleGuy3
+    delete DT_TempleGuy4
+    delete DT_TempleGuy5
+    
+    run background script DT_RandomPrayers1
+    run background script DT_RandomPrayers2
+    
+end script DT_TempleGuys
+
+begin script DT_RandomPrayers1
+
+    Number = 0
+    NumberDelay = 0
+
+start
+
+    DT_RandomPrayerPos1 = marker at {DT_Abode1}
+    DT_RandomPrayerPos2 = marker at {DT_Abode3}
+    DT_RandomPrayerPos3 = marker at {DT_Abode5}
+
+begin loop
+    if DTDone == 0
+        Number = number from 1 to 3
+        if Number == 1
+            DT_RandomTempleGuy = create random villager of tribe TRIBE_TYPE_AZTEC at {DT_RandomPrayerPos1}
+            attach DT_RandomTempleGuy to DisbelieverTown
+            move DT_RandomTempleGuy position to {DT_TempleGuyPos2}
+            wait until {DT_RandomTempleGuy} near {DT_TempleGuyPos2} or HEALTH of DT_RandomTempleGuy == 0
+            set DT_RandomTempleGuy focus to {DT_Temple}
+            play anim "a_p_pray" on DT_RandomTempleGuy loop 7
+            wait until DT_RandomTempleGuy played or DTDone == 1 or HEALTH of DT_RandomTempleGuy == 0
+            if DTDone == 0
+                move DT_RandomTempleGuy position to {DT_RandomPrayerPos1}
+                wait until {DT_RandomTempleGuy} near {DT_RandomPrayerPos1} or HEALTH of DT_RandomTempleGuy == 0
+                delete DT_RandomTempleGuy
+            end if
+        elsif Number == 2
+            DT_RandomTempleGuy = create random villager of tribe TRIBE_TYPE_AZTEC at {DT_RandomPrayerPos2}
+            attach DT_RandomTempleGuy to DisbelieverTown
+            move DT_RandomTempleGuy position to {DT_TempleGuyPos4}
+            wait until {DT_RandomTempleGuy} near {DT_TempleGuyPos4} or HEALTH of DT_RandomTempleGuy == 0
+            set DT_RandomTempleGuy focus to {DT_Temple}
+            play anim "a_p_pray" on DT_RandomTempleGuy loop 7
+            wait until DT_RandomTempleGuy played or DTDone == 1 or HEALTH of DT_RandomTempleGuy == 0
+            if DTDone == 0
+                move DT_RandomTempleGuy position to {DT_RandomPrayerPos2}
+                wait until {DT_RandomTempleGuy} near {DT_RandomPrayerPos2} or HEALTH of DT_RandomTempleGuy == 0
+                delete DT_RandomTempleGuy
+            end if
+        elsif Number == 3
+            DT_RandomTempleGuy = create random villager of tribe TRIBE_TYPE_AZTEC at {DT_RandomPrayerPos3}
+            attach DT_RandomTempleGuy to DisbelieverTown
+            move DT_RandomTempleGuy position to {DT_TempleGuyPos3}
+            wait until {DT_RandomTempleGuy} near {DT_TempleGuyPos3} or HEALTH of DT_RandomTempleGuy == 0
+            set DT_RandomTempleGuy focus to {DT_Temple}
+            play anim "a_p_pray" on DT_RandomTempleGuy loop 7
+            wait until DT_RandomTempleGuy played or DTDone == 1 or HEALTH of DT_RandomTempleGuy == 0
+            if DTDone == 0
+                move DT_RandomTempleGuy position to {DT_RandomPrayerPos3}
+                wait until {DT_RandomTempleGuy} near {DT_RandomPrayerPos3} or HEALTH of DT_RandomTempleGuy == 0
+                delete DT_RandomTempleGuy
+            end if
+        end if
+    end if
+    
+    NumberDelay = number from 1 to 4
+    
+    if NumberDelay == 1
+        wait 4 seconds
+    elsif NumberDelay == 2
+        wait 7 seconds
+    elsif NumberDelay == 3
+        wait 12 seconds
+    elsif NumberDelay == 4
+        wait 15 seconds
+    end if
+    
+    until DTDone == 1
+end loop
+
+end script DT_RandomPrayers1
+
+begin script DT_RandomPrayers2
+
+    Number = 0
+    NumberDelay = 0
+
+start
+
+    DT_RandomPrayerPos4 = marker at {DT_Abode2}
+    DT_RandomPrayerPos5 = marker at {DT_Abode4}
+
+begin loop
+    if DTDone == 0
+        Number = number from 1 to 2
+        if Number == 1
+            DT_RandomTempleGuy2 = create random villager of tribe TRIBE_TYPE_AZTEC at {DT_RandomPrayerPos5}
+            attach DT_RandomTempleGuy2 to DisbelieverTown
+            move DT_RandomTempleGuy2 position to {DT_TempleGuyPos5}
+            wait until {DT_RandomTempleGuy2} near {DT_TempleGuyPos5} or HEALTH of DT_RandomTempleGuy2 == 0
+            set DT_RandomTempleGuy2 focus to {DT_Temple}
+            play anim "a_p_pray" on DT_RandomTempleGuy2 loop 7
+            wait until DT_RandomTempleGuy2 played or DTDone == 1 or HEALTH of DT_RandomTempleGuy2 == 0
+            if DTDone == 0
+                move DT_RandomTempleGuy2 position to {DT_RandomPrayerPos5}
+                wait until {DT_RandomTempleGuy2} near {DT_RandomPrayerPos5} or HEALTH of DT_RandomTempleGuy2 == 0
+                delete DT_RandomTempleGuy2
+            end if
+        elsif Number == 2
+            DT_RandomTempleGuy2 = create random villager of tribe TRIBE_TYPE_AZTEC at {DT_RandomPrayerPos4}
+            attach DT_RandomTempleGuy2 to DisbelieverTown
+            move DT_RandomTempleGuy2 position to {DT_TempleGuyPos1}
+            wait until {DT_RandomTempleGuy2} near {DT_TempleGuyPos1} or HEALTH of DT_RandomTempleGuy2 == 0
+            set DT_RandomTempleGuy2 focus to {DT_Temple}
+            play anim "a_p_pray" on DT_RandomTempleGuy2 loop 7
+            wait until DT_RandomTempleGuy2 played or DTDone == 1 or HEALTH of DT_RandomTempleGuy2 == 0
+            if DTDone == 0
+                move DT_RandomTempleGuy2 position to {DT_RandomPrayerPos4}
+                wait until {DT_RandomTempleGuy2} near {DT_RandomPrayerPos4} or HEALTH of DT_RandomTempleGuy2 == 0
+                delete DT_RandomTempleGuy2
+            end if
+        end if
+    end if
+    
+    NumberDelay = number from 1 to 4
+    
+    if NumberDelay == 1
+        wait 4 seconds
+    elsif NumberDelay == 2
+        wait 7 seconds
+    elsif NumberDelay == 3
+        wait 12 seconds
+    elsif NumberDelay == 4
+        wait 15 seconds
+    end if
+    
+    until DTDone == 1
+end loop
+
+end script DT_RandomPrayers2
+
+begin script DT_CheckForConditions
+
+start
+
+begin loop
+
+    if (HEALTH of DT_Temple < 0.4)
+        DTDone = 1
+        enable migration from DisbelieverTown to PlayerTown
+        start migration from DisbelieverTown to PlayerTown
+    elsif size of DisbelieverTown == 0
+        DTDone = 1
+    end if
+    
+    until DTDone == 1
+end loop
+
+delete Scroll_DisbelievingVillage
+
+set player 0 objective TRIBUTE_OBJECTIVE_LAND_1 status to TRIBUTE_OBJECTIVE_STATE_COMPLETE
+
+end script DT_CheckForConditions
+
+begin script DT_Platoon0Actions
+
+    TestPlatoonGuards = 0
+    DistanceG = 0
+    disvolcano = 0
+    Position1 = 0
+    Position2 = 0
+    Position3 = 0
+    Position4 = 0
+    PlayerCreature = 0
+    PlayerPlatoon1 = 0
+    TestSiege = 0
+    oCreature = get player 0 creature
+    NumPat1 = 0
+    HeTeste1 = 0
+    Catapult = 0
+    PlayerPlatoon1Distance = 0
+    PlayerCatapultDistance = 0
+    a = 0
+    PlayerSettlement = 0
+    
+start
+
+wait until IntroFinished == 1
+
+begin loop
+    
+    if DT_Platoon[0] not exists
+        //PlatoonKilled = 1
+        wait until DT_Platoon[0] exists
+    end if
+
+    PlayerCreature = get distance from {DT_Platoon[0]} to {oCreature}
+    if PlayerCreature <= 200 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00 and DT_Platoon[0] can navigate to {oCreature}
+        clear DT_Platoon[0] action queue
+        begin loop
+            PlayerCreature = get distance from {DT_Platoon[0]} to {oCreature}
+            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_MOVING_OBJECT using oCreature to DT_Platoon[0] action queue
+            NumPat1 = get number of villagers in platoon DT_Platoon[0]
+            until NumPat1 == 0 or SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature == 0.00 or not DT_Platoon[0] can navigate to {oCreature} or PlayerCreature > 200
+        end loop
+        clear DT_Platoon[0] action queue
+    end if
+    
+    PlayerPlatoon1 = get platoon of player 0 nearest {DT_Platoon[0]} radius 200
+    Catapult = get siege weapon of player 0 nearest {DT_Platoon[0]} radius 155
+    if PlayerPlatoon1 exists and DT_Platoon[0] can navigate to {PlayerPlatoon1}
+        clear DT_Platoon[0] action queue
+        begin loop
+            PlayerPlatoon1 = get platoon of player 0 nearest {DT_Platoon[0]} radius 200
+            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_PLATOON using PlayerPlatoon1 to DT_Platoon[0] action queue
+            NumPat1 = get number of villagers in platoon DT_Platoon[0]
+            HeTeste1 = get number of villagers in platoon PlayerPlatoon1
+            until NumPat1 == 0 or HeTeste1 == 0 or not DT_Platoon[0] can navigate to {PlayerPlatoon1} or PlayerPlatoon1 not exists
+        end loop
+        clear DT_Platoon[0] action queue
+    elsif Catapult exists and DT_Platoon[0] can navigate to {Catapult}
+        clear DT_Platoon[0] action queue
+        a = 0
+        begin loop
+            Catapult = get siege weapon of player 0 nearest {DT_Platoon[0]} radius 155
+            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Catapult to DT_Platoon[0] action queue
+            NumPat1 = get number of villagers in platoon DT_Platoon[0]
+            PlayerPlatoon1 = get platoon of player 0 nearest {DT_Platoon[0]} radius 200
+            if PlayerPlatoon1 exists and DT_Platoon[0] can navigate to {PlayerPlatoon1}
+                a = 1
+            end if
+            until NumPat1 == 0 or Catapult not exists or not DT_Platoon[0] can navigate to {Catapult} or a == 1 or Catapult not exists
+        end loop
+        clear DT_Platoon[0] action queue
+        a = 0
+    end if
+    
+    if get size of DT_Platoon[0] action queue < 1 and {DT_Platoon[0]} not near {DT_Platoon1DefPos} radius 25
+        add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {DT_Platoon1DefPos} to DT_Platoon[0] action queue
+    end if
+    
+end loop
+
+end script DT_Platoon0Actions
+
+begin script DT_Platoon1Actions
+
+    TestPlatoonGuards = 0
+    DistanceG = 0
+    disvolcano = 0
+    Position1 = 0
+    Position2 = 0
+    Position3 = 0
+    Position4 = 0
+    PlayerCreature = 0
+    PlayerPlatoon1 = 0
+    TestSiege = 0
+    oCreature = get player 0 creature
+    NumPat1 = 0
+    HeTeste1 = 0
+    Catapult = 0
+    PlayerPlatoon1Distance = 0
+    PlayerCatapultDistance = 0
+    a = 0
+    PlayerSettlement = 0
+    
+start
+
+wait until IntroFinished == 1
+
+begin loop
+    
+    if DT_Platoon[1] not exists
+        //PlatoonKilled = 1
+        wait until DT_Platoon[1] exists
+    end if
+
+    PlayerCreature = get distance from {DT_Platoon[1]} to {oCreature}
+    if PlayerCreature <= 200 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00 and DT_Platoon[1] can navigate to {oCreature}
+        clear DT_Platoon[1] action queue
+        begin loop
+            PlayerCreature = get distance from {DT_Platoon[1]} to {oCreature}
+            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_MOVING_OBJECT using oCreature to DT_Platoon[1] action queue
+            NumPat1 = get number of villagers in platoon DT_Platoon[1]
+            until NumPat1 == 0 or SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature == 0.00 or not DT_Platoon[1] can navigate to {oCreature} or PlayerCreature > 200
+        end loop
+        clear DT_Platoon[1] action queue
+    end if
+    
+    PlayerPlatoon1 = get platoon of player 0 nearest {DT_Platoon[1]} radius 200
+    Catapult = get siege weapon of player 0 nearest {DT_Platoon[1]} radius 155
+    if PlayerPlatoon1 exists and DT_Platoon[1] can navigate to {PlayerPlatoon1}
+        clear DT_Platoon[1] action queue
+        begin loop
+            PlayerPlatoon1 = get platoon of player 0 nearest {DT_Platoon[1]} radius 200
+            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_PLATOON using PlayerPlatoon1 to DT_Platoon[1] action queue
+            NumPat1 = get number of villagers in platoon DT_Platoon[1]
+            HeTeste1 = get number of villagers in platoon PlayerPlatoon1
+            until NumPat1 == 0 or HeTeste1 == 0 or not DT_Platoon[1] can navigate to {PlayerPlatoon1} or PlayerPlatoon1 not exists
+        end loop
+        clear DT_Platoon[1] action queue
+    elsif Catapult exists and DT_Platoon[1] can navigate to {Catapult}
+        clear DT_Platoon[1] action queue
+        a = 0
+        begin loop
+            Catapult = get siege weapon of player 0 nearest {DT_Platoon[1]} radius 155
+            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Catapult to DT_Platoon[1] action queue
+            NumPat1 = get number of villagers in platoon DT_Platoon[1]
+            PlayerPlatoon1 = get platoon of player 0 nearest {DT_Platoon[1]} radius 200
+            if PlayerPlatoon1 exists and DT_Platoon[1] can navigate to {PlayerPlatoon1}
+                a = 1
+            end if
+            until NumPat1 == 0 or Catapult not exists or not DT_Platoon[1] can navigate to {Catapult} or a == 1 or Catapult not exists
+        end loop
+        clear DT_Platoon[1] action queue
+        a = 0
+    end if
+    
+    if get size of DT_Platoon[1] action queue < 1 and {DT_Platoon[1]} not near {DT_Platoon2DefPos} radius 25
+        add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {DT_Platoon2DefPos} to DT_Platoon[1] action queue
+    end if
+    
+end loop
+
+end script DT_Platoon1Actions
+
+begin script DT_Platoon2Actions
+
+    TestPlatoonGuards = 0
+    DistanceG = 0
+    disvolcano = 0
+    Position1 = 0
+    Position2 = 0
+    Position3 = 0
+    Position4 = 0
+    PlayerCreature = 0
+    PlayerPlatoon1 = 0
+    TestSiege = 0
+    oCreature = get player 0 creature
+    NumPat1 = 0
+    HeTeste1 = 0
+    WorrNum = 0
+    HomeTown = get town with id 4
+    Catapult = 0
+    Armory = get building ABODE_NUMBER_MELEE_ARMOURY in HomeTown min built 1.0
+    ArmoryRanged = get building ABODE_NUMBER_RANGED_ARMOURY in HomeTown min built 1.0
+    PlayerPlatoon1Distance = 0
+    PlayerCatapultDistance = 0
+    a = 0
+    oTown = get town with id 0
+    oTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in oTown min built 1.0
+    Number = 0
+    PlayerSettlement = 0
+    AttackMode = 0
+    Building = 0
+    TestCreature2 = 0
+    Timer = 0
+    RecalculateTimer = create timer for 0 seconds
+    AttackPosTemp[2]
+
+start
+
+AttackPosTemp[0] = marker at {1294.74,135.53,870.82}//FrontAttackpos
+AttackPosTemp[1] = marker at {1187.61,98.44,1158.94}//FrontFallback
+
+begin loop
+    a = 0
+    wait until DT_Platoon[2] exists
+    begin loop
+
+        PlayerCreature = get distance from {DT_Platoon[2]} to {oCreature}
+        if PlayerCreature <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00 and DT_Platoon[2] can navigate to {oCreature}
+            clear DT_Platoon[2] action queue
+            begin loop
+                PlayerCreature = get distance from {DT_Platoon[2]} to {oCreature}
+                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_MOVING_OBJECT using oCreature to DT_Platoon[2] action queue
+                NumPat1 = get number of villagers in platoon DT_Platoon[2]
+                until NumPat1 == 0 or SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature == 0.00 or not DT_Platoon[2] can navigate to {oCreature} or PlayerCreature > 150
+            end loop
+            clear DT_Platoon[2] action queue
+        end if
+        
+        PlayerPlatoon1 = get platoon of player 0 nearest {DT_Platoon[2]} radius 150
+        Catapult = get siege weapon of player 0 nearest {DT_Platoon[2]} radius 50
+        if PlayerPlatoon1 exists and DT_Platoon[2] can navigate to {PlayerPlatoon1}
+            clear DT_Platoon[2] action queue
+            begin loop
+                PlayerPlatoon1 = get platoon of player 0 nearest {DT_Platoon[2]} radius 150
+                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_PLATOON using PlayerPlatoon1 to DT_Platoon[2] action queue
+                NumPat1 = get number of villagers in platoon DT_Platoon[2]
+                HeTeste1 = get number of villagers in platoon PlayerPlatoon1
+                until NumPat1 == 0 or HeTeste1 == 0 or not DT_Platoon[2] can navigate to {PlayerPlatoon1} or PlayerPlatoon1 not exists
+            end loop
+            clear DT_Platoon[2] action queue
+        elsif Catapult exists and DT_Platoon[2] can navigate to {Catapult}
+            clear DT_Platoon[2] action queue
+            a = 0
+            begin loop
+                Catapult = get siege weapon of player 0 nearest {DT_Platoon[2]} radius 50
+                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Catapult to DT_Platoon[2] action queue
+                NumPat1 = get number of villagers in platoon DT_Platoon[2]
+                PlayerPlatoon1 = get platoon of player 0 nearest {DT_Platoon[2]} radius 150
+                if PlayerPlatoon1 exists and DT_Platoon[2] can navigate to {PlayerPlatoon1}
+                    a = 1
+                end if
+                until NumPat1 == 0 or Catapult not exists or not DT_Platoon[2] can navigate to {Catapult} or a == 1 or Catapult not exists
+            end loop
+            clear DT_Platoon[2] action queue
+            a = 0
+        end if
+
+        PlayerSettlement = get nearest town at {DT_Platoon[2]} for player 0 radius 500
+        //Not a Armory, it's a towncentre.
+        Armory = get building ABODE_NUMBER_TOWN_CENTRE in PlayerSettlement min built 1.0
+        if Armory exists and PlayerSettlement != PlayerTown and PLAYER of PlayerSettlement == 0
+            if DT_Platoon[2] can navigate to object Armory
+                clear DT_Platoon[2] action queue
+                set DT_Platoon[2] attack PlayerSettlement with severity 0.3 for takeover
+                a = 1
+                begin loop
+                    PlayerPlatoon1 = get platoon of player 0 nearest {DT_Platoon[2]} radius 150
+                    PlayerCreature = get distance from {DT_Platoon[2]} to {oCreature}
+                    if PlayerPlatoon1 exists
+                        a = 0
+                    elsif PlayerCreature <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+                        a = 0
+                    elsif not DT_Platoon[2] can navigate to object Armory
+                        a = 0
+                    elsif DT_Platoon[2] not exists
+                        a = 0
+                    end if
+                    until a == 0 or DT_Platoon[2] not exists or PLAYER of PlayerSettlement == 1
+                end loop
+                clear DT_Platoon[2] action queue
+            end if
+        end if
+
+        //if get size of DT_Platoon[2] action queue < 1
+            if DT_Platoon[2] can navigate to object oTownCentre
+                wait number from 5 to 25 seconds
+                a = 1
+                clear DT_Platoon[2] action queue
+                Number = number from 1 to 4
+                if Number == 2 and HEALTH of MyCreature > 0 //Hunt down platoons or destroy buildings
+                    AttackMode = 1
+                    set DT_Platoon[2] attack PlayerTown with severity 0.2
+                elsif Number == 3 or Number == 4 //Destroy value buildings
+                    AttackMode = 2
+                    Building = 0
+                    Timer = create timer for 2 seconds
+                    begin loop
+                        Number = number from 1 to 8
+                        if Number == 1 or Number == 2 or Number == 3
+                            Building = get building ALTAR in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to DT_Platoon[2] action queue
+                            else
+                                Building = 0
+                            end if
+                        elsif Number == 4
+                            Building = get building TEMPLE in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to DT_Platoon[2] action queue
+                            else
+                                Building = 0
+                            end if
+                        elsif Number == 5
+                            Building = get building CREATURE_PEN in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to DT_Platoon[2] action queue
+                            else
+                                Building = 0
+                            end if
+                        elsif Number == 6
+                            Building = get building UNIVERSITY in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to DT_Platoon[2] action queue
+                            else
+                                Building = 0
+                            end if
+                        elsif Number == 7
+                            Building = get building BATHHOUSE in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to DT_Platoon[2] action queue
+                            else
+                                Building = 0
+                            end if
+                        elsif Number == 8
+                            Building = get building AMPITHEATRE in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to DT_Platoon[2] action queue
+                            else
+                                Building = 0
+                            end if
+                        end if
+                        until Building != 0 or get Timer time remaining <= 0
+                    end loop
+                else //Capture Town
+                    AttackMode = 0
+                    set DT_Platoon[2] attack PlayerTown with severity 0.3 for takeover
+                end if
+                RecalculateTimer = create timer for 40 seconds
+                begin loop
+                    PlayerPlatoon1 = get platoon of player 0 nearest {DT_Platoon[2]} radius 150
+                    TestCreature2 = get distance from {DT_Platoon[2]} to {MyCreature}
+                    NumPat1 = get number of villagers in platoon DT_Platoon[2]
+                    //if PlayerPlatoon1 exists or TestCreature2 <= 150 or not DT_Platoon[2] can navigate to object PlayerTownCentre
+                        if PlayerPlatoon1 exists and not town PlayerTown is under takeover from player 1
+                            a = 0
+                        elsif TestCreature2 <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of MyCreature > 0.00 and not town PlayerTown is under takeover from player 1
+                            a = 0
+                        elsif not DT_Platoon[2] can navigate to object oTownCentre
+                            a = 0
+                        elsif DT_Platoon[2] not exists
+                            a = 0
+                        elsif AttackMode == 1 and HEALTH of MyCreature == 0
+                            a = 0
+                        elsif AttackMode == 2 and Building not exists
+                            a = 0
+                        elsif AttackMode == 2 and HEALTH of Building < 0.1
+                            a = 0
+                        elsif AttackMode == 2 and Building == 0
+                            a = 0
+                        elsif not town PlayerTown is under takeover from player 1 and get RecalculateTimer time remaining <= 0
+                            a = 0
+                        end if
+                    //end if
+                    until a == 0 or DT_Platoon[2] not exists
+                end loop
+                clear DT_Platoon[2] action queue
+            elsif DT_Platoon[2] can navigate to {AttackPosTemp[0]} + {10,0,10}
+                clear DT_Platoon[2] action queue
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackPosTemp[0]} + {10,0,10} to DT_Platoon[2] action queue
+            else
+                clear DT_Platoon[2] action queue
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackPosTemp[1]} + {10,0,10} to DT_Platoon[2] action queue
+            end if
+        //end if
+
+        until DT_Platoon[2] not exists
+    end loop
+    if DT_Platoon[2] not exists
+        //PlatoonKilled = 1
+        wait until DT_Platoon[2] exists
+    end if
+end loop
+
+end script DT_Platoon2Actions
+
+//-----------------------------------------------------------------------------
+// Disbelieving Village
+//-----------------------------------------------------------------------------

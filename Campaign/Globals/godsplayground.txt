@@ -1,0 +1,141 @@
+///////////////////////////////////////////////////////////////////////////////
+//        God's Playground loader
+//    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//    Start date:        01.06.18            By: Boxhead
+//    Update date:    01.06.18            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+define script GodsPlaygroundLoader
+
+global GP_WishToLeaveLand = 0
+global GP_Scroll = 0
+global GP_ScrollBronze = 0
+
+begin script GodsPlaygroundLoader
+
+    CurrentLand = 0
+    LandID = 0
+    GP_ScrollPos = 0
+    AreYouSureCommentSaid = 0
+    CinemaPos = 0
+    Portal = 0
+    CSMixer = 0
+
+start
+
+    LandID = persistent data "LAND_ID"
+
+    //Initiate Gold scroll
+    if LandID == 4
+        GP_ScrollPos = marker at {1100.17,119.09,531.35}
+        GP_Scroll = create highlight GOLD name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {GP_ScrollPos}
+
+    elsif LandID == 6
+        GP_ScrollPos = marker at {1188.53,34.08,552.00}
+        GP_Scroll = create highlight GOLD name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {GP_ScrollPos}
+
+    elsif LandID == 7
+        GP_ScrollPos = marker at {2316.27,20.66,706.85}
+        GP_Scroll = create highlight GOLD name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {GP_ScrollPos}
+
+    elsif LandID == 8
+        GP_ScrollPos = marker at {1474.04,237.16,464.43}
+        GP_Scroll = create highlight GOLD name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {GP_ScrollPos}
+
+    elsif LandID == 9
+        GP_ScrollPos = marker at {1454.02,172.06,122.25}
+        GP_Scroll = create highlight GOLD name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {GP_ScrollPos}
+
+    elsif LandID == 10
+        GP_ScrollPos = marker at {716.01,159.07,598.03}
+        GP_Scroll = create highlight GOLD name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {GP_ScrollPos}
+
+    elsif LandID == 11
+        GP_ScrollPos = marker at {1645.87,116.05,149.30}
+        GP_Scroll = create highlight GOLD name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {GP_ScrollPos}
+
+    elsif LandID == 20
+        GP_ScrollPos = marker at {1154.78,170.77,1057.33}
+        GP_Scroll = create highlight GOLD name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {GP_ScrollPos}
+
+    end if
+
+    Portal = create visual effect VISUAL_EFFECT_TELEPORTER_HOOP at {GP_ScrollPos} + {0.000,1.000,0.000} time -1
+    SCALE of Portal = 1.25
+    set Portal colour red 218 green 165 blue 32
+
+    GP_ScrollBronze = create highlight BRONZE name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {GP_ScrollPos} + {20,0,20}
+
+begin loop
+
+    if GP_ScrollBronze right clicked
+        clear right clicked object
+        begin dialogue
+            if Language == English
+                say "This scroll teleports you to god's playground."
+            elsif Language == German
+                say "Diese Schriftrolle teleportiert dich zum Spielplatz der Goetter."
+            end if
+            wait 4.5 seconds
+        end dialogue
+    end if
+
+    if GP_Scroll right clicked and AreYouSureCommentSaid == 0
+        clear right clicked object
+        begin dialogue
+            eject good spirit
+            eject evil spirit
+            //GA: "Are you sure you wish to leave the land?"
+            say "BW2T_SCRIPT_04FINAL_ADVISORS_DEPARTURE_10"
+            wait until read
+            //EA: "Click again to confirm"
+            say "BW2T_SCRIPT_04FINAL_ADVISORS_DEPARTURE_11"
+            wait until read
+            send good spirit home
+            send evil spirit home
+        end dialogue
+        AreYouSureCommentSaid = 1
+        clear right clicked object
+    elsif GP_Scroll right clicked and AreYouSureCommentSaid == 1
+        delete GP_Scroll
+        delete GP_ScrollBronze
+    end if
+
+    until GP_Scroll not exists
+end loop
+
+CinemaPos = marker at {GP_ScrollPos}
+
+set fade red 0 green 0 blue 0 time 1
+wait 1 seconds
+begin cinema
+    start music "cut_scene_sinister_02" loop 10 
+
+    wait 2 seconds
+    queue camera move with position {CinemaPos} + {10,15,10} focus {CinemaPos} + {0,5,0} time 0.0
+    queue camera move with position {CinemaPos} + {7.5,12,7.5} focus {CinemaPos} time 6.0
+    queue camera move with position {CinemaPos} + {1,1.5,1} focus {CinemaPos} time 6.0
+    play camera path with easein 4 easeout 4 method SCRIPT_CAMERAPATH_EQUALDISTANCE
+    set fade in time 2
+    wait 7.5 seconds
+    set fade red 0 green 0 blue 0 time 3
+    set mixer CSMixer channel AUDIO_MIXER_CHANNEL_GLOBAL to 0.0 with fadetime 3
+    wait 3.5 seconds
+
+    MyCreature = get player 0 creature
+    if MyCreature exists
+        save my_creature
+    end if
+
+    PD_ForcedSaving = 1
+    wait until PD_ForcedSaving == 1 or 10 seconds
+
+    disable game can be lost
+    run script LandExit
+    load map "./Data/Landscape/BW2/land2001.bwe"
+    wait 3 seconds
+
+end cinema
+
+end script GodsPlaygroundLoader

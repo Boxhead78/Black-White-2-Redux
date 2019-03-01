@@ -1,0 +1,298 @@
+///////////////////////////////////////////////////////////////////////////////
+//    Land 8 Outro
+//    ~~~~~~~~~~~~~
+//
+//    Start date:        19.04.18            By: Boxhead
+//    Update date:    19.04.18            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+define script LC9_Outro
+define script DoLand9PreOutroObjectives
+define script DoLand9OutroObjectives
+
+//-------------------------------------------------------------------------------------------------
+
+begin script LC9_Outro
+
+AztekTown = 0
+ConversionMethod = 0
+AztekGuy = 0
+Portal = 0
+DepartureScroll = 0
+CSMixer = 0
+
+start
+
+wait until PLAYER of AztecCapital != 1 and PLAYER of AztecTown1 != 1 and PLAYER of AztecTown2 != 1 and PLAYER of AztecTown3 != 1
+
+PD_ForcedSaving = 1
+wait until PD_ForcedSaving == 1 or 10 seconds
+stop script "SavePersistentDataSetData"
+set persistent data "PREVLAND_OVER" to 1
+run script SavePersistentDataGetData
+
+set town PlayerTown capture all enemy towns
+disable dialogue manager
+disable game can be lost
+//increment tribute by 250000
+stop script "LC9_Speeches"
+stop script "LC9_GateHouseManager"
+stop script "LC9_CreatureLogic"
+stop script "LC9_MusicManager"
+
+CSMixer = create mixer
+AztekTown = get town with id 13//get TOWN at {1973.149, 195.207, 2040.272} radius 20
+
+if variable get town AztekTown status == variable TOWN_STATUS_CAPTURED
+    ConversionMethod = 1
+else
+    ConversionMethod = 2
+end if
+
+if ConversionMethod == 1 //Aggressive
+    //AztekGuy = create VILLAGER TEZOZOMOC at {486.41,256.62,1986.35}
+    //set AztekGuy focus to {PlayerTown}
+    //play anim "a_p_talk2_male" on AztekGuy loop -1
+    
+    
+    Portal = create visual effect VISUAL_EFFECT_TELEPORTER_HOOP at {505.95,261.61,2006.05} + {0, 0.5, 0} time -1
+    DepartureScroll = create highlight GOLD name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {505.95,261.61,2006.05} + {0,5,0}
+    ALTITUDE of DepartureScroll = 5
+        
+    begin cinema
+        //AGC: Moved fade out & wait inside the cinema block
+        set fade red 0 green 0 blue 0 time 2
+        wait 2 seconds
+
+        start music "cut_scene_sad_34s_01" loop 100
+        wait 2 seconds
+        reset camera path
+        queue camera move with position {301.11,250.00,2136.41} focus {AztecCapital} time 0.0
+        queue camera move with position {443.28,300.00,2210.78} focus {AztecCapital} time 13.0
+        queue camera move with position {476.32,275.00,1985.25} focus {505.95,261.61,2006.05} time 23.0
+        play camera path with easein 4 easeout 8 method SCRIPT_CAMERAPATH_EQUALDISTANCE
+        set fade in time 1
+        say "BW2T_SCRIPT_09FINAL_PDM_ENDLAND_10"
+        wait until read
+        
+        //GEN:Retreat and secure the sacrifices. Now!
+        say "BW2T_SCRIPT_09FINAL_PDM_ENDLAND_20"
+        wait until read
+
+    //    say "BW2T_SCRIPT_09FINAL_PDM_ENDLAND_30"
+    //    wait until read
+
+    //    say "BW2T_SCRIPT_09FINAL_PDM_ENDLAND_40"
+    //    wait until read
+
+        wait 6 seconds
+
+        eject good spirit
+        eject evil spirit
+        say "BW2T_SCRIPT_09FINAL_ADVISORS_LAND_DONE_10"
+        //GOOD_ADVISOR    We did it! We survived the land and we survived the Aztecs!
+        wait until read
+        say "BW2T_SCRIPT_09FINAL_ADVISORS_LAND_DONE_20"
+        //EVIL_ADVISOR    And we won, dammit! We beat them!
+        wait until read
+        say "BW2T_SCRIPT_09FINAL_ADVISORS_OUTRO_10"
+        wait until read
+        send good spirit home
+        send evil spirit home
+        wait until camera ready
+        stop music with fadetime 4
+    end cinema
+    //delete AztekGuy
+    
+    run script DoLand9PreOutroObjectives
+    wait until DepartureScroll right clicked
+    
+    
+    begin dialogue
+        eject good spirit
+        //say "Are you sure you wish to leave the land?"
+        say "BW2T_SCRIPT_03FINAL_ADVISORS_TUT_934"
+        wait until read
+        //say "Click again to confirm"
+        say "BW2T_SCRIPT_03FINAL_ADVISORS_TUT_933"
+        wait until read
+        send good spirit home
+    end dialogue
+    clear right clicked object
+    wait until DepartureScroll right clicked
+    delete DepartureScroll
+    
+    set fade red 0 green 0 blue 0 time 2
+    wait 2 seconds
+    begin cinema
+        start music "farming_communtiy_land2" loop 10
+        wait 2 seconds
+    
+        queue camera move with position {507.68,262.11,2007.43} + {10,7.5,10} focus {507.68,262.11,2007.43} + {0,5,0} time 0.0
+        queue camera move with position {507.68,262.11,2007.43} + {7.5,5,7.5} focus {507.68,262.11,2007.43} time 6.0
+        queue camera move with position {507.68,262.11,2007.43} + {1,1.5,1} focus {507.68,262.11,2007.43} time 6.0
+        play camera path with easein 4 easeout 8 method SCRIPT_CAMERAPATH_EQUALDISTANCE
+        set fade in time 1
+        eject good spirit
+        eject evil spirit
+        say "BW2T_SCRIPT_09FINAL_ADVISORS_LAND_DONE_40"
+        wait until read
+        say "BW2T_SCRIPT_09FINAL_ADVISORS_LAND_DONE_50"
+        wait until read
+        send good spirit home
+        send evil spirit home
+        set fade red 0 green 0 blue 0 time 3
+        set mixer CSMixer channel AUDIO_MIXER_CHANNEL_GLOBAL to 0.0 with fadetime 3
+        wait 3.5 seconds
+        wait 1 seconds
+    end cinema
+    
+    run script DoLand9OutroObjectives
+else
+    Portal = create visual effect VISUAL_EFFECT_TELEPORTER_HOOP at {1888.82,61.91,373.23} + {0, 0.5, 0} time -1
+    DepartureScroll = create highlight GOLD name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {1888.82,61.91,373.23} + {0,5,0}
+        
+    begin cinema
+        //AGC: Moved fade out & wait inside the cinema block
+        set fade red 0 green 0 blue 0 time 2
+        wait 2 seconds
+
+        start music "cut_scene_sad_34s_01" loop 100
+        wait 2 seconds
+        reset camera path
+        set camera position to {1621.54,80.00,468.37}
+        set camera focus to {PlayerTown}
+        move camera position to {1621.54,80.00,468.37} + {200,150,200} time 34
+        move camera focus to {PlayerTown} time 34
+        set fade in time 1
+        say "BW2T_SCRIPT_09FINAL_PDM_ENDLAND_10"
+        wait until read
+        
+        //GEN:Retreat and secure the sacrifices. Now!
+        say "BW2T_SCRIPT_09FINAL_PDM_ENDLAND_20"
+        wait until read
+
+    //    say "BW2T_SCRIPT_09FINAL_PDM_ENDLAND_30"
+    //    wait until read
+
+    //    say "BW2T_SCRIPT_09FINAL_PDM_ENDLAND_40"
+    //    wait until read
+
+        wait 6 seconds
+
+        eject good spirit
+        eject evil spirit
+        say "BW2T_SCRIPT_09FINAL_ADVISORS_LAND_DONE_10"
+        //GOOD_ADVISOR    We did it! We survived the land and we survived the Aztecs!
+        wait until read
+        say "BW2T_SCRIPT_09FINAL_ADVISORS_LAND_DONE_20"
+        //EVIL_ADVISOR    And we won, dammit! We beat them!
+        wait until read
+        say "BW2T_SCRIPT_09FINAL_ADVISORS_OUTRO_10"
+        wait until read
+        send good spirit home
+        send evil spirit home
+        wait until camera ready
+        stop music with fadetime 4
+    end cinema
+    
+    run script DoLand9PreOutroObjectives
+    wait until DepartureScroll right clicked
+
+    begin dialogue
+        eject good spirit
+        //say "Are you sure you wish to leave the land?"
+        say "BW2T_SCRIPT_03FINAL_ADVISORS_TUT_934"
+        wait until read
+        //say "Click again to confirm"
+        say "BW2T_SCRIPT_03FINAL_ADVISORS_TUT_933"
+        wait until read
+        send good spirit home
+    end dialogue
+    clear right clicked object
+    wait until DepartureScroll right clicked
+    delete DepartureScroll
+    
+    set fade red 0 green 0 blue 0 time 2
+    wait 2 seconds
+    begin cinema
+        start music "farming_communtiy_land2" loop 10
+        wait 2 seconds
+    
+        queue camera move with position {1888.82,61.91,373.23} + {10,7.5,10} focus {1888.82,61.91,373.23} + {0,5,0} time 0.0
+        queue camera move with position {1888.82,61.91,373.23} + {7.5,5,7.5} focus {1888.82,61.91,373.23} time 6.0
+        queue camera move with position {1888.82,61.91,373.23} + {1,1.5,1} focus {1888.82,61.91,373.23} time 6.0
+        play camera path with easein 4 easeout 8 method SCRIPT_CAMERAPATH_EQUALDISTANCE
+        set fade in time 1
+        eject good spirit
+        eject evil spirit
+        say "BW2T_SCRIPT_09FINAL_ADVISORS_LAND_DONE_40"
+        wait until read
+        say "BW2T_SCRIPT_09FINAL_ADVISORS_LAND_DONE_50"
+        wait until read
+        send good spirit home
+        send evil spirit home
+        set fade red 0 green 0 blue 0 time 3
+        set mixer CSMixer channel AUDIO_MIXER_CHANNEL_GLOBAL to 0.0 with fadetime 3
+        wait 3.5 seconds
+        wait 1 seconds
+    end cinema
+    
+    run script DoLand9OutroObjectives
+end if 
+
+end script LC9_Outro
+
+//-------------------------------------------------------------------------------------------------
+
+begin script DoLand9PreOutroObjectives
+AztekTown = 0
+start
+    AztekTown = get town with id 13//get TOWN at {1973.149, 195.207, 2040.272} radius 20
+
+    enable global influence
+
+    if variable get town AztekTown status == variable TOWN_STATUS_CAPTURED
+        ALIGNMENT of MyCreature = ALIGNMENT of MyCreature - 0.1
+        set player 0 objective TRIBUTE_OBJECTIVE_SCRIPT_CONTROLLED_WIN_LAND with amount 1 text "BW2T_SCRIPT_07FINAL_SECONDARYOBJECTIVE_80" amount 1 description "BW2T_SCRIPT_06FINAL_SECONDARYOBJECTIVE_51" alignment -0.15    
+    else
+        ALIGNMENT of MyCreature = ALIGNMENT of MyCreature + 0.1
+        set player 0 objective TRIBUTE_OBJECTIVE_SCRIPT_CONTROLLED_WIN_LAND with amount 1 text "BW2T_SCRIPT_07FINAL_SECONDARYOBJECTIVE_80" amount 1 description "BW2T_SCRIPT_06FINAL_SECONDARYOBJECTIVE_51" alignment 0.15                
+    end if
+    //Either way we have completed the land.
+    set player 0 objective TRIBUTE_OBJECTIVE_SCRIPT_CONTROLLED_WIN_LAND value 1
+end script DoLand9PreOutroObjectives
+
+//-------------------------------------------------------------------------------------------------
+
+begin script DoLand9OutroObjectives
+start
+    process land end objectives
+    wait until land end objectives processed
+
+    release MyCreature
+    MyCreature = get player 0 creature
+    if MyCreature exists
+        save my_creature
+    end if
+    
+    
+    //TA: If we haven't shown the challenge objectives do so now, otherwise we won't see them in the end screen
+    if L9ShowingArcheologistsObjective == 0
+        set player 0 objective TRIBUTE_OBJECTIVE_LAND_8 with amount 1 text "BW2T_SCRIPT_07FINAL_CHALLENGENAME_ARCHAEOLOGISTS" amount 1 description "BW2T_SCRIPT_07FINAL_CHALLENGE_ARCHAEOLOGISTS_REMINDER" start value 0 reward 40000
+    end if
+    
+    if L9ShowingSunDialObjective == 0
+        set player 0 objective TRIBUTE_OBJECTIVE_LAND_7 with amount 1 text "BW2T_SCRIPT_09FINAL_CHALLENGENAME_SUNDIAL" amount 1 description "BW2T_SCRIPT_09FINAL_CHALLENGE_SUNDIAL_REMINDER" start value 0 reward 40000
+    end if
+    
+    disable game can be lost
+    run script LandExit
+    PD_ForcedSaving = 1
+    wait until PD_ForcedSaving == 1 or 10 seconds
+    load map "./Data/Landscape/BW2/Land10.bwe"
+
+    wait 3 seconds
+end script DoLand9OutroObjectives
+
+//-------------------------------------------------------------------------------------------------

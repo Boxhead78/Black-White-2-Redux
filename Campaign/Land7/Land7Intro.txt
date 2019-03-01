@@ -1,0 +1,184 @@
+///////////////////////////////////////////////////////////////////////////////
+//    Land 7 Intro
+//    ~~~~~~~~~~~~~~
+//
+//    Start date:        02.03.18            By: Boxhead
+//    Update date:    03.03.18            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+define False = 0
+define True = 1
+define script LC7_Intro
+
+begin script LC7_Intro
+
+    JapaneseTown = 0
+    Catapult = 0
+    Catapult2 = 0
+    Catapult3 = 0
+    JapaneseL = 0
+    JapaneseR = 0
+    GateHouse1 = 0
+    GateHouse2 = 0
+    Army1 = 0
+    Army2 = 0
+    Army3 = 0
+    Army4 = 0
+    WindMixer = 0
+
+start
+
+    PD_ForcedSaving = 1
+    wait until PD_ForcedSaving == 1 or 10 seconds
+    stop script "SavePersistentDataSetData"
+    set persistent data "PREVLAND_OVER" to 0
+    run script SavePersistentDataGetData
+
+    WindMixer = create mixer
+    set mixer WindMixer channel AUDIO_MIXER_CHANNEL_GLOBAL to 0.0
+
+    wait 7.5 seconds
+
+    JapaneseL = create VILLAGER VILLAGER_INFO_TARANAGA at {2112.45,187.69,312.54}
+    JapaneseR = create VILLAGER VILLAGER_INFO_HIROKU at {2115.45,187.73,311.14}
+    
+    set JapaneseL focus to {JapaneseR}
+    set JapaneseR focus to {JapaneseL}
+    ALTITUDE of JapaneseL = 4.65
+    ALTITUDE of JapaneseR = 4.65
+    play anim "a_p_chatting_paired01_a" on JapaneseL loop -1
+    play anim "a_p_talk2_male" on JapaneseR loop -1
+
+    Catapult = create siege weapon CATAPULT_1 belonging to JapaneseCapital at {1685.21,44.68,1209.47}
+    Catapult2 = create siege weapon CATAPULT_1 belonging to JapaneseCapital at {1715.09,44.66,1196.27}
+    Catapult3 = create siege weapon CATAPULT_1 belonging to JapaneseCapital at {1668.08,43.16,1179.99}
+    
+    add action SIEGEWEAPON_AGENDA_ACTION_FACE_POSITION using {PlayerTown} to siege weapon Catapult action queue
+    add action SIEGEWEAPON_AGENDA_ACTION_FACE_POSITION using {PlayerTown} to siege weapon Catapult2 action queue
+    add action SIEGEWEAPON_AGENDA_ACTION_FACE_POSITION using {PlayerTown} to siege weapon Catapult3 action queue
+    
+    Army1 = create platoon PLATOON_INFO_JAPANESE_MELEE_5 at {1604.97,44.44,1060.46} with 50 * RecruitSizeModifier men and 0 women
+    attach Army1 to JapaneseCapital
+
+    Army2 = create platoon PLATOON_INFO_JAPANESE_MELEE_5 at {1626.32,81.50,731.09} with 200 * RecruitSizeModifier men and 0 women
+    attach Army2 to JapaneseCapital
+
+    Army3 = create platoon PLATOON_INFO_JAPANESE_MELEE_5 at {1901.08,129.56,498.99} with 50 * RecruitSizeModifier men and 0 women
+    attach Army3 to JapaneseCapital
+    
+    Army4 = create platoon PLATOON_INFO_JAPANESE_MELEE_5 at {1876.63,129.46,441.51} with 50 * RecruitSizeModifier men and 0 women
+    attach Army4 to JapaneseCapital
+    
+    wait 5 seconds
+    set mixer WindMixer channel AUDIO_MIXER_CHANNEL_GLOBAL to 1.0 with fadetime 2
+    wait 2 seconds
+    destroy mixer WindMixer
+
+    wait 1 seconds        
+    begin cinema
+        set game time 05.00        
+        
+        wait 3 seconds
+
+        move Army1 position to {1686.30,44.66,1198.88}
+
+        start music "creaturefightmain_01" loop -1
+        
+        queue camera move with position {1755.06,50.26,1283.45} focus {1693.37,75.00,1212.83} time 0.0
+        queue camera move with position {1705.40,64.00,1227.44} focus {1692.74,44.66,1182.23} time 7.0
+        queue camera move with position {1585.43,130.00,680.04} focus {1633.50,120.00,600.47} time 12.0
+        queue camera move with position {2028.71,185.00,505.40} focus {2254.34,161.56,338.86} time 8.0
+        queue camera move with position {2113.96,193.00,325.86} focus {JapaneseR} time 8.0
+        play camera path with easein 4 easeout 12 method SCRIPT_CAMERAPATH_EQUALDISTANCE
+
+        set fade in time 4
+        disable load screen
+        
+        wait 2 seconds
+        move Army2 position to {1633.86,45.05,953.11}
+        
+        //Gen of city:Brother, I could not stand up to the Greeks. They overwhelmed us.        
+        say "BW2T_SCRIPT_07FINAL_PDM_STARTLAND_10"
+        wait 2 seconds
+        wait until read
+        //Gen of war:You are a fool. With defences and a strong army they could have been held at bay.        
+        say "BW2T_SCRIPT_07FINAL_PDM_STARTLAND_20"
+        wait 5 seconds
+        move Army3 position to {1575.65,87.78,647.67}
+        move Army4 position to {1575.65,87.78,647.67}
+        
+        wait until read
+        //Grn of city:No! They have some power. I think they have a god. I have seen Miracles.        
+        say "BW2T_SCRIPT_07FINAL_PDM_STARTLAND_30"
+        
+        wait until read
+        //Gen of war: They have no god. You failed.        
+        say "BW2T_SCRIPT_07FINAL_PDM_STARTLAND_40"
+        wait until read
+        //Gen of city:No, it is as the Prophesy says. A weak race will survive an onslaught and will rise again with a god to lead it.        
+        say "BW2T_SCRIPT_07FINAL_PDM_STARTLAND_50"
+        wait until read
+        
+        
+        //Gen of war:Silence! I will deal with these Greeks according to the Teachings of War.        
+        say "BW2T_SCRIPT_07FINAL_PDM_STARTLAND_60"
+        wait until read
+        //Gen of war:I will let them build and then I will destroy them.        
+        say "BW2T_SCRIPT_07FINAL_PDM_STARTLAND_70"
+        wait until read
+        
+        reset camera path
+        
+        queue camera move with position {2118.88,197.00,302.12} focus {JapaneseL} time 0.0
+        queue camera move with position {2114.57,196.00,312.03} focus {2132.59,183.00,347.09} time 5.0
+        queue camera move with position {2201.87,170.00,535.26} focus {2215.73,150.00,685.18} time 9.0
+        queue camera move with position {2211.07,120.00,743.83} focus {2233.79,101.79,1131.65} time 5.0
+        queue camera move with position {2249.18,130.00,1098.12} focus {PlayerTown} time 8.0
+        queue camera move with position {2228.59,90.00,1324.89} focus {PlayerTown} time 5.0
+        play camera path with easein 6 easeout 4 method SCRIPT_CAMERAPATH_EQUALDISTANCE
+    
+        //Gen of war: Remember. We obey the Aztecs. Until we are beaten or we triumph, we must follow the Aztecs.        
+        say "BW2T_SCRIPT_07FINAL_PDM_STARTLAND_80"
+        wait until read
+        
+        eject good spirit
+        eject evil spirit
+
+        /*say "BW2T_SCRIPT_07FINAL_ADVISORS_INTRO_30"
+        wait until read
+        say "BW2T_SCRIPT_07FINAL_ADVISORS_INTRO_40"
+        wait until read
+        say "BW2T_SCRIPT_07FINAL_ADVISORS_INTRO_50"
+        wait until read*/
+        
+        make good spirit play across 0.5 down 0.5 HELPDUDE_KM_07FINAL_ADVISORS_INTRO_G_30_40_50
+        make evil spirit play across 0.5 down 0.5 HELPDUDE_KM_07FINAL_ADVISORS_INTRO_E_30_40_50
+        wait until read
+        
+                
+        send good spirit home
+        send evil spirit home
+        
+        //add action SIEGEWEAPON_AGENDA_ACTION_FACE_POSITION using {1132.466, 314.667, 1452.605} to siege weapon Catapult action queue
+        //add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {1132.466, 314.667, 1452.605} to siege weapon Catapult2 action queue
+        
+        //add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {1328.308, 257.251, 1001.030} to siege weapon Catapult2 action queue
+        //add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {1328.308, 257.251, 1001.030} to siege weapon Catapult3 action queue
+
+        //wait 6 seconds
+        wait until camera ready
+        wait 0.5 seconds
+        stop music with fadetime 5
+    end cinema
+    IntroFinished = 1
+    delete JapaneseL
+    delete JapaneseR
+    delete Army1
+    delete Army2
+    delete Army3
+    delete Army4
+    delete Catapult
+    delete Catapult2
+    delete Catapult3
+
+end script LC7_Intro

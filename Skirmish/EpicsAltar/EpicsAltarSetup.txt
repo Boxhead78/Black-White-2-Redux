@@ -1,0 +1,245 @@
+//--------------------------------------------------------------------------------------------------------------
+define script AltarEpics
+define script AltarEpicsLogic(TownCentre,PlayerID,whichWonder)
+
+define NONE = 0
+define VERDANT = 1
+define FIRERAIN = 2
+define THUNDERSTORM = 3
+define METEOR = 4
+
+global EpicSpellsActivated = 0
+
+
+run script AltarEpics
+
+begin script AltarEpics
+
+    Counter = 0
+    VerdantActivated[25]
+    FireRainActivated[25]
+    ThunderStormActivated[25]
+    MapID = 0
+    MeteorActivated[25]
+    PlayerID = 0
+    Town[25]
+    TownCentre = 0
+
+start
+
+wait 10 seconds
+
+MapID = persistent data "LAND_ID"
+
+EpicSpellsActivated = persistent data "EPICSPELLS_CHECK"
+if EpicSpellsActivated == 1
+    begin loop
+        if Counter >= 20
+            Counter = 0
+        end if
+
+        Town[Counter] = get town with id Counter
+        if Town[Counter] exists
+            TownCentre = get building ABODE_NUMBER_TOWN_CENTRE in Town[Counter] min built 1.0
+            if PLAYER of Town[Counter] >= 0 and PLAYER of Town[Counter] < 6
+                if TownCentre exists
+                    if PLAYER of Town[Counter] == 0
+                        PlayerID = 0
+                    elsif PLAYER of Town[Counter] == 1
+                        PlayerID = 1
+                    elsif PLAYER of Town[Counter] == 2
+                        PlayerID = 2
+                    elsif PLAYER of Town[Counter] == 3
+                        PlayerID = 3
+                    elsif PLAYER of Town[Counter] == 4
+                        PlayerID = 4
+                    elsif PLAYER of Town[Counter] == 5
+                        PlayerID = 5
+                    end if
+                    if PlayerID >= 1 and AISpellsActivated != 0
+                        if get research ARTEFACT_EPIC_WONDER_NUMBER_SIREN available == variable RESEARCH_AVAILABILITY_RESEARCHED or PlayerID >= 1 
+                            if VerdantActivated[Counter] == 0
+                                VerdantActivated[Counter] = 1
+                                run background script AltarEpicsLogic(TownCentre,PlayerID,VERDANT)
+                            end if
+                        end if
+                        if get research ARTEFACT_EPIC_WONDER_NUMBER_HURRICANE available == variable RESEARCH_AVAILABILITY_RESEARCHED or PlayerID >= 1
+                            if ThunderStormActivated[Counter] == 0
+                                ThunderStormActivated[Counter] = 1
+                                run background script AltarEpicsLogic(TownCentre,PlayerID,THUNDERSTORM)
+                            end if
+                        end if
+                        if get research ARTEFACT_EPIC_WONDER_NUMBER_EARTHQUAKE available == variable RESEARCH_AVAILABILITY_RESEARCHED or PlayerID >= 1
+                            if FireRainActivated[Counter] == 0
+                                FireRainActivated[Counter] = 1
+                                run background script AltarEpicsLogic(TownCentre,PlayerID,FIRERAIN)
+                            end if
+                        end if
+                        if get research ARTEFACT_EPIC_WONDER_NUMBER_VOLCANO available == variable RESEARCH_AVAILABILITY_RESEARCHED or PlayerID >= 1
+                            if MeteorActivated[Counter] == 0
+                                MeteorActivated[Counter] = 1
+                                run background script AltarEpicsLogic(TownCentre,PlayerID,METEOR)
+                            end if
+                        end if
+                        
+                    elsif PlayerID == 0
+                        if get research ARTEFACT_EPIC_WONDER_NUMBER_SIREN available == variable RESEARCH_AVAILABILITY_RESEARCHED or PlayerID >= 1 
+                            if VerdantActivated[Counter] == 0
+                                VerdantActivated[Counter] = 1
+                                run background script AltarEpicsLogic(TownCentre,PlayerID,VERDANT)
+                            end if
+                        end if
+                        if get research ARTEFACT_EPIC_WONDER_NUMBER_HURRICANE available == variable RESEARCH_AVAILABILITY_RESEARCHED or PlayerID >= 1
+                            if ThunderStormActivated[Counter] == 0
+                                ThunderStormActivated[Counter] = 1
+                                run background script AltarEpicsLogic(TownCentre,PlayerID,THUNDERSTORM)
+                            end if
+                        end if
+                        if get research ARTEFACT_EPIC_WONDER_NUMBER_VOLCANO available == variable RESEARCH_AVAILABILITY_RESEARCHED or PlayerID >= 1
+                            if FireRainActivated[Counter] == 0
+                                FireRainActivated[Counter] = 1
+                                run background script AltarEpicsLogic(TownCentre,PlayerID,FIRERAIN)
+                            end if
+                        end if
+                        if get research ARTEFACT_EPIC_WONDER_NUMBER_EARTHQUAKE available == variable RESEARCH_AVAILABILITY_RESEARCHED or PlayerID >= 1
+                            if MeteorActivated[Counter] == 0
+                                MeteorActivated[Counter] = 1
+                                run background script AltarEpicsLogic(TownCentre,PlayerID,METEOR)
+                            end if
+                        end if
+                    end if
+                end if
+            end if
+        end if
+
+        Counter += 1
+    end loop
+end if
+
+end script AltarEpics
+
+
+begin script AltarEpicsLogic(TownCentre,PlayerID,whichWonder)
+
+    RelPos[4]
+    Foundation[4]
+    ParticleEffect[4]
+    ParticleEffect2[4]
+    Test = 0
+
+start
+
+// Test = create visual effect VISUAL_EFFECT_TOWN_TAKEOVER_AGGRESSOR at {TownCentre} + {30,40,30} time -1 PRE EFFECT
+// Test = create visual effect VISUAL_EFFECT_WEATHER_SANDSTORM at {TownCentre} + {30,40,30} time -1 
+
+RelPos[0] = marker at get world position from TownCentre to {19,0}
+RelPos[1] = marker at get world position from TownCentre to {-19,0}
+RelPos[2] = marker at get world position from TownCentre to {0,19}
+RelPos[3] = marker at get world position from TownCentre to {0,-19}
+
+if whichWonder == VERDANT
+    //Verdant, 10000 mana
+    Foundation[0] = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {RelPos[0]}
+    ANGLE of Foundation[0] = ANGLE of TownCentre
+    SCALE of Foundation[0] = 3.25
+    ParticleEffect[0] = create visual effect VISUAL_MIRACLE_FIRE_SEED at {RelPos[0]} + {0,6,0} time -1 target {RelPos[0]} + {0,50,0}
+    set ParticleEffect[0] colour red 30 green 195 blue 30
+    SCALE of ParticleEffect[0] = 0.75
+
+elsif whichWonder == FIRERAIN
+    //FireRain 20000 mana
+    Foundation[1] = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {RelPos[1]}
+    ANGLE of Foundation[1] = ANGLE of TownCentre
+    SCALE of Foundation[1] = 3.25
+    ParticleEffect[1] = create visual effect VISUAL_MIRACLE_FIRE_SEED at {RelPos[1]} + {0,6,0} time -1 target {RelPos[1]} + {0,50,0}
+    SCALE of ParticleEffect[1] = 0.75
+
+elsif whichWonder == THUNDERSTORM
+    //ThunderStorm 30000 mana
+    Foundation[2] = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {RelPos[2]}
+    ANGLE of Foundation[2] = ANGLE of TownCentre
+    SCALE of Foundation[2] = 3.25
+    ParticleEffect[2] = create visual effect VISUAL_MIRACLE_TORNODO_SEED at {RelPos[2]} + {0,6,0} time -1 target {RelPos[2]} + {0,50,0}
+    SCALE of ParticleEffect[2] = 0.75
+
+elsif whichWonder == METEOR
+    //MeteorSpell 40000 mana
+    Foundation[3] = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {RelPos[3]}
+    ANGLE of Foundation[3] = ANGLE of TownCentre
+    SCALE of Foundation[3] = 3.25
+    ParticleEffect[3] = create visual effect VISUAL_MIRACLE_METEOR_SEED at {RelPos[3]} + {0,6,0} time -1 target {RelPos[3]} + {0,50,0}
+    SCALE of ParticleEffect[3] = 0.75
+
+end if
+
+//Check if useable
+begin loop
+    if whichWonder == VERDANT
+        if get player PlayerID mana >= 10000
+            if ParticleEffect2[0] not exists
+                ParticleEffect2[0] = create visual effect VISUAL_EFFECT_MIRACLE_CHARGE at {RelPos[0]} + {0,1,0} time -1 target {RelPos[0]} + {0,50,0}
+                SCALE of ParticleEffect2[0] = 0.5
+            end if
+            if bindable action BINDABLE_ACTION_TYPE_ACTION performed and hand position near {Foundation[0]} radius 5
+                run script VerdantSpell(0,0)
+                wait 2 seconds
+            end if
+        else
+            if ParticleEffect2[0] exists
+                delete ParticleEffect2[0]
+            end if
+        end if
+
+    elsif whichWonder == FIRERAIN
+        if get player PlayerID mana >= 20000
+            if ParticleEffect2[1] not exists
+                ParticleEffect2[1] = create visual effect VISUAL_EFFECT_MIRACLE_CHARGE at {RelPos[1]} + {0,1,0} time -1 target {RelPos[1]} + {0,50,0}
+                SCALE of ParticleEffect2[1] = 0.5
+            end if
+            if bindable action BINDABLE_ACTION_TYPE_ACTION performed and hand position near {Foundation[1]} radius 5
+                run script FirerainSpell(0,0)
+                wait 2 seconds
+            end if
+        else
+            if ParticleEffect2[1] exists
+                delete ParticleEffect2[1]
+            end if
+        end if
+
+    elsif whichWonder == THUNDERSTORM
+        if get player PlayerID mana >= 30000
+            if ParticleEffect2[2] not exists
+                ParticleEffect2[2] = create visual effect VISUAL_EFFECT_MIRACLE_CHARGE at {RelPos[2]} + {0,1,0} time -1 target {RelPos[2]} + {0,50,0}
+                SCALE of ParticleEffect2[2] = 0.5
+            end if
+            if bindable action BINDABLE_ACTION_TYPE_ACTION performed and hand position near {Foundation[2]} radius 5
+                run script ThunderstormSpell(0,0)
+                wait 2 seconds
+            end if
+        else
+            if ParticleEffect2[2] exists
+                delete ParticleEffect2[2]
+            end if
+        end if
+
+    elsif whichWonder == METEOR
+        if get player PlayerID mana >= 42500
+            if ParticleEffect2[3] not exists
+                ParticleEffect2[3] = create visual effect VISUAL_EFFECT_MIRACLE_CHARGE at {RelPos[3]} + {0,1,0} time -1 target {RelPos[3]} + {0,50,0}
+                SCALE of ParticleEffect2[3] = 0.5
+            end if
+            if bindable action BINDABLE_ACTION_TYPE_ACTION performed and hand position near {Foundation[3]} radius 5
+                run script MeteorSpell(0,0)
+                wait 2 seconds
+            end if
+        else
+            if ParticleEffect2[3] exists
+                delete ParticleEffect2[3]
+            end if
+        end if
+
+    end if
+end loop
+
+end script AltarEpicsLogic
+//VISUAL_MIRACLE_TORNADO_SHIELD useful for implementing shields for ais
