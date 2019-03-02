@@ -162,9 +162,10 @@ start
 wait until PLAYER of PlayerTown != 1 and PLAYER of AztecCapital != 1 and PLAYER of AztecTown1 != 1 and PLAYER of AztecTown2 != 1
 
 PD_ForcedSaving = 1
-wait until PD_ForcedSaving == 1 or 10 seconds
+wait until PD_ForcedSaving == 0 or 10 seconds
 stop script "SavePersistentDataSetData"
 set persistent data "PREVLAND_OVER" to 1
+set persistent data "SECOND_PLAYTHROUGH" to 1
 run script SavePersistentDataGetData
 
 set town PlayerTown capture all enemy towns
@@ -476,15 +477,12 @@ set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 1.0
             save my_creature
         end if
 
-        PD_ForcedSaving = 1
-        wait until PD_ForcedSaving == 1 or 10 seconds
-        stop script "SavePersistentDataSetData"
-        set persistent data "SECOND_PLAYTHROUGH" to 1
-        run script SavePersistentDataGetData
-
         disable game can be lost
         wait 1 seconds
         
+        PD_ForcedSaving = 1
+        wait until PD_ForcedSaving == 0 or 10 seconds
+
         set mixer CSMixer channel AUDIO_MIXER_CHANNEL_GLOBAL to 0.0 with fadetime 3
         wait 4.5 seconds
         set fade red 0 green 0 blue 0 time 0.0

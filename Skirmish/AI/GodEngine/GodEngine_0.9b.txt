@@ -1046,7 +1046,6 @@ start
         end if
 
         // Do I need to resource? Don't check these too often
-        //Sometimes make god fly off to 0.0.0
         if ge_Busy[godHandle] == 0 and ge_EmergencyMode[godHandle] == 0
             ge_Busy[godHandle] = 1
             if resourcesCounter > 2
@@ -1216,10 +1215,9 @@ start
     while counter < 3 and rGodInstance[godHandle] exists
         //say "Satisfy Wood"
         myStorehouse = get building ABODE_NUMBER_STORAGE_PIT in ge_HomeTown[godHandle] min built 1.0
-        townDesire = get ge_HomeTown[godHandle] desire TOWN_DESIRE_FOR_WOOD
         myTree = get SCRIPT_OBJECT_TYPE_TREE at {ge_HomeTown[godHandle]} radius bim_ResourceGatherRadius
         myInfluence = get player ge_Player[godHandle] influence at {myTree}
-        if myStorehouse exists
+        if myStorehouse exists and myTree exists
             run script ge_PickupResource(godHandle,myTree,GE_HT_WOOD,-1)
             run script ge_DropInStorehouse(godHandle,myStorehouse,-1)
         end if
@@ -1239,9 +1237,8 @@ start
         //say "Satisfy Ore"
         myStorehouse = get building ABODE_NUMBER_STORAGE_PIT in ge_HomeTown[godHandle] min built 1.0
         myOreRock = get SCRIPT_OBJECT_TYPE_ORE_ROCK at {ge_HomeTown[godHandle]} radius bim_ResourceGatherRadius
-        townDesire = get ge_HomeTown[godHandle] desire TOWN_DESIRE_FOR_ORE
         myInfluence = get player ge_Player[godHandle] influence at {myOreRock}
-        if myStorehouse exists
+        if myStorehouse exists and myOreRock exists
             run script ge_PickupResource(godHandle,myOreRock,GE_HT_ORE,-1)
             run script ge_DropInStorehouse(godHandle,myStorehouse,-1)
         end if
@@ -1266,16 +1263,15 @@ start
         //say "Satisfy Food"
         myHouse = get random home in town ge_HomeTown[godHandle]
         myField = get ABODE_NUMBER_FIELD at {myHouse} radius bim_ResourceGatherRadius
-        townDesire = get ge_HomeTown[godHandle] desire TOWN_DESIRE_FOR_FOOD
         myStorehouse = get building ABODE_NUMBER_STORAGE_PIT in ge_HomeTown[godHandle] min built 1.0
-        if myStorehouse exists
+        if myStorehouse exists and myField exists
             foodInField = get resource RESOURCE_TYPE_FOOD in myField
             myAltar = get building ABODE_NUMBER_ALTAR in ge_HomeTown[godHandle] min built 1.0
             if foodInField < 600 and myAltar exists// then try to water
                 currentMana = get player ge_Player[godHandle] mana        
                 waterThrows = currentMana / geManaCostWater
-                if waterThrows > 3 // Max times it will water (make global var?)
-                    waterThrows = 3
+                if waterThrows > 2 // Max times it will water (make global var?)
+                    waterThrows = 2
                 end if
                 while waterThrows > 0
                     run script ge_ThrowMiracle(godHandle, GE_MIRACLE_TYPE_WATER, myField)
@@ -1285,7 +1281,6 @@ start
             end if
             run script ge_PickupResource(godHandle,myField,GE_HT_FOOD,-1)
             run script ge_DropInStorehouse(godHandle,myStorehouse,-1)
-            townDesire = get ge_HomeTown[godHandle] desire TOWN_DESIRE_FOR_FOOD
         end if
         counter++
     end while
