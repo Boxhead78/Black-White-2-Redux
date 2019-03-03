@@ -2,7 +2,7 @@
 //    Land 8 Japanese-Strategy
 //    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
-//    Start date:        29.03.18            By: Boxhead
+//    Start date:     29.03.18            By: Boxhead
 //    Update date:    04.04.18            By: Boxhead
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -821,7 +821,7 @@ start
 
 begin loop
 
-    if EpicWondersBuilt == 1 and GB_DialogueIsRunning == 0
+    if EpicWondersBuilt == 1 and GB_DialogueIsRunning == 0 and Difficulty >= 4
         EpicWondersBuilt = 2
         GB_DialogueIsRunning = 1
         begin dialogue
@@ -1352,7 +1352,7 @@ begin loop
         end if
     end if
 
-    if FireHurricane == 1 and HURR_NOT_PLAYED == 0
+    if FireHurricane == 1 and HURR_NOT_PLAYED == 0 and PLAYER of JapaneseTown2 == 1
         GB_DialogueIsRunning = 1
         HURR_NOT_PLAYED = 1
         begin dialogue
@@ -2147,13 +2147,17 @@ start
         if get player 0 alignment > 0.25
             if get player 0 impressiveness >= 4000 and EpicWondersBuilt == 0
                 EpicWondersBuilt = 1
-                run background script LC8_HurricaneRessourceManager
+                if Difficulty >= 4
+                    run background script LC8_HurricaneRessourceManager
+                end if
                 run background script LC8_EarthquakeRessourceManager
             end if
         else
             if get player 0 impressiveness >= 1500 and EpicWondersBuilt == 0
                 EpicWondersBuilt = 1
-                run background script LC8_HurricaneRessourceManager
+                if Difficulty >= 4
+                    run background script LC8_HurricaneRessourceManager
+                end if
                 run background script LC8_EarthquakeRessourceManager
             end if
         end if
@@ -2581,7 +2585,9 @@ begin loop
             if PortalFirstTime == 1
                 PortalFirstTime = 0
                 run script LC8_PlatoonPortalCutscene
-                run background script LC8_Build_Japanese_Altars
+                if Difficulty >= 4
+                    run background script LC8_Build_Japanese_Altars
+                end if
             end if
         else //On hilltop
             Weather[1] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {PortalDestPos2} + {0, 75, 0}
@@ -2597,7 +2603,9 @@ begin loop
             if PortalFirstTime == 1
                 PortalFirstTime = 0
                 run script LC8_PlatoonPortalCutscene
-                run background script LC8_Build_Japanese_Altars
+                if Difficulty >= 4
+                    run background script LC8_Build_Japanese_Altars
+                end if
             end if
         end if
 
@@ -2659,7 +2667,9 @@ begin loop
         PlatoonArrived[1] = 0
         PlatoonArrived[2] = 0
     elsif PLAYER of JapaneseCapital != 1 and AltarsActivated == 0
-        run background script LC8_Build_Japanese_Altars
+        if Difficulty >= 4
+            run background script LC8_Build_Japanese_Altars
+        end if
     end if
 
 end loop
@@ -2844,16 +2854,20 @@ start
     wait 215 seconds
     wait until not town PlayerTown is under takeover from player 1
 
-    LC8_LargeSiegeLaunchAttack = 0
+    if Difficulty >= 4
+        LC8_LargeSiegeLaunchAttack = 0
 
-    wait until PLAYER of PlayerTown == 0
-    wait 45 seconds
-    FireHurricane = 1
+        wait until PLAYER of PlayerTown == 0
+        wait 45 seconds
+        FireHurricane = 1
 
-    wait until HurricaneActive == 1 or 120 seconds
-    wait until HurricaneActive == 0 or 120 seconds
+        wait until HurricaneActive == 1 or 60 seconds
+        wait until HurricaneActive == 0 or 30 seconds
 
-    LC8_LargeSiegeLaunchAttack = 1
+        LC8_LargeSiegeLaunchAttack = 1
+    else
+        wait 30 seconds
+    end if
 
     wait 60 seconds
 
@@ -2900,7 +2914,7 @@ begin loop
             wait until not LC8_Platoon[26] recruiting
         end if
 
-        if LC8_Platoon[27] not exists and PLAYER of JapaneseTown2 == 1 and LC8_LargeSiegeIsRunning == 1 and Difficulty >= 4
+        if LC8_Platoon[27] not exists and PLAYER of JapaneseTown2 == 1 and LC8_LargeSiegeIsRunning == 1 and Difficulty >= 3
             wait number from 2 to 4 seconds
             LC8_Platoon[27] = recruit ARMY_UNIT_TYPE_RANGED_4 town JapaneseTown2 platoon of size 30 * RecruitSizeModifier
             wait until not LC8_Platoon[27] recruiting
@@ -2955,7 +2969,7 @@ begin loop
             LC8_Platoon[30] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 30 * RecruitSizeModifier
             wait until not LC8_Platoon[30] recruiting
         end if
-        if LC8_Platoon[31] not exists and PLAYER of JapaneseCapital == 1 and LC8_LargeSiegeIsRunning == 1 and Difficulty >= 4
+        if LC8_Platoon[31] not exists and PLAYER of JapaneseCapital == 1 and LC8_LargeSiegeIsRunning == 1 and Difficulty >= 3
             wait number from 2 to 4 seconds
             LC8_Platoon[31] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 30 * RecruitSizeModifier
             wait until not LC8_Platoon[31] recruiting
@@ -2995,31 +3009,31 @@ start
     
     wait until LC8_LargeSiegeLaunchAttack == 1
 
-    play string sound "AZTECWARNINGHORN"
-
     wait 30 seconds
     set dynamic music "medium" loop -1 urgent
     
-    wait until LC8_LargeSiegeLaunchAttack == 0
+    if Difficulty >= 4
+        wait until LC8_LargeSiegeLaunchAttack == 0
 
-    play string sound "AZTECWARNINGHORN"
-    wait 3 seconds
-    set dynamic music "smallendofbattle" loop 0 urgent
-    wait 20 seconds
-    play string sound "AZTECWARNINGHORN"
-    wait 20 seconds
-    
-    cdmixer = create mixer
-    set mixer cdmixer channel AUDIO_MIXER_CHANNEL_MUSIC to 0.0 with fadetime 8
-    wait 8 seconds 
-    stop dynamic music
-    destroy mixer cdmixer with fadetime 3
+        play string sound "AZTECWARNINGHORN"
+        wait 3 seconds
+        set dynamic music "smallendofbattle" loop 0 urgent
+        wait 20 seconds
+        play string sound "AZTECWARNINGHORN"
+        wait 20 seconds
+        
+        cdmixer = create mixer
+        set mixer cdmixer channel AUDIO_MIXER_CHANNEL_MUSIC to 0.0 with fadetime 8
+        wait 8 seconds 
+        stop dynamic music
+        destroy mixer cdmixer with fadetime 3
 
-    wait until FireHurricane == 1 and LC8_LargeSiegeLaunchAttack == 1
-    
-    wait 3 seconds
-    start dynamic music
-    set dynamic music "small" loop -1 urgent
+        wait until FireHurricane == 1 and LC8_LargeSiegeLaunchAttack == 1
+
+        wait 3 seconds
+        start dynamic music
+        set dynamic music "small" loop -1 urgent
+    end if
     
     wait 40 seconds
     set dynamic music "smallevent4" loop 0 urgent
