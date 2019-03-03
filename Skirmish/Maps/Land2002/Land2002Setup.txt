@@ -351,40 +351,54 @@ start
 
     if PlayerID == 0
         //Load the creature and get it into global
-        Creature = persistent data "PLAYER_CREATURE_TYPE"
-        if Creature == variable CREATURE_TYPE_LION
-            Creature = create CREATURE CREATURE_TYPE_LION at {CreaturePos}
-            set player PlayerID creature to Creature
+        load my_creature at {CreaturePos}
+        Creature = get player 0 creature
 
-        elsif Creature == variable CREATURE_TYPE_APE
-            Creature = create CREATURE CREATURE_TYPE_APE at {CreaturePos}
-            set player PlayerID creature to Creature
+        if not Creature exists
+            //Load the creature and get it into global
+            Creature = persistent data "PLAYER_CREATURE_TYPE"
+            if Creature == variable CREATURE_TYPE_LION
+                Creature = create CREATURE CREATURE_TYPE_LION at {CreaturePos}
+                set player 0 creature to Creature
 
-        elsif Creature == variable CREATURE_TYPE_GORILLA
-            Creature = create CREATURE CREATURE_TYPE_GORILLA at {CreaturePos}
-            set player PlayerID creature to Creature
+            elsif Creature == variable CREATURE_TYPE_APE
+                Creature = create CREATURE CREATURE_TYPE_APE at {CreaturePos}
+                set player 0 creature to Creature
 
-        elsif Creature == variable CREATURE_TYPE_WOLF
-            Creature = create CREATURE CREATURE_TYPE_WOLF at {CreaturePos}
-            set player PlayerID creature to Creature
+            elsif Creature == variable CREATURE_TYPE_GORILLA
+                Creature = create CREATURE CREATURE_TYPE_GORILLA at {CreaturePos}
+                set player 0 creature to Creature
 
-        elsif Creature == variable CREATURE_TYPE_COW
-            Creature = create CREATURE CREATURE_TYPE_COW at {CreaturePos}
-            set player PlayerID creature to Creature
+            elsif Creature == variable CREATURE_TYPE_WOLF
+                Creature = create CREATURE CREATURE_TYPE_WOLF at {CreaturePos}
+                set player 0 creature to Creature
 
-        else// L2PlayersCreatureCheck == variable CREATURE_TYPE_TIGER
-            Creature = create CREATURE CREATURE_TYPE_TIGER at {CreaturePos}
-            set player PlayerID creature to Creature
+            elsif Creature == variable CREATURE_TYPE_COW
+                Creature = create CREATURE CREATURE_TYPE_COW at {CreaturePos}
+                set player 0 creature to Creature
 
+            else// L2PlayersCreatureCheck == variable CREATURE_TYPE_TIGER
+                Creature = create CREATURE CREATURE_TYPE_TIGER at {CreaturePos}
+                set player 0 creature to Creature
+
+            end if
+
+            set creature Creature happiness to maximum
+
+            AGE of Creature = persistent data "CREATURE_AGE"
+            HEIGHT of Creature = persistent data "CREATURE_SIZE"
+            STRENGTH of Creature = persistent data "CREATURE_STRENGTH"
+            ALIGNMENT of Creature = persistent data "CREATURE_ALIGNMENT"
+            FATNESS of Creature = persistent data "CREATURE_FATNESS"
+
+            release Creature
         end if
 
-        set creature Creature happiness to maximum
-
-        AGE of Creature = persistent data "CREATURE_AGE"
-        HEIGHT of Creature = persistent data "CREATURE_SIZE"
-        STRENGTH of Creature = persistent data "CREATURE_STRENGTH"
-        ALIGNMENT of Creature = persistent data "CREATURE_ALIGNMENT"
-        FATNESS of Creature = persistent data "CREATURE_FATNESS"
+        Creature = get player 0 creature
+        if not Creature exists
+            Creature = create CREATURE CREATURE_TYPE_APE at {CreaturePos}
+            set player 0 creature to Creature
+        end if
 
         release Creature
     else
