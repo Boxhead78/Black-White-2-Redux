@@ -2,8 +2,6 @@
 //    Land 12 Script-Manager
 //    ~~~~~~~~~~~~~~~~~~~~~~~~~
 //
-//    Start date:     05.02.17            By: Boxhead
-//    Update date:    09.03.18            By: Boxhead
 ///////////////////////////////////////////////////////////////////////////////
 
 define script Land12Script
@@ -165,17 +163,17 @@ start
         run background script LC12_Intro
     end if
 
-//    run script Globals
-//    run background script PlayerMana(0)
-//    run background script PlayerMana(1)
-//    run background script LC12_Outro
-//    run background script LC12_SetupCreature
-//    run background script LC12_Capital_Impressiveness
-//    run background script LC12_Tribute
-//    run background script LC12_TownConversion
-//    run background script LC12_Japanese_Capital
-//    run background script DisableLocalPlatoonResponse
-//    run background script GodsPlaygroundLoader
+    run script Globals
+    run background script PlayerMana(0)
+    run background script PlayerMana(1)
+//  run background script LC12_Outro
+    run background script LC12_SetupCreature
+    run background script LC12_Aztec_Capital_Impressiveness
+    run background script LC12_Tribute
+    run background script LC12_TownConversion
+    run background script LC12_Japanese_Capital
+//  run background script DisableLocalPlatoonResponse
+    run background script GodsPlaygroundLoader
     
     wait until IntroFinished == 1
 
@@ -183,29 +181,28 @@ start
     set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_MAP to 0.6
     set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_POSITIONAL to 0.6
 
-//    run background script LC6_AttackNearestTownTimer
-//    run background script LC6_DefendPlatoons
-//    run background script LC6_PlatoonBehaviors
-//    run background script LC6_AltarBehavior
-//    run background script LC6_BonusMissions
-//    run background script LC6_Speeches
-//    run background script LC6_TownObjectives
-//    run background script LC6_GatehouseManager
-//    run background script LC6_Japanese_Capital_Resource_Manager
-//    run background script LC6_Enemy_Migrations
-//    run background script LC6_JapaneseCapitalRessourceManager
-//    run background script LC6_MinorJapaneseTown1RessourceManager
-//    run background script LC6_MinorJapaneseTown2RessourceManager
-//    run background script LC6_GetNearestSettlement
-//    run background script LC6_JapaneseMinorTown1VillagerManager
-//    run background script LC6_JapaneseMinorTown2VillagerManager
-//    run background script LC6_JapaneseCapitalVillagerManager
+//  run background script LC12_AttackNearestTownTimer
+//  run background script LC12_DefendPlatoons
+//  run background script LC12_PlatoonBehaviors
+//  run background script LC12_BonusMissions
+    run background script LC12_Speeches
+//  run background script LC12_TownObjectives
+    run background script LC12_GatehouseManager
+//  run background script LC12_Japanese_Capital_Resource_Manager
+//  run background script LC12_Enemy_Migrations
+//  run background script LC12_JapaneseCapitalRessourceManager
+//  run background script LC12_MinorJapaneseTown1RessourceManager
+//  run background script LC12_MinorJapaneseTown2RessourceManager
+//  run background script LC12_GetNearestSettlement
+//  run background script LC12_JapaneseMinorTown1VillagerManager
+//  run background script LC12_JapaneseMinorTown2VillagerManager
+//  run background script LC12_JapaneseCapitalVillagerManager
     
 end script Land12ScriptManager
 
 begin script LC12_SetupCreature
 
-    CreaturePos    = marker at {1090.03,23.41,967.70}
+    CreaturePos    = marker at {1107.55,63.45,1471.47}
     
 start
 
@@ -214,9 +211,52 @@ start
     MyCreature = get player 0 creature
 
     if not MyCreature exists
+        //Load the creature and get it into global
+        MyCreature = persistent data "PLAYER_CREATURE_TYPE"
+        if MyCreature == variable CREATURE_TYPE_LION
+            MyCreature = create CREATURE CREATURE_TYPE_LION at {CreaturePos}
+            set player 0 creature to MyCreature
+
+        elsif MyCreature == variable CREATURE_TYPE_APE
+            MyCreature = create CREATURE CREATURE_TYPE_APE at {CreaturePos}
+            set player 0 creature to MyCreature
+
+        elsif MyCreature == variable CREATURE_TYPE_GORILLA
+            MyCreature = create CREATURE CREATURE_TYPE_GORILLA at {CreaturePos}
+            set player 0 creature to MyCreature
+
+        elsif MyCreature == variable CREATURE_TYPE_WOLF
+            MyCreature = create CREATURE CREATURE_TYPE_WOLF at {CreaturePos}
+            set player 0 creature to MyCreature
+
+        elsif MyCreature == variable CREATURE_TYPE_COW
+            MyCreature = create CREATURE CREATURE_TYPE_COW at {CreaturePos}
+            set player 0 creature to MyCreature
+
+        else// L2PlayersCreatureCheck == variable CREATURE_TYPE_TIGER
+            MyCreature = create CREATURE CREATURE_TYPE_TIGER at {CreaturePos}
+            set player 0 creature to MyCreature
+
+        end if
+
+        set creature MyCreature happiness to maximum
+
+        AGE of MyCreature = persistent data "CREATURE_AGE"
+        HEIGHT of MyCreature = persistent data "CREATURE_SIZE"
+        STRENGTH of MyCreature = persistent data "CREATURE_STRENGTH"
+        ALIGNMENT of MyCreature = persistent data "CREATURE_ALIGNMENT"
+        FATNESS of MyCreature = persistent data "CREATURE_FATNESS"
+
+        release MyCreature
+    end if
+
+    MyCreature = get player 0 creature
+    if not MyCreature exists
         MyCreature = create CREATURE CREATURE_TYPE_APE at {CreaturePos}
         set player 0 creature to MyCreature
     end if
+
+    MyCreature = get player 0 creature
     wait until IntroFinished == 1
     release MyCreature
 
