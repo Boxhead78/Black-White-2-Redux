@@ -1,19 +1,18 @@
 ///////////////////////////////////////////////////////////////////////////////
-//    Land 6 Script-Manager
+//    Land 12 Script-Manager
 //    ~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 //    Start date:     05.02.17            By: Boxhead
 //    Update date:    09.03.18            By: Boxhead
 ///////////////////////////////////////////////////////////////////////////////
 
-define script Land6Script
-define script Land6ScriptManager
-define script LC6_SetupCreature
-define script LC6_BonusMissions
+define script Land12Script
+define script Land12ScriptManager
+define script LC12_SetupCreature
 
-run script Land6Script
+run script Land12Script
 
-begin script Land6Script
+begin script Land12Script
     
     
 start
@@ -30,7 +29,7 @@ start
     enable load screen
 
     run script DifficultyModifiers
-    run background script Land6ScriptManager
+    run background script Land12ScriptManager
     
     if DEBUG == 1
         set research ABODE_NUMBER_C available to RESEARCH_AVAILABILITY_RESEARCHED
@@ -137,9 +136,9 @@ start
 
     wait until 1 !=1
 
-end script Land6Script
+end script Land12Script
 
-begin script Land6ScriptManager
+begin script Land12ScriptManager
 
     AtmosMixer = create mixer
     Portal = 0
@@ -161,26 +160,22 @@ start
         disable load screen
         set fade red 0 green 0 blue 0 time 0
         set fade in time 4
-        Portal = create visual effect VISUAL_EFFECT_TELEPORTER_HOOP at {1630.60,73.16,1592.69} + {0, 3, 0} time -1
-        run background script LookAFterPeopleComingFromTeleporter(Portal)
-        wait 30 seconds
-        DeletePeople = True
         IntroFinished = 1
     else
-        run background script LC6_Intro
+        run background script LC12_Intro
     end if
 
-    run script Globals
-    run background script PlayerMana(0)
-    run background script PlayerMana(1)
-    run background script LC6_Outro
-    run background script LC6_SetupCreature
-    run background script LC6_Capital_Impressiveness
-    run background script LC6_Tribute
-    run background script LC6_TownConversion
-    run background script LC6_Japanese_Capital
-    run background script DisableLocalPlatoonResponse
-    run background script GodsPlaygroundLoader
+//    run script Globals
+//    run background script PlayerMana(0)
+//    run background script PlayerMana(1)
+//    run background script LC12_Outro
+//    run background script LC12_SetupCreature
+//    run background script LC12_Capital_Impressiveness
+//    run background script LC12_Tribute
+//    run background script LC12_TownConversion
+//    run background script LC12_Japanese_Capital
+//    run background script DisableLocalPlatoonResponse
+//    run background script GodsPlaygroundLoader
     
     wait until IntroFinished == 1
 
@@ -188,27 +183,27 @@ start
     set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_MAP to 0.6
     set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_POSITIONAL to 0.6
 
-    run background script LC6_AttackNearestTownTimer
-    run background script LC6_DefendPlatoons
-    run background script LC6_PlatoonBehaviors
-    run background script LC6_AltarBehavior
-    run background script LC6_BonusMissions
-    run background script LC6_Speeches
-    run background script LC6_TownObjectives
-    run background script LC6_GatehouseManager
-    run background script LC6_Japanese_Capital_Resource_Manager
-    run background script LC6_Enemy_Migrations
-    run background script LC6_JapaneseCapitalRessourceManager
-    run background script LC6_MinorJapaneseTown1RessourceManager
-    run background script LC6_MinorJapaneseTown2RessourceManager
-    run background script LC6_GetNearestSettlement
-    run background script LC6_JapaneseMinorTown1VillagerManager
-    run background script LC6_JapaneseMinorTown2VillagerManager
-    run background script LC6_JapaneseCapitalVillagerManager
+//    run background script LC6_AttackNearestTownTimer
+//    run background script LC6_DefendPlatoons
+//    run background script LC6_PlatoonBehaviors
+//    run background script LC6_AltarBehavior
+//    run background script LC6_BonusMissions
+//    run background script LC6_Speeches
+//    run background script LC6_TownObjectives
+//    run background script LC6_GatehouseManager
+//    run background script LC6_Japanese_Capital_Resource_Manager
+//    run background script LC6_Enemy_Migrations
+//    run background script LC6_JapaneseCapitalRessourceManager
+//    run background script LC6_MinorJapaneseTown1RessourceManager
+//    run background script LC6_MinorJapaneseTown2RessourceManager
+//    run background script LC6_GetNearestSettlement
+//    run background script LC6_JapaneseMinorTown1VillagerManager
+//    run background script LC6_JapaneseMinorTown2VillagerManager
+//    run background script LC6_JapaneseCapitalVillagerManager
     
-end script Land6ScriptManager
+end script Land12ScriptManager
 
-begin script LC6_SetupCreature
+begin script LC12_SetupCreature
 
     CreaturePos    = marker at {1090.03,23.41,967.70}
     
@@ -225,39 +220,4 @@ start
     wait until IntroFinished == 1
     release MyCreature
 
-end script LC6_SetupCreature
-
-begin script LC6_BonusMissions
-
-    Player1Impressiveness = 0
-
-    a = 0
-    b = 0
-    c = 0
-
-start
-
-begin loop
-
-    Player1Impressiveness = get player 0 impressiveness
-
-    if get building CRECHE in PlayerTown min built 1.0 exists and a == 0
-        a = 1
-        run background script LC6_Kidnapper
-    end if
-
-    if Player1Impressiveness > 7500 and b == 0
-        b = 1
-        run background script LC6_ChopSuey
-    end if
-
-    if c == 0
-        if TownsConverted >= 5 or TownsAggressiveConverted >= 2
-            c = 1
-            run background script LC6_NutOil
-        end if
-    end if
-
-end loop
-
-end script LC6_BonusMissions
+end script LC12_SetupCreature
