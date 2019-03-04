@@ -9,7 +9,8 @@ define script LC12_TownConversion
 define script LC12_Tribute
 define script LC12_GatehouseManager
 define script LC12_Speeches
-define script LC12_Japanese_Capital
+define script LC12_Aztec_Capital
+define script DisableLocalPlatoonResponse
 
 
 begin script LC12_Aztec_Capital_Impressiveness
@@ -1617,7 +1618,7 @@ end loop
 
 end script LC12_Speeches
 
-begin script LC12_Japanese_Capital
+begin script LC12_Aztec_Capital
 
 start
 
@@ -1646,7 +1647,6 @@ start
         add resource FOOD 10000 to PlayerTown
     end if
 
-
     //----Create town static defenders platoons----//
 
     //--AztecCapital--//
@@ -1661,4 +1661,28 @@ start
 
     end loop
 
-end script LC12_Japanese_Capital
+end script LC12_Aztec_Capital
+
+
+begin script DisableLocalPlatoonResponse
+
+    Counter = 0
+
+start
+
+begin loop
+    if Counter > 99
+        Counter = 0
+        wait 30 seconds
+    end if
+    if LC12_Platoon[Counter] exists
+        disable platoon LC12_Platoon[Counter] respond to local platoon attack
+    end if
+    if LC12_WallArcher[Counter] exists
+        disable platoon LC12_WallArcher[Counter] respond to local platoon attack
+    end if
+
+    Counter++
+end loop
+
+end script DisableLocalPlatoonResponse
