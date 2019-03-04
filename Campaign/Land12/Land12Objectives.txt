@@ -6,9 +6,13 @@
 
 //*************************************************************
 //
-//    Land6Objectives
+//    Land12Objectives
 //
 //*************************************************************
+
+define LO_FALSE = 0
+define LO_TRUE = 1
+define script LC12_TownObjectives
 
 define script LC12_TownObjectives
 
@@ -17,115 +21,94 @@ define script LC12_TownObjectives
 //-----------------------------------------------------------------------------
 begin script LC12_TownObjectives
 
+    CreatureAbodeObjective = LO_FALSE
+    CityObjective = LO_FALSE
+    CreatureWoodObjective = LO_FALSE
+    CreatureFoodObjective = LO_FALSE
+    CreatureSoldiersObjective = LO_FALSE
+    BreedObjective = LO_FALSE
+    CreatureSoldiers2Objective = LO_FALSE
+    PlayerAlignment = 0
+    
 start
 
     reset all objectives for player 0
-
-    // New uber way
-    //set player 0 objective constant amount expression text "STRING" <description "STRING"> <icon constant> <parent constant> <type constant>
     
+    ///////PRIMARY OBJECTIVES - these are script controlled
 
-    //PRIMARY OBJECTIVES - these are controlled by script
+
+    //PRIMARY - Dominate Land by Impressiveness or Force
+    set player 0 objective TRIBUTE_OBJECTIVE_SCRIPT_CONTROLLED_WIN_LAND with amount 1 text "BW2T_SCRIPT_07FINAL_SECONDARYOBJECTIVE_80" amount 1 description "BW2T_SCRIPT_06FINAL_SECONDARYOBJECTIVE_51" start value 0 reward 550000 alignment 0.1
     
-    //PRIMARY - Dominate Land by Impressiveness    
-    set player 0 objective TRIBUTE_OBJECTIVE_SCRIPT_CONTROLLED_WIN_LAND with amount 1 text "BW2T_SCRIPT_07FINAL_SECONDARYOBJECTIVE_80" amount 1 description "BW2T_SCRIPT_06FINAL_SECONDARYOBJECTIVE_51" start value 0 reward 150000 alignment 0.1
-        
-    //SECONDARY OBJECTIVES - these are controlled by code -
-
-    // Add the relevant objectives to the list
+    /////SECONDARY OBJECTIVES - these are controlled by gamecode    
     
     //SPECIAL OBJECTIVES
-    
-    //Enclose  town within walls    
-    set player 0 objective TRIBUTE_OBJECTIVE_SPECIAL_ENCLOSE_TOWN_WITHIN_WALLS with amount 1 text "BW2T_SCRIPT_04FINAL_OBJECTIVE_NEUTRAL_10" amount 1 description "BW2T_SCRIPT_04FINAL_OBJECTIVE_NEUTRAL_11" start value 0    reward 15000
-        
+    PlayerAlignment = alignment of player
 
-    //Take over 3 towns using impressiveness    
-    set player 0 objective TRIBUTE_OBJECTIVE_TAKEOVER_TOWNS_IMPRESSIVENESS with amount 5 text "BW2T_SCRIPT_GENERIC_PICKUP163" amount 5 description "BW2T_SCRIPT_06FINAL_OBJECTIVE_GOOD_21" start value 0 reward 15000 alignment 0.05
+    //PICK THE CORRECT change alignment!
+    if PlayerAlignment > 0
+        //Change of heart - convert from GOOD to EVIL
+        set player 0 objective TRIBUTE_OBJECTIVE_AS_SOON_AS_CONVERT_ALIGMNENT_TO_EVIL with amount 1 text "BW2T_SCRIPT_07FINAL_OBJECTIVE_EVIL_60" amount 1 description "BW2T_SCRIPT_07FINAL_OBJECTIVE_EVIL_61" start value 0 reward 5000 alignment -0.05
+    end if
+    if PlayerAlignment < 0
+        //Change of heart - convert from Good to EVIL    
+        set player 0 objective TRIBUTE_OBJECTIVE_AS_SOON_AS_CONVERT_ALIGMNENT_TO_GOOD with amount 1 text "BW2T_SCRIPT_07FINAL_OBJECTIVE_GOOD_10" amount 1 description "BW2T_SCRIPT_07FINAL_OBJECTIVE_GOOD_11" start value 0 reward 5000 alignment 0.05
+    end if
     
-    //Increase impressiveness by 30000    
-    set player 0 objective TRIBUTE_OBJECTIVE_INCREASE_IMPRESSIVENESS with amount 30000 text "BW2T_SCRIPT_06FINAL_OBJECTIVE_NEUTRAL_10" amount 30000 description "BW2T_SCRIPT_06FINAL_OBJECTIVE_NEUTRAL_11" start value 0 reward 10000
+    //Segregate men and women into separate towns    
+    set player 0 objective TRIBUTE_OBJECTIVE_SPECIAL_SEGREGATE_MEN_WOMEN with amount 1 text "BW2T_SCRIPT_09FINAL_OBJECTIVE_NEUTRAL_20" amount 1 description "BW2T_SCRIPT_09FINAL_OBJECTIVE_NEUTRAL_21" start value 0 reward 10000
     
-    //Link all your impressiveness bubbles together    
-    set player 0 objective TRIBUTE_OBJECTIVE_SPECIAL_LINK_TOWNS_WITH_IMPRESSIVENESS with amount 3 text "BW2T_SCRIPT_07FINAL_PRIMARYOBJECTIVE_51" amount 3 description "BW2T_SCRIPT_07FINAL_OBJECTIVE_NEUTRAL_11" start value 0 reward 5000
-    
-    //Build a wonder
-    set player 0 objective TRIBUTE_OBJECTIVE_BUILD_WONDER with amount 1 text "BW2T_SCRIPT_10FINAL_OBJECTIVE_NEUTRAL_30" amount 1 description "BW2T_SCRIPT_10FINAL_OBJECTIVE_NEUTRAL_31" start value 0 reward 100000
+    //Take over X  towns by impressiveness    
+    set player 0 objective TRIBUTE_OBJECTIVE_TAKEOVER_TOWNS_IMPRESSIVENESS with amount 4 text "BW2T_SCRIPT_GENERIC_PICKUP163" amount 3 description "BW2T_SCRIPT_07FINAL_OBJECTIVE_GOOD_41" start value 0 reward 20000 alignment 0.05
     
     
-    //TOWN OBJECTIVES
+    ///TOWN Objecitves
     
-    //Build 5 fields on fertile land    
-    set player 0 objective TRIBUTE_OBJECTIVE_BUILD_FIELD_FERTILE with amount 5 text "BW2T_SCRIPT_06FINAL_OBJECTIVE_NEUTRAL_90" amount 5 description "BW2T_SCRIPT_06FINAL_OBJECTIVE_NEUTRAL_91" start value 0 reward 4000
+    //MAKE WORK Use Shield Miracle to protect your villagers/army    
+    set player 0 objective TRIBUTE_OBJECTIVE_SPECIAL_PROTECT_N_VILLAGERS_WITH_SHIELD_MIRACLE with amount 15 text "BW2T_SCRIPT_OBJECTIVES_PICKUP30" amount 5 description "BW2T_SCRIPT_08FINAL_OBJECTIVE_GOOD_51" class TRIBUTE_OBJECTIVE_CLASS_TOWN start value 0 reward 3000 alignment 0.01
     
-    //Build 10 embellishments    
-    set player 0 objective TRIBUTE_OBJECTIVE_BUILD_EMBELLISHMENT with amount 10 text "BW2T_SCRIPT_08FINAL_OBJECTIVE_GOOD_30" amount 10 description "BW2T_SCRIPT_08FINAL_OBJECTIVE_GOOD_31" start value 0 reward 5000 alignment 0.03
-    
-    //Make 20 breeder disciples    
-    set player 0 objective TRIBUTE_OBJECTIVE_MAKE_BREEDER_DISCIPLES with amount 30 text "BW2T_SCRIPT_06FINAL_OBJECTIVE_NEUTRAL_80" amount 30 description "BW2T_SCRIPT_06FINAL_OBJECTIVE_NEUTRAL_81" start value 0 reward 4000
-        
-    //Achieve city status    
-    set player 0 objective TRIBUTE_OBJECTIVE_REACH_CITY_STATUS with amount 1 text "BW2T_SCRIPT_06FINAL_OBJECTIVE_NEUTRAL_60" amount 300 description "BW2T_SCRIPT_06FINAL_OBJECTIVE_NEUTRAL_61" start value 0 reward 20000
-    
-    //ARMY OBJECTIVES
-        
-    //Create 10 platoons    
-    set player 0 objective TRIBUTE_OBJECTIVE_CREATE_TROOPS with amount 100 text "BW2T_SCRIPT_06FINAL_OBJECTIVE_50" amount 100 description "BW2T_SCRIPT_06FINAL_SECONDARYOBJECTIVE_71" start value 50 reward 10000 alignment -0.05
+    //Create 50 breaders    
+    set player 0 objective TRIBUTE_OBJECTIVE_MAKE_BREEDER_DISCIPLES with amount 50 text "BW2T_SCRIPT_07FINAL_OBJECTIVE_GOOD_50" amount 20 description "BW2T_SCRIPT_07FINAL_OBJECTIVE_GOOD_51" class TRIBUTE_OBJECTIVE_CLASS_TOWN start value 0 reward 10000
 
-    //Take over 3 towns by force    
-    set player 0 objective TRIBUTE_OBJECTIVE_TAKEOVER_TOWNS_FORCE with amount 3 text "BW2T_SCRIPT_GENERIC_PICKUP162" amount 3 description "BW2T_SCRIPT_06FINAL_OBJECTIVE_EVIL_21" start value 0 reward 15000 alignment -0.05
+    //Achieve metropolis status    
+    set player 0 objective TRIBUTE_OBJECTIVE_REACH_METROPOLIS_STATUS with amount 1 text "BW2T_SCRIPT_07FINAL_OBJECTIVE_NEUTRAL_30" amount 500 description "BW2T_SCRIPT_07FINAL_OBJECTIVE_NEUTRAL_31" start value 0 reward 20000
     
     
-    //Kill every living thing    
-    set player 0 objective TRIBUTE_OBJECTIVE_AS_SOON_AS_LIVING_THINGS_DEAD with amount 1 text "BW2T_SCRIPT_11FINAL_OBJECTIVE_EVIL_10" amount 1 description "BW2T_SCRIPT_11FINAL_OBJECTIVE_EVIL_11" class TRIBUTE_OBJECTIVE_CLASS_ARMY start value 0 reward 20000 alignment -0.2
+    //CREATURE OBJECTIVES
     
-    //TA: REMOVED AS cannot be completed..
-    //Kill everyone who is not Greek in the world
-    //set player 0 objective TRIBUTE_OBJECTIVE_AS_SOON_AS_NON_GREEK_DEAD with amount 1 text "BW2T_SCRIPT_10FINAL_OBJECTIVE_EVIL_20" amount 1 description "BW2T_SCRIPT_10FINAL_OBJECTIVE_EVIL_21" start value 0 reward 20000 alignment -0.2
+    //WIN X CREATURE FIGHTS
     
+    //Creature Collects 15000 wood    
+    set player 0 objective TRIBUTE_OBJECTIVE_CREATURE_COLLECT_WOOD with amount 15000 text "BW2T_SCRIPT_07FINAL_OBJECTIVE_NEUTRAL_80" amount 15000 description "BW2T_SCRIPT_07FINAL_OBJECTIVE_NEUTRAL_81" class TRIBUTE_OBJECTIVE_CLASS_CREATURE start value 0 reward 10000
     
-    //RESOURCE objectives
-    
-        
-    //Collect Resources    
-    set player 0 objective TRIBUTE_OBJECTIVE_COLLECT_ALL with amount 18000 text "BW2T_SCRIPT_06FINAL_OBJECTIVE_NEUTRAL_40" amount 18000 description "BW2T_SCRIPT_06FINAL_OBJECTIVE_NEUTRAL_41" start value 0 reward 0
-    
-    //Collect 6000 ore    
-    set player 0 objective TRIBUTE_OBJECTIVE_MINE_ORE with amount 6000 text "BW2T_SCRIPT_06FINAL_OBJECTIVE_NEUTRAL_100" amount 6000 description "BW2T_SCRIPT_06FINAL_OBJECTIVE_NEUTRAL_101" parent TRIBUTE_OBJECTIVE_COLLECT_ALL start value 0 reward 3000
-    
-    //Collect 6000 food    
-    set player 0 objective TRIBUTE_OBJECTIVE_COLLECT_FOOD with amount 6000 text "BW2T_SCRIPT_06FINAL_OBJECTIVE_NEUTRAL_110" amount 6000 description "BW2T_SCRIPT_06FINAL_OBJECTIVE_NEUTRAL_111" parent TRIBUTE_OBJECTIVE_COLLECT_ALL start value 0 reward 3000
-    
-    //Collect 6000 wood    
-    set player 0 objective TRIBUTE_OBJECTIVE_COLLECT_WOOD with amount 6000 text "BW2T_SCRIPT_06FINAL_OBJECTIVE_NEUTRAL_120" amount 6000 description "BW2T_SCRIPT_06FINAL_OBJECTIVE_NEUTRAL_121" parent TRIBUTE_OBJECTIVE_COLLECT_ALL start value 0 reward 3000
-    
+    //Creature kills 10 platoons    
+    set player 0 objective TRIBUTE_OBJECTIVE_CREATURE_KILL_PLATOONS with amount 10 text "BW2T_SCRIPT_07FINAL_OBJECTIVE_EVIL_50" amount 10 description "BW2T_SCRIPT_07FINAL_OBJECTIVE_EVIL_51" start value 0 reward 14000
 
-
-    //Creature Objectives
+    //Use creature to break enemy walls
+    set player 0 objective TRIBUTE_OBJECTIVE_AS_SOON_AS_CREATURE_BREAK_ENEMY_WALLS with amount 1 text "BW2T_SCRIPT_OBJECTIVES_PICKUP29" amount 1 description "BW2T_SCRIPT_10FINAL_OBJECTIVE_PRIMARY_NEUTRAL_11" start value 0 reward 12000
     
-    //Creature Collect Resources    
-    set player 0 objective TRIBUTE_OBJECTIVE_CREATURE_COLLECT_ALL with amount 15000 text "BW2T_SCRIPT_09FINAL_OBJECTIVE_NEUTRAL_60" amount 15000 description "BW2T_SCRIPT_09FINAL_OBJECTIVE_NEUTRAL_61" class TRIBUTE_OBJECTIVE_CLASS_CREATURE start value 0 reward 0
+    //Creature wins X creature fights 
+    set player 0 objective TRIBUTE_OBJECTIVE_WIN_CREATURE_FIGHT with amount 3 text "BW2T_SCRIPT_OBJECTIVES_PICKUP32" amount 3 description "BW2T_SCRIPT_06FINAL_OBJECTIVE_EVIL_41" start value 0 reward 20000
     
-    //Creature Collects 5000 ore    
-    set player 0 objective TRIBUTE_OBJECTIVE_CREATURE_COLLECT_ORE with amount 5000 text "BW2T_SCRIPT_07FINAL_OBJECTIVE_NEUTRAL_60" amount 5000 description "BW2T_SCRIPT_07FINAL_OBJECTIVE_NEUTRAL_61" parent TRIBUTE_OBJECTIVE_CREATURE_COLLECT_ALL class TRIBUTE_OBJECTIVE_CLASS_CREATURE start value 0 reward 3000
     
-    //Creature Collects 5000 food    
-    set player 0 objective TRIBUTE_OBJECTIVE_CREATURE_COLLECT_FOOD with amount 5000 text "BW2T_SCRIPT_09FINAL_OBJECTIVE_NEUTRAL_81" amount 5000 description "BW2T_SCRIPT_09FINAL_OBJECTIVE_NEUTRAL_80" parent TRIBUTE_OBJECTIVE_CREATURE_COLLECT_ALL class TRIBUTE_OBJECTIVE_CLASS_CREATURE start value 0 reward 3000
+    //ARMY 
     
-    //Creature Collects 5000 wood    
-    set player 0 objective TRIBUTE_OBJECTIVE_CREATURE_COLLECT_WOOD with amount 5000 text "BW2T_SCRIPT_09FINAL_OBJECTIVE_NEUTRAL_90" amount 5000 description "BW2T_SCRIPT_09FINAL_OBJECTIVE_NEUTRAL_91" parent TRIBUTE_OBJECTIVE_CREATURE_COLLECT_ALL class TRIBUTE_OBJECTIVE_CLASS_CREATURE start value 0 reward 3000
-
-    //Creature Build X Abodes.....
-    set player 0 objective TRIBUTE_OBJECTIVE_CREATURE_BUILD_ABODES with amount 30    text "BW2T_SCRIPT_04FINAL_SECONDARYOBJECTIVE_10" amount 30 description "BW2T_SCRIPT_08FINAL_OBJECTIVES_DESCRIPTION_10" start value 0 reward 10000
-
-    //////
+    //Only attack under cover of darkness    
+    set player 0 objective TRIBUTE_OBJECTIVE_FAILABLE_ATTACKED_ONLY_UNDER_DARKNESS with amount 1 text "BW2T_SCRIPT_07FINAL_OBJECTIVE_EVIL_10" amount 1 description "BW2T_SCRIPT_07FINAL_OBJECTIVE_EVIL_11" start value 0 reward 20000 alignment -0.05
+    
+    //Take over N towns by force 
+    set player 0 objective TRIBUTE_OBJECTIVE_TAKEOVER_TOWNS_FORCE with amount 4 text "BW2T_SCRIPT_GENERIC_PICKUP162" amount 3 description "BW2T_SCRIPT_06FINAL_OBJECTIVE_EVIL_21" class TRIBUTE_OBJECTIVE_CLASS_ARMY start value 0 reward 20000   alignment -0.05
+    
+    //Level up a platoon to Rank 6    
+    set player 0 objective TRIBUTE_OBJECTIVE_LEVEL_UP_PLATOON with amount 6 text "BW2T_SCRIPT_07FINAL_OBJECTIVE_EVIL_40" amount 6 description "BW2T_SCRIPT_07FINAL_OBJECTIVE_EVIL_41" start value 0 reward 11000 alignment -0.05
+    
+    
+    //AMOUNT SETTING
     //The amount setting must occur last
     set player 0 objective class TRIBUTE_OBJECTIVE_CLASS_GOLD amount 20
     set player 0 objective class TRIBUTE_OBJECTIVE_CLASS_SPECIAL amount 0
     set player 0 objective class TRIBUTE_OBJECTIVE_CLASS_TOWN amount 1
     set player 0 objective class TRIBUTE_OBJECTIVE_CLASS_ARMY amount 1
     set player 0 objective class TRIBUTE_OBJECTIVE_CLASS_CREATURE amount 1
-    set player 0 objective class TRIBUTE_OBJECTIVE_CLASS_RESOURCES amount 1
-
 
 end script LC12_TownObjectives
