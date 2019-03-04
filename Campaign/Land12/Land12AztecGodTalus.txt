@@ -1,0 +1,1009 @@
+////////////////////////
+//  GOD ENGINE BODY  //
+//////////////////////
+/*##############################
+# Version:      0.9 Beta
+#
+# Description:  Low-level implementation of God Engine
+#
+# Credits:      Godplex
+#               Daxter (for original idea and a bit of his code)
+#                Boxhead78
+#
+# Notes:        You shouldn't mess with this unless you intend to
+#               modify some low-levl aspect of the way God Engine
+#               functions. Everything you need to know to use
+#               the API is conveniently documented in the header
+#               file (GodEngineH.txt) and any globals you may want
+#               to change are declared there.
+#
+# Features:     - Gathers resources based on desire
+#               ^- Will water fields if necessary
+#               - Puts out fires
+#               - Regenerates mana based on town population
+#               - Constructs new buildings
+#               - Repairs damaged buildings
+#
+###      CONVENTIONS USED      ###
+# - Public members prefix:  ge[Identifier]
+#  ^- ARE for use outside GodEngine.txt
+# - Private members prefix: ge_[Identifier]
+#  ^- ARE NOT for use outside GodEngine.txt
+# - PascalCase params, camelCase locals, prefix globals, GE_CAPS_AND_PREFIX global-constants & enums
+#  ^- Reference params prefix with "r" (ex. rMyReferenceParam)
+#  ^- Non-reference params must be stored in local variable of same name
+#       but different casing (ex. myByValParam = MyByValParam)
+# - Methods return values via reference paramaters with the prefix o
+#  ^- (ex. geMyMethod(oMethodOutput))
+# - Public methods must be fail-safe to invalid inputs
+#  ^- Validity checks needed in all public members
+#  ^- Data is assumed valid in private members
+#
+###      FILES      ###
+# GodEngineH.txt - This is the header file. Everything you need to make
+#                  full use of the API can be found here.
+#                ^- Public globals, public enums, and documentation
+#                   of public scripts goes here.
+#
+# GodEngine.txt  - This is the body/implementation file. All the cool,
+#                  behind-the-scenes stuff happens here. ONLY look in
+#                  this file if you are interested in seeing the core
+#                  implementation (not needed for API use,) or if you
+#                  want to gawk at my genius ;)
+#                ^- ge_[anything] goes here
+# 
+#
+### WARNING ###
+# Passing paramaters ByVal (that is, storing them in local variable)
+# does not prevent them from being modified when the local variable is
+# modified... it PROBABLY depends on whether the object is a pointer
+# or a value, but how to tell?
+##############################
+
+//Talus Stuff
+// Global Constants
+global tal_ResourceGatherRadius = 500.0
+global tal_DefendRadius = 1024.0
+global tal_MinDesireToStartResource = 0.6
+global tal_MaxDesireToStopResource = 0.1
+global tal_ManaRatePerAdult = 0.5
+global tal_MaxBuiltToGodBuild = 0.5
+global tal_DamageToFirefight = 0.9
+
+// Number of Disciples
+global tal_MaleBreeders = 0 //Look in script "tal_Disciples" 
+global tal_Prayers = 0 //Look in script "tal_Disciples" 
+global tal_Miners = 0 //Look in script "tal_Disciples" 
+global tal_NumDiscipleOther = 0 //Look in script "tal_Disciples" 
+
+// Script Definitions
+define script talNewTalus(rTown,PlayerID)
+define script tal_TalusLoop(GodHandle,rTown,PlayerID)
+define script tal_TalusEmergency(GodHandle,rTown,PlayerID)
+define script tal_SatisfyWoodDesire(GodHandle,rTown)
+define script tal_SatisfyFoodDesire(GodHandle,rTown)
+define script tal_SatisfyOreDesire(GodHandle,rTown)
+define script tal_BuildNewBuilding(GodHandle,rTown)
+define script tal_Firefight(GodHandle,rTown)
+define script tal_Disciples(GodHandle,rTown)
+define script tal_MoveRandom(GodHandle,rTown)
+define script tal_WaterForest(GodHandle,rTown)
+define script tal_FightEnemy(GodHandle,rTown,Target,TargetType)
+define script tal_EpicSpell(GodHandle,rTown,whichSpell,Target)
+define script tal_HealMyPlatoon(godHandle,rTown)
+
+//Talus Scripts
+begin script talNewTalus(rTown,PlayerID)
+    godHandle = -1
+start
+    // Instantiates a new AI instance
+    // run script ge_GetNewGodHandle(rTown,godHandle)
+
+    run script ge_GetNewGodHandle(rTown,PlayerID)
+
+    godHandle = geReturnVal
+    run script geUnlockReturn
+    
+    if godHandle > -1 // make sure godHandle is valid
+        ge_Busy[godHandle] = 0
+        ge_EmergencyMode[godHandle] = 0
+        run background script tal_TalusLoop(godHandle,rTown,PlayerID)
+        run background script tal_TalusEmergency(godHandle,rTown,PlayerID)
+    end if
+end script talNewTalus
+
+
+//Every basic non-reactive god actions in this script
+begin script tal_TalusLoop(GodHandle,rTown,PlayerID)
+    godHandle = GodHandle
+    buildingUnderConstruction = 0
+    discipleCounter = 9
+    waterForestCounter = 0
+    resourcesCounter = 0
+    townDesire = 0.0
+    manaRate = 0
+    myPlatoon = 0
+    myCatapult = 0
+    myCounter = 0
+    NumberOfTowns = 0
+    PlayerMana = 0
+    Rand = 0
+    Timer = create timer for 0 seconds
+    townCounter = 0
+    whichSpell = 0
+start
+    ge_MiracleDelay[godHandle] = create timer for 0 seconds
+    ge_EpicSpellDelay[godHandle] = create timer for 120 seconds
+    while 1 == 1 // make sure godHandle is valid
+        wait until rGodInstance[godHandle] exists
+        if myCounter > SK_MaxPlayers
+            myCounter = 0
+        end if
+
+        // Do I need to resource? Don't check these too often
+        if ge_Busy[godHandle] == 0 and ge_EmergencyMode[godHandle] == 0
+            ge_Busy[godHandle] = 1
+            if resourcesCounter > 2
+                resourcesCounter = 0
+                townDesire = get ge_HomeTown[godHandle] desire TOWN_DESIRE_FOR_FOOD
+                if townDesire > tal_MinDesireToStartResource
+                    run script tal_SatisfyFoodDesire(godHandle,ge_HomeTown[godHandle])
+                end if
+                townDesire = get ge_HomeTown[godHandle] desire TOWN_DESIRE_FOR_WOOD
+                if townDesire > tal_MinDesireToStartResource
+                    run script tal_SatisfyWoodDesire(godHandle,ge_HomeTown[godHandle])
+                end if
+                townDesire = get ge_HomeTown[godHandle] desire TOWN_DESIRE_FOR_ORE
+                if townDesire > tal_MinDesireToStartResource
+                    run script tal_SatisfyOreDesire(godHandle,ge_HomeTown[godHandle])
+                end if
+            end if
+            ge_Busy[godHandle] = 0
+        end if
+        
+        // Are there any new buildings to build?
+        // (May go mad if there is not enough resources anywhere, haven't tested.)
+        if ge_Busy[godHandle] == 0 and ge_EmergencyMode[godHandle] == 0
+            ge_Busy[godHandle] = 1
+            run script tal_BuildNewBuilding(godHandle,ge_HomeTown[godHandle])
+            ge_Busy[godHandle] = 0
+        end if
+        
+        if ge_Busy[godHandle] == 0 and ge_EmergencyMode[godHandle] == 0
+            //Heal my Platoons
+            if get Timer time remaining <= 0
+                ge_Busy[godHandle] = 1
+                run script tal_HealMyPlatoon(godHandle,ge_HomeTown[godHandle])
+                ge_Busy[godHandle] = 0
+                Timer = create timer for 300 seconds
+            end if
+        end if
+
+        // Are any of my structures on fire?
+        if ge_Busy[godHandle] == 0 and ge_EmergencyMode[godHandle] == 0
+            ge_Busy[godHandle] = 1
+            run script tal_Firefight(godHandle,ge_HomeTown[godHandle])
+            ge_Busy[godHandle] = 0
+        end if
+        
+        if ge_Busy[godHandle] == 0 and ge_EmergencyMode[godHandle] == 0
+            NumberOfTowns = get player ge_Player[godHandle] town total
+            // Are there enough of each disciple type? Don't do this too often
+            if discipleCounter > 8 and size of ge_HomeTown[godHandle] < 175 and NumberOfTowns == 1
+                ge_Busy[godHandle] = 1
+                discipleCounter = 0
+                run script tal_Disciples(godHandle,ge_HomeTown[godHandle])
+                ge_Busy[godHandle] = 0
+            end if
+        end if
+
+        //Water Forests
+        if ge_Busy[godHandle] == 0 and ge_EmergencyMode[godHandle] == 0
+            if waterForestCounter > 4
+                ge_Busy[godHandle] = 1
+                waterForestCounter = 0
+                run script tal_WaterForest(godHandle,ge_HomeTown[godHandle])
+                ge_Busy[godHandle] = 0
+            end if
+        end if
+
+        // Prevent from idling
+        if ge_Busy[godHandle] == 0 and ge_EmergencyMode[godHandle] == 0
+            ge_Busy[godHandle] = 1
+            run script tal_MoveRandom(godHandle,ge_HomeTown[godHandle])
+            ge_Busy[godHandle] = 0
+        end if
+
+        //Fire Epic Spell
+        if get ge_EpicSpellDelay[godHandle] time remaining <= 0 and EpicSpellsActivated == 1
+            run script tal_EpicSpell(godHandle,ge_HomeTown[godHandle],0,0)
+        end if
+
+        if townCounter >= 10
+            geChangeTown[godHandle] = 1
+        end if
+
+        if ge_Busy[godHandle] == 0 and ge_EmergencyMode[godHandle] == 0
+            discipleCounter++ resourcesCounter++ waterForestCounter++ myCounter++ townCounter++
+        end if
+    end while
+end script tal_TalusLoop
+
+
+//Set Emergency mode in this script
+begin script tal_TalusEmergency(GodHandle,rTown,PlayerID)
+
+    godHandle = GodHandle
+    currentMana = 0
+    myCounter = 0
+    myInfluence = 0
+    EnemyCreature = 0
+    EnemyCreatureDist = 0
+    EnemyPlatoon = 0
+    EnemyCatapult = 0
+    Target = 0
+    TargetType = 0
+
+start
+
+    while 1 == 1
+        wait until rGodInstance[godHandle] exists
+        if myCounter > SK_MaxPlayers
+            myCounter = 0
+        end if
+
+        if PlayerID != myCounter
+            EnemyCreature = get player myCounter creature
+            EnemyCreatureDist = get distance from {ge_HomeTown[godHandle]} to {EnemyCreature}
+            EnemyPlatoon = get platoon of player myCounter nearest {ge_HomeTown[godHandle]} radius tal_DefendRadius
+            EnemyCatapult = get siege weapon of player myCounter nearest {ge_HomeTown[godHandle]} radius tal_DefendRadius
+            Target = 0
+
+            if EnemyPlatoon exists
+                myInfluence = get player ge_Player[godHandle] influence at {EnemyPlatoon}
+                if myInfluence > 0
+                    Target = EnemyPlatoon
+                end if
+                TargetType = 1
+            elsif EnemyCatapult exists
+                myInfluence = get player ge_Player[godHandle] influence at {EnemyCatapult}
+                if myInfluence > 0
+                    Target = EnemyCatapult
+                end if
+                TargetType = 2
+            elsif EnemyCreatureDist < tal_DefendRadius
+                myInfluence = get player ge_Player[godHandle] influence at {EnemyCreature}
+                if myInfluence > 0
+                    Target = EnemyCreature
+                end if
+                TargetType = 3
+            end if
+            currentMana = get player ge_Player[godHandle] mana
+            if Target != 0 and currentMana > geManaCostFire and ge_Altar[godHandle] == 1
+                //say "Set Emergency Mode"
+                ge_EmergencyMode[godHandle] = 1
+                wait until ge_Busy[godHandle] == 0
+                //say "Fighting Platoon"
+                ge_Busy[godHandle] = 1
+                run script tal_FightEnemy(godHandle,ge_HomeTown[godHandle],Target,TargetType)
+                ge_Busy[godHandle] = 0
+                
+            elsif Target == 0 or currentMana < geManaCostFire or ge_Altar[godHandle] == 0
+                ge_EmergencyMode[godHandle] = 0
+            end if
+        end if
+
+        myCounter++
+    end while
+
+end script tal_TalusEmergency
+
+
+begin script tal_SatisfyWoodDesire(GodHandle,rTown)
+    godHandle = GodHandle
+    myStorehouse = 0
+    myTree = 0
+    townDesire = 0
+    myInfluence = 0
+    counter = 0
+start
+    while counter < 3 and rGodInstance[godHandle] exists
+        //say "Satisfy Wood"
+        myStorehouse = get building ABODE_NUMBER_STORAGE_PIT in ge_HomeTown[godHandle] min built 1.0
+        myTree = get SCRIPT_OBJECT_TYPE_TREE at {ge_HomeTown[godHandle]} radius tal_ResourceGatherRadius
+        myInfluence = get player ge_Player[godHandle] influence at {myTree}
+        if myStorehouse exists and myTree exists
+            run script ge_PickupResource(godHandle,myTree,GE_HT_WOOD,-1)
+            run script ge_DropInStorehouse(godHandle,myStorehouse,-1)
+        end if
+        counter++
+    end while
+end script tal_SatisfyWoodDesire
+
+begin script tal_SatisfyOreDesire(GodHandle,rTown)
+    godHandle = GodHandle
+    myStorehouse = 0
+    myOreRock = 0
+    townDesire = 0
+    myInfluence = 0
+    counter = 0
+start
+    while counter < 3 and rGodInstance[godHandle] exists
+        //say "Satisfy Ore"
+        myStorehouse = get building ABODE_NUMBER_STORAGE_PIT in ge_HomeTown[godHandle] min built 1.0
+        myOreRock = get SCRIPT_OBJECT_TYPE_ORE_ROCK at {ge_HomeTown[godHandle]} radius tal_ResourceGatherRadius
+        myInfluence = get player ge_Player[godHandle] influence at {myOreRock}
+        if myStorehouse exists and myOreRock exists
+            run script ge_PickupResource(godHandle,myOreRock,GE_HT_ORE,-1)
+            run script ge_DropInStorehouse(godHandle,myStorehouse,-1)
+        end if
+        counter++
+    end while
+end script tal_SatisfyOreDesire
+
+// Currently only gathers from 1 field //Should gather from multiple fields now
+begin script tal_SatisfyFoodDesire(GodHandle,rTown)
+    godHandle = GodHandle
+    myAltar = 0
+    myStorehouse = 0
+    myField = 0//get building ABODE_NUMBER_FIELD in rTown min built 1.0
+    myHouse = 0
+    foodInField = 0
+    townDesire = 0
+    currentMana = 0
+    waterThrows = 0
+    counter = 0
+start
+    while counter < 3 and rGodInstance[godHandle] exists
+        //say "Satisfy Food"
+        myHouse = get random home in town ge_HomeTown[godHandle]
+        myField = get ABODE_NUMBER_FIELD at {myHouse} radius tal_ResourceGatherRadius
+        myStorehouse = get building ABODE_NUMBER_STORAGE_PIT in ge_HomeTown[godHandle] min built 1.0
+        if myStorehouse exists and myField exists
+            foodInField = get resource RESOURCE_TYPE_FOOD in myField
+            myAltar = get building ABODE_NUMBER_ALTAR in ge_HomeTown[godHandle] min built 1.0
+            if foodInField < 600 and myAltar exists// then try to water
+                currentMana = get player ge_Player[godHandle] mana        
+                waterThrows = currentMana / geManaCostWater
+                if waterThrows > 2 // Max times it will water (make global var?)
+                    waterThrows = 2
+                end if
+                while waterThrows > 0
+                    run script ge_ThrowMiracle(godHandle, GE_MIRACLE_TYPE_WATER, myField)
+                    waterThrows -= 1
+                    wait 3 seconds
+                end while
+            end if
+            run script ge_PickupResource(godHandle,myField,GE_HT_FOOD,-1)
+            run script ge_DropInStorehouse(godHandle,myStorehouse,-1)
+        end if
+        counter++
+    end while
+end script tal_SatisfyFoodDesire
+
+//Priority list for building
+begin script tal_BuildNewBuilding(GodHandle,rTown)
+    godHandle = GodHandle
+    buildingUnderConstruction = 0
+    isThereConstruction = GE_FALSE
+    currentMana = 0
+    myHome = 0
+    myTownSize = 0
+start
+    if rGodInstance[godHandle] exists
+        //say "Build Building"
+        myTownSize = size of ge_HomeTown[godHandle]
+        // Find out if/which unconstructed building exists (isn't there a way to iterate through game consts??)
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_STORAGE_PIT in ge_HomeTown[godHandle] max built tal_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_ALTAR in ge_HomeTown[godHandle] max built tal_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get WONDER EPIC_WONDER_NUMBER_SIREN at {ge_HomeTown[godHandle]} radius 750
+            if BUILT of buildingUnderConstruction == 1.0
+                buildingUnderConstruction = 0
+            end if
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get WONDER EPIC_WONDER_NUMBER_HURRICANE at {ge_HomeTown[godHandle]} radius 750
+            if BUILT of buildingUnderConstruction == 1.0
+                buildingUnderConstruction = 0
+            end if
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get WONDER EPIC_WONDER_NUMBER_EARTHQUAKE at {ge_HomeTown[godHandle]} radius 750
+            if BUILT of buildingUnderConstruction == 1.0
+                buildingUnderConstruction = 0
+            end if
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get WONDER EPIC_WONDER_NUMBER_VOLCANO at {ge_HomeTown[godHandle]} radius 750
+            if BUILT of buildingUnderConstruction == 1.0
+                buildingUnderConstruction = 0
+            end if
+        end if
+        if not buildingUnderConstruction exists and myTownSize > capacity of ge_HomeTown[godHandle] * 0.9
+            buildingUnderConstruction = get building ABODE_NUMBER_E in ge_HomeTown[godHandle] max built tal_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists and myTownSize > capacity of ge_HomeTown[godHandle] * 0.9
+            buildingUnderConstruction = get building ABODE_NUMBER_D in ge_HomeTown[godHandle] max built tal_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists and myTownSize > capacity of ge_HomeTown[godHandle] * 0.9
+            buildingUnderConstruction = get building ABODE_NUMBER_C in ge_HomeTown[godHandle] max built tal_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists and myTownSize > capacity of ge_HomeTown[godHandle] * 0.9
+            buildingUnderConstruction = get building ABODE_NUMBER_B in ge_HomeTown[godHandle] max built tal_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists and myTownSize > capacity of ge_HomeTown[godHandle] * 0.9
+            buildingUnderConstruction = get building ABODE_NUMBER_A in ge_HomeTown[godHandle] max built tal_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_TEMPLE in ge_HomeTown[godHandle] max built tal_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_CREATURE_PEN in ge_HomeTown[godHandle] max built tal_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_MELEE_ARMOURY in ge_HomeTown[godHandle] max built tal_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_RANGED_ARMOURY in ge_HomeTown[godHandle] max built tal_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_CRECHE in ge_HomeTown[godHandle] max built tal_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_SHRINE in ge_HomeTown[godHandle] max built tal_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_PUB in ge_HomeTown[godHandle] max built tal_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_TOWN_CENTRE in ge_HomeTown[godHandle] max built tal_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_WORKSHOP in ge_HomeTown[godHandle] max built tal_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_STUDY in ge_HomeTown[godHandle] max built tal_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_UNIVERSITY in ge_HomeTown[godHandle] max built tal_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_PRISON in ge_HomeTown[godHandle] max built tal_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_SMELTER in ge_HomeTown[godHandle] max built tal_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_GRANARY in ge_HomeTown[godHandle] max built tal_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_LUMBERMILL in ge_HomeTown[godHandle] max built tal_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_MARKET_POT in ge_HomeTown[godHandle] max built tal_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_MARKET_STATUE in ge_HomeTown[godHandle] max built tal_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_MARKET_PLANT in ge_HomeTown[godHandle] max built tal_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_AMPITHEATRE in ge_HomeTown[godHandle] max built tal_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_GRAVEYARD in ge_HomeTown[godHandle] max built tal_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_OLD_PERSONS_HOME in ge_HomeTown[godHandle] max built tal_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_BATHHOUSE in ge_HomeTown[godHandle] max built tal_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_WALLTOWER_TECH0 in ge_HomeTown[godHandle] max built tal_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_WALLTOWER_TECH1 in ge_HomeTown[godHandle] max built tal_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_GATEHOUSE in ge_HomeTown[godHandle] max built tal_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_GATEHOUSE_F in ge_HomeTown[godHandle] max built tal_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_SKYSCRAPER in ge_HomeTown[godHandle] max built tal_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_E in ge_HomeTown[godHandle] max built tal_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_D in ge_HomeTown[godHandle] max built tal_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_C in ge_HomeTown[godHandle] max built tal_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_B in ge_HomeTown[godHandle] max built tal_MaxBuiltToGodBuild
+        end if
+        if not buildingUnderConstruction exists
+            buildingUnderConstruction = get building ABODE_NUMBER_A in ge_HomeTown[godHandle] max built tal_MaxBuiltToGodBuild
+        end if
+
+        if buildingUnderConstruction exists
+            // This will probably never be true, but just in case
+            if buildingUnderConstruction on fire
+                currentMana = get player ge_Player[godHandle] mana
+                while buildingUnderConstruction exists and buildingUnderConstruction on fire and geManaCostWater <= currentMana
+
+                    run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_WATER,buildingUnderConstruction)
+                    currentMana -= geManaCostWater
+                end while
+            end if
+            run script ge_GodBuild(godHandle,buildingUnderConstruction,tal_ResourceGatherRadius)
+            buildingUnderConstruction = 0
+        end if
+    end if
+end script tal_BuildNewBuilding
+
+
+begin script tal_Firefight(GodHandle,rTown)
+    godHandle = GodHandle
+    damagedBuilding = 0
+    isThereConstruction = GE_FALSE
+    currentMana = 0
+start
+    if rGodInstance[godHandle] exists
+        //say "Firefight"
+        damagedBuilding = get random abode of type ABODE_NUMBER_A in town ge_HomeTown[godHandle]
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= tal_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_B in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= tal_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_C in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= tal_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_D in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= tal_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_E in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= tal_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_SKYSCRAPER in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= tal_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_ALTAR in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= tal_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_STORAGE_PIT in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= tal_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_CRECHE in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= tal_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_SHRINE in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= tal_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_TEMPLE in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= tal_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_PUB in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= tal_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_TOWN_CENTRE in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= tal_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_CREATURE_PEN in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= tal_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_MELEE_ARMOURY in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= tal_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_RANGED_ARMOURY in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= tal_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_WORKSHOP in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= tal_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_STUDY in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= tal_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_UNIVERSITY in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= tal_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_PRISON in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= tal_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_SMELTER in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= tal_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_GRANARY in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= tal_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_LUMBERMILL in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= tal_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_MARKET_POT in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= tal_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_MARKET_STATUE in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= tal_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_MARKET_PLANT in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= tal_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_AMPITHEATRE in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= tal_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_GRAVEYARD in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= tal_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_OLD_PERSONS_HOME in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= tal_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_BATHHOUSE in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= tal_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_WALLTOWER_TECH0 in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= tal_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_WALLTOWER_TECH1 in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= tal_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_GATEHOUSE in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= tal_DamageToFirefight
+            damagedBuilding = get random abode of type ABODE_NUMBER_GATEHOUSE_F in town ge_HomeTown[godHandle]
+        end if
+        if not SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of damagedBuilding <= tal_DamageToFirefight
+            damagedBuilding = 0
+        end if
+
+        if damagedBuilding exists
+            if damagedBuilding on fire
+                currentMana = get player ge_Player[godHandle] mana
+                while damagedBuilding exists and damagedBuilding on fire and geManaCostWater <= currentMana
+                    run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_WATER,damagedBuilding)
+                    currentMana -= geManaCostWater
+                end while
+            end if
+            run script ge_GodBuild(godHandle,damagedBuilding,tal_ResourceGatherRadius)
+            damagedBuilding = 0
+        end if
+    end if
+end script tal_Firefight
+
+
+begin script tal_Disciples(GodHandle,rTown)
+    godHandle = GodHandle
+    numberOfDisciples = 0
+start
+    if rGodInstance[godHandle] exists
+        tal_MaleBreeders = adult size of ge_HomeTown[godHandle] * 12 / 100 //12 percent of town
+        tal_Prayers = adult size of ge_HomeTown[godHandle] * 20 / 100 //20 percent of town
+        tal_Miners = adult size of ge_HomeTown[godHandle] * 8 / 100 //8 percent of town
+        tal_NumDiscipleOther = adult size of ge_HomeTown[godHandle] * 4 / 100 //4 percent of town
+        //say "Disciples"
+        numberOfDisciples = get number of disciple VILLAGER_DISCIPLE_FARMER in town ge_HomeTown[godHandle]
+        while numberOfDisciples < tal_NumDiscipleOther // Need more
+            run script ge_CreateDisciple(godHandle,GE_VILLAGER_DISCIPLE_FARMER)
+            numberOfDisciples += 1
+        end while
+        while numberOfDisciples > tal_NumDiscipleOther // Need less
+            run script ge_RemoveDisciple(godHandle,GE_VILLAGER_DISCIPLE_FARMER,tal_ResourceGatherRadius)
+            numberOfDisciples -= 1
+        end while
+        
+        numberOfDisciples = get number of disciple VILLAGER_DISCIPLE_FORESTER in town ge_HomeTown[godHandle]
+        while numberOfDisciples < tal_NumDiscipleOther // Need more
+            run script ge_CreateDisciple(godHandle,GE_VILLAGER_DISCIPLE_FORESTER)
+            numberOfDisciples += 1
+        end while
+        while numberOfDisciples > tal_NumDiscipleOther // Need less
+            run script ge_RemoveDisciple(godHandle,GE_VILLAGER_DISCIPLE_FORESTER,tal_ResourceGatherRadius)
+            numberOfDisciples -= 1
+        end while 
+        
+        numberOfDisciples = get number of disciple VILLAGER_DISCIPLE_BUILDER in town ge_HomeTown[godHandle]
+        while numberOfDisciples < tal_NumDiscipleOther // Need more
+            run script ge_CreateDisciple(godHandle,GE_VILLAGER_DISCIPLE_BUILDER)
+            numberOfDisciples += 1
+        end while
+        while numberOfDisciples > tal_NumDiscipleOther // Need less
+            run script ge_RemoveDisciple(godHandle,GE_VILLAGER_DISCIPLE_BUILDER,tal_ResourceGatherRadius)
+            numberOfDisciples -= 1
+        end while 
+        
+        numberOfDisciples = get number of disciple VILLAGER_DISCIPLE_BREEDER in town ge_HomeTown[godHandle]
+        while numberOfDisciples < tal_MaleBreeders // Need more
+            run script ge_CreateDisciple(godHandle,GE_VILLAGER_DISCIPLE_BREEDER)
+            numberOfDisciples += 1
+        end while
+        while numberOfDisciples > tal_MaleBreeders // Need less
+            run script ge_RemoveDisciple(godHandle,GE_VILLAGER_DISCIPLE_BREEDER,tal_ResourceGatherRadius)
+            numberOfDisciples -= 1
+        end while 
+        
+        numberOfDisciples = get number of disciple VILLAGER_DISCIPLE_WORSHIP in town ge_HomeTown[godHandle]
+        while numberOfDisciples < tal_Prayers // Need more
+            run script ge_CreateDisciple(godHandle,GE_VILLAGER_DISCIPLE_WORSHIP)
+            numberOfDisciples += 1
+        end while
+        while numberOfDisciples > tal_Prayers // Need less
+            run script ge_RemoveDisciple(godHandle,GE_VILLAGER_DISCIPLE_WORSHIP,tal_ResourceGatherRadius)
+            numberOfDisciples -= 1
+        end while 
+        
+        numberOfDisciples = get number of disciple VILLAGER_DISCIPLE_MINER in town ge_HomeTown[godHandle]
+        while numberOfDisciples < tal_Miners // Need more
+            run script ge_CreateDisciple(godHandle,GE_VILLAGER_DISCIPLE_MINER)
+            numberOfDisciples += 1
+        end while
+        while numberOfDisciples > tal_Miners // Need less
+            run script ge_RemoveDisciple(godHandle,GE_VILLAGER_DISCIPLE_MINER,tal_ResourceGatherRadius)
+            numberOfDisciples -= 1
+        end while
+        
+        numberOfDisciples = get number of disciple VILLAGER_DISCIPLE_REFINER in town ge_HomeTown[godHandle]
+        while numberOfDisciples < tal_NumDiscipleOther // Need more
+            run script ge_CreateDisciple(godHandle,GE_VILLAGER_DISCIPLE_REFINER)
+            numberOfDisciples += 1
+        end while
+        while numberOfDisciples > tal_NumDiscipleOther // Need less
+            run script ge_RemoveDisciple(godHandle,GE_VILLAGER_DISCIPLE_REFINER,tal_ResourceGatherRadius)
+            numberOfDisciples -= 1
+        end while 
+    end if
+end script tal_Disciples
+
+begin script tal_MoveRandom(GodHandle,rTown)
+    godHandle = GodHandle
+    myHome = 0
+start
+    if rGodInstance[godHandle] exists
+        //say "Move Random"
+        myHome = get random home in town ge_HomeTown[godHandle]
+        if myHome exists
+            while HEALTH of myHome >= 1.0 and myHome exists
+                run script ge_MoveToObject(godHandle,myHome)
+                myHome = 0
+            end while
+        end if
+    end if
+end script tal_MoveRandom
+
+begin script tal_WaterForest(GodHandle,rTown)
+    godHandle = GodHandle
+    counter = 0
+    myAltar = 0
+    currentMana = 0
+    myHouse = 0
+    myNumber = 0
+    myTree = 0
+    myInfluence = 0
+start
+    if rGodInstance[godHandle] exists
+        //say "Water Forest"
+        counter = 0
+        myHouse = get random home in town ge_HomeTown[godHandle]
+        myTree = get SCRIPT_OBJECT_TYPE_TREE at {myHouse} radius tal_ResourceGatherRadius
+        myInfluence = get player ge_Player[godHandle] influence at {myTree}
+        myAltar = get building ABODE_NUMBER_ALTAR in ge_HomeTown[godHandle] min built 1.0
+
+        currentMana = get player ge_Player[godHandle] mana
+        while myAltar exists and myInfluence > 0 and myTree exists and currentMana > 20000 and counter < 2
+            run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_WATER,myTree)
+            wait 3 seconds
+            counter++
+        end while
+    end if
+
+end script tal_WaterForest
+
+begin script tal_FightEnemy(GodHandle,rTown,Target,TargetType)
+    //TargetType = 1: Platoon, TargetType = 2: Catapult, TargetType = 3: Creature
+    godHandle = GodHandle
+    counter = 0
+    myAltar = 0
+    currentMana = 0
+    myNumber = 0
+    myTown = 0
+    myInfluence1 = 0
+    myInfluence2 = 0
+    myPlatoon = 0
+    myRock = 0
+    myCounter = 0
+start
+    //say "Fight Platoons"
+    if rGodInstance[godHandle] exists
+        currentMana = get player ge_Player[godHandle] mana
+        if Target exists and not Target on fire
+            if currentMana >= geManaCostMeteor + 20000 and PLAYER of Target != ge_Player[godHandle] and get ge_MiracleDelay[godHandle] time remaining <= 0 and ge_Altar[godHandle] == 1
+                myNumber = number from 1 to 5
+                if myNumber == 1
+                    run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_METEOR,Target)
+                    ge_MiracleDelay[godHandle] = create timer for 7 seconds
+                elsif myNumber == 2 or myNumber == 3
+                    run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_FIRE,Target)
+                    ge_MiracleDelay[godHandle] = create timer for 7 seconds
+                else
+                    if TargetType == 1
+                        run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_STORM,Target)
+                        ge_MiracleDelay[godHandle] = create timer for 7 seconds
+                    end if
+                end if
+            
+            elsif currentMana >= geManaCostStorm and PLAYER of Target != ge_Player[godHandle] and get ge_MiracleDelay[godHandle] time remaining <= 0 and ge_Altar[godHandle] == 1
+                myNumber = number from 1 to 3
+                if myNumber == 1
+                    if TargetType == 1
+                        run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_STORM,Target)
+                        ge_MiracleDelay[godHandle] = create timer for 7 seconds
+                    end if
+                elsif myNumber == 2 or myNumber == 3
+                    run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_FIRE,Target)
+                    ge_MiracleDelay[godHandle] = create timer for 7 seconds
+                end if
+
+            elsif myRock exists and PLAYER of Target != ge_Player[godHandle]
+                //run script geThrowObjectAtObject(godHandle, myRock, myPlatoon)
+
+            end if
+        end if
+    end if
+
+end script tal_FightEnemy
+
+begin script tal_EpicSpell(GodHandle,rTown,whichSpell,Target)
+    godHandle = GodHandle
+    myNumber = 0
+    myBuilding = 0
+    myLocation = 0
+    myRand = 0
+    playerMana = 0
+    EnemySettlement = 0
+    PlayerID = 0
+start
+
+    if rGodInstance[godHandle] exists
+        ge_EpicSpellDelay[godHandle] = create timer for 450 seconds
+
+        playerMana = get player ge_Player[godHandle] mana
+        //Randomize Spell here
+        if playerMana >= 42500
+            myNumber = number from 1 to 8
+            if myNumber == 1
+                whichSpell = GE_MIRACLE_TYPE_VERDANT
+
+            elsif myNumber == 2 or myNumber == 3
+                whichSpell = GE_MIRACLE_TYPE_FIRERAIN
+
+            elsif myNumber == 4
+                whichSpell = GE_MIRACLE_TYPE_THUNDERSTORM
+
+            elsif myNumber == 5 or myNumber == 6 or myNumber == 7 or myNumber == 8 or myNumber == 9
+                whichSpell = GE_MIRACLE_TYPE_METEORID
+
+            end if
+        elsif playerMana >= 40000
+            myNumber = number from 1 to 8
+            if myNumber == 1
+                whichSpell = GE_MIRACLE_TYPE_VERDANT
+
+            elsif myNumber == 2 or myNumber == 3
+                whichSpell = GE_MIRACLE_TYPE_FIRERAIN
+
+            elsif myNumber == 4 or myNumber == 5
+                whichSpell = GE_MIRACLE_TYPE_THUNDERSTORM
+
+            end if
+        elsif playerMana >= 30000
+            myNumber = number from 1 to 6
+            if myNumber == 1
+                whichSpell = GE_MIRACLE_TYPE_VERDANT
+
+            elsif myNumber == 2 or myNumber == 3
+                whichSpell = GE_MIRACLE_TYPE_FIRERAIN
+
+            end if
+        elsif playerMana >= 15000
+            myNumber = number from 1 to 3
+            if myNumber == 1
+                whichSpell = GE_MIRACLE_TYPE_VERDANT
+
+            end if
+        end if
+
+        if whichSpell != 0
+            if whichSpell == GE_MIRACLE_TYPE_VERDANT
+                myBuilding = get building ABODE_NUMBER_STORAGE_PIT in ge_HomeTown[godHandle] min built 1.0
+                myLocation = marker at {myBuilding} + {number from 20 to 35,number from -20 to -35}
+                if not {myLocation} under water
+                    run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_VERDANT,myLocation)
+                end if
+
+            elsif whichSpell == GE_MIRACLE_TYPE_FIRERAIN or whichSpell == GE_MIRACLE_TYPE_THUNDERSTORM or whichSpell == GE_MIRACLE_TYPE_METEORID
+                PlayerID = ge_Player[godHandle]
+                if EnemyIDFinal[PlayerID] == 0
+                    EnemySettlement = PlayerTown1
+
+                elsif EnemyIDFinal[PlayerID] == 1
+                    EnemySettlement = PlayerTown2
+
+                elsif EnemyIDFinal[PlayerID] == 2
+                    EnemySettlement = PlayerTown3
+
+                elsif EnemyIDFinal[PlayerID] == 3
+                    EnemySettlement = PlayerTown4
+
+                end if
+
+                myRand = number from 1 to 5
+                if myRand == 1
+                    myBuilding = get building ALTAR in EnemySettlement min built 0.75
+                elsif myRand == 2
+                    myBuilding = get building STORAGE_YARD in EnemySettlement min built 0.75
+
+                elsif myRand == 3
+                    myBuilding = get building TEMPLE in EnemySettlement min built 0.75
+
+                elsif myRand >= 4
+                    myBuilding = get random abode in town EnemySettlement
+                end if
+
+
+                if myBuilding exists
+                    if whichSpell == GE_MIRACLE_TYPE_FIRERAIN
+                        run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_FIRERAIN,myBuilding)
+
+                    elsif whichSpell == GE_MIRACLE_TYPE_THUNDERSTORM
+                        run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_THUNDERSTORM,myBuilding)
+
+                    elsif whichSpell == GE_MIRACLE_TYPE_METEORID
+                        run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_METEORID,myBuilding)
+
+                    end if
+                end if
+            end if
+        end if
+    end if
+
+end script tal_EpicSpell
+
+begin script tal_HealMyPlatoon(GodHandle,rTown)
+    godHandle = GodHandle
+    counter = 0
+    myAltar = 0
+    currentMana = 0
+    myNumber = 0
+    myTown = 0
+    myInfluence = 0
+    myPlatoon = 0
+    myRock = 0
+    myHome = get random abode in town rTown
+start
+    //say "Heal Platoons"
+    if rGodInstance[godHandle] exists
+        myTown = get building ABODE_NUMBER_TOWN_CENTRE in ge_HomeTown[godHandle] min built 1.0
+        myAltar = get building ABODE_NUMBER_ALTAR in ge_HomeTown[godHandle] min built 1.0
+        myPlatoon = get platoon of player ge_Player[godHandle] nearest {myHome} radius 750
+        
+        if myPlatoon exists
+            myInfluence = get player ge_Player[godHandle] influence at {myPlatoon}
+        end if
+
+        currentMana = get player ge_Player[godHandle] mana
+        if myAltar exists and myInfluence > 0 and myTown exists and myPlatoon exists
+            if currentMana >= geManaCostHeal and PLAYER of myPlatoon == ge_Player[godHandle] and HEALTH of myPlatoon < 0.75
+                run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_HEAL,myPlatoon)
+            end if
+        end if
+    end if
+
+end script tal_HealMyPlatoon
