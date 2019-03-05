@@ -69,6 +69,7 @@ global tal_MaxDesireToStopResource = 0.1
 global tal_ManaRatePerAdult = 0.5
 global tal_MaxBuiltToGodBuild = 0.5
 global tal_DamageToFirefight = 0.9
+global tal_EmergencyAllowed = 0
 
 // Number of Disciples
 global tal_MaleBreeders = 0 //Look in script "tal_Disciples" 
@@ -91,6 +92,8 @@ define script tal_WaterForest(GodHandle,rTown)
 define script tal_FightEnemy(GodHandle,rTown,Target,TargetType)
 define script tal_EpicSpell(GodHandle,rTown,whichSpell,Target)
 define script tal_HealMyPlatoon(godHandle,rTown)
+
+
 
 //Talus Scripts
 begin script talNewTalus(rTown,PlayerID)
@@ -133,13 +136,9 @@ begin script tal_TalusLoop(GodHandle,rTown,PlayerID)
     whichSpell = 0
 start
     ge_MiracleDelay[godHandle] = create timer for 0 seconds
-    ge_EpicSpellDelay[godHandle] = create timer for 120 seconds
     while 1 == 1 // make sure godHandle is valid
         wait until rGodInstance[godHandle] exists
-        if myCounter > SK_MaxPlayers
-            myCounter = 0
-        end if
-
+        tal_EmergencyAllowed = 1
         // Do I need to resource? Don't check these too often
         if ge_Busy[godHandle] == 0 and ge_EmergencyMode[godHandle] == 0
             ge_Busy[godHandle] = 1
@@ -169,6 +168,13 @@ start
             ge_Busy[godHandle] = 0
         end if
         
+        // Are any of my structures on fire?
+        if ge_Busy[godHandle] == 0 and ge_EmergencyMode[godHandle] == 0
+            ge_Busy[godHandle] = 1
+            run script tal_Firefight(godHandle,ge_HomeTown[godHandle])
+            ge_Busy[godHandle] = 0
+        end if
+
         if ge_Busy[godHandle] == 0 and ge_EmergencyMode[godHandle] == 0
             //Heal my Platoons
             if get Timer time remaining <= 0
@@ -176,24 +182,6 @@ start
                 run script tal_HealMyPlatoon(godHandle,ge_HomeTown[godHandle])
                 ge_Busy[godHandle] = 0
                 Timer = create timer for 300 seconds
-            end if
-        end if
-
-        // Are any of my structures on fire?
-        if ge_Busy[godHandle] == 0 and ge_EmergencyMode[godHandle] == 0
-            ge_Busy[godHandle] = 1
-            run script tal_Firefight(godHandle,ge_HomeTown[godHandle])
-            ge_Busy[godHandle] = 0
-        end if
-        
-        if ge_Busy[godHandle] == 0 and ge_EmergencyMode[godHandle] == 0
-            NumberOfTowns = get player ge_Player[godHandle] town total
-            // Are there enough of each disciple type? Don't do this too often
-            if discipleCounter > 8 and size of ge_HomeTown[godHandle] < 175 and NumberOfTowns == 1
-                ge_Busy[godHandle] = 1
-                discipleCounter = 0
-                run script tal_Disciples(godHandle,ge_HomeTown[godHandle])
-                ge_Busy[godHandle] = 0
             end if
         end if
 
@@ -214,18 +202,14 @@ start
             ge_Busy[godHandle] = 0
         end if
 
-        //Fire Epic Spell
-        if get ge_EpicSpellDelay[godHandle] time remaining <= 0 and EpicSpellsActivated == 1
-            run script tal_EpicSpell(godHandle,ge_HomeTown[godHandle],0,0)
-        end if
-
-        if townCounter >= 10
+        if townCounter >= 15
             geChangeTown[godHandle] = 1
         end if
 
         if ge_Busy[godHandle] == 0 and ge_EmergencyMode[godHandle] == 0
-            discipleCounter++ resourcesCounter++ waterForestCounter++ myCounter++ townCounter++
+            discipleCounter++ resourcesCounter++ waterForestCounter++ townCounter++
         end if
+
     end while
 end script tal_TalusLoop
 
@@ -247,8 +231,8 @@ begin script tal_TalusEmergency(GodHandle,rTown,PlayerID)
 start
 
     while 1 == 1
-        wait until rGodInstance[godHandle] exists
-        if myCounter > SK_MaxPlayers
+        wait until rGodInstance[godHandle] exists and tal_EmergencyAllowed == 1
+        if myCounter > 2
             myCounter = 0
         end if
 
@@ -930,19 +914,7 @@ start
 
             elsif whichSpell == GE_MIRACLE_TYPE_FIRERAIN or whichSpell == GE_MIRACLE_TYPE_THUNDERSTORM or whichSpell == GE_MIRACLE_TYPE_METEORID
                 PlayerID = ge_Player[godHandle]
-                if EnemyIDFinal[PlayerID] == 0
-                    EnemySettlement = PlayerTown1
-
-                elsif EnemyIDFinal[PlayerID] == 1
-                    EnemySettlement = PlayerTown2
-
-                elsif EnemyIDFinal[PlayerID] == 2
-                    EnemySettlement = PlayerTown3
-
-                elsif EnemyIDFinal[PlayerID] == 3
-                    EnemySettlement = PlayerTown4
-
-                end if
+                EnemySettlement = PlayerTown
 
                 myRand = number from 1 to 5
                 if myRand == 1

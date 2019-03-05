@@ -10,6 +10,15 @@ define script LC12_Tribute
 define script LC12_GatehouseManager
 define script LC12_Speeches
 define script LC12_Aztec_Capital
+define script LC12_AttackNearestTownTimer
+define script LC12_GetNearestSettlement
+define script LC12_DefendPlatoons
+define script LC12_AztecCapitalRessourceManager
+define script LC12_AztecCapitalVillagerManager
+define script LC12_AztecTown1RessourceManager
+define script LC12_AztecTown1VillagerManager
+define script LC12_AztecTown2RessourceManager
+define script LC12_AztecTown2VillagerManager
 define script DisableLocalPlatoonResponse
 
 
@@ -697,9 +706,9 @@ begin loop
 
     end if
 
-    GateHouseT31 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {1138.10,21.94,1040.15} radius 15
-    GateHouseT32 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {1078.92,36.02,666.42} radius 15
-    GateHouseT33 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {862.58,40.80,974.04} radius 15
+    GateHouseT31 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE at {1138.10,21.94,1040.15} radius 15
+    GateHouseT32 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE at {1078.92,36.02,666.42} radius 15
+    GateHouseT33 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE at {862.58,40.80,974.04} radius 15
     
     oCreature = get player 0 creature
 
@@ -1662,6 +1671,285 @@ start
     end loop
 
 end script LC12_Aztec_Capital
+
+
+begin script LC12_DefendPlatoons
+
+    PlayerPlatoon = 0
+    DefendRecruitTimer1 = create timer for 0 seconds
+    DefendRecruitTimer2 = create timer for 0 seconds
+    DefendRecruitTimer3 = create timer for 0 seconds
+
+    DefenderPlatoon[8]
+
+start
+
+    begin loop
+        PlayerPlatoon = get platoon of player 0 nearest {AztecTown1} radius 250
+        if PlayerPlatoon exists and DefenderPlatoon[0] not exists and DefenderPlatoon[0] not exists and get DefendRecruitTimer1 time remaining <= 0 and PLAYER of AztecTown1 == 1 //Makes a couple of defend platoons
+            DefenderPlatoon[0] = recruit ARMY_UNIT_TYPE_MELEE_5 town AztecTown1 platoon of size 30 * RecruitSizeModifier
+            enable platoon DefenderPlatoon[0] respond to town AztecTown1 attack
+            wait until not DefenderPlatoon[0] recruiting
+            
+            DefenderPlatoon[1] = recruit ARMY_UNIT_TYPE_RANGED_5 town AztecTown1 platoon of size 30 * RecruitSizeModifier
+            enable platoon DefenderPlatoon[1] respond to town AztecTown1 attack
+            wait until not DefenderPlatoon[1] recruiting
+            
+            DefendRecruitTimer1 = create timer for 180 * RecruitModifier seconds
+        end if
+
+        PlayerPlatoon = get platoon of player 0 nearest {AztecTown2} radius 250
+        if PlayerPlatoon exists and DefenderPlatoon[2] not exists and DefenderPlatoon[3] not exists and get DefendRecruitTimer2 time remaining <= 0 and PLAYER of AztecTown2 == 1 //Makes a couple of defend platoons
+            DefenderPlatoon[2] = recruit ARMY_UNIT_TYPE_MELEE_5 town AztecTown2 platoon of size 25 * RecruitSizeModifier
+            enable platoon DefenderPlatoon[2] respond to town AztecTown2 attack
+            wait until not DefenderPlatoon[2] recruiting
+            
+            DefenderPlatoon[3] = recruit ARMY_UNIT_TYPE_RANGED_5 town AztecTown2 platoon of size 25 * RecruitSizeModifier
+            enable platoon DefenderPlatoon[3] respond to town AztecTown2 attack
+            wait until not DefenderPlatoon[3] recruiting
+
+            DefendRecruitTimer2 = create timer for 180 * RecruitModifier seconds
+        end if
+
+        PlayerPlatoon = get platoon of player 0 nearest {AztecCapital} radius 250
+        if PlayerPlatoon exists and DefenderPlatoon[4] not exists and DefenderPlatoon[5] not exists and get DefendRecruitTimer3 time remaining <= 0 and PLAYER of AztecCapital == 1 //Makes a couple of defend platoons
+            DefenderPlatoon[4] = recruit ARMY_UNIT_TYPE_MELEE_5 town AztecCapital platoon of size 25 * RecruitSizeModifier
+            enable platoon DefenderPlatoon[4] respond to town AztecCapital attack
+            wait until not DefenderPlatoon[4] recruiting
+            
+            DefenderPlatoon[5] = recruit ARMY_UNIT_TYPE_RANGED_5 town AztecCapital platoon of size 25 * RecruitSizeModifier
+            enable platoon DefenderPlatoon[5] respond to town AztecCapital attack
+            wait until not DefenderPlatoon[5] recruiting
+            
+            DefendRecruitTimer3 = create timer for 180 * RecruitModifier seconds
+        end if
+    end loop
+
+end script LC12_DefendPlatoons
+
+
+begin script LC12_AztecCapitalRessourceManager
+
+start
+
+begin loop
+
+    wait 5 seconds
+
+    if PLAYER of AztecCapital == 1
+        if (get town AztecCapital RESOURCE_TYPE_ORE total < 25000)
+            add resource RESOURCE_TYPE_ORE number from 100 to 500 to AztecCapital
+        elsif (get town AztecCapital RESOURCE_TYPE_WOOD total < 25000)
+            add resource RESOURCE_TYPE_WOOD number from 500 to 1000 to AztecCapital
+        elsif (get town AztecCapital RESOURCE_TYPE_FOOD total < 25000)
+            add resource RESOURCE_TYPE_FOOD number from 500 to 1500 to AztecCapital
+        end if
+    end if
+    until PLAYER of AztecCapital != 1
+end loop    
+
+end script LC12_AztecCapitalRessourceManager
+
+begin script LC12_AztecCapitalVillagerManager
+
+    Counter = 0
+    Villager = 0
+    HousesBuilt = 0
+    RoadPos = marker at {481.25,408.44,1058.25}
+    Road = 0
+
+start
+
+begin loop
+
+    wait 900 * BuilderModifier seconds
+    Counter = 0
+
+    if PLAYER of AztecCapital == 1
+        if HousesBuilt == 0
+            HousesBuilt = 1
+            build all town AztecCapital buildings in group 10
+            Road = build building at {RoadPos} desire 1
+            release Road
+        end if
+        begin loop
+            Villager = create random villager of tribe TRIBE_TYPE_JAPANESE at {AztecCapital} + {number from -12 to 12, 0, number from -12 to 12}//create VILLAGER VILLAGER_INFO_JAPANESE_FORESTER_MALE at {1013.581, 132.333, 2002.798} + {number from -3 to 3, 0, number from -3 to 3}
+            attach Villager to AztecCapital
+            release Villager
+            
+            wait number from 6 to 10 seconds
+            Counter++
+            until Counter >= 50 or PLAYER of AztecCapital != 1
+        end loop
+    end if
+
+end loop
+
+end script LC12_AztecCapitalVillagerManager
+
+begin script LC12_AztecTown1RessourceManager
+
+start
+
+begin loop
+
+    wait 5 seconds
+
+    if PLAYER of AztecTown1 == 1
+        if (get town AztecTown1 RESOURCE_TYPE_ORE total < 17000)
+            add resource RESOURCE_TYPE_ORE number from 100 to 500 to AztecTown1
+        elsif (get town AztecTown1 RESOURCE_TYPE_WOOD total < 17000)
+            add resource RESOURCE_TYPE_WOOD number from 500 to 1000 to AztecTown1
+        elsif (get town AztecTown1 RESOURCE_TYPE_FOOD total < 17000)
+            add resource RESOURCE_TYPE_FOOD number from 500 to 1500 to AztecTown1
+        end if
+    end if
+
+end loop    
+
+end script LC12_AztecTown1RessourceManager
+
+begin script LC12_AztecTown1VillagerManager
+
+    Counter = 0
+    Villager = 0
+    HousesBuilt = 0
+
+start
+
+begin loop
+
+    wait 900 * BuilderModifier seconds
+    Counter = 0
+
+    if PLAYER of AztecTown1 == 1
+        if HousesBuilt == 0
+            HousesBuilt = 1
+            build all town AztecTown1 buildings in group 10
+        end if
+        begin loop
+            Villager = create random villager of tribe TRIBE_TYPE_AZTEC at {AztecTown1} + {number from -12 to 12, 0, number from -12 to 12}//create VILLAGER VILLAGER_INFO_JAPANESE_FORESTER_MALE at {1013.581, 132.333, 2002.798} + {number from -3 to 3, 0, number from -3 to 3}
+            attach Villager to AztecTown1
+            release Villager
+            
+            wait number from 6 to 10 seconds
+            Counter++
+            until Counter >= 20 or PLAYER of AztecTown1 != 1
+        end loop
+    end if
+
+end loop
+
+end script LC12_AztecTown1VillagerManager
+
+begin script LC12_AztecTown2RessourceManager
+
+start
+
+begin loop
+
+    wait 5 seconds
+
+    if PLAYER of AztecTown2 == 1
+        if (get town AztecTown2 RESOURCE_TYPE_ORE total < 35000)
+            add resource RESOURCE_TYPE_ORE number from 100 to 500 to AztecTown2
+        elsif (get town AztecTown2 RESOURCE_TYPE_WOOD total < 35000)
+            add resource RESOURCE_TYPE_WOOD number from 500 to 1000 to AztecTown2
+        elsif (get town AztecTown2 RESOURCE_TYPE_FOOD total < 35000)
+            add resource RESOURCE_TYPE_FOOD number from 500 to 1500 to AztecTown2
+        end if
+    end if
+
+end loop    
+
+end script LC12_AztecTown2RessourceManager
+
+begin script LC12_AztecTown2VillagerManager
+
+    Counter = 0
+    Villager = 0
+    HousesBuilt = 0
+
+start
+
+begin loop
+
+    wait 900 * BuilderModifier seconds
+    Counter = 0
+
+    if PLAYER of AztecTown2 == 1
+        if HousesBuilt == 0
+            HousesBuilt = 1
+            build all town AztecTown2 buildings in group 10
+        end if
+        begin loop
+            Villager = create random villager of tribe TRIBE_TYPE_GREEK at {AztecTown2} + {number from -12 to 12, 0, number from -12 to 12}//create VILLAGER VILLAGER_INFO_JAPANESE_FORESTER_MALE at {1013.581, 132.333, 2002.798} + {number from -3 to 3, 0, number from -3 to 3}
+            attach Villager to AztecTown2
+            release Villager
+            
+            wait number from 6 to 10 seconds
+            Counter++
+            until Counter >= 20 or PLAYER of AztecTown2 != 1
+        end loop
+    end if
+
+end loop
+
+end script LC12_AztecTown2VillagerManager
+
+begin script LC12_GetNearestSettlement
+
+    NearestTown = 0
+
+start
+
+begin loop
+    if PLAYER of AztecCapital == 0
+        NearestTown = AztecCapital
+
+    elsif PLAYER of AztecTown1 == 0
+        NearestTown = AztecTown1
+
+    elsif PLAYER of AztecTown2 == 0
+        NearestTown = AztecTown2
+
+    elsif PLAYER of MinorTown1 == 0
+        NearestTown = MinorTown1
+
+    elsif PLAYER of MinorTown2 == 0
+        NearestTown = MinorTown2
+
+    elsif PLAYER of MinorTown3 == 0
+        NearestTown = MinorTown3
+
+    elsif PLAYER of MinorTown4 == 0
+        NearestTown = MinorTown4
+    else
+        NearestTown = PlayerTown
+
+    end if
+
+    NearestSettlement = NearestTown
+    wait 45 seconds
+end loop
+
+end script LC12_GetNearestSettlement
+
+
+begin script LC12_AttackNearestTownTimer
+
+start
+
+begin loop
+
+    if get AttackNearestTownTimer time remaining <= 0
+        wait 45 seconds
+        AttackNearestTownTimer = create timer for 1200 * RecruitModifier seconds
+    end if
+
+end loop
+
+end script LC12_AttackNearestTownTimer
 
 
 begin script DisableLocalPlatoonResponse

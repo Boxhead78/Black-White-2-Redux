@@ -9,10 +9,57 @@ define True = 1
 define MAX_VILLAGERS = 100
 
 define script LC12_Intro
-
+define script Background
 
 begin script LC12_Intro
 
+    IntroVid = 0
+
 start
 
+    begin cinema
+    set fade red 0 green 0 blue 0 time 0
+    set game time 07.00
+        
+    //Disable creature fisting
+    enable interface action MANACOST_BALANCE_TYPE_INITIATECREATUREFIST
+
+    wait until widescreen transition complete
+    //Intro vid
+        
+    disable load screen
+    wait 2 seconds
+
+    IntroVid = create video window with left 0 top 0 width 1 height 1
+    set IntroVid clipping window left 0 top 0 width 1 height 1
+    start music "land12intro" loop 1
+    play video "land12 intro" 
+    set fade red 0 green 0 blue 0 time 1
+    run script Background
+    
+    set fade in time 5
+
+    stop video
+    delete IntroVid
+
+    //Real Intro
+end cinema
+
 end script LC12_Intro
+
+begin script Background
+
+    ExitVid = False
+
+start
+
+begin known cinema
+    begin loop
+        wait 2 seconds
+        wait until not video is playing
+        ExitVid = True
+        until key KB_ESC down or ExitVid == True
+    end loop
+end known cinema
+
+end script Background
