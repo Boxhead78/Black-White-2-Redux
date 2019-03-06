@@ -37,9 +37,14 @@ begin loop
             ET_FireEpicLocation = marker at {EpicPos} + {number from minNumber to maxNumber, number from minNumber to maxNumber}
         end if
         Influence = get player 0 influence at {ET_FireEpicLocation}
+        Villager = create VILLAGER NORSE_HOUSEWIFE at {ET_FireEpicLocation} + {number from minNumber to maxNumber, number from minNumber to maxNumber}
         if Influence < 1 and not {ET_FireEpicLocation} under water and not {whichTown} near {ET_FireEpicLocation} radius 30
-            ExitLoop = 1
+            if Villager can navigate to {Villager}
+                delete Villager
+                ExitLoop = 1
+            end if
         end if
+        
         CounterEpic++
     end while
     minNumber -= 10
