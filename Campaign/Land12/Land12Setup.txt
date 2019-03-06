@@ -7,6 +7,7 @@
 define script Land12Script
 define script Land12ScriptManager
 define script LC12_SetupCreature
+define script LC12_SetupDamagedTowns(whichTown,Amount)
 define script LC12_SetupGodReq
 
 run script Land12Script
@@ -178,6 +179,9 @@ start
     run background script LC12_Aztec_Capital
     run background script DisableLocalPlatoonResponse
     run background script GodsPlaygroundLoader
+    run background script talNewTalus(AztecCapital,1)
+    run background script LC12_SetupDamagedTowns(AztecCapital,100)
+    run background script LC12_SetupDamagedTowns(AztecTown2,50)
     
     wait until IntroFinished == 1
 
@@ -208,6 +212,7 @@ begin script LC12_SetupCreature
 start
 
     //Load the creature and get it into global
+    wait 1.5 seconds
     load my_creature at {CreaturePos}
     MyCreature = get player 0 creature
 
@@ -262,6 +267,33 @@ start
     release MyCreature
 
 end script LC12_SetupCreature
+
+begin script LC12_SetupDamagedTowns(whichTown,Amount)
+
+    House = 0
+    Number = 0
+
+start
+
+    while Amount > 0
+        House = get random abode in town whichTown
+        if BUILT of House == 1.0
+            say "TEST"
+            Number = number from 1 to 3
+            if Number == 1
+                BUILT of House = 0.25
+            elsif Number == 2
+                BUILT of House = 0.5
+            else
+                BUILT of House = 0.75
+            end if
+            Amount--
+        elsif House not exists
+            Amount--
+        end if 
+    end while
+
+end script LC12_SetupDamagedTowns
 
 begin script LC12_SetupGodReq
 
