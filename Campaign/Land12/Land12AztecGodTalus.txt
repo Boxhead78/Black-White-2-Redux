@@ -76,7 +76,7 @@ begin script tal_TalusLoop(GodHandle,rTown,PlayerID)
 start
     ge_MiracleDelay[godHandle] = create timer for 0 seconds
     while 1 == 1 // make sure godHandle is valid
-        wait until rGodInstance[godHandle] exists
+        wait until rGodInstance[godHandle] exists and IntroFinished == 1
         tal_EmergencyAllowed = 1
         // Do I need to resource? Don't check these too often
         if ge_Busy[godHandle] == 0 and ge_EmergencyMode[godHandle] == 0
@@ -133,7 +133,7 @@ start
 
         //Water Forests
         if ge_Busy[godHandle] == 0 and ge_EmergencyMode[godHandle] == 0
-            if waterForestCounter > 4
+            if waterForestCounter > 12
                 ge_Busy[godHandle] = 1
                 waterForestCounter = 0
                 run script tal_WaterForest(godHandle,ge_HomeTown[godHandle])
@@ -616,10 +616,10 @@ begin script tal_Disciples(GodHandle,rTown)
     numberOfDisciples = 0
 start
     if rGodInstance[godHandle] exists
-        tal_MaleBreeders = adult size of ge_HomeTown[godHandle] * 12 / 100 //12 percent of town
-        tal_Prayers = adult size of ge_HomeTown[godHandle] * 20 / 100 //20 percent of town
-        tal_Miners = adult size of ge_HomeTown[godHandle] * 8 / 100 //8 percent of town
-        tal_NumDiscipleOther = adult size of ge_HomeTown[godHandle] * 4 / 100 //4 percent of town
+        tal_MaleBreeders = adult size of ge_HomeTown[godHandle] * 4 / 100 //4 percent of town
+        tal_Prayers = adult size of ge_HomeTown[godHandle] * 2 / 100 //2 percent of town
+        tal_Miners = adult size of ge_HomeTown[godHandle] * 1 / 100 //1 percent of town
+        tal_NumDiscipleOther = adult size of ge_HomeTown[godHandle] * 2 / 100 //2 percent of town
         say "Disciples"
         numberOfDisciples = get number of disciple VILLAGER_DISCIPLE_FARMER in town ge_HomeTown[godHandle]
         while numberOfDisciples < tal_NumDiscipleOther // Need more

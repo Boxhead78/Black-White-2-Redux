@@ -152,6 +152,10 @@ start
     set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_MAP to 0.0
     set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_POSITIONAL to 0.0
 
+    set town AztecTown1 maximum population to 325
+    set town AztecTown2 maximum population to 325
+    set town AztecCapital maximum population to 325
+
     PD_ForcedSaving = 1
     wait until PD_ForcedSaving == 0 or 10 seconds
     stop script "SavePersistentDataSetData"
@@ -180,8 +184,8 @@ start
     run background script DisableLocalPlatoonResponse
     run background script GodsPlaygroundLoader
     run background script talNewTalus(AztecCapital,1)
-    run background script LC12_SetupDamagedTowns(AztecCapital,100)
-    run background script LC12_SetupDamagedTowns(AztecTown2,50)
+    run background script LC12_SetupDamagedTowns(AztecCapital,80)
+    run background script LC12_SetupDamagedTowns(AztecTown2,40)
     
     wait until IntroFinished == 1
 
@@ -212,7 +216,6 @@ begin script LC12_SetupCreature
 start
 
     //Load the creature and get it into global
-    wait 1.5 seconds
     load my_creature at {CreaturePos}
     MyCreature = get player 0 creature
 
@@ -276,7 +279,7 @@ begin script LC12_SetupDamagedTowns(whichTown,Amount)
 start
 
     while Amount > 0
-        House = get random abode in town whichTown
+        House = get random home in town whichTown
         if BUILT of House == 1.0
             say "TEST"
             Number = number from 1 to 3
