@@ -8,6 +8,7 @@ define script Land12Script
 define script Land12ScriptManager
 define script LC12_SetupCreature
 define script LC12_SetupDamagedTowns(whichTown,Amount)
+define script LC12_SetupWeather(Amount,Position)
 define script LC12_SetupGodReq
 
 run script Land12Script
@@ -186,6 +187,22 @@ start
     run background script talNewTalus(AztecCapital,1)
     run background script LC12_SetupDamagedTowns(AztecCapital,80)
     run background script LC12_SetupDamagedTowns(AztecTown2,40)
+
+    //Weather Scripts
+    run background script LC12_SetupWeather(3,marker at {PlayerTown})
+    run background script LC12_SetupWeather(2,marker at {AztecTown1})
+    run background script LC12_SetupWeather(2,marker at {AztecTown2})
+    run background script LC12_SetupWeather(2,marker at {AztecCapital})
+    run background script LC12_SetupWeather(2,marker at {MinorTown1})
+    run background script LC12_SetupWeather(2,marker at {MinorTown2})
+    run background script LC12_SetupWeather(2,marker at {MinorTown3})
+    run background script LC12_SetupWeather(2,marker at {MinorTown4})
+    run background script LC12_SetupWeather(1,marker at {1109.86,63.41,1573.95})
+    run background script LC12_SetupWeather(1,marker at {1363.37,52.30,1584.18})
+    run background script LC12_SetupWeather(1,marker at {1408.33,42.38,1297.97})
+    run background script LC12_SetupWeather(1,marker at {1250.54,22.32,1029.37})
+    run background script LC12_SetupWeather(1,marker at {896.90,27.79,1356.71})
+    run background script LC12_SetupWeather(1,marker at {815.01,20.72,1658.77})
     
     wait until IntroFinished == 1
 
@@ -281,7 +298,6 @@ start
     while Amount > 0
         House = get random home in town whichTown
         if BUILT of House == 1.0
-            say "TEST"
             Number = number from 1 to 3
             if Number == 1
                 BUILT of House = 0.25
@@ -297,6 +313,34 @@ start
     end while
 
 end script LC12_SetupDamagedTowns
+
+begin script LC12_SetupWeather(Amount,Position)
+
+    AmountInit = 0
+    Weather[10]
+
+start
+
+    AmountInit = Amount
+
+    while Amount > 0
+        Weather[Amount] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {Position} + {number from -Amount * 50 to Amount * 50,0,number from -Amount * 50 to Amount * 50}
+        set cloud for Weather[Amount] above {Position} + {0, 30, 0}
+        set Weather[Amount] properties rainfall 1 snowfall 0 overcast 0.9
+        disable Weather[Amount] affected by wind
+        Amount--
+    end while
+
+    wait until DeleteWeather == 1
+
+    wait number from 20 to 60 seconds
+
+    while AmountInit > 0
+        delete Weather[Amount]
+        AmountInit--
+    end while
+
+end script LC12_SetupWeather
 
 begin script LC12_SetupGodReq
 
