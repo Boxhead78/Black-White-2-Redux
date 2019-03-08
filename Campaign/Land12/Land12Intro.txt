@@ -9,15 +9,30 @@ define True = 1
 define MAX_VILLAGERS = 100
 
 define script LC12_Intro
+define script LC12_SpawnFireBall(whichPosition)
 define script Video_Background
 
 begin script LC12_Intro
 
+    Ampitheatre = 0
+    Counter = 0
     IntroVid = 0
+    CSMixer = 0
+    WindMixer = 0
+    Villager = 0
 
 start
 
-    begin cinema
+PD_ForcedSaving = 1
+wait until PD_ForcedSaving == 0 or 10 seconds
+stop script "SavePersistentDataSetData"
+set persistent data "PREVLAND_OVER" to 0
+run script SavePersistentDataGetData
+
+WindMixer = create mixer
+set mixer WindMixer channel AUDIO_MIXER_CHANNEL_GLOBAL to 0.0
+
+begin cinema
     set fade red 0 green 0 blue 0 time 0
     set game time 07.00
         
@@ -28,6 +43,13 @@ start
     //Intro vid
     wait 2 seconds
 
+    wait 5 seconds
+    set mixer WindMixer channel AUDIO_MIXER_CHANNEL_GLOBAL to 1.0 with fadetime 2
+    CSMixer = create mixer
+    set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 0.7
+    wait 2 seconds
+    destroy mixer WindMixer
+
     disable load screen
     IntroVid = create video window with left 0 top 0 width 1 height 1
     set IntroVid clipping window left 0 top 0 width 1 height 1
@@ -37,20 +59,97 @@ start
     play video "land12 intro" 
     set fade red 0 green 0 blue 0 time 1
     run script Video_Background
-    
-    set fade in time 5
 
     stop video
     stop music
     delete IntroVid
 
+    set AztecCapital emergency for 90 seconds
+    set AztecTown2 emergency for 90 seconds
+
+    wait 6 seconds
+
+    run background script LC12_SpawnFireBall(marker at {1693.99,70.75,1516.54})
+    run background script LC12_SpawnFireBall(marker at {1586.03,73.16,1527.75})
+    run background script LC12_SpawnFireBall(marker at {1115.77,26.05,961.07})
+    run background script LC12_SpawnFireBall(marker at {1004.04,26.24,954.66})
+    run background script LC12_SpawnFireBall(marker at {988.77,26.57,830.66})
+    run background script LC12_SpawnFireBall(marker at {1089.29,36.22,676.77})
+
     //Real Intro
+    Ampitheatre = get HOUSE at {1061.26,969.99}
+    BUILT of Ampitheatre = 0.025
+    set fade in time 5
+    start music "exintro1" loop -1
+    reset camera path 
+    queue camera move with position {2028.31,130.00,1247.56} focus {AztecCapital} + {0,20,0} time 0.0
+    queue camera move with position {1753.96,85.00,1480.21} focus {1617.54,73.16,1525.54} time 13.0
+    queue camera move with position {1454.31,95.00,1361.74} focus {1350.08,65.00,1272.13} time 7.0
+    queue camera move with position {1136.88,28.00,1040.33} focus {AztecTown2} time 6.5
+    queue camera move with position {1039.13,36.00,938.55} focus {986.14,35.25,936.94} time 5.0
+    queue camera move with position {857.33,66.71,993.74} focus {851.50,70.00,1052.18} time 5.0
+    queue camera move with position {937.36,120.00,1163.59} focus {1008.73,110.00,1267.20} time 4.0
+    queue camera move with position {1080.08,100.00,1368.88} focus {1104.16,67.00,1449.65} time 4.0
+
+
+    play camera path with easein 20 easeout 8 method SCRIPT_CAMERAPATH_SMOOTHEST
+
+    wait 7 seconds
+
+    say "BW2XT_LAND02_INTRO_20"
+    clear dialogue
+    close dialogue
+    wait BW2XT_LAND02_INTRO_20 + 0.5 seconds
+
+    wait 2 seconds
+    say "BW2XT_LAND02_INTRO_50"
+    clear dialogue
+    close dialogue
+    wait BW2XT_LAND02_INTRO_50 + 0.5 seconds
+
+    wait 7.5 seconds
+
+    say "BW2XT_LAND02_INTRO_60"
+    clear dialogue
+    close dialogue
+    wait BW2XT_LAND02_INTRO_60 + 0.5 seconds
+
+    wait 11 seconds
+
+    say "BW2XT_LAND02_INTRO_70"
+    clear dialogue
+    close dialogue
+    wait BW2XT_LAND02_INTRO_70 + 0.5 seconds
+
+    wait until camera ready
 
     IntroFinished = 1
 
 end cinema
 
+stop music with fadetime 2
+set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 1.0
+
 end script LC12_Intro
+
+begin script LC12_SpawnFireBall(whichPosition)
+    FireBallStart = 0
+    FireBallTarget = 0
+    FireBall = 0
+start
+
+add effect EFFECT_TYPE_BURN at {whichPosition} strength 0.75 radius 10
+
+begin loop
+    FireBallStart = marker at ({whichPosition} + {number from -20 to 20,number from -20 to 20})
+    FireBallTarget = marker at ({whichPosition} + {number from -5 to 5, 3, number from -5 to 5})
+    FireBall = make player 1 throw miracle MIRACLE_TYPE_FIRE from ({FireBallStart} + {0,-3.0,0}) heading ({FireBallTarget} + {0,21,0} - {FireBallStart})
+
+    wait number from 7 to 12 seconds
+    until IntroFinished == 1
+end loop
+
+end script LC12_SpawnFireBall
 
 begin script Video_Background
 
