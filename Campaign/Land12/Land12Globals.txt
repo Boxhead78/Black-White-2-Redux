@@ -7,6 +7,11 @@
 // Other Defines
 define oCreature = 0
 define script Globals
+define script LC12_CreateUndeadPlatoon(whichPlatoon,howManyVillagers,whichMesh)
+
+define s_aztecwarrior_ghost = 0
+define s_skeletonadultland2 = 1
+define s_undeadwarrior_noghost = 2
 
 // Debug switch
 global DEBUG = 1
@@ -20,6 +25,7 @@ global TownsPeacefulConverted = 0
 global UnderAttack = 0
 global IntroFinished = 0
 global DeleteWeather = 0
+global AttackingPlatoons = 0
 
 global PlayerTown = 0
 global MinorTown1 = 0
@@ -32,12 +38,12 @@ global AztecCapital = 0
 global NearestSettlement = 0
 
 global MINOR_TOWN1_IMPRESSIVENESS = 6000
-global MINOR_TOWN2_IMPRESSIVENESS = 9000
-global MINOR_TOWN3_IMPRESSIVENESS = 12000
-global MINOR_TOWN4_IMPRESSIVENESS = 15000
-global AZTECTOWN1_IMPRESSIVENESS = 20000 
-global AZTECTOWN2_IMPRESSIVENESS = 20000
-global AZTECCAPITAL_IMPRESSIVENESS = 20000
+global MINOR_TOWN2_IMPRESSIVENESS = 12000
+global MINOR_TOWN3_IMPRESSIVENESS = 18000
+global MINOR_TOWN4_IMPRESSIVENESS = 24000
+global AZTECTOWN1_IMPRESSIVENESS = 40000 
+global AZTECTOWN2_IMPRESSIVENESS = 45000
+global AZTECCAPITAL_IMPRESSIVENESS = 55000
 
 global AttackNearestTownTimer = 0
 global LC12_RecruitTimer1 = 0
@@ -72,3 +78,49 @@ start
     AztecCapital = get town with id 13
     
 end script Globals
+
+
+//Only works with global platoons
+begin script LC12_CreateUndeadPlatoon(whichPlatoon,howManyVillagers,whichMesh)
+
+    Ghost[200]
+    counter = 0
+    Villager = 0
+    VillagerTemp = 0
+
+start
+
+    //Remove old villagers
+    while counter < howManyVillagers - 1
+        if counter < howManyVillagers
+            Villager = get villager from platoon whichPlatoon nearest {whichPlatoon}
+            delete Villager
+        end if
+        counter++
+    end while
+    Villager = get villager from platoon whichPlatoon nearest {whichPlatoon}
+    counter = 0
+
+    while counter < howManyVillagers
+
+        //Create ghosts
+        Ghost[counter] = create VILLAGER NORSE_HOUSEWIFE at {whichPlatoon} 
+        add villager Ghost[counter] to platoon whichPlatoon
+
+        //Set new mesh
+        if whichMesh == s_aztecwarrior_ghost
+            set anim speed of Ghost[counter] to 0.75
+            override mesh for Ghost[counter] with "..\skins\s_aztecwarrior_ghost"
+        elsif whichMesh == s_skeletonadultland2
+            set anim speed of Ghost[counter] to 0.5
+            override mesh for Ghost[counter] with "..\skins\s_skeletonadultland2"
+        else
+            set anim speed of Ghost[counter] to 0.6
+            override mesh for Ghost[counter] with "..\skins\s_undeadwarrior_noghost"
+        end if
+        counter++
+    end while
+
+    delete Villager
+
+end script LC12_CreateUndeadPlatoon
