@@ -32,12 +32,17 @@ global LC12_Platoon[LC12_NUM_OF_PLATOONS]
 global LC12_SiegeCatapult[LC12_NUM_OF_SIEGE_CATAPULTS]
 global LC12_WallArcher[LC12_NUM_OF_WALL_ARCHERS]
 
-global PlatoonPos[7]
+global PlatoonPos[30]
 global AttackPos[7]
 global SiegePlatoonPos[1]
 global SiegeRoute1[3]
 global Script1WP[2]
 global PlayerWallPos = 0
+
+global PatrolRouteA[4]
+global WaypointsA = 0
+global PatrolRouteB[3]
+global WaypointsB = 0
 
 //-----------------------------------------------------------------------------
 
@@ -53,14 +58,17 @@ start
 
     PlayerWallPos = marker at {1230.47,121.51,758.87}
 
-    PlatoonPos[0] = marker at {1215.43,298.98,1945.71}
-    PlatoonPos[1] = marker at {1383.52,298.83,1895.26}
-    PlatoonPos[2] = marker at {887.47,298.84,2077.57}
-    PlatoonPos[3] = marker at {1312.52,256.05,1657.31}
-    PlatoonPos[4] = marker at {1604.96,290.49,1983.51}
-    PlatoonPos[5] = marker at {590.77,296.15,2006.85}
-    PlatoonPos[6] = marker at {585.47,292.29,1939.63}
-    
+    PlatoonPos[0] = marker at {1679.74,73.14,1578.63}
+    PlatoonPos[1] = marker at {1639.48,73.13,1530.27}
+    PlatoonPos[2] = marker at {1613.31,73.16,1499.07}
+    PlatoonPos[3] = marker at {1585.38,73.16,1467.98}
+    PlatoonPos[4] = marker at {1030.88,26.22,1007.18}
+    PlatoonPos[5] = marker at {1122.31,25.91,964.67}
+    PlatoonPos[6] = marker at {960.09,27.99,804.32}
+    PlatoonPos[7] = marker at {1099.06,31.16,789.79}
+    PlatoonPos[8] = marker at {590.77,296.15,2006.85}
+    PlatoonPos[9] = marker at {585.47,292.29,1939.63}
+
     AttackPos[0] = marker at {1229.49,125.41,819.19}
     AttackPos[1] = marker at {1154.31,130.97,858.11}
     AttackPos[2] = marker at {1322.59,129.45,867.83}
@@ -77,6 +85,24 @@ start
     
     Script1WP[0] = marker at {1345.16,298.65,1914.31}
     Script1WP[1] = marker at {1345.16,298.65,1914.31}
+
+    PatrolRouteA[0] = marker at {1734.23,71.11,1530.10}
+    PatrolRouteA[1] = marker at {1634.02,73.16,1618.94}
+    PatrolRouteA[2] = marker at {1532.40,72.72,1497.92}
+    PatrolRouteA[3] = marker at {1607.42,71.38,1435.90}
+
+    add {PatrolRouteA[0]} to waypoint list WaypointsA
+    add {PatrolRouteA[1]} to waypoint list WaypointsA
+    add {PatrolRouteA[2]} to waypoint list WaypointsA
+    add {PatrolRouteA[3]} to waypoint list WaypointsA
+
+    PatrolRouteB[0] = marker at {794.75,44.04,1369.53}
+    PatrolRouteB[1] = marker at {596.60,125.74,1270.01}
+    PatrolRouteB[2] = marker at {492.60,36.58,1447.21}
+
+    add {PatrolRouteB[0]} to waypoint list WaypointsB
+    add {PatrolRouteB[1]} to waypoint list WaypointsB
+    add {PatrolRouteB[2]} to waypoint list WaypointsB
 
 end script Waypoints
 
@@ -680,8 +706,38 @@ begin loop
         //end if
 
     elsif Task == Patrol
-        if get size of Platoon action queue < 1
-            move Platoon along PatrolRoute with patrol WAYPOINTROUTE_TRAVERSAL_TYPE_CIRCULAR
+        if Platoon == LC12_Platoon[4]
+            if {Platoon} near {PatrolRouteA[0]} radius 10
+                clear Platoon action queue
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {PatrolRouteA[1]} to Platoon action queue
+                wait 5 seconds
+            elsif {Platoon} near {PatrolRouteA[1]} radius 10
+                clear Platoon action queue
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {PatrolRouteA[2]} to Platoon action queue
+                wait 5 seconds
+            elsif {Platoon} near {PatrolRouteA[2]} radius 10
+                clear Platoon action queue
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {PatrolRouteA[3]} to Platoon action queue
+                wait 5 seconds
+            elsif {Platoon} near {PatrolRouteA[3]} radius 10
+                clear Platoon action queue
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {PatrolRouteA[0]} to Platoon action queue
+                wait 5 seconds
+            end if
+        elsif Platoon == LC12_Platoon[5]
+            if {Platoon} near {PatrolRouteB[0]} radius 10
+                clear Platoon action queue
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {PatrolRouteB[1]} to Platoon action queue
+                wait 5 seconds
+            elsif {Platoon} near {PatrolRouteB[1]} radius 10
+                clear Platoon action queue
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {PatrolRouteB[2]} to Platoon action queue
+                wait 5 seconds
+            elsif {Platoon} near {PatrolRouteB[2]} radius 10
+                clear Platoon action queue
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {PatrolRouteB[0]} to Platoon action queue
+                wait 5 seconds
+            end if
         end if
 
     end if
