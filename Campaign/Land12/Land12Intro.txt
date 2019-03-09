@@ -12,6 +12,8 @@ define script LC12_Intro
 define script LC12_SpawnFireBall(whichPosition)
 define script Video_Background
 
+global IntroPlatoon[8]
+
 begin script LC12_Intro
 
     Ampitheatre = 0
@@ -35,7 +37,7 @@ set mixer WindMixer channel AUDIO_MIXER_CHANNEL_GLOBAL to 0.0
 begin cinema
     set fade red 0 green 0 blue 0 time 0
     set game time 07.00
-        
+
     //Disable creature fisting
     enable interface action MANACOST_BALANCE_TYPE_INITIATECREATUREFIST
 
@@ -67,7 +69,31 @@ begin cinema
     set AztecCapital emergency for 90 seconds
     set AztecTown2 emergency for 90 seconds
 
-    wait 6 seconds
+    enable load screen
+
+    IntroPlatoon[0] = create platoon ARMY_UNIT_TYPE_MELEE_7 at {1130.02,23.36,1024.69} with 50 men and 0 women
+    attach IntroPlatoon[0] to AztecTown1
+    PLAYER of IntroPlatoon[0] = 1
+    run background script LC12_CreateUndeadPlatoon(IntroPlatoon[0],50 * RecruitSizeModifier,s_skeletonadultland2)
+
+    IntroPlatoon[1] = create platoon ARMY_UNIT_TYPE_MELEE_7 at {1090.98,26.13,983.74} with 50 men and 0 women
+    attach IntroPlatoon[1] to AztecTown1
+    PLAYER of IntroPlatoon[1] = 1
+    run background script LC12_CreateUndeadPlatoon(IntroPlatoon[1],50 * RecruitSizeModifier,s_skeletonadultland2)
+
+    IntroPlatoon[2] = create platoon ARMY_UNIT_TYPE_MELEE_7 at {1018.79,26.17,998.85} with 50 men and 0 women
+    attach IntroPlatoon[2] to AztecTown1
+    PLAYER of IntroPlatoon[2] = 1
+    run background script LC12_CreateUndeadPlatoon(IntroPlatoon[2],50 * RecruitSizeModifier,s_skeletonadultland2)
+
+    IntroPlatoon[3] = create platoon ARMY_UNIT_TYPE_MELEE_7 at {955.83,27.18,970.82} with 50 men and 0 women
+    attach IntroPlatoon[3] to AztecTown1
+    PLAYER of IntroPlatoon[3] = 1
+    run script LC12_CreateUndeadPlatoon(IntroPlatoon[3],50 * RecruitSizeModifier,s_skeletonadultland2)
+
+    wait until not video is playing
+
+    disable load screen
 
     run background script LC12_SpawnFireBall(marker at {1693.99,70.75,1516.54})
     run background script LC12_SpawnFireBall(marker at {1586.03,73.16,1527.75})
@@ -109,6 +135,11 @@ begin cinema
 
     wait 7.5 seconds
 
+    IntroPlatoon[4] = create platoon PLATOON_INFO_GREEK_MELEE_2 at {IntroPlatoon[3]} with 25 men and 0 women
+    IntroPlatoon[5] = create platoon PLATOON_INFO_GREEK_MELEE_2 at {IntroPlatoon[4]} with 25 men and 0 women
+    IntroPlatoon[6] = create platoon PLATOON_INFO_GREEK_MELEE_2 at {IntroPlatoon[5]} with 25 men and 0 women
+    IntroPlatoon[7] = create platoon PLATOON_INFO_GREEK_MELEE_2 at {IntroPlatoon[6]} with 25 men and 0 women
+
     say "BW2XT_LAND02_INTRO_60"
     clear dialogue
     close dialogue
@@ -123,11 +154,23 @@ begin cinema
 
     wait until camera ready
 
+    wait 2.5 seconds
+
+    delete IntroPlatoon[0]
+    delete IntroPlatoon[1]
+    delete IntroPlatoon[2]
+    delete IntroPlatoon[3]
+    delete IntroPlatoon[4]
+    delete IntroPlatoon[5]
+    delete IntroPlatoon[6]
+    delete IntroPlatoon[7]
+
     IntroFinished = 1
 
 end cinema
 
-stop music with fadetime 2
+stop music with fadetime 9
+wait 9 seconds
 set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 1.0
 
 end script LC12_Intro
@@ -138,7 +181,7 @@ begin script LC12_SpawnFireBall(whichPosition)
     FireBall = 0
 start
 
-add effect EFFECT_TYPE_BURN at {whichPosition} strength 0.75 radius 10
+add effect EFFECT_TYPE_BURN at {whichPosition} strength 0.75 radius 30
 
 begin loop
     FireBallStart = marker at ({whichPosition} + {number from -20 to 20,number from -20 to 20})
