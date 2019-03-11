@@ -1,0 +1,39 @@
+///////////////////////////////////////////////////////////////////////////////
+//       Town-Villagers-Maintainer
+//    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+///////////////////////////////////////////////////////////////////////////////
+
+define script MaintainVillagers(PlayerID)
+
+
+begin script MaintainVillagers(PlayerID)
+
+    Counter = 0
+    myTown[20]
+    RandomAbode = 0
+    Villager = 0
+
+start
+
+begin loop
+    myTown[Counter] = get town with id Counter
+    if size of myTown[Counter] > 950 and PLAYER of myTown[Counter] == PlayerID
+        RandomAbode = get random abode in town myTown[Counter]
+        Villager = get living villager at {RandomAbode} radius 250
+        if AGE of Villager > 30
+            delete Villager
+            wait number from 1 to 2 seconds
+        end if
+    elsif size of myTown[Counter] > 850 and PLAYER of myTown[Counter] == PlayerID
+        RandomAbode = get random abode in town myTown[Counter]
+        Villager = get living villager at {RandomAbode} radius 250
+        if AGE of Villager > 30
+            HEALTH of Villager = 0.0
+            wait number from 2 to 4 seconds
+        end if
+    end if
+    Counter++
+    until Counter >= 20
+end loop
+
+end script MaintainVillagers
