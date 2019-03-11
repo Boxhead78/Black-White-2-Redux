@@ -1,0 +1,219 @@
+///////////////////////////////////////////////////////////////////////////////
+//    Land 11 Creature AI
+//    ~~~~~~~~~~~~~~~~~~~
+//
+//    Start date:         29.10.16            By:    Boxhead
+//    Update date:        30.10.16            By: Boxhead
+///////////////////////////////////////////////////////////////////////////////
+
+//-----------------------------------------------------------------------------
+//    Globals
+//-----------------------------------------------------------------------------
+
+define script LC12_AICreature
+define script LC12_CreatureLogic
+
+global CreatureAttackPos[3]
+global CreatureBuildPos[2]
+global CreatureGathererPos[3]
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
+begin script LC12_AICreature
+
+    CreaturePos = marker at {932.30,93.96,673.22}
+    CSMixer = 0
+    PlayerCreature = 0
+    PlayerCreatureType = 0
+
+start
+
+    CreatureAttackPos[0] = marker at {1287.81,307.44,1069.04}//AztecCapital
+    CreatureAttackPos[1] = marker at {1488.70,309.74,1231.34}//AztecTown1
+    CreatureAttackPos[2] = marker at {1332.90,304.73,911.53}//AztecTown2
+
+    CreatureGathererPos[0] = marker at {489.69,407.26,1152.56}//AztecCapital
+    CreatureGathererPos[1] = marker at {1912.16,343.12,1425.69}//AztecTown1
+    CreatureGathererPos[2] = marker at {1280.00,146.91,291.22}//AztecTown2
+
+    wait until LC12_EnemyCreature == 1
+    
+    CinemaIsRunning = 1
+    begin cinema
+        store camera details
+        set fade red 0 green 0 blue 0 time 4
+
+        PlayerCreature = get player 0 creature
+        PlayerCreatureType = variable get PlayerCreature sub type
+        if PlayerCreatureType == variable CREATURE_TYPE_LION
+            LC12_EnemyCreature = create CREATURE CREATURE_TYPE_LION at {CreaturePos}
+
+        elsif PlayerCreatureType == variable CREATURE_TYPE_APE 
+            LC12_EnemyCreature = create CREATURE CREATURE_TYPE_APE at {CreaturePos}
+
+        elsif PlayerCreatureType == variable CREATURE_TYPE_GORILLA
+            LC12_EnemyCreature = create CREATURE CREATURE_TYPE_GORILLA at {CreaturePos}
+
+        elsif PlayerCreatureType == variable CREATURE_TYPE_WOLF
+            LC12_EnemyCreature = create CREATURE CREATURE_TYPE_WOLF at {CreaturePos}
+
+        elsif PlayerCreatureType == variable CREATURE_TYPE_COW
+            LC12_EnemyCreature = create CREATURE CREATURE_TYPE_COW at {CreaturePos}
+
+        else// PlayerCreature == variable CREATURE_TYPE_TIGER
+            LC12_EnemyCreature = create CREATURE CREATURE_TYPE_TIGER at {CreaturePos}
+            
+        end if
+
+        ALIGNMENT of LC12_EnemyCreature = -1.0
+        set creature LC12_EnemyCreature happiness to maximum
+
+        snap creature LC12_EnemyCreature focus to {AztecCapital}
+
+        wait 4.1 seconds
+        set camera position to {927.76,100.68,665.49}
+        set camera focus to {AztecCapital} + {0,15,0}
+        move camera position to {927.76,108.68,665.49} + {3,0,-9} time 24
+        move camera focus to {AztecCapital} + {0,-125,0} time 24
+        CSMixer = create mixer
+        set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 0.7
+        start music "exintro1" loop 1
+        set fade in time 4
+        wait 1 seconds
+        wait 2.25 seconds
+        play anim C_FIGHT_THREAT2 on LC12_EnemyCreature
+        wait 3.25 seconds
+        play anim C_FIGHT_THREAT3 on LC12_EnemyCreature
+        wait 3 seconds
+        play anim C_FIGHT_THREAT1 on LC12_EnemyCreature
+        set fade red 0 green 0 blue 0 time 4
+        wait 4 seconds
+        restore camera details
+        set fade in time 4
+
+    end cinema
+    CinemaIsRunning = 0
+    
+    teach LC12_EnemyCreature all
+    
+    set player 1 creature to LC12_EnemyCreature
+    
+    set research ARTEFACT_CREATURE_MAGIC_TYPE_WATER available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_CREATURE_MAGIC_TYPE_LIGHTNING available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_CREATURE_MAGIC_TYPE_FIREBALL available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_CREATURE_MAGIC_TYPE_HEAL available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_CREATURE_ROLE_BUILDER_3 available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_CREATURE_ROLE_GATHERER_3 available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_CREATURE_ROLE_SOLDIER_3 available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+
+    set creature LC12_EnemyCreature CREATURE_SCRIPT_TRANSITIONAL_ATTRIBUTE_TYPE_SIZE 1.0
+    STRENGTH of LC12_EnemyCreature = 1.0
+    ALIGNMENT of LC12_EnemyCreature = -0.85
+    FATNESS of LC12_EnemyCreature = 0.2
+
+    disable LC12_EnemyCreature action availability LA_EAT with LO_PLAYER_VILLAGER
+    disable LC12_EnemyCreature action availability LA_EAT with LO_PLAYER_PLATOON
+    disable LC12_EnemyCreature action availability LA_EAT with LO_ROCKS
+    disable LC12_EnemyCreature action availability LA_EAT with LO_TREES
+    disable LC12_EnemyCreature action availability LA_EAT with LO_TOYS
+    disable LC12_EnemyCreature action availability LA_EAT with LO_POO
+    disable LC12_EnemyCreature action availability LA_EAT with LO_SPELL_ORBS
+    disable LC12_EnemyCreature action availability LA_POO with LO_PLAYER_VILLAGER
+    disable LC12_EnemyCreature action availability LA_POO with LO_PLAYER_PLATOON
+    disable LC12_EnemyCreature action availability LA_POO with LO_PLAYER_DEFENCES
+    disable LC12_EnemyCreature action availability LA_POO with LO_PLAYER_STORAGE_PIT
+    disable LC12_EnemyCreature action availability LA_POO with LO_PLAYER_BUILDING
+    disable LC12_EnemyCreature action availability LA_PLAY
+    disable LC12_EnemyCreature action availability LA_WATER with LO_PLAYER_VILLAGER
+    disable LC12_EnemyCreature action availability LA_WATER with LO_PLAYER_PLATOON
+    disable LC12_EnemyCreature action availability LA_HEAL with LO_OPPONENT_PLATOON
+    disable LC12_EnemyCreature action availability LA_ATTACK with LO_CREATURE_PEN
+    disable LC12_EnemyCreature action availability LA_ATTACK with LO_ROCKS
+    disable LC12_EnemyCreature action availability LA_ATTACK with LO_MINE
+    disable LC12_EnemyCreature action availability LA_ATTACK with LO_ORE_ROCKS
+    disable LC12_EnemyCreature action availability LA_ATTACK with LO_TREES
+    disable LC12_EnemyCreature action availability LA_ATTACK with LO_FIELDS
+    disable LC12_EnemyCreature action availability LA_ATTACK with LO_POO
+    disable LC12_EnemyCreature action availability LA_ATTACK with LO_SPELL_ORBS
+
+    CreatureIntroDone = 1
+    release LC12_EnemyCreature
+
+    run background script LC12_CreatureLogic
+
+    wait 45 seconds
+
+    set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 1.0 with fadetime 10
+
+end script LC12_AICreature
+
+begin script LC12_CreatureLogic
+
+    Number = 0
+    CreatureRollRoleTimer = create timer for 0 seconds
+    WallSegment = 0
+    Counter = 0
+    Town[16]
+
+start
+
+begin loop
+
+    while Counter > 14
+        Counter = 0
+    end while
+
+    if HEALTH of LC12_EnemyCreature == 0.00
+        //CreatureKilled = 1
+        wait until HEALTH of LC12_EnemyCreature > 0.00
+        set creature LC12_EnemyCreature role to CR_NONE radius 500 at {CreatureGathererPos[0]}
+        HEALTH of LC12_EnemyCreature = 1.0
+    end if
+
+    if town AztecCapital is under takeover from player 0 and HEALTH of LC12_EnemyCreature > 0
+        HEALTH of LC12_EnemyCreature = 1.0
+        set creature LC12_EnemyCreature role to CR_SOLDIER radius 100 at {AztecCapital}
+        
+        wait until HEALTH of LC12_EnemyCreature == 0.00 or not town AztecCapital is under takeover from player 0 or 1000 seconds
+    
+    elsif town AztecTown1 is under takeover from player 0 and HEALTH of LC12_EnemyCreature > 0
+        HEALTH of LC12_EnemyCreature = 1.0
+        set creature LC12_EnemyCreature role to CR_SOLDIER radius 100 at {AztecTown1}
+        
+        wait until HEALTH of LC12_EnemyCreature == 0.00 or not town AztecTown1 is under takeover from player 0 or 1000 seconds
+
+    elsif town AztecTown2 is under takeover from player 0 and HEALTH of LC12_EnemyCreature > 0
+        HEALTH of LC12_EnemyCreature = 1.0
+        set creature LC12_EnemyCreature role to CR_SOLDIER radius 100 at {AztecTown2}
+        
+        wait until HEALTH of LC12_EnemyCreature == 0.00 or not town AztecTown2 is under takeover from player 0 or 1000 seconds
+
+    elsif town Town[Counter] is under takeover from player 1 and HEALTH of LC12_EnemyCreature > 0
+        HEALTH of LC12_EnemyCreature = 1.0
+        set creature LC12_EnemyCreature role to CR_SOLDIER radius 100 at {PlayerTown}
+        
+        wait until HEALTH of LC12_EnemyCreature == 0.00 or not town PlayerTown is under takeover from player 0 or 1000 seconds
+
+    elsif HEALTH of LC12_EnemyCreature > 0.00 and get CreatureRollRoleTimer time remaining <= 0
+        Number = number from 1 to 4
+        if Number == 1 and PLAYER of AztecCapital == 1
+            set creature LC12_EnemyCreature role to CR_GATHERER radius 200 at {CreatureGathererPos[0]}
+            CreatureRollRoleTimer = create timer for 360 seconds
+            
+        elsif Number == 2 and PLAYER of AztecTown1 == 1
+            set creature LC12_EnemyCreature role to CR_GATHERER radius 200 at {CreatureGathererPos[1]}
+            CreatureRollRoleTimer = create timer for 360 seconds
+
+        elsif Number == 3 and PLAYER of AztecTown2 == 1
+            set creature LC12_EnemyCreature role to CR_GATHERER radius 200 at {CreatureGathererPos[2]}
+            CreatureRollRoleTimer = create timer for 360 seconds
+        
+        end if
+    end if
+
+    Counter++
+    
+end loop
+
+end script LC12_CreatureLogic

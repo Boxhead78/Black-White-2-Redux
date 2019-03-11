@@ -15,8 +15,9 @@ define s_undeadwarrior_noghost = 2
 
 // Debug switch
 global DEBUG = 1
-global Intro = 1
+global Intro = 0
 
+global LC12_EnemyCreature = 0
 global CinemaIsRunning = 0
 global MigrationsAccepted = 0
 global TownsConverted = 0
@@ -26,6 +27,12 @@ global UnderAttack = 0
 global IntroFinished = 0
 global DeleteWeather = 0
 global AttackingPlatoons = 0
+global LC12_LargeSiegeLaunchAttack = 0
+global AztecPrisonDestroyed = 0
+global AIHurricane = 0
+global GenericCommentTimer = 0
+global UnitDeadTimer = 0
+global CreatureIntroDone = 0
 
 global PlayerTown = 0
 global MinorTown1 = 0
@@ -35,27 +42,32 @@ global MinorTown4 = 0
 global AztecTown1 = 0
 global AztecTown2 = 0
 global AztecCapital = 0
+global AztecPrison = 0
 global NearestSettlement = 0
 
 global MINOR_TOWN1_IMPRESSIVENESS = 6000
 global MINOR_TOWN2_IMPRESSIVENESS = 12000
 global MINOR_TOWN3_IMPRESSIVENESS = 18000
 global MINOR_TOWN4_IMPRESSIVENESS = 24000
-global AZTECTOWN1_IMPRESSIVENESS = 40000 
-global AZTECTOWN2_IMPRESSIVENESS = 45000
-global AZTECCAPITAL_IMPRESSIVENESS = 55000
+global AZTECTOWN1_IMPRESSIVENESS = 31000 
+global AZTECTOWN2_IMPRESSIVENESS = 40000
+global AZTECCAPITAL_IMPRESSIVENESS = 52000
 
 global AttackNearestTownTimer = 0
 global LC12_RecruitTimer1 = 0
 global LC12_RecruitTimer2 = 0
 global LC12_RecruitTimer3 = 0
 
+global L12ShowingNutOil2Objective = 0
 
 begin script Globals
 
 SecondPlaythrough = 0
 
 start
+
+    GenericCommentTimer = create timer for 0 seconds
+    UnitDeadTimer = create timer for 200 seconds
 
     MINOR_TOWN1_IMPRESSIVENESS = MINOR_TOWN1_IMPRESSIVENESS *  ImpressivenessModifier
     MINOR_TOWN2_IMPRESSIVENESS = MINOR_TOWN2_IMPRESSIVENESS *  ImpressivenessModifier
@@ -76,6 +88,7 @@ start
     AztecTown1 = get town with id 4
     AztecTown2 = get town with id 5
     AztecCapital = get town with id 13
+    AztecPrison = get town with id 6
     
 end script Globals
 
@@ -85,12 +98,16 @@ begin script LC12_CreateUndeadPlatoon(whichPlatoon,howManyVillagers,whichMesh)
 
     Ghost[200]
     counter = 0
+    myEffect = 0
     Villager = 0
     VillagerTemp = 0
 
 start
 
     //Remove old villagers
+    myEffect = create visual effect VISUAL_EFFECT_MIGRATION_THREAD at {whichPlatoon}
+    set myEffect color red 148 green 0 blue 211
+    SCALE of myEffect = 2
     while counter < howManyVillagers - 1
         if counter < howManyVillagers
             Villager = get villager from platoon whichPlatoon nearest {whichPlatoon}
@@ -106,11 +123,14 @@ start
         //Create ghosts
         Ghost[counter] = create VILLAGER NORSE_HOUSEWIFE at {whichPlatoon} 
         add villager Ghost[counter] to platoon whichPlatoon
+        disable Ghost[counter] hurt by fire
+        disable Ghost[counter] set on fire
 
         //Set new mesh
         if whichMesh == s_aztecwarrior_ghost
             set anim speed of Ghost[counter] to 0.75
             override mesh for Ghost[counter] with "..\skins\s_aztecwarrior_ghost"
+            disable Ghost[counter] can be fisted
         elsif whichMesh == s_skeletonadultland2
             set anim speed of Ghost[counter] to 0.5
             override mesh for Ghost[counter] with "..\skins\s_skeletonadultland2"

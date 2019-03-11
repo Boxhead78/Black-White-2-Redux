@@ -5,10 +5,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 //TODO
-//Creatue cinematic
-//Ghost attack
-//Hurricane and Earthquake
-//God throwing rocks at player
+//aztectown1 attacks
+
+//sidequests:
+//Rocks riddle
+//Skeleton waves
 
 define script Land12Script
 define script Land12ScriptManager
@@ -16,6 +17,7 @@ define script LC12_SetupCreature
 define script LC12_SetupDamagedTowns(whichTown,Amount)
 define script LC12_SetupWeather(Amount,Position)
 define script LC12_SetupGodReq
+define script LC12_SetupPrison
 
 run script Land12Script
 
@@ -154,15 +156,18 @@ begin script Land12ScriptManager
 
 start
 
+    AIHurricane = get WONDER at {653.72,129.44,1170.66} radius 25
+    disable AIHurricane hurt by fire
+
     enable predefined sky "land12" time 0
 
     set atmos volume 0
     set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_MAP to 0.0
     set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_POSITIONAL to 0.0
 
-    set town AztecTown1 maximum population to 325
-    set town AztecTown2 maximum population to 325
-    set town AztecCapital maximum population to 325
+    set town AztecTown1 maximum population to 200
+    set town AztecTown2 maximum population to 200
+    set town AztecCapital maximum population to 200
 
     PD_ForcedSaving = 1
     wait until PD_ForcedSaving == 0 or 10 seconds
@@ -195,6 +200,8 @@ start
     run background script LC12_SetupDamagedTowns(AztecCapital,80)
     run background script LC12_SetupDamagedTowns(AztecTown2,40)
     run background script LC12_GatehouseManager
+    run background script LC12_Hurricane
+    run background script LC12_SetupPrison
 
     //Weather Scripts
     run background script LC12_SetupWeather(3,marker at {PlayerTown})
@@ -230,7 +237,14 @@ start
     run background script LC12_AztecTown1VillagerManager
     run background script LC12_AztecTown2VillagerManager
     run background script LC12_AztecCapitalVillagerManager
+    run background script LC12_GetPlayerUnits
+    run background script LC12_AICreature
+    run background script MaintainVillagers(0)
     
+    wait until PLAYER of AztecTown2 != 1
+
+    run background script Land12NutOil2
+
 end script Land12ScriptManager
 
 begin script LC12_SetupCreature
@@ -344,6 +358,12 @@ start
 
     wait until DeleteWeather == 1
 
+    begin loop
+        wait until DeleteWeather == 1 or number from 90 to 240 seconds
+        set lightning strike at {Weather[0]} + {number from -50 to 50,number from -50 to 50} from Weather[0] scale 0.66
+        until DeleteWeather == 1
+    end loop
+
     wait number from 20 to 60 seconds
 
     while AmountInit > 0
@@ -352,6 +372,28 @@ start
     end while
 
 end script LC12_SetupWeather
+
+begin script LC12_SetupPrison
+
+Men[75]
+Counter = 0
+TownPos = 0
+
+start
+
+begin loop
+    while Counter != 75
+        if Men[Counter] not exists and Counter != 75
+            Men[Counter] = create random villager of tribe TRIBE_TYPE_GREEK at {AztecPrison} + {number from -12 to 12, 0, number from -12 to 12}//create VILLAGER VILLAGER_INFO_JAPANESE_FORESTER_MALE at {1013.581, 132.333, 2002.798} + {number from -3 to 3, 0, number from -3 to 3}
+            attach Men[Counter] to AztecPrison
+            release Men[Counter]
+            Counter++
+        end if
+    end while
+    until Counter == 75
+end loop
+
+end script LC12_SetupPrison
 
 begin script LC12_SetupGodReq
 

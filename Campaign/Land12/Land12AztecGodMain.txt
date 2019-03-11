@@ -98,7 +98,7 @@ define script ge_MoveToObject(GodHandle,rObject)
 define script ge_MoveToRadiusAltitude(GodHandle,rTargetObject,Radius,Altitude)
 define script ge_PickupResource(GodHandle,rResourceObject,ResourceType,ResourceQuantity)
 define script ge_DropInStorehouse(GodHandle,rStorehouse,ResourceQuantity)
-define script ge_ThrowMiracle(GodHandle, MiracleType, rTargetObject)
+define script ge_ThrowMiracle(GodHandle, MiracleType, rTargetObject, Scripted)
 define script ge_ThrowObjectAtObject(GodHandle, rThrowObject, rTargetObject)
 define script ge_GodBuild(GodHandle,rBuilding,ResourceGatherRadius)
 define script ge_GoGetOre(GodHandle,AmountNeeded,ResourceGatherRadius)
@@ -444,14 +444,16 @@ start
 end script ge_DropInStorehouse
 
 
-begin script ge_ThrowMiracle(GodHandle, MiracleType, rTargetObject)
+begin script ge_ThrowMiracle(GodHandle, MiracleType, rTargetObject, Scripted)
     godHandle = GodHandle
     miracleType = MiracleType
     newMiracle = 0
     currMana = 0
 start
     if miracleType > GE_MIRACLE_TYPE_NONE and miracleType < GE_MIRACLE_TYPE_LAST and rGodInstance[godHandle] exists
-        run script ge_MoveToRadiusAltitude(godHandle,rTargetObject,geGodThrowRadius,geGodThrowAltitude)
+        if Scripted == 0
+            run script ge_MoveToRadiusAltitude(godHandle,rTargetObject,geGodThrowRadius,geGodThrowAltitude)
+        end if
         //SCRIPT_OBJECT_PROPERTY_TYPE_YPOS of rGodInstance[godHandle] = geGodThrowAltitude
         wait 1 seconds
         if miracleType == GE_MIRACLE_TYPE_HEAL

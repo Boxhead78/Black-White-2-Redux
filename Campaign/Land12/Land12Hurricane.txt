@@ -1,0 +1,100 @@
+define script LC12_Hurricane
+
+begin script LC12_Hurricane
+
+MyDance = 0
+Dancer = 0
+Wonder = 0
+Count = 0
+RelCamPos=0
+RelCamFoc=0
+AboveH=0
+Beam=0
+Beam2=0
+BeamPlace=0
+
+MusicEventTimer=0
+MusicEvent1=0
+MusicEvent2=0
+MusicEvent3=0
+MusicEvent4=0
+MusicEvent5=0
+MusicEvent6=0
+MusicEvent7=0
+MusicEvent8=0
+MusicEvent9=0
+
+Hurricane = 0
+StarDude=0
+StarAbode=0
+
+MyHurricanePos=0
+MyHurricaneFoc=0
+MyWeather=0
+
+checkthemofo=0
+count=0
+
+LoadsOfFloatingVillagers[20]
+
+DodgyBuilding=0
+
+Imwalkingaway=0
+
+HowLongDoIWait = create timer for 0 seconds
+
+start
+
+wait until AIHurricane exists
+
+invoke AIHurricane EPIC_WONDER_STAGE_3
+invoke AIHurricane EPIC_WONDER_STAGE_4
+invoke AIHurricane EPIC_WONDER_STAGE_5
+invoke AIHurricane EPIC_WONDER_STAGE_6
+invoke AIHurricane EPIC_WONDER_STAGE_7
+invoke AIHurricane EPIC_WONDER_STAGE_8
+invoke AIHurricane EPIC_WONDER_STAGE_9
+invoke AIHurricane EPIC_WONDER_STAGE_10
+
+wait 5 seconds
+
+//shake camera strength 6.0
+
+wait 1 seconds
+
+begin loop
+    Hurricane = create hurricane at {1346.36,43.12,1295.98} player 1 direction {1346.36,43.12,1295.98}
+
+    invoke Hurricane EPIC_HURRICANE_BEAM_DOWN
+    invoke Hurricane EPIC_START_GROUND_SWIRL
+    attach atmos "spells" to Hurricane// range 500
+    set Hurricane atmos group 7 time 1 seconds
+    wait 4 seconds
+    invoke Hurricane EPIC_HURRICANE_END_BEAM
+    invoke Hurricane EPIC_START_TOP_SWIRL
+    invoke Hurricane EPIC_CREATE_CLOUDS
+    invoke Hurricane EPIC_SET_CLOUDS_STORM
+    invoke Hurricane EPIC_ENTER_TORNADO
+
+    //wait until get MusicEventTimer time since set >= MusicEvent1
+    wait until HEALTH of AIHurricane < 1.0 or 45 seconds
+    until HEALTH of AIHurricane < 1.0
+end loop
+
+invoke Hurricane EPIC_EXIT_TORNADO
+wait 4 seconds//wait until get MusicEventTimer time since set >= MusicEvent9
+invoke Hurricane EPIC_STOP_TORNADO
+invoke Hurricane EPIC_CLEAR_CLOUDS
+invoke Hurricane EPIC_END_TORNADO
+invoke AIHurricane EPIC_WONDER_STAGE_LAST
+detach atmos from Hurricane
+//stop camera shake
+
+//reset sky colour 3 seconds
+DeleteWeather = 1
+wait 30 seconds
+enable predefined sky "DEFAULT" time 60
+wait 3 seconds
+enable influence
+
+end script LC12_Hurricane

@@ -63,9 +63,11 @@ begin script tal_TalusLoop(GodHandle,rTown,PlayerID)
     resourcesCounter = 0
     townDesire = 0.0
     manaRate = 0
+    myBuilding = 0
     myPlatoon = 0
     myCatapult = 0
     myCounter = 0
+    myRand = 0
     Number = 0
     NumberOfTowns = 0
     PlayerMana = 0
@@ -77,7 +79,6 @@ start
     ge_MiracleDelay[godHandle] = create timer for 0 seconds
     while 1 == 1 // make sure godHandle is valid
         wait until rGodInstance[godHandle] exists and IntroFinished == 1
-        tal_EmergencyAllowed = 1
         // Do I need to resource? Don't check these too often
         if ge_Busy[godHandle] == 0 and ge_EmergencyMode[godHandle] == 0
             ge_Busy[godHandle] = 1
@@ -148,13 +149,114 @@ start
             ge_Busy[godHandle] = 0
         end if
 
+        if get ThrowMiracleTimer time remaining <= 0 and get player ge_Player[godHandle] mana > 23000 and PLAYER of PlayerTown == 0 and GB_DialogueIsRunning == 0
+
+            GB_DialogueIsRunning = 1
+            begin dialogue
+                myRand = number from 1 to 4
+                if myRand == 1
+                    say "BW2XT_LAND02_TALUS_FIRE_20"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND02_TALUS_FIRE_20 + 1 seconds
+                    say "BW2XT_LAND02_TALUS_FIRE_50"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND02_TALUS_FIRE_50 + 1 seconds
+                elsif myRand == 2
+                    say "BW2XT_LAND05_TALUS_MIRACLE_ATTACK_40"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND05_TALUS_MIRACLE_ATTACK_40 + 1 seconds
+                elsif myRand == 3
+                    say "BW2XT_LAND02_PLAYER_ACCEPTS_MIGRATION_10"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND02_PLAYER_ACCEPTS_MIGRATION_10 + 1 seconds
+                elsif myRand == 4
+                    say "BW2XT_LAND02_PLAYER_ACCEPTS_MIGRATION_20"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND02_PLAYER_ACCEPTS_MIGRATION_20 + 1 seconds
+                end if
+            end dialogue
+            GB_DialogueIsRunning = 0
+
+            run script ge_MoveToRadiusAltitude(godHandle,marker at {1413.27,61.22,1473.44},geGodThrowRadius,geGodThrowAltitude)
+            wait until GB_DialogueIsRunning == 0
+            while myCounter < 3
+                wait number from 4 to 6 seconds
+                run script ge_ThrowMiracle(godHandle, GE_MIRACLE_TYPE_STORM, marker at {1277.97,60.64,1466.99} + {0,15,0} + {number from -15 to 15,number from -5 to 5,number from -15 to 15}, 1)
+                myCounter++
+            end while 
+            run script ge_ThrowMiracle(godHandle, GE_MIRACLE_TYPE_FIRE, marker at {1247.97,60.64,1426.99} + {0,20,0} + {number from -15 to 15,0,number from -15 to 15}, 1)
+            ThrowMiracleTimer = create timer for number from 300 to 900 seconds
+        end if
+
+        if get FireRainTimer time remaining <= 0 and get player ge_Player[godHandle] mana > 20000 and GB_DialogueIsRunning == 0 and PLAYER of PlayerTown == 0
+    
+            myRand = number from 1 to 5
+            if myRand == 1 or myRand == 2
+                myBuilding = get building ALTAR in PlayerTown min built 0.75
+            elsif myRand == 2
+                myBuilding = get building STORAGE_YARD in PlayerTown min built 0.75
+
+            elsif myRand == 3
+                myBuilding = get building TEMPLE in PlayerTown min built 0.75
+
+            elsif myRand == 5
+                myBuilding = get random abode in town PlayerTown
+            end if
+
+            if myBuilding exists
+                GB_DialogueIsRunning = 1
+                begin dialogue
+                    myRand = number from 1 to 4
+                    if myRand == 1
+                        say "BW2XT_LAND02_TALUS_FIRE_20"
+                        clear dialogue
+                        close dialogue
+                        wait BW2XT_LAND02_TALUS_FIRE_20 + 1 seconds
+                        say "BW2XT_LAND02_TALUS_FIRE_50"
+                        clear dialogue
+                        close dialogue
+                        wait BW2XT_LAND02_TALUS_FIRE_50 + 1 seconds
+                    elsif myRand == 2
+                        say "BW2XT_LAND05_TALUS_MIRACLE_ATTACK_40"
+                        clear dialogue
+                        close dialogue
+                        wait BW2XT_LAND05_TALUS_MIRACLE_ATTACK_40 + 1 seconds
+                    elsif myRand == 3
+                        say "BW2XT_LAND02_PLAYER_ACCEPTS_MIGRATION_10"
+                        clear dialogue
+                        close dialogue
+                        wait BW2XT_LAND02_PLAYER_ACCEPTS_MIGRATION_10 + 1 seconds
+                    elsif myRand == 4
+                        say "BW2XT_LAND02_PLAYER_ACCEPTS_MIGRATION_20"
+                        clear dialogue
+                        close dialogue
+                        wait BW2XT_LAND02_PLAYER_ACCEPTS_MIGRATION_20 + 1 seconds
+                    end if
+                end dialogue
+                GB_DialogueIsRunning = 0
+                run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_FIRERAIN,myBuilding,0)
+                FireRainTimer = create timer for number from 1200 to 2400 seconds
+            end if
+        end if
+
         if townCounter >= 15
             townCounter = 0
             geChangeTown[godHandle] = 1
         end if
 
+        if PLAYER of AztecPrison != 1 or size of PlayerTown > 75
+            tal_EmergencyAllowed = 1
+        else
+            tal_EmergencyAllowed = 0
+        end if
+
         if ge_Busy[godHandle] == 0 and ge_EmergencyMode[godHandle] == 0
-            discipleCounter++ resourcesCounter++ waterForestCounter++ townCounter++
+            discipleCounter++ resourcesCounter++ waterForestCounter++ townCounter++ myCounter = 0
         end if
 
     end while
@@ -300,7 +402,7 @@ start
                     waterThrows = 2
                 end if
                 while waterThrows > 0
-                    run script ge_ThrowMiracle(godHandle, GE_MIRACLE_TYPE_WATER, myField)
+                    run script ge_ThrowMiracle(godHandle, GE_MIRACLE_TYPE_WATER, myField, 0)
                     waterThrows -= 1
                     wait 3 seconds
                 end while
@@ -473,7 +575,7 @@ start
                 currentMana = get player ge_Player[godHandle] mana
                 while buildingUnderConstruction exists and buildingUnderConstruction on fire and geManaCostWater <= currentMana
 
-                    run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_WATER,buildingUnderConstruction)
+                    run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_WATER,buildingUnderConstruction, 0)
                     currentMana -= geManaCostWater
                 end while
             end if
@@ -600,7 +702,7 @@ start
             if damagedBuilding on fire
                 currentMana = get player ge_Player[godHandle] mana
                 while damagedBuilding exists and damagedBuilding on fire and geManaCostWater <= currentMana
-                    run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_WATER,damagedBuilding)
+                    run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_WATER,damagedBuilding, 0)
                     currentMana -= geManaCostWater
                 end while
             end if
@@ -729,7 +831,7 @@ start
 
         currentMana = get player ge_Player[godHandle] mana
         while myAltar exists and myInfluence > 0 and myTree exists and currentMana > 20000 and counter < 2
-            run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_WATER,myTree)
+            run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_WATER,myTree, 0)
             wait 3 seconds
             counter++
         end while
@@ -758,14 +860,14 @@ start
             if currentMana >= geManaCostMeteor + 20000 and PLAYER of Target != ge_Player[godHandle] and get ge_MiracleDelay[godHandle] time remaining <= 0 and ge_Altar[godHandle] == 1
                 myNumber = number from 1 to 5
                 if myNumber == 1
-                    run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_METEOR,Target)
+                    run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_METEOR,Target, 0)
                     ge_MiracleDelay[godHandle] = create timer for 7 seconds
                 elsif myNumber == 2 or myNumber == 3
-                    run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_FIRE,Target)
+                    run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_FIRE,Target, 0)
                     ge_MiracleDelay[godHandle] = create timer for 7 seconds
                 else
                     if TargetType == 1
-                        run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_STORM,Target)
+                        run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_STORM,Target, 0)
                         ge_MiracleDelay[godHandle] = create timer for 7 seconds
                     end if
                 end if
@@ -774,11 +876,11 @@ start
                 myNumber = number from 1 to 3
                 if myNumber == 1
                     if TargetType == 1
-                        run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_STORM,Target)
+                        run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_STORM,Target, 0)
                         ge_MiracleDelay[godHandle] = create timer for 7 seconds
                     end if
                 elsif myNumber == 2 or myNumber == 3
-                    run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_FIRE,Target)
+                    run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_FIRE,Target, 0)
                     ge_MiracleDelay[godHandle] = create timer for 7 seconds
                 end if
 
@@ -856,7 +958,7 @@ start
                 myBuilding = get building ABODE_NUMBER_STORAGE_PIT in ge_HomeTown[godHandle] min built 1.0
                 myLocation = marker at {myBuilding} + {number from 20 to 35,number from -20 to -35}
                 if not {myLocation} under water
-                    run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_VERDANT,myLocation)
+                    run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_VERDANT,myLocation, 0)
                 end if
 
             elsif whichSpell == GE_MIRACLE_TYPE_FIRERAIN or whichSpell == GE_MIRACLE_TYPE_THUNDERSTORM or whichSpell == GE_MIRACLE_TYPE_METEORID
@@ -879,13 +981,13 @@ start
 
                 if myBuilding exists
                     if whichSpell == GE_MIRACLE_TYPE_FIRERAIN
-                        run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_FIRERAIN,myBuilding)
+                        run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_FIRERAIN,myBuilding, 0)
 
                     elsif whichSpell == GE_MIRACLE_TYPE_THUNDERSTORM
-                        run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_THUNDERSTORM,myBuilding)
+                        run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_THUNDERSTORM,myBuilding, 0)
 
                     elsif whichSpell == GE_MIRACLE_TYPE_METEORID
-                        run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_METEORID,myBuilding)
+                        run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_METEORID,myBuilding, 0)
 
                     end if
                 end if
@@ -920,7 +1022,7 @@ start
         currentMana = get player ge_Player[godHandle] mana
         if myAltar exists and myInfluence > 0 and myTown exists and myPlatoon exists
             if currentMana >= geManaCostHeal and PLAYER of myPlatoon == ge_Player[godHandle] and HEALTH of myPlatoon < 0.75
-                run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_HEAL,myPlatoon)
+                run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_HEAL,myPlatoon, 0)
             end if
         end if
     end if
