@@ -1,0 +1,573 @@
+///////////////////////////////////////////////////////////////////////////////
+//    Riddle of the Rocks
+//    ~~~~~~~~~~~~~~~~~~~
+///////////////////////////////////////////////////////////////////////////////
+
+define script LC12_RiddleOfTheRocks
+define script LC12_RiddleOfTheRocks_StatuesLogic(whichStatue)
+define script LC12_RiddleTurnStatueBy90(whichStatue)
+define script LC12_RiddleOfTheRocks_Intro
+define script LC12_RiddleCompletion
+define script LC12_RiddleOfTheRocks_Outro
+define script LC12_RiddleOfTheRocks_Verdant
+define script Riddle_GroundAlignment(PrevAlignment,VerdantSpell)
+define script Riddle_Trees(VerdantSpell)
+define script Riddle_TreesGrow(Tree,Growth)
+define script Riddle_Animals(VerdantSpell)
+define script Riddle_AnimalsGrow(Animal)
+define script Riddle_Effects(VerdantSpell)
+
+define RiddlePos0 = 0
+define RiddlePos90 = 1
+define RiddlePos180 = 2
+define RiddlePos270 = 3
+
+global ScrollRiddle = 0
+global Statue[4]
+global StatueAngle[4]
+global StatueAngleCounter[4]
+global LC12_RiddleCompleted = 0
+
+global RiddlePos = 0
+global ScrollRiddlePos = 0
+global StatuePos[4]
+
+begin script LC12_RiddleOfTheRocks
+
+start
+
+	RiddlePos = marker at {955.07,20.97,1699.63}
+	ScrollRiddlePos = marker at {930.74,20.47,1670.15}
+	StatuePos[0] = marker at {959.48,20.93,1694.10}
+	StatuePos[1] = marker at {959.71,20.94,1704.06}
+	StatuePos[2] = marker at {951.56,20.96,1704.11}
+	StatuePos[3] = marker at {951.69,20.97,1694.41}
+
+	StatueAngle[0] = RiddlePos0
+	StatueAngle[1] = RiddlePos90
+	StatueAngle[2] = RiddlePos180
+	StatueAngle[3] = RiddlePos270
+	StatueAngleCounter[0] = 0
+	StatueAngleCounter[1] = 0
+	StatueAngleCounter[2] = 0
+	StatueAngleCounter[3] = 0
+
+	Statue[0] = create ROCK_OBJECT MOBILE_STATIC_INFO_SCRIPT_OBJECT at {StatuePos[0]}
+	Statue[1] = create ROCK_OBJECT MOBILE_STATIC_INFO_SCRIPT_OBJECT at {StatuePos[1]}
+	Statue[2] = create ROCK_OBJECT MOBILE_STATIC_INFO_SCRIPT_OBJECT at {StatuePos[2]}
+	Statue[3] = create ROCK_OBJECT MOBILE_STATIC_INFO_SCRIPT_OBJECT at {StatuePos[3]}
+	override mesh for Statue[0] with "..\features\m_7samurai_2"
+	override mesh for Statue[1] with "..\features\m_7samurai_6"
+	override mesh for Statue[2] with "..\features\m_7samurai_5"
+	override mesh for Statue[3] with "..\features\m_7samurai_3"
+	ALTITUDE of Statue[0] = 1
+	ALTITUDE of Statue[1] = 1
+	ALTITUDE of Statue[2] = 1
+	ALTITUDE of Statue[3] = 1
+	set Statue[0] position to {StatuePos[0]}
+	set Statue[1] position to {StatuePos[1]}
+	set Statue[2] position to {StatuePos[2]}
+	set Statue[3] position to {StatuePos[3]}
+	SCALE of Statue[0] = 2.33
+	SCALE of Statue[1] = 2.33
+	SCALE of Statue[2] = 2.33
+	SCALE of Statue[3] = 2.33
+    disable Statue[0] moveable
+    enable Statue[0] indestructible
+    disable Statue[0] set on fire    
+    disable Statue[0] pickup
+    disable Statue[1] moveable
+    enable Statue[1] indestructible
+    disable Statue[1] set on fire    
+    disable Statue[1] pickup
+    disable Statue[2] moveable
+    enable Statue[2] indestructible
+    disable Statue[2] set on fire    
+    disable Statue[2] pickup
+    disable Statue[3] moveable
+    enable Statue[3] indestructible
+    disable Statue[3] set on fire    
+    disable Statue[3] pickup
+
+    ScrollRiddle = create highlight SILVER name "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_32" remind "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_23" at {ScrollRiddlePos}
+
+	set player 0 objective TRIBUTE_OBJECTIVE_LAND_1 with amount 1 text "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_32" amount 1 description "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_23" start value 0 reward 50000
+
+    wait until ScrollRiddle right clicked
+    
+	run background script LC12_RiddleOfTheRocks_StatuesLogic(Statue[0])
+	run background script LC12_RiddleOfTheRocks_StatuesLogic(Statue[1])
+	run background script LC12_RiddleOfTheRocks_StatuesLogic(Statue[2])
+	run background script LC12_RiddleOfTheRocks_StatuesLogic(Statue[3])
+
+    delete ScrollRiddle
+
+    run background script LC12_RiddleOfTheRocks_Intro
+
+end script LC12_RiddleOfTheRocks
+
+
+begin script LC12_RiddleOfTheRocks_StatuesLogic(whichStatue)
+
+	StatueTooltip = 0
+
+start
+
+if whichStatue == Statue[0]
+	while LC12_RiddleCompleted != 1
+		if hand position near {whichStatue} radius 4 and StatueTooltip not exists
+			StatueTooltip = create tooltip on whichStatue with text "HELP_TEXT_MULTIPLAYER_BANTER_SET_01_TEXT_19"
+		end if
+		if hand position not near {whichStatue} radius 4 + 1 and StatueTooltip exists
+			delete StatueTooltip
+		end if
+		if bindable action BINDABLE_ACTION_TYPE_ACTION performed and hand position near {whichStatue} radius 4
+			run script LC12_RiddleTurnStatueBy90(whichStatue)
+		end if
+	end while
+elsif whichStatue == Statue[1]
+	while LC12_RiddleCompleted != 1
+		if hand position near {whichStatue} radius 4 and StatueTooltip not exists
+			StatueTooltip = create tooltip on whichStatue with text "HELP_TEXT_MULTIPLAYER_BANTER_SET_01_TEXT_18"
+		end if
+		if hand position not near {whichStatue} radius 4 + 1 and StatueTooltip exists
+			delete StatueTooltip
+		end if
+		if bindable action BINDABLE_ACTION_TYPE_ACTION performed and hand position near {whichStatue} radius 4
+			run script LC12_RiddleTurnStatueBy90(whichStatue)
+		end if
+	end while
+elsif whichStatue == Statue[2]
+	while LC12_RiddleCompleted != 1
+		if hand position near {whichStatue} radius 4 and StatueTooltip not exists
+			StatueTooltip = create tooltip on whichStatue with text "HELP_TEXT_MULTIPLAYER_BANTER_SET_01_TEXT_10"
+		end if
+		if hand position not near {whichStatue} radius 4 + 1 and StatueTooltip exists
+			delete StatueTooltip
+		end if
+		if bindable action BINDABLE_ACTION_TYPE_ACTION performed and hand position near {whichStatue} radius 4
+			run script LC12_RiddleTurnStatueBy90(whichStatue)
+		end if
+	end while
+elsif whichStatue == Statue[3]
+	while LC12_RiddleCompleted != 1
+		if hand position near {whichStatue} radius 4 and StatueTooltip not exists
+			StatueTooltip = create tooltip on whichStatue with text "HELP_TEXT_MULTIPLAYER_BANTER_SET_01_TEXT_11"
+		end if
+		if hand position not near {whichStatue} radius 4 + 1 and StatueTooltip exists
+			delete StatueTooltip
+		end if
+		if bindable action BINDABLE_ACTION_TYPE_ACTION performed and hand position near {whichStatue} radius 4
+			run script LC12_RiddleTurnStatueBy90(whichStatue)
+		end if
+	end while
+end if
+
+delete StatueTooltip
+
+end script LC12_RiddleOfTheRocks_StatuesLogic
+
+
+begin script LC12_RiddleTurnStatueBy90(whichStatue)
+
+	Counter = 0
+	XPOSBEFORE = ANGLE of whichStatue
+
+start
+
+while Counter != 9
+	ANGLE of whichStatue += 10
+	wait 0.05 seconds
+	Counter++
+end while
+
+if whichStatue == Statue[0]
+	if StatueAngleCounter[0] == 0
+		StatueAngle[0] = RiddlePos90
+		StatueAngleCounter[0] = 1
+	elsif StatueAngleCounter[0] == 1
+		StatueAngle[0] = RiddlePos180
+		StatueAngleCounter[0] = 2
+	elsif StatueAngleCounter[0] == 2
+		StatueAngle[0] = RiddlePos270
+		StatueAngleCounter[0] = 3
+	else
+		StatueAngle[0] = RiddlePos0
+		StatueAngleCounter[0] = 0
+	end if
+end if
+if whichStatue == Statue[1]
+	if StatueAngleCounter[1] == 0
+		StatueAngle[1] = RiddlePos90
+		StatueAngleCounter[1] = 1
+	elsif StatueAngleCounter[1] == 1
+		StatueAngle[1] = RiddlePos180
+		StatueAngleCounter[1] = 2
+	elsif StatueAngleCounter[1] == 2
+		StatueAngle[1] = RiddlePos270
+		StatueAngleCounter[1] = 3
+	else
+		StatueAngle[1] = RiddlePos0
+		StatueAngleCounter[1] = 0
+	end if
+end if
+if whichStatue == Statue[2]
+	if StatueAngleCounter[2] == 0
+		StatueAngle[2] = RiddlePos90
+		StatueAngleCounter[2] = 1
+	elsif StatueAngleCounter[2] == 1
+		StatueAngle[2] = RiddlePos180
+		StatueAngleCounter[2] = 2
+	elsif StatueAngleCounter[2] == 2
+		StatueAngle[2] = RiddlePos270
+		StatueAngleCounter[2] = 3
+	else
+		StatueAngle[2] = RiddlePos0
+		StatueAngleCounter[2] = 0
+	end if
+end if
+if whichStatue == Statue[3]
+	if StatueAngleCounter[3] == 0
+		StatueAngle[3] = RiddlePos90
+		StatueAngleCounter[3] = 1
+	elsif StatueAngleCounter[3] == 1
+		StatueAngle[3] = RiddlePos180
+		StatueAngleCounter[3] = 2
+	elsif StatueAngleCounter[3] == 2
+		StatueAngle[3] = RiddlePos270
+		StatueAngleCounter[3] = 3
+	else
+		StatueAngle[3] = RiddlePos0
+		StatueAngleCounter[3] = 0
+	end if
+end if
+
+end script LC12_RiddleTurnStatueBy90
+
+
+begin script LC12_RiddleOfTheRocks_Intro
+
+start
+
+    begin cinema
+		set fade red 0 green 0 blue 0 time 3
+		wait 3 seconds
+        set camera position to {RiddlePos} + {-40,20,-40}
+        set camera focus to {RiddlePos} + {0.00,5,0.00}
+		set fade in time 3
+		say "BW2XT_CHALLENGE_RIDDLEOFTHEROCK_10"
+		clear dialogue
+		close dialogue
+        wait 5 seconds
+		wait BW2XT_CHALLENGE_RIDDLEOFTHEROCK_10 - 2.25 seconds
+        move camera position to {RiddlePos} + {-13,7.5,-13} time 17
+        move camera focus to {RiddlePos} + {0.00,3,0.00} time 17
+		say "BW2XT_CHALLENGE_RIDDLEOFTHEROCK_20"
+		clear dialogue
+		close dialogue
+		wait BW2XT_CHALLENGE_RIDDLEOFTHEROCK_20 + 0.4 seconds
+		say "BW2XT_CHALLENGE_RIDDLEOFTHEROCK_30"
+		clear dialogue
+		close dialogue
+		wait BW2XT_CHALLENGE_RIDDLEOFTHEROCK_30 + 1.0 seconds
+		say "BW2XT_CHALLENGE_RIDDLEOFTHEROCK_40"
+		clear dialogue
+		close dialogue
+		wait BW2XT_CHALLENGE_RIDDLEOFTHEROCK_40 + 1.0 seconds
+		say "BW2XT_CHALLENGE_RIDDLEOFTHEROCK_50"
+		clear dialogue
+		close dialogue
+		wait BW2XT_CHALLENGE_RIDDLEOFTHEROCK_50 + 1.0 seconds
+		say "BW2XT_CHALLENGE_RIDDLEOFTHEROCK_60"
+		clear dialogue
+		close dialogue
+		wait BW2XT_CHALLENGE_RIDDLEOFTHEROCK_60 + 1.0 seconds
+		say "BW2XT_CHALLENGE_RIDDLEOFTHEROCK_70"
+		clear dialogue
+		close dialogue
+		wait BW2XT_CHALLENGE_RIDDLEOFTHEROCK_70 + 1.0 seconds
+		say "BW2XT_CHALLENGE_RIDDLEOFTHEROCK_80"
+		clear dialogue
+		close dialogue
+		wait BW2XT_CHALLENGE_RIDDLEOFTHEROCK_80 + 1.0 seconds
+    end cinema
+
+    ScrollRiddle = create highlight SILVER name "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_32" remind "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_23" at {ScrollRiddlePos}
+
+	run background script LC12_RiddleCompletion
+
+end script LC12_RiddleOfTheRocks_Intro
+
+
+begin script LC12_RiddleCompletion
+
+start
+
+begin loop
+	if StatueAngleCounter[0] == 2 and StatueAngleCounter[1] == 3 and StatueAngleCounter[2] == 0 and StatueAngleCounter[3] == 1
+		LC12_RiddleCompleted = 1
+	end if
+
+	if ScrollRiddle right clicked
+		delete ScrollRiddle
+		begin dialogue
+			eject good spirit
+			eject evil spirit
+			say "BW2XT_CHALLENGE_RIDDLEOFTHEROCK_DOINGBADLY_1"
+			clear dialogue
+			close dialogue
+			wait BW2XT_CHALLENGE_RIDDLEOFTHEROCK_DOINGBADLY_1 + 1.0 seconds
+			say "BW2XT_CHALLENGE_RIDDLEOFTHEROCK_DOINGBADLY_2"
+			clear dialogue
+			close dialogue
+			wait BW2XT_CHALLENGE_RIDDLEOFTHEROCK_DOINGBADLY_2 + 1.0 seconds
+			send good spirit home
+			send evil spirit home
+		end dialogue
+		ScrollRiddle = create highlight SILVER name "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_32" remind "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_23" at {ScrollRiddlePos}
+	end if
+
+	until LC12_RiddleCompleted == 1
+end loop
+
+run background script LC12_RiddleOfTheRocks_Outro
+
+end script LC12_RiddleCompletion
+
+
+begin script LC12_RiddleOfTheRocks_Outro
+
+	visEffect0 = 0
+
+start
+
+    begin cinema
+		set fade red 0 green 0 blue 0 time 3
+		wait 3 seconds
+		set camera position to {RiddlePos} + {-75,60,-75}
+		set camera focus to {RiddlePos}
+		start music "cut_scene_sinister_02" loop 1
+		set fade in time 3
+		wait 2 seconds
+		run background script LC12_RiddleOfTheRocks_Verdant
+		wait 9 seconds
+		eject good spirit
+		eject evil spirit
+		say "BW2XT_CHALLENGE_RIDDLEOFTHEROCK_WON_10"
+		clear dialogue
+		close dialogue
+		wait BW2XT_CHALLENGE_RIDDLEOFTHEROCK_WON_10 + 1.0 seconds
+		say "BW2XT_CHALLENGE_RIDDLEOFTHEROCK_WON_20"
+		clear dialogue
+		close dialogue
+		wait BW2XT_CHALLENGE_RIDDLEOFTHEROCK_WON_20 + 1.0 seconds
+		send good spirit home
+		send evil spirit home
+		stop music with fadetime 10
+    end cinema
+
+	wait 1.5 seconds
+	delete ScrollRiddle
+	set player 0 objective TRIBUTE_OBJECTIVE_LAND_1 status to TRIBUTE_OBJECTIVE_STATE_COMPLETE
+
+end script LC12_RiddleOfTheRocks_Outro
+
+
+begin script LC12_RiddleOfTheRocks_Verdant
+
+	RiddleBeam = 0
+	RiddleTargetVisual = 0
+	RiddleTargetVisualPos = 0
+	RiddleVisualBeautyLines = 0
+	RiddleBeamPulse = 0
+	RiddleBeamPulse2 = 0
+	RiddleBeamPulse3 = 0
+	SpellPosition = 0
+
+start
+
+	SpellPosition = marker at {RiddlePos}
+	run background script Riddle_GroundAlignment(0,marker at {SpellPosition})
+	run background script Riddle_Animals(marker at {SpellPosition})
+	run background script Riddle_Effects(marker at {SpellPosition})
+	run background script Riddle_Trees(marker at {SpellPosition})
+
+	RiddleBeam = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM at {SpellPosition} time -1
+	RiddleTargetVisual = create visual effect VISUAL_EFFECT_WONDER_VOLCANO_CHARGE at {SpellPosition} time -1
+	RiddleVisualBeautyLines = create visual effect VISUAL_EFFECT_WONDER_HURRICANE_TIP_WIND at {SpellPosition} time -1
+	set RiddleVisualBeautyLines colour red 182 green 224 blue 35
+	play string sound "SCRIPT1_VEPIC_BEAMOFLIGHTSTART1"
+	set RiddleBeam colour red 182 green 224 blue 35
+	set RiddleTargetVisual colour red 182 green 224 blue 35
+	wait 2 seconds
+	RiddleBeamPulse = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {SpellPosition}+{0,200,0} time 1
+	play string sound "SCRIPT1_VEPIC_DECAYCHARGESPELL"
+	set RiddleBeamPulse colour red 182 green 224 blue 35
+	wait 2 seconds
+	stop visual effect RiddleBeamPulse
+	RiddleBeamPulse2 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {SpellPosition}+{0,200,0} time 1
+	play string sound "SCRIPT1_VEPIC_DECAYCHARGESPELL"
+	set RiddleBeamPulse2 colour red 182 green 224 blue 35
+	wait 2 seconds
+	RiddleVisualBeautyLines = create visual effect VISUAL_EFFECT_WONDER_HURRICANE_TIP_WIND at {SpellPosition} time -1
+	set RiddleVisualBeautyLines colour red 182 green 224 blue 35
+	RiddleBeamPulse3 = create visual effect VISUAL_EFFECT_EPIC_VOLCANO_BEAM_PULSE_DOWN at {SpellPosition}+{0,200,0} time 1
+	play string sound "SCRIPT1_VEPIC_DECAYCHARGESPELL"
+	set RiddleBeamPulse3 colour red 182 green 224 blue 35
+
+	wait 45 seconds
+
+	wait until not {RiddlePos} viewed
+
+	delete RiddleBeam
+	delete RiddleTargetVisual
+	delete RiddleVisualBeautyLines
+	delete RiddleBeamPulse
+	delete RiddleBeamPulse2
+	delete RiddleBeamPulse3
+
+end script LC12_RiddleOfTheRocks_Verdant
+
+begin script Riddle_GroundAlignment(PrevAlignment,VerdantSpell)
+
+start
+
+    set ground alignment to PrevAlignment + 0.2 at {VerdantSpell} radius 50 amount 1
+    wait 6 seconds
+    set ground alignment to PrevAlignment + 0.4 at {VerdantSpell} radius 50 amount 1
+    wait 6 seconds
+    set ground alignment to PrevAlignment + 0.6 at {VerdantSpell} radius 50 amount 1
+    wait 6 seconds
+    set ground alignment to PrevAlignment + 0.8 at {VerdantSpell} radius 50 amount 1
+    wait 6 seconds
+    set ground alignment to PrevAlignment + 1.0 at {VerdantSpell} radius 50 amount 1
+
+end script Riddle_GroundAlignment
+
+
+begin script Riddle_Trees(VerdantSpell)
+
+    Counter = 0
+    RandomNumber = 0
+    Tree[64]
+
+start
+
+    while Counter <= 4
+        RandomNumber = number from 1 to 3
+        if RandomNumber == 1
+            Tree[Counter] = create with angle 0 and scale 0.05 TREE TREE_INFO_SPRUCE at {VerdantSpell} + {number from -30 to 30, number from -30 to 30}
+        elsif RandomNumber == 2
+            Tree[Counter] = create with angle 0 and scale 0.05 TREE TREE_INFO_CEDAR at {VerdantSpell} + {number from -30 to 30, number from -30 to 30}
+        elsif RandomNumber == 3
+            Tree[Counter] = create with angle 0 and scale 0.05 TREE TREE_INFO_OAK at {VerdantSpell} + {number from -30 to 30, number from -30 to 30}
+        end if
+        run background script Riddle_TreesGrow(Tree[Counter],0.75)
+        wait number from 1 to 2 seconds
+        Counter++
+    end while
+
+    Counter = 0
+    while Counter <= 7
+        RandomNumber = number from 1 to 3
+        if RandomNumber == 1
+            Tree[Counter] = create with angle 0 and scale 0.05 TREE TREE_INFO_SPRUCE at {VerdantSpell} + {number from -30 to 30, number from -30 to 30}
+        elsif RandomNumber == 2
+            Tree[Counter] = create with angle 0 and scale 0.05 TREE TREE_INFO_CEDAR at {VerdantSpell} + {number from -30 to 30, number from -30 to 30}
+        elsif RandomNumber == 3
+            Tree[Counter] = create with angle 0 and scale 0.05 TREE TREE_INFO_OAK at {VerdantSpell} + {number from -30 to 30, number from -30 to 30}
+        end if
+        run background script Riddle_TreesGrow(Tree[Counter],0.2)
+        wait number from 1 to 2 seconds
+        Counter++
+    end while
+
+end script Riddle_Trees
+
+
+begin script Riddle_TreesGrow(Tree,Growth)
+
+start
+
+    while SCALE of Tree < Growth and Tree exists
+        SCALE of Tree += 0.1
+        wait 1.5 seconds
+    end while
+
+    while SCALE of Tree < 0.95 and Tree exists
+        SCALE of Tree += 0.05
+        wait 5 seconds
+    end while
+
+end script Riddle_TreesGrow
+
+
+begin script Riddle_Animals(VerdantSpell)
+
+    Counter = 0
+    RandomNumber = 0
+    Animal[32]
+
+start
+
+    while Counter <= 7
+        RandomNumber = number from 1 to 3
+        if RandomNumber == 1
+            Animal[Counter] = create with angle 0 and scale 0.05 ANIMAL SHEEP at {VerdantSpell} + {number from -30 to 30, number from -30 to 30}
+        elsif RandomNumber == 2
+            Animal[Counter] = create with angle 0 and scale 0.05 ANIMAL PIG at {VerdantSpell} + {number from -30 to 30, number from -30 to 30}
+        elsif RandomNumber == 3
+            Animal[Counter] = create with angle 0 and scale 0.05 ANIMAL COW at {VerdantSpell} + {number from -30 to 30, number from -30 to 30}
+        end if
+        run background script Riddle_AnimalsGrow(Animal[Counter])
+        wait number from 2 to 3 seconds
+        Counter++
+    end while
+
+end script Riddle_Animals
+
+
+begin script Riddle_AnimalsGrow(Animal)
+
+start
+
+    while SCALE of Animal < 1.0 and Animal exists
+        SCALE of Animal += 0.1
+        wait 1.5 seconds
+    end while
+
+end script Riddle_AnimalsGrow
+
+//VISUAL_EFFECT_CREATURE_DUST
+begin script Riddle_Effects(VerdantSpell)
+
+    Counter = 0
+    Effect1[32]
+    Effect2[32]
+
+start
+
+    while Counter < 9
+        Effect1[Counter] = create visual effect VISUAL_EFFECT_SWARM_BUTTERFLIES at {VerdantSpell} + {number from -30 to 30,1,number from -30 to 30} time -1 target {VerdantSpell} + {0,50,0}
+        SCALE of Effect1[Counter] = 1.5
+        Effect2[Counter] = create visual effect VISUAL_EFFECT_SWARM_FIREFLIES at {VerdantSpell} + {number from -30 to 30,1,number from -30 to 30} time -1 target {VerdantSpell} + {0,50,0}
+        SCALE of Effect2[Counter] = 2.0
+        wait number from 1 to 2 seconds
+        Counter++
+    end while
+
+    wait 45 seconds
+
+    Counter = 0
+    while Counter < 9
+        delete Effect1[Counter]
+        delete Effect2[Counter]
+        wait number from 1 to 2 seconds
+        Counter++
+    end while
+
+end script Riddle_Effects
+
+//-----------------------------------------------------------------------------
+// Land 12 Riddle of the Rocks
+//-----------------------------------------------------------------------------
