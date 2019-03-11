@@ -1272,13 +1272,18 @@ start
                         NumPat1 = number from 1 to 3
                     end if
                     if NumPat1 == 1 or NumPat1 == 2
-                        GateHouse = get random abode of type GATEHOUSE in town PlayerTown
+                        GateHouse = get HOUSE GATEHOUSE at {SiegeWeapon} radius 250
                         if GateHouse exists and PLAYER of GateHouse == 0
                             clear siege weapon SiegeWeapon action queue
                             Target = marker at get target from {SiegeWeapon} to {GateHouse} distance 10 angle 180
                             add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using GateHouse to siege weapon SiegeWeapon action queue
                         elsif GateHouse not exists
                             GateHouse = get HOUSE GATEHOUSE at {SiegeWeapon} radius 750
+                            clear siege weapon SiegeWeapon action queue
+                            Target = marker at get target from {SiegeWeapon} to {GateHouse} distance 10 angle 180
+                            add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using GateHouse to siege weapon SiegeWeapon action queue
+                        else
+                            GateHouse = get random abode of type GATEHOUSE in town PlayerTown
                             if GateHouse exists and PLAYER of GateHouse == 0
                                 clear siege weapon SiegeWeapon action queue
                                 Target = marker at get target from {SiegeWeapon} to {GateHouse} distance 10 angle 180
@@ -1387,7 +1392,7 @@ start
                             clear siege weapon SiegeWeapon action queue
                             Target = marker at get target from {SiegeWeapon} to {GateHouse} distance 10 angle 180
                             add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using GateHouse to siege weapon SiegeWeapon action queue
-                        elsif GateHouse not exists
+                        else
                             GateHouse = get HOUSE GATEHOUSE at {SiegeWeapon} radius 750
                             if GateHouse exists and PLAYER of GateHouse == 0
                                 clear siege weapon SiegeWeapon action queue
