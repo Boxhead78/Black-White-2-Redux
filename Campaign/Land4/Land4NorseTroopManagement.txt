@@ -494,23 +494,27 @@ begin loop
     Armory = get building ABODE_NUMBER_TOWN_CENTRE in PlayerSettlement min built 1.0
     if Armory exists and PlayerSettlement != PlayerTown and PLAYER of PlayerSettlement == 0 and Task != Conqueror
         if Platoon can navigate to object Armory
-            clear Platoon action queue
-            set Platoon attack PlayerSettlement with severity 0.3 for takeover
-            a = 1
-            begin loop
-                PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 150
-                PlayerCreature = get distance from {Platoon} to {oCreature}
-                if PlayerPlatoon1 exists
-                    a = 0
-                elsif PlayerCreature <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
-                    a = 0
-                elsif not Platoon can navigate to object Armory
-                    a = 0
-                elsif Platoon not exists
-                    a = 0
-                end if
-                until a == 0 or Platoon not exists or PLAYER of PlayerSettlement == 1
-            end loop
+            if TownCapturePlatoons[0] < 2
+                TownCapturePlatoons[0]++
+                clear Platoon action queue
+                set Platoon attack PlayerSettlement with severity 0.3 for takeover
+                a = 1
+                begin loop
+                    PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 150
+                    PlayerCreature = get distance from {Platoon} to {oCreature}
+                    if PlayerPlatoon1 exists
+                        a = 0
+                    elsif PlayerCreature <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+                        a = 0
+                    elsif not Platoon can navigate to object Armory
+                        a = 0
+                    elsif Platoon not exists
+                        a = 0
+                    end if
+                    until a == 0 or Platoon not exists or PLAYER of PlayerSettlement == 1
+                end loop
+                TownCapturePlatoons[0]--
+            end if
             clear Platoon action queue
         end if
     end if
@@ -578,7 +582,12 @@ begin loop
                     end loop
                 else //Capture Town
                     AttackMode = 0
-                    set Platoon attack PlayerTown with severity 0.3 for takeover
+                    if TownCapturePlatoons[0] < 2
+                        TownCapturePlatoons[0]++
+                        set Platoon attack PlayerTown with severity 0.3 for takeover
+                    else
+                        a = 0
+                    end if
                 end if
                 RecalculateTimer = create timer for 40 seconds
                 begin loop
@@ -608,6 +617,7 @@ begin loop
                     //end if
                     until a == 0 or Platoon not exists
                 end loop
+                TownCapturePlatoons[0]--
                 clear Platoon action queue
             elsif Platoon can navigate to {AttackingPoint}
                 clear Platoon action queue
@@ -696,7 +706,12 @@ begin loop
                     end loop
                 else //Capture Town
                     AttackMode = 0
-                    set Platoon attack PlayerTown with severity 0.3 for takeover
+                    if TownCapturePlatoons[0] < 2
+                        TownCapturePlatoons[0]++
+                        set Platoon attack PlayerTown with severity 0.3 for takeover
+                    else
+                        a = 0
+                    end if
                 end if
                 RecalculateTimer = create timer for 40 seconds
                 begin loop
@@ -726,6 +741,7 @@ begin loop
                     //end if
                     until a == 0 or Platoon not exists
                 end loop
+                TownCapturePlatoons[0]--
                 clear Platoon action queue
             elsif Platoon can navigate to {AttackingPoint}
                 clear Platoon action queue
@@ -755,7 +771,12 @@ begin loop
                 Number = number from 1 to 4
                 if Number == 2 and HEALTH of MyCreature > 0 //Hunt down platoons or destroy buildings
                     AttackMode = 1
-                    set Platoon attack NearestSettlement with severity 0.2 for takeover
+                    if TownCapturePlatoons[1] < 2
+                        TownCapturePlatoons[1]++
+                        set Platoon attack NearestSettlement with severity 0.2 for takeover
+                    else
+                        a = 0
+                    end if
                 elsif Number == 3 or Number == 4 //Destroy value buildings
                     AttackMode = 2
                     Building = 0
@@ -809,7 +830,12 @@ begin loop
                     end loop
                 else //Capture Town
                     AttackMode = 0
-                    set Platoon attack NearestSettlement with severity 0.3 for takeover
+                    if TownCapturePlatoons[1] < 2
+                        TownCapturePlatoons[1]++
+                        set Platoon attack NearestSettlement with severity 0.3 for takeover
+                    else
+                        a = 0
+                    end if
                 end if
                 RecalculateTimer = create timer for 40 seconds
                 begin loop
@@ -839,6 +865,7 @@ begin loop
                     //end if
                     until a == 0 or Platoon not exists
                 end loop
+                TownCapturePlatoons[1]--
                 clear Platoon action queue
             else
                 clear Platoon action queue

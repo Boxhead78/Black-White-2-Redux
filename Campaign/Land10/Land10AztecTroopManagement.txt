@@ -470,23 +470,27 @@ begin loop
         Armory = get building ABODE_NUMBER_TOWN_CENTRE in PlayerSettlement min built 1.0
         if Armory exists and PlayerSettlement != PlayerTown and PLAYER of PlayerSettlement == 0
             if LC10_Platoon[7] can navigate to object Armory
-                clear LC10_Platoon[7] action queue
-                set LC10_Platoon[7] attack PlayerSettlement with severity 0.3 for takeover
-                a = 1
-                begin loop
-                    PlayerPlatoon1 = get platoon of player 0 nearest {LC10_Platoon[7]} radius 150
-                    PlayerCreature = get distance from {LC10_Platoon[7]} to {oCreature}
-                    if PlayerPlatoon1 exists
-                        a = 0
-                    elsif PlayerCreature <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
-                        a = 0
-                    elsif not LC10_Platoon[7] can navigate to object Armory
-                        a = 0
-                    elsif LC10_Platoon[7] not exists
-                        a = 0
-                    end if
-                    until a == 0 or LC10_Platoon[7] not exists or PLAYER of PlayerSettlement == 1
-                end loop
+                if TownCapturePlatoons[2] < 2
+                    TownCapturePlatoons[2]++
+                    clear LC10_Platoon[7] action queue
+                    set LC10_Platoon[7] attack PlayerSettlement with severity 0.3 for takeover
+                    a = 1
+                    begin loop
+                        PlayerPlatoon1 = get platoon of player 0 nearest {LC10_Platoon[7]} radius 150
+                        PlayerCreature = get distance from {LC10_Platoon[7]} to {oCreature}
+                        if PlayerPlatoon1 exists
+                            a = 0
+                        elsif PlayerCreature <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+                            a = 0
+                        elsif not LC10_Platoon[7] can navigate to object Armory
+                            a = 0
+                        elsif LC10_Platoon[7] not exists
+                            a = 0
+                        end if
+                        until a == 0 or LC10_Platoon[7] not exists or PLAYER of PlayerSettlement == 1
+                    end loop
+                    TownCapturePlatoons[2]--
+                end if
                 clear LC10_Platoon[7] action queue
             end if
         end if
@@ -553,7 +557,12 @@ begin loop
                     end loop
                 else //Capture Town
                     AttackMode = 0
-                    set LC10_Platoon[7] attack PlayerTown with severity 0.3 for takeover
+                    if TownCapturePlatoons[0] < 2
+                        TownCapturePlatoons[0]++
+                        set LC10_Platoon[7] attack PlayerTown with severity 0.3 for takeover
+                    else
+                        a = 0
+                    end if
                 end if
                 RecalculateTimer = create timer for 40 seconds
                 begin loop
@@ -583,6 +592,7 @@ begin loop
                     //end if
                     until a == 0 or LC10_Platoon[7] not exists
                 end loop
+                TownCapturePlatoons[0]--
                 clear LC10_Platoon[7] action queue
             elsif LC10_Platoon[7] can navigate to {AttackPos[0]} + {-20,0,-20}
                 clear LC10_Platoon[7] action queue
@@ -695,23 +705,27 @@ begin loop
         Armory = get building ABODE_NUMBER_TOWN_CENTRE in PlayerSettlement min built 1.0
         if Armory exists and PlayerSettlement != PlayerTown and PLAYER of PlayerSettlement == 0
             if LC10_Platoon[8] can navigate to object Armory
-                clear LC10_Platoon[8] action queue
-                set LC10_Platoon[8] attack PlayerSettlement with severity 0.3 for takeover
-                a = 1
-                begin loop
-                    PlayerPlatoon1 = get platoon of player 0 nearest {LC10_Platoon[8]} radius 150
-                    PlayerCreature = get distance from {LC10_Platoon[8]} to {oCreature}
-                    if PlayerPlatoon1 exists
-                        a = 0
-                    elsif PlayerCreature <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
-                        a = 0
-                    elsif not LC10_Platoon[8] can navigate to object Armory
-                        a = 0
-                    elsif LC10_Platoon[8] not exists
-                        a = 0
-                    end if
-                    until a == 0 or LC10_Platoon[8] not exists or PLAYER of PlayerSettlement == 1
-                end loop
+                if TownCapturePlatoons[2] < 2
+                    TownCapturePlatoons[2]++
+                    clear LC10_Platoon[8] action queue
+                    set LC10_Platoon[8] attack PlayerSettlement with severity 0.3 for takeover
+                    a = 1
+                    begin loop
+                        PlayerPlatoon1 = get platoon of player 0 nearest {LC10_Platoon[8]} radius 150
+                        PlayerCreature = get distance from {LC10_Platoon[8]} to {oCreature}
+                        if PlayerPlatoon1 exists
+                            a = 0
+                        elsif PlayerCreature <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+                            a = 0
+                        elsif not LC10_Platoon[8] can navigate to object Armory
+                            a = 0
+                        elsif LC10_Platoon[8] not exists
+                            a = 0
+                        end if
+                        until a == 0 or LC10_Platoon[8] not exists or PLAYER of PlayerSettlement == 1
+                    end loop
+                    TownCapturePlatoons[2]--
+                end if
                 clear LC10_Platoon[8] action queue
             end if
         end if
@@ -778,7 +792,12 @@ begin loop
                     end loop
                 else //Capture Town
                     AttackMode = 0
-                    set LC10_Platoon[8] attack PlayerTown with severity 0.3 for takeover
+                    if TownCapturePlatoons[0] < 2
+                        TownCapturePlatoons[0]++
+                        set LC10_Platoon[8] attack PlayerTown with severity 0.3 for takeover
+                    else
+                        a = 0
+                    end if
                 end if
                 RecalculateTimer = create timer for 40 seconds
                 begin loop
@@ -808,6 +827,7 @@ begin loop
                     //end if
                     until a == 0 or LC10_Platoon[8] not exists
                 end loop
+                TownCapturePlatoons[0]--
                 clear LC10_Platoon[8] action queue
             elsif LC10_Platoon[8] can navigate to {AttackPos[0]} + {20,0,20}
                 clear LC10_Platoon[8] action queue
@@ -920,23 +940,27 @@ begin loop
         Armory = get building ABODE_NUMBER_TOWN_CENTRE in PlayerSettlement min built 1.0
         if Armory exists and PlayerSettlement != PlayerTown and PLAYER of PlayerSettlement == 0
             if LC10_Platoon[9] can navigate to object Armory
-                clear LC10_Platoon[9] action queue
-                set LC10_Platoon[9] attack PlayerSettlement with severity 0.3 for takeover
-                a = 1
-                begin loop
-                    PlayerPlatoon1 = get platoon of player 0 nearest {LC10_Platoon[9]} radius 150
-                    PlayerCreature = get distance from {LC10_Platoon[9]} to {oCreature}
-                    if PlayerPlatoon1 exists
-                        a = 0
-                    elsif PlayerCreature <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
-                        a = 0
-                    elsif not LC10_Platoon[9] can navigate to object Armory
-                        a = 0
-                    elsif LC10_Platoon[9] not exists
-                        a = 0
-                    end if
-                    until a == 0 or LC10_Platoon[9] not exists or PLAYER of PlayerSettlement == 1
-                end loop
+                if TownCapturePlatoons[2] < 2
+                    TownCapturePlatoons[2]++
+                    clear LC10_Platoon[9] action queue
+                    set LC10_Platoon[9] attack PlayerSettlement with severity 0.3 for takeover
+                    a = 1
+                    begin loop
+                        PlayerPlatoon1 = get platoon of player 0 nearest {LC10_Platoon[9]} radius 150
+                        PlayerCreature = get distance from {LC10_Platoon[9]} to {oCreature}
+                        if PlayerPlatoon1 exists
+                            a = 0
+                        elsif PlayerCreature <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+                            a = 0
+                        elsif not LC10_Platoon[9] can navigate to object Armory
+                            a = 0
+                        elsif LC10_Platoon[9] not exists
+                            a = 0
+                        end if
+                        until a == 0 or LC10_Platoon[9] not exists or PLAYER of PlayerSettlement == 1
+                    end loop
+                    TownCapturePlatoons[2]--
+                end if
                 clear LC10_Platoon[9] action queue
             end if
         end if
@@ -1003,7 +1027,12 @@ begin loop
                     end loop
                 else //Capture Town
                     AttackMode = 0
-                    set LC10_Platoon[9] attack PlayerTown with severity 0.3 for takeover
+                    if TownCapturePlatoons[0] < 2
+                        TownCapturePlatoons[0]++
+                        set LC10_Platoon[9] attack PlayerTown with severity 0.3 for takeover
+                    else
+                        a = 0
+                    end if
                 end if
                 RecalculateTimer = create timer for 40 seconds
                 begin loop
@@ -1033,6 +1062,7 @@ begin loop
                     //end if
                     until a == 0 or LC10_Platoon[9] not exists
                 end loop
+                TownCapturePlatoons[0]--
                 clear LC10_Platoon[9] action queue
             elsif LC10_Platoon[9] can navigate to {AttackPos[0]} + {40,0,40}
                 clear LC10_Platoon[9] action queue
@@ -1145,23 +1175,27 @@ begin loop
         Armory = get building ABODE_NUMBER_TOWN_CENTRE in PlayerSettlement min built 1.0
         if Armory exists and PlayerSettlement != PlayerTown and PLAYER of PlayerSettlement == 0
             if LC10_Platoon[10] can navigate to object Armory
-                clear LC10_Platoon[10] action queue
-                set LC10_Platoon[10] attack PlayerSettlement with severity 0.3 for takeover
-                a = 1
-                begin loop
-                    PlayerPlatoon1 = get platoon of player 0 nearest {LC10_Platoon[10]} radius 150
-                    PlayerCreature = get distance from {LC10_Platoon[10]} to {oCreature}
-                    if PlayerPlatoon1 exists
-                        a = 0
-                    elsif PlayerCreature <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
-                        a = 0
-                    elsif not LC10_Platoon[10] can navigate to object Armory
-                        a = 0
-                    elsif LC10_Platoon[10] not exists
-                        a = 0
-                    end if
-                    until a == 0 or LC10_Platoon[10] not exists or PLAYER of PlayerSettlement == 1
-                end loop
+                if TownCapturePlatoons[2] < 2
+                    TownCapturePlatoons[2]++
+                    clear LC10_Platoon[10] action queue
+                    set LC10_Platoon[10] attack PlayerSettlement with severity 0.3 for takeover
+                    a = 1
+                    begin loop
+                        PlayerPlatoon1 = get platoon of player 0 nearest {LC10_Platoon[10]} radius 150
+                        PlayerCreature = get distance from {LC10_Platoon[10]} to {oCreature}
+                        if PlayerPlatoon1 exists
+                            a = 0
+                        elsif PlayerCreature <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+                            a = 0
+                        elsif not LC10_Platoon[10] can navigate to object Armory
+                            a = 0
+                        elsif LC10_Platoon[10] not exists
+                            a = 0
+                        end if
+                        until a == 0 or LC10_Platoon[10] not exists or PLAYER of PlayerSettlement == 1
+                    end loop
+                    TownCapturePlatoons[2]--
+                end if
                 clear LC10_Platoon[10] action queue
             end if
         end if
@@ -1228,7 +1262,12 @@ begin loop
                     end loop
                 else //Capture Town
                     AttackMode = 0
-                    set LC10_Platoon[10] attack PlayerTown with severity 0.3 for takeover
+                    if TownCapturePlatoons[0] < 2
+                        TownCapturePlatoons[0]++
+                        set LC10_Platoon[10] attack PlayerTown with severity 0.3 for takeover
+                    else
+                        a = 0
+                    end if
                 end if
                 RecalculateTimer = create timer for 40 seconds
                 begin loop
@@ -1258,6 +1297,7 @@ begin loop
                     //end if
                     until a == 0 or LC10_Platoon[10] not exists
                 end loop
+                TownCapturePlatoons[0]--
                 clear LC10_Platoon[10] action queue
             elsif LC10_Platoon[10] can navigate to {AttackPos[0]}
                 clear LC10_Platoon[10] action queue
@@ -2216,23 +2256,27 @@ begin loop
         Armory = get building ABODE_NUMBER_TOWN_CENTRE in PlayerSettlement min built 1.0
         if Armory exists and PlayerSettlement != PlayerTown and PLAYER of PlayerSettlement == 0
             if LC10_Platoon[11] can navigate to object Armory
-                clear LC10_Platoon[11] action queue
-                set LC10_Platoon[11] attack PlayerSettlement with severity 0.3 for takeover
-                a = 1
-                begin loop
-                    PlayerPlatoon1 = get platoon of player 0 nearest {LC10_Platoon[11]} radius 150
-                    PlayerCreature = get distance from {LC10_Platoon[11]} to {oCreature}
-                    if PlayerPlatoon1 exists
-                        a = 0
-                    elsif PlayerCreature <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
-                        a = 0
-                    elsif not LC10_Platoon[11] can navigate to object Armory
-                        a = 0
-                    elsif LC10_Platoon[11] not exists
-                        a = 0
-                    end if
-                    until a == 0 or LC10_Platoon[11] not exists or PLAYER of PlayerSettlement == 1
-                end loop
+                if TownCapturePlatoons[2] < 2
+                    TownCapturePlatoons[2]++
+                    clear LC10_Platoon[11] action queue
+                    set LC10_Platoon[11] attack PlayerSettlement with severity 0.3 for takeover
+                    a = 1
+                    begin loop
+                        PlayerPlatoon1 = get platoon of player 0 nearest {LC10_Platoon[11]} radius 150
+                        PlayerCreature = get distance from {LC10_Platoon[11]} to {oCreature}
+                        if PlayerPlatoon1 exists
+                            a = 0
+                        elsif PlayerCreature <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+                            a = 0
+                        elsif not LC10_Platoon[11] can navigate to object Armory
+                            a = 0
+                        elsif LC10_Platoon[11] not exists
+                            a = 0
+                        end if
+                        until a == 0 or LC10_Platoon[11] not exists or PLAYER of PlayerSettlement == 1
+                    end loop
+                    TownCapturePlatoons[2]--
+                end if
                 clear LC10_Platoon[11] action queue
             end if
         end if
@@ -2304,7 +2348,12 @@ begin loop
                         end loop
                     else //Capture Town
                         AttackMode = 0
-                        set LC10_Platoon[11] attack PlayerTown with severity 0.3 for takeover
+                        if TownCapturePlatoons[0] < 2
+                            TownCapturePlatoons[0]++
+                            set LC10_Platoon[11] attack PlayerTown with severity 0.3 for takeover
+                        else
+                            a = 0
+                        end if
                     end if
                     RecalculateTimer = create timer for 40 seconds
                     begin loop
@@ -2334,6 +2383,7 @@ begin loop
                         //end if
                         until a == 0 or LC10_Platoon[11] not exists
                     end loop
+                    TownCapturePlatoons[0]--
                     clear LC10_Platoon[11] action queue
                 elsif LC10_Platoon[11] can navigate to {AttackPos[2]}
                     clear LC10_Platoon[11] action queue
@@ -2441,23 +2491,27 @@ begin loop
         Armory = get building ABODE_NUMBER_TOWN_CENTRE in PlayerSettlement min built 1.0
         if Armory exists and PlayerSettlement != PlayerTown and PLAYER of PlayerSettlement == 0
             if LC10_Platoon[12] can navigate to object Armory
-                clear LC10_Platoon[12] action queue
-                set LC10_Platoon[12] attack PlayerSettlement with severity 0.3 for takeover
-                a = 1
-                begin loop
-                    PlayerPlatoon1 = get platoon of player 0 nearest {LC10_Platoon[12]} radius 150
-                    PlayerCreature = get distance from {LC10_Platoon[12]} to {oCreature}
-                    if PlayerPlatoon1 exists
-                        a = 0
-                    elsif PlayerCreature <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
-                        a = 0
-                    elsif not LC10_Platoon[12] can navigate to object Armory
-                        a = 0
-                    elsif LC10_Platoon[12] not exists
-                        a = 0
-                    end if
-                    until a == 0 or LC10_Platoon[12] not exists or PLAYER of PlayerSettlement == 1
-                end loop
+                if TownCapturePlatoons[2] < 2
+                    TownCapturePlatoons[2]++
+                    clear LC10_Platoon[12] action queue
+                    set LC10_Platoon[12] attack PlayerSettlement with severity 0.3 for takeover
+                    a = 1
+                    begin loop
+                        PlayerPlatoon1 = get platoon of player 0 nearest {LC10_Platoon[12]} radius 150
+                        PlayerCreature = get distance from {LC10_Platoon[12]} to {oCreature}
+                        if PlayerPlatoon1 exists
+                            a = 0
+                        elsif PlayerCreature <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+                            a = 0
+                        elsif not LC10_Platoon[12] can navigate to object Armory
+                            a = 0
+                        elsif LC10_Platoon[12] not exists
+                            a = 0
+                        end if
+                        until a == 0 or LC10_Platoon[12] not exists or PLAYER of PlayerSettlement == 1
+                    end loop
+                    TownCapturePlatoons[2]--
+                end if
                 clear LC10_Platoon[12] action queue
             end if
         end if
@@ -2529,7 +2583,12 @@ begin loop
                         end loop
                     else //Capture Town
                         AttackMode = 0
-                        set LC10_Platoon[12] attack PlayerTown with severity 0.3 for takeover
+                        if TownCapturePlatoons[0] < 2
+                            TownCapturePlatoons[0]++
+                            set LC10_Platoon[12] attack PlayerTown with severity 0.3 for takeover
+                        else
+                            a = 0
+                        end if
                     end if
                     RecalculateTimer = create timer for 40 seconds
                     begin loop
@@ -2559,6 +2618,7 @@ begin loop
                         //end if
                         until a == 0 or LC10_Platoon[12] not exists
                     end loop
+                    TownCapturePlatoons[0]--
                     clear LC10_Platoon[12] action queue
                 elsif LC10_Platoon[12] can navigate to {AttackPos[2]} + {20,0,20}
                     clear LC10_Platoon[12] action queue
@@ -2666,23 +2726,27 @@ begin loop
         Armory = get building ABODE_NUMBER_TOWN_CENTRE in PlayerSettlement min built 1.0
         if Armory exists and PlayerSettlement != PlayerTown and PLAYER of PlayerSettlement == 0
             if LC10_Platoon[13] can navigate to object Armory
-                clear LC10_Platoon[13] action queue
-                set LC10_Platoon[13] attack PlayerSettlement with severity 0.3 for takeover
-                a = 1
-                begin loop
-                    PlayerPlatoon1 = get platoon of player 0 nearest {LC10_Platoon[13]} radius 150
-                    PlayerCreature = get distance from {LC10_Platoon[13]} to {oCreature}
-                    if PlayerPlatoon1 exists
-                        a = 0
-                    elsif PlayerCreature <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
-                        a = 0
-                    elsif not LC10_Platoon[13] can navigate to object Armory
-                        a = 0
-                    elsif LC10_Platoon[13] not exists
-                        a = 0
-                    end if
-                    until a == 0 or LC10_Platoon[13] not exists or PLAYER of PlayerSettlement == 1
-                end loop
+                if TownCapturePlatoons[2] < 2
+                    TownCapturePlatoons[2]++
+                    clear LC10_Platoon[13] action queue
+                    set LC10_Platoon[13] attack PlayerSettlement with severity 0.3 for takeover
+                    a = 1
+                    begin loop
+                        PlayerPlatoon1 = get platoon of player 0 nearest {LC10_Platoon[13]} radius 150
+                        PlayerCreature = get distance from {LC10_Platoon[13]} to {oCreature}
+                        if PlayerPlatoon1 exists
+                            a = 0
+                        elsif PlayerCreature <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+                            a = 0
+                        elsif not LC10_Platoon[13] can navigate to object Armory
+                            a = 0
+                        elsif LC10_Platoon[13] not exists
+                            a = 0
+                        end if
+                        until a == 0 or LC10_Platoon[13] not exists or PLAYER of PlayerSettlement == 1
+                    end loop
+                    TownCapturePlatoons[2]--
+                end if
                 clear LC10_Platoon[13] action queue
             end if
         end if
@@ -2754,7 +2818,12 @@ begin loop
                         end loop
                     else //Capture Town
                         AttackMode = 0
-                        set LC10_Platoon[13] attack PlayerTown with severity 0.3 for takeover
+                        if TownCapturePlatoons[0] < 2
+                            TownCapturePlatoons[0]++
+                            set LC10_Platoon[13] attack PlayerTown with severity 0.3 for takeover
+                        else
+                            a = 0
+                        end if
                     end if
                     RecalculateTimer = create timer for 40 seconds
                     begin loop
@@ -2784,6 +2853,7 @@ begin loop
                         //end if
                         until a == 0 or LC10_Platoon[13] not exists
                     end loop
+                    TownCapturePlatoons[0]--
                     clear LC10_Platoon[13] action queue
                 elsif LC10_Platoon[13] can navigate to {AttackPos[2]} + {-20,0,-20}
                     clear LC10_Platoon[13] action queue
@@ -3327,7 +3397,12 @@ begin loop
                 Number = number from 1 to 4
                 if Number == 2 and HEALTH of MyCreature > 0 //Hunt down platoons or destroy buildings
                     AttackMode = 1
-                    set LC10_Platoon[22] attack NearestSettlement with severity 0.2 for takeover
+                    if TownCapturePlatoons[1] < 2
+                        TownCapturePlatoons[1]++
+                        set LC10_Platoon[22] attack NearestSettlement with severity 0.2 for takeover
+                    else
+                        a = 0
+                    end if
                 elsif Number == 3 or Number == 4 //Destroy value buildings
                     AttackMode = 2
                     Building = 0
@@ -3381,7 +3456,12 @@ begin loop
                     end loop
                 else //Capture Town
                     AttackMode = 0
-                    set LC10_Platoon[22] attack NearestSettlement with severity 0.3 for takeover
+                    if TownCapturePlatoons[1] < 2
+                        TownCapturePlatoons[1]++
+                        set LC10_Platoon[22] attack NearestSettlement with severity 0.3 for takeover
+                    else
+                        a = 0
+                    end if
                 end if
                 RecalculateTimer = create timer for 40 seconds
                 begin loop
@@ -3411,6 +3491,7 @@ begin loop
                     //end if
                     until a == 0 or LC10_Platoon[22] not exists
                 end loop
+                TownCapturePlatoons[1]--
                 clear LC10_Platoon[22] action queue
             else
                 clear LC10_Platoon[22] action queue
@@ -3523,7 +3604,12 @@ begin loop
                 Number = number from 1 to 4
                 if Number == 2 and HEALTH of MyCreature > 0 //Hunt down platoons or destroy buildings
                     AttackMode = 1
-                    set LC10_Platoon[23] attack NearestSettlement with severity 0.2 for takeover
+                    if TownCapturePlatoons[1] < 2
+                        TownCapturePlatoons[1]++
+                        set LC10_Platoon[23] attack NearestSettlement with severity 0.2 for takeover
+                    else
+                        a = 0
+                    end if
                 elsif Number == 3 or Number == 4 //Destroy value buildings
                     AttackMode = 2
                     Building = 0
@@ -3577,7 +3663,12 @@ begin loop
                     end loop
                 else //Capture Town
                     AttackMode = 0
-                    set LC10_Platoon[23] attack NearestSettlement with severity 0.3 for takeover
+                    if TownCapturePlatoons[1] < 2
+                        TownCapturePlatoons[1]++
+                        set LC10_Platoon[23] attack NearestSettlement with severity 0.3 for takeover
+                    else
+                        a = 0
+                    end if
                 end if
                 RecalculateTimer = create timer for 40 seconds
                 begin loop
@@ -3607,6 +3698,7 @@ begin loop
                     //end if
                     until a == 0 or LC10_Platoon[23] not exists
                 end loop
+                TownCapturePlatoons[1]--
                 clear LC10_Platoon[23] action queue
             else
                 clear LC10_Platoon[23] action queue
@@ -3719,7 +3811,12 @@ begin loop
                 Number = number from 1 to 4
                 if Number == 2 and HEALTH of MyCreature > 0 //Hunt down platoons or destroy buildings
                     AttackMode = 1
-                    set LC10_Platoon[24] attack NearestSettlement with severity 0.2 for takeover
+                    if TownCapturePlatoons[1] < 2
+                        TownCapturePlatoons[1]++
+                        set LC10_Platoon[24] attack NearestSettlement with severity 0.2 for takeover
+                    else
+                        a = 0
+                    end if
                 elsif Number == 3 or Number == 4 //Destroy value buildings
                     AttackMode = 2
                     Building = 0
@@ -3773,7 +3870,12 @@ begin loop
                     end loop
                 else //Capture Town
                     AttackMode = 0
-                    set LC10_Platoon[24] attack NearestSettlement with severity 0.3 for takeover
+                    if TownCapturePlatoons[1] < 2
+                        TownCapturePlatoons[1]++
+                        set LC10_Platoon[24] attack NearestSettlement with severity 0.3 for takeover
+                    else
+                        a = 0
+                    end if
                 end if
                 RecalculateTimer = create timer for 40 seconds
                 begin loop
@@ -3803,6 +3905,7 @@ begin loop
                     //end if
                     until a == 0 or LC10_Platoon[24] not exists
                 end loop
+                TownCapturePlatoons[1]--
                 clear LC10_Platoon[24] action queue
             else
                 clear LC10_Platoon[24] action queue
@@ -3915,7 +4018,12 @@ begin loop
                 Number = number from 1 to 4
                 if Number == 2 and HEALTH of MyCreature > 0 //Hunt down platoons or destroy buildings
                     AttackMode = 1
-                    set LC10_Platoon[25] attack NearestSettlement with severity 0.2 for takeover
+                    if TownCapturePlatoons[1] < 2
+                        TownCapturePlatoons[1]++
+                        set LC10_Platoon[25] attack NearestSettlement with severity 0.2 for takeover
+                    else
+                        a = 0
+                    end if
                 elsif Number == 3 or Number == 4 //Destroy value buildings
                     AttackMode = 2
                     Building = 0
@@ -3969,7 +4077,12 @@ begin loop
                     end loop
                 else //Capture Town
                     AttackMode = 0
-                    set LC10_Platoon[25] attack NearestSettlement with severity 0.3 for takeover
+                    if TownCapturePlatoons[1] < 2
+                        TownCapturePlatoons[1]++
+                        set LC10_Platoon[25] attack NearestSettlement with severity 0.3 for takeover
+                    else
+                        a = 0
+                    end if
                 end if
                 RecalculateTimer = create timer for 40 seconds
                 begin loop
@@ -3999,6 +4112,7 @@ begin loop
                     //end if
                     until a == 0 or LC10_Platoon[25] not exists
                 end loop
+                TownCapturePlatoons[1]--
                 clear LC10_Platoon[25] action queue
             else
                 clear LC10_Platoon[25] action queue
@@ -4360,23 +4474,27 @@ begin loop
         Armory = get building ABODE_NUMBER_TOWN_CENTRE in PlayerSettlement min built 1.0
         if Armory exists and PlayerSettlement != PlayerTown and PLAYER of PlayerSettlement == 0
             if LC10_Platoon[28] can navigate to object Armory
-                clear LC10_Platoon[28] action queue
-                set LC10_Platoon[28] attack PlayerSettlement with severity 0.3 for takeover
-                a = 1
-                begin loop
-                    PlayerPlatoon1 = get platoon of player 0 nearest {LC10_Platoon[28]} radius 75
-                    PlayerCreature = get distance from {LC10_Platoon[28]} to {oCreature}
-                    if PlayerPlatoon1 exists
-                        a = 0
-                    elsif PlayerCreature <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
-                        a = 0
-                    elsif not LC10_Platoon[28] can navigate to object Armory
-                        a = 0
-                    elsif LC10_Platoon[28] not exists
-                        a = 0
-                    end if
-                    until a == 0 or LC10_Platoon[28] not exists or PLAYER of PlayerSettlement == 1
-                end loop
+                if TownCapturePlatoons[2] < 2
+                    TownCapturePlatoons[2]++
+                    clear LC10_Platoon[28] action queue
+                    set LC10_Platoon[28] attack PlayerSettlement with severity 0.3 for takeover
+                    a = 1
+                    begin loop
+                        PlayerPlatoon1 = get platoon of player 0 nearest {LC10_Platoon[28]} radius 75
+                        PlayerCreature = get distance from {LC10_Platoon[28]} to {oCreature}
+                        if PlayerPlatoon1 exists
+                            a = 0
+                        elsif PlayerCreature <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+                            a = 0
+                        elsif not LC10_Platoon[28] can navigate to object Armory
+                            a = 0
+                        elsif LC10_Platoon[28] not exists
+                            a = 0
+                        end if
+                        until a == 0 or LC10_Platoon[28] not exists or PLAYER of PlayerSettlement == 1
+                    end loop
+                    TownCapturePlatoons[2]--
+                end if
                 clear LC10_Platoon[28] action queue
             end if
         end if
@@ -4439,23 +4557,27 @@ begin loop
             Armory = get building ABODE_NUMBER_TOWN_CENTRE in PlayerSettlement min built 1.0
             if Armory exists and PlayerSettlement != PlayerTown and PLAYER of PlayerSettlement == 0
                 if LC10_Platoon[28] can navigate to object Armory
-                    clear LC10_Platoon[28] action queue
-                    set LC10_Platoon[28] attack PlayerSettlement with severity 0.3 for takeover
-                    a = 1
-                    begin loop
-                        PlayerPlatoon1 = get platoon of player 0 nearest {LC10_Platoon[28]} radius 75
-                        PlayerCreature = get distance from {LC10_Platoon[28]} to {oCreature}
-                        if PlayerPlatoon1 exists
-                            a = 0
-                        elsif PlayerCreature <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
-                            a = 0
-                        elsif not LC10_Platoon[28] can navigate to object Armory
-                            a = 0
-                        elsif LC10_Platoon[28] not exists
-                            a = 0
-                        end if
-                        until a == 0 or LC10_Platoon[28] not exists or PLAYER of PlayerSettlement == 1
-                    end loop
+                    if TownCapturePlatoons[2] < 2
+                        TownCapturePlatoons[2]++
+                        clear LC10_Platoon[28] action queue
+                        set LC10_Platoon[28] attack PlayerSettlement with severity 0.3 for takeover
+                        a = 1
+                        begin loop
+                            PlayerPlatoon1 = get platoon of player 0 nearest {LC10_Platoon[28]} radius 75
+                            PlayerCreature = get distance from {LC10_Platoon[28]} to {oCreature}
+                            if PlayerPlatoon1 exists
+                                a = 0
+                            elsif PlayerCreature <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+                                a = 0
+                            elsif not LC10_Platoon[28] can navigate to object Armory
+                                a = 0
+                            elsif LC10_Platoon[28] not exists
+                                a = 0
+                            end if
+                            until a == 0 or LC10_Platoon[28] not exists or PLAYER of PlayerSettlement == 1
+                        end loop
+                        TownCapturePlatoons[2]--
+                    end if
                     clear LC10_Platoon[28] action queue
                 end if
             end if
@@ -4520,7 +4642,12 @@ begin loop
                     end loop
                 else //Capture Town
                     AttackMode = 0
-                    set LC10_Platoon[28] attack PlayerTown with severity 0.3 for takeover
+                    if TownCapturePlatoons[0] < 2
+                        TownCapturePlatoons[0]++
+                        set LC10_Platoon[28] attack PlayerTown with severity 0.3 for takeover
+                    else
+                        a = 0
+                    end if
                 end if
                 RecalculateTimer = create timer for 40 seconds
                 begin loop
@@ -4550,6 +4677,7 @@ begin loop
                     //end if
                     until a == 0 or LC10_Platoon[28] not exists
                 end loop
+                TownCapturePlatoons[0]--
                 clear LC10_Platoon[28] action queue
             elsif LC10_Platoon[28] can navigate to {AttackPos[0]} + {20,0,20}
                 clear LC10_Platoon[28] action queue
