@@ -104,13 +104,25 @@ begin script LC12_CreateUndeadPlatoon(whichPlatoon,howManyVillagers,whichMesh)
 
 start
 
-    //Remove old villagers
-    myEffect = create visual effect VISUAL_EFFECT_MIGRATION_THREAD at {whichPlatoon}
+    myEffect = create visual effect VISUAL_EFFECT_TOWN_TAKEOVER_DEFENDER at {whichPlatoon} + {0,2,0} time 10
     set myEffect color red 148 green 0 blue 211
     SCALE of myEffect = 2
-    while counter < howManyVillagers - 1
+
+    myEffect = create visual effect VISUAL_EFFECT_TOWN_TAKEOVER_DEFENDER at {whichPlatoon} + {0,2,0} time 10
+    set myEffect color red 148 green 0 blue 211
+    SCALE of myEffect = 1.0
+
+    myEffect = create visual effect VISUAL_MIRACLE_HEAL_GROUND at {whichPlatoon} + {0,2,0} time 12
+    set myEffect color red 148 green 0 blue 211
+    SCALE of myEffect = 2
+
+    //Remove old villagers
+    while counter < howManyVillagers - 1 and size of whichPlatoon > 1
         if counter < howManyVillagers
             Villager = get villager from platoon whichPlatoon nearest {whichPlatoon}
+            myEffect = create visual effect VISUAL_EFFECT_WEATHER_LIGHTNING_EXPLOSION at {Villager} + {0,1,0} time 1.5
+            set myEffect color red 148 green 0 blue 211
+            SCALE of myEffect = 0.1
             delete Villager
         end if
         counter++
@@ -121,7 +133,10 @@ start
     while counter < howManyVillagers
 
         //Create ghosts
-        Ghost[counter] = create VILLAGER NORSE_HOUSEWIFE at {whichPlatoon} 
+        Ghost[counter] = create VILLAGER NORSE_HOUSEWIFE at {whichPlatoon} + {number from -10 to 10,number from -10 to 10}
+        myEffect = create visual effect VISUAL_EFFECT_WEATHER_LIGHTNING_EXPLOSION at {Ghost[counter]} + {0,1,0} time 1.5
+        set myEffect color red 148 green 0 blue 211
+        SCALE of myEffect = 0.1
         add villager Ghost[counter] to platoon whichPlatoon
         disable Ghost[counter] hurt by fire
         disable Ghost[counter] set on fire

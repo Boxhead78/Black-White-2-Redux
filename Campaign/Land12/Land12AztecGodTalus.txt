@@ -151,6 +151,7 @@ start
 
         if get ThrowMiracleTimer time remaining <= 0 and get player ge_Player[godHandle] mana > 23000 and PLAYER of PlayerTown == 0 and GB_DialogueIsRunning == 0
 
+            MiracleTimerStarted = 1
             GB_DialogueIsRunning = 1
             begin dialogue
                 myRand = number from 1 to 4
@@ -190,11 +191,12 @@ start
                 myCounter++
             end while 
             run script ge_ThrowMiracle(godHandle, GE_MIRACLE_TYPE_FIRE, marker at {1247.97,60.64,1426.99} + {0,20,0} + {number from -15 to 15,0,number from -15 to 15}, 1)
-            ThrowMiracleTimer = create timer for number from 300 to 900 seconds
+            ThrowMiracleTimer = create timer for number from 300 * EpicModifier to 900 * EpicModifier seconds
         end if
 
         if get FireRainTimer time remaining <= 0 and get player ge_Player[godHandle] mana > 20000 and GB_DialogueIsRunning == 0 and PLAYER of PlayerTown == 0
     
+            MiracleFireRainStarted = 1
             myRand = number from 1 to 5
             if myRand == 1 or myRand == 2
                 myBuilding = get building ALTAR in PlayerTown min built 0.75
@@ -240,7 +242,7 @@ start
                 end dialogue
                 GB_DialogueIsRunning = 0
                 run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_FIRERAIN,myBuilding,0)
-                FireRainTimer = create timer for number from 1200 to 2400 seconds
+                FireRainTimer = create timer for number from 1200 * EpicModifier to 2400 * EpicModifier seconds
             end if
         end if
 
@@ -861,14 +863,11 @@ start
                 myNumber = number from 1 to 5
                 if myNumber == 1
                     run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_METEOR,Target, 0)
-                    ge_MiracleDelay[godHandle] = create timer for 7 seconds
                 elsif myNumber == 2 or myNumber == 3
                     run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_FIRE,Target, 0)
-                    ge_MiracleDelay[godHandle] = create timer for 7 seconds
                 else
                     if TargetType == 1
                         run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_STORM,Target, 0)
-                        ge_MiracleDelay[godHandle] = create timer for 7 seconds
                     end if
                 end if
             
@@ -877,16 +876,25 @@ start
                 if myNumber == 1
                     if TargetType == 1
                         run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_STORM,Target, 0)
-                        ge_MiracleDelay[godHandle] = create timer for 7 seconds
                     end if
                 elsif myNumber == 2 or myNumber == 3
                     run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_FIRE,Target, 0)
-                    ge_MiracleDelay[godHandle] = create timer for 7 seconds
                 end if
 
             elsif myRock exists and PLAYER of Target != ge_Player[godHandle]
                 //run script geThrowObjectAtObject(godHandle, myRock, myPlatoon)
 
+            end if
+            if Difficulty == 1
+                ge_MiracleDelay[godHandle] = create timer for 80 seconds
+            elsif Difficulty == 2
+                ge_MiracleDelay[godHandle] = create timer for 60 seconds
+            elsif Difficulty == 3
+                ge_MiracleDelay[godHandle] = create timer for 35 seconds
+            elsif Difficulty == 4
+                ge_MiracleDelay[godHandle] = create timer for 15 seconds
+            else
+                ge_MiracleDelay[godHandle] = create timer for 7 seconds
             end if
         end if
     end if
