@@ -1,0 +1,535 @@
+///////////////////////////////////////////////////////////////////////////////
+//      Skeletons
+//    ~~~~~~~~~~~~~~
+///////////////////////////////////////////////////////////////////////////////
+
+define script LC12_Skeletons
+define script LC12_Skeletons_Intro
+define script LC12_Skeletons_Lightning
+define script LC12_SpawnSkeleton
+define script LC12_SpawnVillager
+define script LC12_SkeletonsWaveManager(whichMode,whichWave)
+define script LC12_SkeletonsLogic
+define script LC12_Skeletons_Outro
+
+global ScrollSkeletons = 0
+global SkeletonsActivated = 0
+global SkeletonLightningActivated = 0
+global SkeletonTree[10]
+global SkeletonCleanUp = 0
+global SkeletonCounter = 0
+global SkeletonWave = 0
+global SkeletonLoseCounter = 0
+
+global SkeletonsScrollPos = 0
+global SkeletonFieldMid = 0
+global SkeletonSpawnPos[5]
+global SkeletonRunToPos[5]
+global WeatherPos = 0
+
+global SkeletonSpeed = 0
+global SkeletonSpawnDelay = 0
+global SkeletonSpawnAmount = 0
+
+
+begin script LC12_Skeletons
+
+	Counter = 0
+
+start
+
+	SkeletonsScrollPos = marker at {477.40,127.55,1187.10}
+	WeatherPos = marker at {510.32,136.12,1112.67}
+	SkeletonSpawnPos[0] = marker at {465.61,144.71,1132.15}
+	SkeletonSpawnPos[1] = marker at {465.52,144.78,1123.94}
+	SkeletonSpawnPos[2] = marker at {466.07,144.79,1114.69}
+	SkeletonSpawnPos[3] = marker at {466.36,144.92,1106.07}
+	SkeletonSpawnPos[4] = marker at {466.27,145.08,1097.53}
+	SkeletonRunToPos[0] = marker at {465.61,144.71,1132.15} + {80,0} 
+	SkeletonRunToPos[1] = marker at {465.52,144.78,1123.94} + {80,0} 
+	SkeletonRunToPos[2] = marker at {466.07,144.79,1114.69} + {80,0} 
+	SkeletonRunToPos[3] = marker at {466.36,144.92,1106.07} + {80,0} 
+	SkeletonRunToPos[4] = marker at {466.27,145.08,1097.53} + {80,0} 
+	SkeletonFieldMid = marker at {SkeletonRunToPos[2]} + {25,0}
+
+	SkeletonTree[0] = create TREE TREE_INFO_BEECH at {SkeletonSpawnPos[0]} + {10,0}
+	SkeletonTree[1] = create TREE TREE_INFO_BEECH at {SkeletonSpawnPos[1]} + {10,0}
+	SkeletonTree[2] = create TREE TREE_INFO_BEECH at {SkeletonSpawnPos[2]} + {10,0}
+	SkeletonTree[3] = create TREE TREE_INFO_BEECH at {SkeletonSpawnPos[3]} + {10,0}
+	SkeletonTree[4] = create TREE TREE_INFO_BEECH at {SkeletonSpawnPos[4]} + {10,0}
+	SkeletonTree[5] = create TREE TREE_INFO_BEECH at {SkeletonRunToPos[0]} - {10,0}
+	SkeletonTree[6] = create TREE TREE_INFO_BEECH at {SkeletonRunToPos[1]} - {10,0}
+	SkeletonTree[7] = create TREE TREE_INFO_BEECH at {SkeletonRunToPos[2]} - {10,0}
+	SkeletonTree[8] = create TREE TREE_INFO_BEECH at {SkeletonRunToPos[3]} - {10,0}
+	SkeletonTree[9] = create TREE TREE_INFO_BEECH at {SkeletonRunToPos[4]} - {10,0}
+
+	while Counter < 10
+		disable SkeletonTree[Counter] moveable
+		enable SkeletonTree[Counter] indestructible
+		disable SkeletonTree[Counter] set on fire    
+		disable SkeletonTree[Counter] pickup
+		Counter++
+	end while
+
+    ScrollSkeletons = create highlight SILVER name "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_32" remind "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_23" at {SkeletonsScrollPos}
+
+	set player 0 objective TRIBUTE_OBJECTIVE_LAND_2 with amount 1 text "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_32" amount 1 description "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_23" start value 0 reward 50000
+
+	wait until ScrollSkeletons right clicked
+
+	delete ScrollSkeletons
+	run background script LC12_Skeletons_Intro
+
+end script LC12_Skeletons
+
+
+begin script LC12_Skeletons_Intro
+
+	CSMixer = create mixer
+
+start
+
+	//Camera from village to horde of skeletons / fleeing villagers 
+	SkeletonsActivated = 1
+    begin cinema
+		set fade red 0 green 0 blue 0 time 3
+		wait 3 seconds
+		set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 0.7
+		start music "creaturefightmain_01" loop -1
+        set camera position to {708.06,165.00,983.01}
+        set camera focus to {653.31,150.00,1030.35}
+		set fade in time 3
+		run background script LC12_SkeletonsWaveManager(1,0)
+		wait 3 seconds
+		move camera position to {SkeletonRunToPos[2]} + {50,30,0} time 6
+        move camera focus to {SkeletonSpawnPos[2]} + {25.00,8,0.00} time 6
+		//move camera
+		wait 2 seconds
+		set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 0.7 with fadetime 5
+		say "BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV1_10"
+		clear dialogue
+		close dialogue
+		wait BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV1_10 + 1 seconds
+		move camera position to {SkeletonRunToPos[2]} + {-10,15,5} time 15
+        move camera focus to {SkeletonSpawnPos[2]} + {0.00,5,0.00} time 15
+		say "BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV1_20"
+		clear dialogue
+		close dialogue
+		wait BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV1_20 + 1.0 seconds
+		say "BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV1_30"
+		clear dialogue
+		close dialogue
+		wait BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV1_30 + 1.0 seconds
+		say "BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV1_40"
+		clear dialogue
+		close dialogue
+		wait BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV1_40 + 1.0 seconds
+		set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 1.0 with fadetime 5
+		set fade red 0 green 0 blue 0 time 3
+		wait 3 seconds
+    end cinema
+	SkeletonsActivated = 0
+
+	wait 1 seconds
+
+	run background script LC12_SkeletonsLogic
+
+	wait until SkeletonsActivated == 1
+
+	begin loop
+		ScrollSkeletons = create highlight SILVER name "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_32" remind "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_23" at {SkeletonSpawnPos[2]} + {30,30,25}
+		wait until ScrollSkeletons right clicked or SkeletonLoseCounter >= 30
+		delete ScrollSkeletons
+		if SkeletonsActivated == 1 or SkeletonLoseCounter >= 30
+			//Only stop logic scripts, all other scripts are released if SkeletonsActivated == 1
+			stop script "LC12_SkeletonsLogic"
+			begin interactive camera
+			end interactive camera
+			begin cinema
+				if SkeletonLoseCounter >= 30
+					SkeletonLoseCounter = 0
+					if SkeletonWave == 1
+						say "BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV1_FAILED_10"
+						clear dialogue
+						close dialogue
+						wait BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV1_FAILED_10 + 1.0 seconds
+						say "BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV1_FAILED_20"
+						clear dialogue
+						close dialogue
+						wait BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV1_FAILED_20 + 1.0 seconds
+					elsif SkeletonWave == 2
+						say "BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV2_FAILED_10"
+						clear dialogue
+						close dialogue
+						wait BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV2_FAILED_10 + 1.0 seconds
+						say "BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV2_FAILED_20"
+						clear dialogue
+						close dialogue
+						wait BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV2_FAILED_20 + 1.0 seconds
+						say "BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV2_FAILED_30"
+						clear dialogue
+						close dialogue
+						wait BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV2_FAILED_30 + 1.0 seconds
+					elsif SkeletonWave == 3
+						say "BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV3_FAILED_10"
+						clear dialogue
+						close dialogue
+						wait BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV3_FAILED_10 + 1.0 seconds
+						say "BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV3_FAILED_20"
+						clear dialogue
+						close dialogue
+						wait BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV3_FAILED_20 + 1.0 seconds
+						say "BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV3_FAILED_30"
+						clear dialogue
+						close dialogue
+						wait BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV3_FAILED_30 + 1.0 seconds
+					end if
+				end if
+				set fade red 0 green 0 blue 0 time 2
+				wait 2 seconds
+				SkeletonCleanUp = 1
+				set camera position to {SkeletonRunToPos[2]} + {50,30,0}
+				set camera focus to {SkeletonSpawnPos[2]} + {25.00,8,0.00}
+				set fade in time 2
+				wait 2 seconds
+				stop music with fadetime 5
+			end cinema
+			SkeletonsActivated = 0
+			SkeletonLightningActivated = 0
+		elsif dialogue ready
+			start music "creaturefightmain_01" loop -1
+			run background script LC12_SkeletonsLogic
+			wait 2 seconds
+		end if
+	end loop
+
+end script LC12_Skeletons_Intro
+
+
+begin script LC12_Skeletons_Lightning
+
+	myWeather = 0
+	Number = 0
+	Villager = 0
+
+start
+
+myWeather = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {WeatherPos}
+set cloud for myWeather above {WeatherPos} + {0, 30, 0}
+set myWeather properties rainfall 1 snowfall 0 overcast 0.9
+disable myWeather affected by wind
+
+while SkeletonLightningActivated == 1
+	if bindable action BINDABLE_ACTION_TYPE_ACTION performed
+		set lightning strike at hand position from myWeather scale 0.25
+		add effect EFFECT_TYPE_BURN at hand position strength 0.8 radius 5
+		add effect EFFECT_TYPE_HIT at hand position strength 0.8 radius 5
+		add effect EFFECT_TYPE_APPLY_FORCE at hand position strength 5 radius 5
+		add effect EFFECT_TYPE_CRUSH at hand position strength 5 radius 5
+		Number = number from 1 to 2
+		if Number == 1
+			play sound "SCRIPT2_EEPIC_HURRICANELIGHTNING1" at hand position
+		else 
+			play sound "SCRIPT2_EEPIC_HURRICANELIGHTNING6" at hand position
+		end if
+		wait 0.75 seconds
+	end if
+end while
+
+end script LC12_Skeletons_Lightning
+
+
+begin script LC12_SpawnSkeleton
+
+	myEffect = 0
+	Number = 0
+	Skeleton = 0
+
+start
+
+	Number = number from 0 to 4
+	Skeleton = create VILLAGER NORSE_HOUSEWIFE at {SkeletonSpawnPos[Number]} 
+	disable Skeleton reactable
+	override mesh for Skeleton with "..\skins\s_skeletonadultland2"
+	set anim speed of Skeleton to 0.66
+	SPEED of Skeleton = SkeletonSpeed
+
+	Number = number from 0 to 4
+	move Skeleton position to {SkeletonRunToPos[Number]} using NAV_FAILURE_MODE_GO_TO_CLOSEST_POINT navigation
+
+	SkeletonCounter++
+
+	wait until HEALTH of Skeleton == 0.00 or {Skeleton} near {SkeletonRunToPos[Number]} radius 3.5 or SkeletonCleanUp == 1
+
+	SkeletonCounter--
+
+	if HEALTH of Skeleton == 0.00
+		wait number from 1 to 3 seconds
+		myEffect = create visual effect VISUAL_EFFECT_WEATHER_LIGHTNING_EXPLOSION at {Skeleton} + {0,1,0} time 1.5
+		set myEffect color red 148 green 0 blue 211
+		SCALE of myEffect = 0.1
+		delete Skeleton
+	else
+		wait until {Skeleton} near {SkeletonRunToPos[Number]} radius 3.5 or SkeletonCleanUp == 1
+		if SkeletonCleanUp == 0
+			SkeletonLoseCounter += 1
+		end if
+		delete Skeleton
+	end if
+
+end script LC12_SpawnSkeleton
+
+
+begin script LC12_SpawnVillager
+
+	Number = 0
+	Villager = 0
+
+start
+
+	Number = number from 0 to 4
+	Villager = create random villager of tribe TRIBE_TYPE_JAPANESE at {SkeletonSpawnPos[Number]}
+	disable Villager reactable
+	SPEED of Villager = SkeletonSpeed + 0.1
+
+	Number = number from 0 to 4
+	move Villager position to {SkeletonRunToPos[Number]} using NAV_FAILURE_MODE_GO_TO_CLOSEST_POINT navigation
+
+	wait until HEALTH of Villager == 0.00 or {Villager} near {SkeletonRunToPos[Number]} radius 3.5 or SkeletonCleanUp == 1
+
+	if HEALTH of Villager == 0.00 and SkeletonCleanUp == 0
+		SkeletonLoseCounter += 3
+	end if
+
+	wait until {Villager} near {SkeletonRunToPos[Number]} radius 3.5 or number from 10 to 20 seconds or SkeletonCleanUp == 1
+	delete Villager
+
+end script LC12_SpawnVillager
+
+
+begin script LC12_SkeletonsLogic
+
+start
+
+SkeletonCleanUp = 0
+
+begin interactive camera
+	SkeletonLoseCounter = 0
+	set fade red 0 green 0 blue 0 time 2
+	wait 2 seconds
+	set camera position to {SkeletonSpawnPos[2]} + {50,30,0}
+	set camera focus to {SkeletonSpawnPos[2]} + {35.00,5,0.00}
+	set fade in time 2
+
+	SkeletonLightningActivated = 1
+	run background script LC12_Skeletons_Lightning
+
+	//Wave 1
+	SkeletonsActivated = 1
+	SkeletonWave = 1
+	run background script LC12_SkeletonsWaveManager(0,1)
+
+	wait 40 seconds
+
+	SkeletonsActivated = 0
+
+	wait until SkeletonCounter == 0
+
+	wait 2 seconds
+
+	//Wave 2
+	SkeletonsActivated = 1
+	SkeletonWave = 2
+	run background script LC12_SkeletonsWaveManager(0,2)
+
+	wait 3 seconds
+	say "BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV2_10"
+	clear dialogue
+	close dialogue
+	wait BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV2_10 + 1 seconds
+	say "BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV2_20"
+	clear dialogue
+	close dialogue
+	wait BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV2_20 + 1 seconds
+	say "BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV2_30"
+	clear dialogue
+	close dialogue
+	wait BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV2_30 + 1 seconds
+
+	wait 40 seconds
+
+	SkeletonsActivated = 0
+
+	wait until SkeletonCounter == 0
+
+	wait 2 seconds
+
+	//Wave 2
+	SkeletonsActivated = 1
+	SkeletonWave = 3
+	run background script LC12_SkeletonsWaveManager(0,2)
+
+	wait 3 seconds
+	say "BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV3_10"
+	clear dialogue
+	close dialogue
+	wait BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV3_10 + 1 seconds
+	say "BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV3_20"
+	clear dialogue
+	close dialogue
+	wait BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV3_20 + 1 seconds
+	say "BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV3_30"
+	clear dialogue
+	close dialogue
+	wait BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV3_30 + 1 seconds
+
+	wait 40 seconds
+
+	SkeletonsActivated = 0
+
+	wait until SkeletonCounter == 0
+
+end interactive camera
+
+SkeletonLightningActivated = 0
+SkeletonsActivated = 0
+
+delete ScrollSkeletons
+
+wait 2.5 seconds
+stop music with fadetime 5
+run script LC12_Skeletons_Outro
+
+set player 0 objective TRIBUTE_OBJECTIVE_LAND_1 status to TRIBUTE_OBJECTIVE_STATE_COMPLETE
+
+end script LC12_SkeletonsLogic
+
+
+begin script LC12_SkeletonsWaveManager(whichMode,whichWave)
+
+	SpawnAmountTemp = 0
+	VillagerCounter = 0
+
+start
+
+	SkeletonSpeed = 0.65
+	SkeletonSpawnDelay = 2
+	SkeletonSpawnAmount = 3
+
+	//Game
+	if whichMode == 0
+		if whichWave == 1
+			SkeletonSpeed = 0.5
+			SkeletonSpawnDelay = 2
+			SkeletonSpawnAmount = 5
+			//Wave 1
+			while SkeletonsActivated == 1
+				SpawnAmountTemp = SkeletonSpawnAmount
+				wait until SkeletonsActivated == 0 or SkeletonSpawnDelay seconds
+
+				while SpawnAmountTemp > 0 and SkeletonsActivated == 1
+					wait until SkeletonsActivated == 0 or 0.33 seconds
+					run background script LC12_SpawnSkeleton
+					SpawnAmountTemp-- VillagerCounter += number from 1 to 1
+					if VillagerCounter > 15
+						VillagerCounter = 0
+						run background script LC12_SpawnVillager
+					end if
+				end while
+			end while
+		elsif whichWave == 2
+			SkeletonSpeed = 0.6
+			SkeletonSpawnDelay = 1.5
+			SkeletonSpawnAmount = 11
+			//Wave 2
+			while SkeletonsActivated == 1
+				SpawnAmountTemp = SkeletonSpawnAmount
+				wait until SkeletonsActivated == 0 or SkeletonSpawnDelay seconds
+
+				while SpawnAmountTemp > 0 and SkeletonsActivated == 1
+					wait until SkeletonsActivated == 0 or 0.33 seconds
+					run background script LC12_SpawnSkeleton
+					SpawnAmountTemp-- VillagerCounter += number from 1 to 2
+					if VillagerCounter > 13
+						VillagerCounter = 0
+						run background script LC12_SpawnVillager
+					end if
+				end while
+			end while
+
+		elsif whichWave == 3
+			SkeletonSpeed = 0.75
+			SkeletonSpawnDelay = 1.5
+			SkeletonSpawnAmount = 18
+			//Wave 3
+			while SkeletonsActivated == 1
+				SpawnAmountTemp = SkeletonSpawnAmount
+				wait until SkeletonsActivated == 0 or SkeletonSpawnDelay seconds
+
+				while SpawnAmountTemp > 0 and SkeletonsActivated == 1
+					wait until SkeletonsActivated == 0 or 0.33 seconds
+					run background script LC12_SpawnSkeleton
+					SpawnAmountTemp-- VillagerCounter += number from 1 to 3
+					if VillagerCounter > 11
+						VillagerCounter = 0
+						run background script LC12_SpawnVillager
+					end if
+				end while
+			end while
+
+		end if
+
+	//Intro
+	elsif whichMode == 1
+		set fade in time 3
+		wait 3 seconds
+		SkeletonSpeed = 0.65
+		SkeletonSpawnDelay = 1.25
+		SkeletonSpawnAmount = 27
+		//Intro Wave
+		while SkeletonsActivated == 1
+			SpawnAmountTemp = SkeletonSpawnAmount
+			wait until SkeletonsActivated == 0 or SkeletonSpawnDelay seconds
+
+			while SpawnAmountTemp > 0 and SkeletonsActivated == 1
+				wait until SkeletonsActivated == 0 or 0.33 seconds
+				run background script LC12_SpawnSkeleton
+				SpawnAmountTemp-- VillagerCounter += number from 1 to 3
+			end while
+
+			if VillagerCounter > 10
+				VillagerCounter = 0
+				run background script LC12_SpawnVillager
+			end if
+		end while
+		SkeletonCleanUp = 1
+	end if
+
+end script LC12_SkeletonsWaveManager
+
+
+begin script LC12_Skeletons_Outro
+
+start
+
+begin cinema
+	set fade red 0 green 0 blue 0 time 3
+	wait 3 seconds
+	set camera position to {SkeletonRunToPos[2]} + {50,30,0}
+	set camera focus to {SkeletonSpawnPos[2]} + {25.00,8,0.00}
+	set fade in time 3
+	wait 3 seconds
+	say "BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV3_OUTRO_10"
+	clear dialogue
+	close dialogue
+	wait BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV3_OUTRO_10 + 1 seconds
+	say "BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV3_OUTRO_20"
+	clear dialogue
+	close dialogue
+	wait BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV3_OUTRO_20 + 1 seconds
+end cinema
+
+end script LC12_Skeletons_Outro
+//-----------------------------------------------------------------------------
+// Land 12 Skeletons
+//-----------------------------------------------------------------------------
