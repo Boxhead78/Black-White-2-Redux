@@ -149,13 +149,12 @@ begin script Land12ScriptManager
     AtmosMixer = create mixer
     Portal = 0
     EvilWonder = 0
+    PlayerCatapult = 0
 
 start
 
     AIHurricane = get WONDER at {653.72,129.44,1170.66} radius 25
     disable AIHurricane hurt by fire
-
-    enable predefined sky "land12" time 0
 
     set atmos volume 0
     set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_MAP to 0.0
@@ -214,7 +213,10 @@ start
     run background script LC12_SetupWeather(1,marker at {1250.54,22.32,1029.37})
     run background script LC12_SetupWeather(1,marker at {896.90,27.79,1356.71})
     run background script LC12_SetupWeather(1,marker at {815.01,20.72,1658.77})
-    
+
+    PlayerCatapult = create siege weapon SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 belonging to PlayerTown at {PlayerTown} + {20,20}
+    PLAYER of PlayerCatapult = 0
+
     wait until IntroFinished == 1
 
     set atmos volume 0.45
@@ -223,7 +225,6 @@ start
 
     run background script LC12_AttackNearestTownTimer
     run background script LC12_DefendPlatoons
-//  run background script LC12_BonusMissions
     run background script LC12_Speeches
     run background script LC12_TownObjectives
     run background script LC12_AztecCapitalRessourceManager
@@ -239,7 +240,7 @@ start
     
     run background script LC12_RiddleOfTheRocks
 
-    //wait until TownsConverted >= 3
+    wait until TownsConverted >= 3
 
     run background script LC12_Skeletons
 
@@ -358,7 +359,11 @@ start
         Amount--
     end while
 
-    wait until DeleteWeather == 1
+    begin loop
+        wait 1.5 seconds
+        enable predefined sky "land12" time 0
+        until DeleteWeather == 1
+    end loop
 
     begin loop
         wait until DeleteWeather == 1 or number from 90 to 240 seconds
@@ -381,15 +386,17 @@ begin script LC12_SetupPrison
 Men[75]
 Counter = 0
 TownPos = 0
+Wall = 0
 
 start
 
+Counter = 0
 begin loop
     while Counter != 75
         if Men[Counter] not exists and Counter != 75
             Men[Counter] = create random villager of tribe TRIBE_TYPE_GREEK at {AztecPrison} + {number from -12 to 12, 0, number from -12 to 12}//create VILLAGER VILLAGER_INFO_JAPANESE_FORESTER_MALE at {1013.581, 132.333, 2002.798} + {number from -3 to 3, 0, number from -3 to 3}
-            attach Men[Counter] to AztecPrison
             release Men[Counter]
+            attach Men[Counter] to AztecPrison
             Counter++
         end if
     end while
