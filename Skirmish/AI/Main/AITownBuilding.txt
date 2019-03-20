@@ -91,6 +91,7 @@ begin script SK_AITownBuildingGetBuildingPos(AITown,PlayerID)
     ExistingOreRock = 0
     ExistingSpell = 0
     Influence = 0
+    InfluenceEnemy[SK_MaxPlayers]
     Number = 0
     NumberofA = 0
     NumberofB = 0
@@ -1565,6 +1566,21 @@ start
         ExistingOreRock = get ORE_ROCK at {NextBuildingPos[PlayerID]} radius BuildRadius
         ExistingSpell = get FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {NextBuildingPos[PlayerID]} radius BuildRadius
         Influence = get player PlayerID influence at {NextBuildingPos[PlayerID]}
+        if PlayerID != 0
+            InfluenceEnemy[0] = get player 0 influence at {NextBuildingPos[PlayerID]}
+        end if
+        if PlayerID != 1
+            InfluenceEnemy[1] = get player 1 influence at {NextBuildingPos[PlayerID]}
+        end if
+        if PlayerID != 2
+            InfluenceEnemy[2] = get player 2 influence at {NextBuildingPos[PlayerID]}
+        end if
+        if PlayerID != 3
+            InfluenceEnemy[3] = get player 3 influence at {NextBuildingPos[PlayerID]}
+        end if
+        if InfluenceEnemy[0] > 0 or InfluenceEnemy[1] > 0 or InfluenceEnemy[2] > 0 or InfluenceEnemy[3] > 0
+            NextBuildingPos[PlayerID] = marker at {0,0,0}
+        end if
         myDistance = BuildRadius / 1.5
         Villager = get VILLAGER in AITown
         if Influence > 0 and not {AITown} near {NextBuildingPos[PlayerID]} radius 30 and ExistingEpic not exists and ExistingBuilding not exists and ExistingEmbellishment not exists and ExistingField not exists and ExistingRock not exists and ExistingOreRock not exists and ExistingSpell not exists and not {NextBuildingPos[PlayerID]} under water and Villager exists
