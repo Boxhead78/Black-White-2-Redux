@@ -561,6 +561,7 @@ begin script SK_ArmyBehaivours(PlayerID,Platoon,Type,Task,AttackImmediately,Wayp
     locAttack = 0
     myPlatoon = 0
     Number = 0
+    RandomHome = 0
     PlatoonSize = 0
     PlatoonSizeEnemy = 0
     PointOn = 0
@@ -1054,11 +1055,16 @@ begin loop
             elsif SK_ALLOWED_TO_ATTACK[PlayerID] == 0 and locAttack == 0 and get WaypointTimer time remaining <= 0
                 if not Platoon can navigate to {WaypointTown} or WaypointTown == 0
                     begin loop
-                        WaypointTown = marker at {SK_AIHomeTown[PlayerID]} + {number from -150 to 150,number from -150 to 150}
+                        RandomHome = get random home in town SK_AIHomeTown[PlayerID]
+                        if RandomHome exists
+                            WaypointTown = marker at {RandomHome} + {number from -75 to 75,number from -75 to 75}
+                        else
+                            WaypointTown = marker at {SK_AIHomeTown[PlayerID]} + {number from -150 to 150,number from -150 to 150}
+                        end if
                         until Platoon can navigate to {WaypointTown}
                     end loop
                 end if
-                WaypointTimer = create timer for 75 seconds
+                WaypointTimer = create timer for 200 seconds
                 add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {WaypointTown} to Platoon action queue
             end if
 
@@ -1715,6 +1721,7 @@ begin script SK_SiegeWeaponBehaivours(PlayerID,SiegeWeapon,AttackImmediately,Way
     PlatoonSizeEnemy = 0
     PointOn = 0
     Rand = 0
+    RandomHome = 0
     RecalculateTimer = create timer for 0 seconds
     ResetTimer = create timer for 0 seconds
     Target = 0
@@ -2004,11 +2011,16 @@ begin loop
         elsif SK_ALLOWED_TO_ATTACK[PlayerID] == 0 and locAttack == 0 and get WaypointTimer time remaining <= 0
             if not SiegeWeapon can navigate to {WaypointTown} or WaypointTown == 0
                 begin loop
-                    WaypointTown = marker at {SK_AIHomeTown[PlayerID]} + {number from -150 to 150,number from -150 to 150}
+                    RandomHome = get random home in town SK_AIHomeTown[PlayerID]
+                    if RandomHome exists
+                        WaypointTown = marker at {RandomHome} + {number from -75 to 75,number from -75 to 75}
+                    else
+                        WaypointTown = marker at {SK_AIHomeTown[PlayerID]} + {number from -150 to 150,number from -150 to 150}
+                    end if
                     until SiegeWeapon can navigate to {WaypointTown}
                 end loop
             end if
-            WaypointTimer = create timer for 75 seconds
+            WaypointTimer = create timer for 200 seconds
             add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {WaypointTown} to siege weapon SiegeWeapon action queue
         end if
 
