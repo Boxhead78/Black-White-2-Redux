@@ -5,10 +5,174 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 define script LC12_Outro
+define script LC12_Departure
 
 begin script LC12_Outro
 
+    PlayerAlignment = 0
+
 start
-    
+
+wait until IntroFinished == 1
+
+wait until PLAYER of AztecCapital != 1 and GB_DialogueIsRunning == 0
+
+GB_DialogueIsRunning = 1
+begin dialogue
+    eject good spirit
+    eject evil spirit
+    say "BW2XT_LAND02_PLAYER_WINS_IMPRESS_10"
+    clear dialogue
+    close dialogue
+    wait BW2XT_LAND02_PLAYER_WINS_IMPRESS_10 + 1 seconds
+    say "BW2XT_LAND02_PLAYER_WINS_IMPRESS_40"
+    clear dialogue
+    close dialogue
+    wait BW2XT_LAND02_PLAYER_WINS_IMPRESS_40 + 1 seconds
+    send evil spirit home
+    send good spirit home
+end dialogue
+GB_DialogueIsRunning = 0
+
+wait until PLAYER of AztecCapital != 1 and PLAYER of AztecTown1 != 1 and PLAYER of AztecTown2 != 1 and PLAYER of PlayerTown != 1
+
+PD_ForcedSaving = 1
+wait until PD_ForcedSaving == 0 or 10 seconds
+stop script "SavePersistentDataSetData"
+set persistent data "PREVLAND_OVER" to 1
+run script SavePersistentDataGetData
+
+begin cinema
+
+    //AGC: Moved fade out & wait inside the cinema block
+    set fade red 0 green 0 blue 0 time 2
+    wait 2 seconds
+    run background script LC12_Departure
+    set town PlayerTown capture all enemy towns
+    disable dialogue manager
+    disable game can be lost
+    set player 0 objective TRIBUTE_OBJECTIVE_SCRIPT_CONTROLLED_WIN_LAND value 1
+    //increment tribute by 250000
+    PlayerAlignment = get player 0 alignment
+    if PLAYER of AztecCapital == 0
+        PlayerAlignment = PlayerAlignment - 0.15
+        ALIGNMENT of MyCreature = ALIGNMENT of MyCreature - 0.1
+    else
+        PlayerAlignment = PlayerAlignment + 0.15
+        ALIGNMENT of MyCreature = ALIGNMENT of MyCreature + 0.1
+    end if
+    set player 0 alignment PlayerAlignment
+    stop script "LC12_Speeches"
+    stop script "LC12_GateHouseManager"
+    stop script "LC12_CreatureLogic"
+
+    disable atmos sound
+    set atmos volume 0
+
+    start music "farming_communtiy_land2" loop 1
+
+    //16 seconds
+    reset camera path
+    queue camera move with position {PlayerTown} + {40,60,40} focus {PlayerTown} time 0.0
+    queue camera move with position {PlayerTown} + {120,140,120} focus {PlayerTown} + {0,40,0} time 9.0
+    queue camera move with position {PlayerTown} + {150,170,150} focus {PlayerTown} + {0,75,0} time 7.0
+    play camera path with easein 20 easeout 8 method SCRIPT_CAMERAPATH_EQUALDISTANCE
+    set fade in time 1
+
+    eject good spirit
+
+    say "BW2XT_LAND02_NEW_OUTRO_10"
+    clear dialogue
+    close dialogue
+    wait BW2XT_LAND02_NEW_OUTRO_10 + 1 seconds
+    say "BW2XT_LAND02_NEW_OUTRO_20"
+    clear dialogue
+    close dialogue
+    wait BW2XT_LAND02_NEW_OUTRO_20 + 1 seconds
+    say "BW2XT_LAND02_NEW_OUTRO_30"
+    clear dialogue
+    close dialogue
+    wait BW2XT_LAND02_NEW_OUTRO_30 + 1 seconds
+
+    send good spirit home
+
+    wait until camera ready
+
+    stop music with fadetime 5
+
+end cinema
+
 end script LC12_Outro
 
+
+begin script LC12_Departure
+
+    DepartureScrollPos = marker at {978.88,60.34,1575.22}
+    DepartureScroll = 0
+    Portal = 0
+    
+start
+
+    enable global influence
+
+    Portal = create visual effect VISUAL_EFFECT_TELEPORTER_HOOP at {DepartureScrollPos} + {0, 1.5, 0} time -1
+
+    DepartureScroll = create highlight GOLD name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {DepartureScrollPos}
+    ALTITUDE of DepartureScroll = 3
+
+    wait until DepartureScroll right clicked
+
+    begin dialogue
+        eject good spirit
+        //say "Are you sure you wish to leave the land?"
+        say "BW2T_SCRIPT_03FINAL_ADVISORS_TUT_934"
+        wait until read
+        //say "Click again to confirm"
+        say "BW2T_SCRIPT_03FINAL_ADVISORS_TUT_933"
+        wait until read
+        send good spirit home
+    end dialogue
+    
+    clear right clicked object
+    wait until DepartureScroll right clicked
+    delete DepartureScroll
+    
+    // Get the dialogue for the enemy and for the advisors
+    
+    set fade red 0 green 0 blue 0 time 2
+    wait 2 seconds
+    begin cinema
+        start music "farming_communtiy_land2" loop 10
+        wait 2 seconds
+    
+        queue camera move with position {978.88,63.34,1575.22} + {10,7.5,10} focus {978.88,63.34,1575.22} + {0,5,0} time 0.0
+        queue camera move with position {978.88,63.34,1575.22} + {7.5,5,7.5} focus {978.88,63.34,1575.22} time 5.0
+        queue camera move with position {978.88,63.34,1575.22} + {1,1.5,1} focus {978.88,63.34,1575.22} time 4.0
+        play camera path with easein 4 easeout 4 method SCRIPT_CAMERAPATH_EQUALDISTANCE
+        set fade in time 1
+        wait 4 seconds
+        set fade red 0 green 0 blue 0 time 3
+        wait 3 seconds
+        wait 1 seconds
+    end cinema
+    
+    //TRIGGER processing of land end objectives
+    process land end objectives
+    wait until land end objectives processed    
+    
+    release MyCreature
+    MyCreature = get player 0 creature
+    if MyCreature exists
+        save my_creature
+    end if
+
+    disable game can be lost
+    run script LandExit
+
+    PD_ForcedSaving = 1
+    wait until PD_ForcedSaving == 0 or 10 seconds
+
+    load map "./Data/Landscape/BW2/Land13.bwe"
+    wait 3 seconds
+
+end script LC12_Departure
