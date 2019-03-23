@@ -1,0 +1,311 @@
+/*
+###  STRUCTURE BUILD COSTS  ###
+#
+#         By: Godplex
+#
+# Description: Wood and ore costs for all buildings. Stored in
+#              an array you can index to with the same names
+#              as AdobeNumberEnum (but with BC_ prefix.)
+#              Includes method for easy lookup of an object's cost.
+#
+# Example: bcWood[BC_ABODE_NUMBER_MELEE_ARMOURY] returns the
+#          wood cost of an ABODE_NUMBER_MELEE_ARMOURY.
+#
+######################################*/
+
+
+// Public Stuff
+global bcWood[34]
+global bcOre[34]
+
+define script bcGetWoodCostOf(rObject)
+define script bcGetOreCostOf(rObject)
+
+
+// Private Stuff
+global BC_TRUE = 1
+global BC_FALSE = 0
+
+global bcReturnVal
+global bcReturnLock = 0 // INITIALIZE TO BC_FALSE
+
+define script bc_Return(Value)
+define script bcUnlockReturn
+
+// Adobe Number Enum
+global BC_ABODE_NUMBER_A  =  0
+global BC_ABODE_NUMBER_B  =  1
+global BC_ABODE_NUMBER_C  =  2
+global BC_ABODE_NUMBER_D  =  3
+global BC_ABODE_NUMBER_E  =  4
+global BC_ABODE_NUMBER_SKYSCRAPER =  5
+global BC_ABODE_NUMBER_ALTAR  =  6
+global BC_ABODE_NUMBER_STORAGE_PIT =  7
+global BC_ABODE_NUMBER_CRECHE =  8
+global BC_ABODE_NUMBER_SHRINE =  9
+global BC_ABODE_NUMBER_TEMPLE =  10
+global BC_ABODE_NUMBER_PUB =  11
+global BC_ABODE_NUMBER_TOWN_CENTRE=  12
+global BC_ABODE_NUMBER_CREATURE_PEN   =  13
+global BC_ABODE_NUMBER_FIELD  =  14
+global BC_ABODE_NUMBER_MELEE_ARMOURY  =  15
+global BC_ABODE_NUMBER_RANGED_ARMOURY =  16
+global BC_ABODE_NUMBER_WORKSHOP   =  17
+global BC_ABODE_NUMBER_STUDY  =  18
+global BC_ABODE_NUMBER_UNIVERSITY =  19
+global BC_ABODE_NUMBER_PRISON =  20
+global BC_ABODE_NUMBER_SMELTER=  21
+global BC_ABODE_NUMBER_GRANARY=  22
+global BC_ABODE_NUMBER_LUMBERMILL =  23
+global BC_ABODE_NUMBER_MARKET_POT =  24
+global BC_ABODE_NUMBER_MARKET_STATUE  =  25
+global BC_ABODE_NUMBER_MARKET_PLANT   =  26
+global BC_ABODE_NUMBER_AMPITHEATRE=  27
+global BC_ABODE_NUMBER_GRAVEYARD  =  28
+global BC_ABODE_NUMBER_OLD_PERSONS_HOME   =  29
+global BC_ABODE_NUMBER_BATHHOUSE  =  30
+global BC_ABODE_NUMBER_WALLTOWER_TECH0 =  31
+global BC_ABODE_NUMBER_WALLTOWER_TECH1 =  32
+global BC_ABODE_NUMBER_GATEHOUSE  =  33
+global BC_ABODE_NUMBER_GATEHOUSE_F =  34
+
+
+run script bc_InitBuildCosts
+
+begin script bc_InitBuildCosts
+start
+    bcReturnLock = BC_FALSE
+    bcWood[BC_ABODE_NUMBER_A] = 280
+    bcWood[BC_ABODE_NUMBER_B] = 300
+    bcWood[BC_ABODE_NUMBER_C] = 360
+    bcWood[BC_ABODE_NUMBER_D] = 800
+    bcWood[BC_ABODE_NUMBER_E] = 1200
+    bcWood[BC_ABODE_NUMBER_SKYSCRAPER] = 400
+    bcWood[BC_ABODE_NUMBER_ALTAR] = 3000
+    bcWood[BC_ABODE_NUMBER_STORAGE_PIT] = 1500
+    bcWood[BC_ABODE_NUMBER_CRECHE] = 2500
+    bcWood[BC_ABODE_NUMBER_SHRINE] = 0
+    bcWood[BC_ABODE_NUMBER_TEMPLE] = 3500
+    bcWood[BC_ABODE_NUMBER_PUB] = 2000
+    bcWood[BC_ABODE_NUMBER_TOWN_CENTRE] = 1000
+    bcWood[BC_ABODE_NUMBER_CREATURE_PEN] = 3000
+    bcWood[BC_ABODE_NUMBER_FIELD] = 0
+    bcWood[BC_ABODE_NUMBER_MELEE_ARMOURY] = 1400
+    bcWood[BC_ABODE_NUMBER_RANGED_ARMOURY] = 1400
+    bcWood[BC_ABODE_NUMBER_WORKSHOP] = 1200
+    bcWood[BC_ABODE_NUMBER_STUDY] = 0
+    bcWood[BC_ABODE_NUMBER_UNIVERSITY] = 2000
+    bcWood[BC_ABODE_NUMBER_PRISON] = 1500
+    bcWood[BC_ABODE_NUMBER_SMELTER] = 2000
+    bcWood[BC_ABODE_NUMBER_GRANARY] = 1500
+    bcWood[BC_ABODE_NUMBER_LUMBERMILL] = 100
+    bcWood[BC_ABODE_NUMBER_MARKET_POT] = 300
+    bcWood[BC_ABODE_NUMBER_MARKET_STATUE] = 300
+    bcWood[BC_ABODE_NUMBER_MARKET_PLANT] = 300
+    bcWood[BC_ABODE_NUMBER_AMPITHEATRE] = 5000
+    bcWood[BC_ABODE_NUMBER_GRAVEYARD] = 2000
+    bcWood[BC_ABODE_NUMBER_OLD_PERSONS_HOME] = 1500
+    bcWood[BC_ABODE_NUMBER_BATHHOUSE] = 2500
+    bcWood[BC_ABODE_NUMBER_WALLTOWER_TECH0] = 0
+    bcWood[BC_ABODE_NUMBER_WALLTOWER_TECH1] = 0
+    bcWood[BC_ABODE_NUMBER_GATEHOUSE] = 0
+    bcWood[BC_ABODE_NUMBER_GATEHOUSE_F] = 0
+    bcOre[BC_ABODE_NUMBER_A] = 0
+    bcOre[BC_ABODE_NUMBER_B] = 0
+    bcOre[BC_ABODE_NUMBER_C] = 0
+    bcOre[BC_ABODE_NUMBER_D] = 200
+    bcOre[BC_ABODE_NUMBER_E] = 400
+    bcOre[BC_ABODE_NUMBER_SKYSCRAPER] = 200
+    bcOre[BC_ABODE_NUMBER_ALTAR] = 0
+    bcOre[BC_ABODE_NUMBER_STORAGE_PIT] = 0
+    bcOre[BC_ABODE_NUMBER_CRECHE] = 0
+    bcOre[BC_ABODE_NUMBER_SHRINE] = 100
+    bcOre[BC_ABODE_NUMBER_TEMPLE] = 1500
+    bcOre[BC_ABODE_NUMBER_PUB] = 0
+    bcOre[BC_ABODE_NUMBER_TOWN_CENTRE] = 0
+    bcOre[BC_ABODE_NUMBER_CREATURE_PEN] = 0
+    bcOre[BC_ABODE_NUMBER_FIELD] = 0
+    bcOre[BC_ABODE_NUMBER_MELEE_ARMOURY] = 500
+    bcOre[BC_ABODE_NUMBER_RANGED_ARMOURY] = 500
+    bcOre[BC_ABODE_NUMBER_WORKSHOP] = 500
+    bcOre[BC_ABODE_NUMBER_STUDY] = 0
+    bcOre[BC_ABODE_NUMBER_UNIVERSITY] = 500
+    bcOre[BC_ABODE_NUMBER_PRISON] = 300
+    bcOre[BC_ABODE_NUMBER_SMELTER] = 100
+    bcOre[BC_ABODE_NUMBER_GRANARY] = 500
+    bcOre[BC_ABODE_NUMBER_LUMBERMILL] = 600
+    bcOre[BC_ABODE_NUMBER_MARKET_POT] = 300
+    bcOre[BC_ABODE_NUMBER_MARKET_STATUE] = 300
+    bcOre[BC_ABODE_NUMBER_MARKET_PLANT] = 300
+    bcOre[BC_ABODE_NUMBER_AMPITHEATRE] = 1500
+    bcOre[BC_ABODE_NUMBER_GRAVEYARD] = 500
+    bcOre[BC_ABODE_NUMBER_OLD_PERSONS_HOME] = 300
+    bcOre[BC_ABODE_NUMBER_BATHHOUSE] = 1000
+    bcOre[BC_ABODE_NUMBER_WALLTOWER_TECH0] = 50
+    bcOre[BC_ABODE_NUMBER_WALLTOWER_TECH1] = 75
+    bcOre[BC_ABODE_NUMBER_GATEHOUSE] = 100
+    bcOre[BC_ABODE_NUMBER_GATEHOUSE_F] = 150
+end script bc_InitBuildCosts
+
+begin script bcGetWoodCostOf(rObject)
+start
+    if get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_A at {rObject} exists
+        run script bc_Return(bcWood[BC_ABODE_NUMBER_A])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_B at {rObject} exists
+        run script bc_Return(bcWood[BC_ABODE_NUMBER_B])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_C at {rObject} exists
+        run script bc_Return(bcWood[BC_ABODE_NUMBER_C])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_D at {rObject} exists
+        run script bc_Return(bcWood[BC_ABODE_NUMBER_D])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_E at {rObject} exists
+        run script bc_Return(bcWood[BC_ABODE_NUMBER_E])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_SKYSCRAPER at {rObject} exists
+        run script bc_Return(bcWood[BC_ABODE_NUMBER_SKYSCRAPER])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_ALTAR at {rObject} exists
+        run script bc_Return(bcWood[BC_ABODE_NUMBER_ALTAR])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_STORAGE_PIT at {rObject} exists
+        run script bc_Return(bcWood[BC_ABODE_NUMBER_STORAGE_PIT])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_CRECHE at {rObject} exists
+        run script bc_Return(bcWood[BC_ABODE_NUMBER_CRECHE])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_SHRINE at {rObject} exists
+        run script bc_Return(bcWood[BC_ABODE_NUMBER_SHRINE])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_TEMPLE at {rObject} exists
+        run script bc_Return(bcWood[BC_ABODE_NUMBER_TEMPLE])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_PUB at {rObject} exists
+        run script bc_Return(bcWood[BC_ABODE_NUMBER_PUB])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_TOWN_CENTRE at {rObject} exists
+        run script bc_Return(bcWood[BC_ABODE_NUMBER_TOWN_CENTRE])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_CREATURE_PEN at {rObject} exists
+        run script bc_Return(bcWood[BC_ABODE_NUMBER_CREATURE_PEN])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_FIELD at {rObject} exists
+        run script bc_Return(bcWood[BC_ABODE_NUMBER_FIELD])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_MELEE_ARMOURY at {rObject} exists
+        run script bc_Return(bcWood[BC_ABODE_NUMBER_MELEE_ARMOURY])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_RANGED_ARMOURY at {rObject} exists
+        run script bc_Return(bcWood[BC_ABODE_NUMBER_RANGED_ARMOURY])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_WORKSHOP at {rObject} exists
+        run script bc_Return(bcWood[BC_ABODE_NUMBER_WORKSHOP])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_STUDY at {rObject} exists
+        run script bc_Return(bcWood[BC_ABODE_NUMBER_STUDY])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_UNIVERSITY at {rObject} exists
+        run script bc_Return(bcWood[BC_ABODE_NUMBER_UNIVERSITY])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_PRISON at {rObject} exists
+        run script bc_Return(bcWood[BC_ABODE_NUMBER_PRISON])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_SMELTER at {rObject} exists
+        run script bc_Return(bcWood[BC_ABODE_NUMBER_SMELTER])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GRANARY at {rObject} exists
+        run script bc_Return(bcWood[BC_ABODE_NUMBER_GRANARY])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_LUMBERMILL at {rObject} exists
+        run script bc_Return(bcWood[BC_ABODE_NUMBER_LUMBERMILL])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_MARKET_POT at {rObject} exists
+        run script bc_Return(bcWood[BC_ABODE_NUMBER_MARKET_POT])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_MARKET_STATUE at {rObject} exists
+        run script bc_Return(bcWood[BC_ABODE_NUMBER_MARKET_STATUE])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_MARKET_PLANT at {rObject} exists
+        run script bc_Return(bcWood[BC_ABODE_NUMBER_MARKET_PLANT])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_AMPITHEATRE at {rObject} exists
+        run script bc_Return(bcWood[BC_ABODE_NUMBER_AMPITHEATRE])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GRAVEYARD at {rObject} exists
+        run script bc_Return(bcWood[BC_ABODE_NUMBER_GRAVEYARD])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_OLD_PERSONS_HOME at {rObject} exists
+        run script bc_Return(bcWood[BC_ABODE_NUMBER_OLD_PERSONS_HOME])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_BATHHOUSE at {rObject} exists
+        run script bc_Return(bcWood[BC_ABODE_NUMBER_BATHHOUSE])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_WALLTOWER_TECH0 at {rObject} exists
+        run script bc_Return(bcWood[BC_ABODE_NUMBER_WALLTOWER_TECH0])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_WALLTOWER_TECH1 at {rObject} exists
+        run script bc_Return(bcWood[BC_ABODE_NUMBER_WALLTOWER_TECH1])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE at {rObject} exists
+        run script bc_Return(bcWood[BC_ABODE_NUMBER_GATEHOUSE])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {rObject} exists
+        run script bc_Return(bcWood[BC_ABODE_NUMBER_GATEHOUSE_F])
+    end if
+end script bcGetWoodCostOf
+
+begin script bcGetOreCostOf(rObject)
+start
+    if get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_A at {rObject} exists
+        run script bc_Return(bcOre[BC_ABODE_NUMBER_A])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_B at {rObject} exists
+        run script bc_Return(bcOre[BC_ABODE_NUMBER_B])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_C at {rObject} exists
+        run script bc_Return(bcOre[BC_ABODE_NUMBER_C])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_D at {rObject} exists
+        run script bc_Return(bcOre[BC_ABODE_NUMBER_D])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_E at {rObject} exists
+        run script bc_Return(bcOre[BC_ABODE_NUMBER_E])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_SKYSCRAPER at {rObject} exists
+        run script bc_Return(bcOre[BC_ABODE_NUMBER_SKYSCRAPER])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_ALTAR at {rObject} exists
+        run script bc_Return(bcOre[BC_ABODE_NUMBER_ALTAR])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_STORAGE_PIT at {rObject} exists
+        run script bc_Return(bcOre[BC_ABODE_NUMBER_STORAGE_PIT])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_CRECHE at {rObject} exists
+        run script bc_Return(bcOre[BC_ABODE_NUMBER_CRECHE])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_SHRINE at {rObject} exists
+        run script bc_Return(bcOre[BC_ABODE_NUMBER_SHRINE])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_TEMPLE at {rObject} exists
+        run script bc_Return(bcOre[BC_ABODE_NUMBER_TEMPLE])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_PUB at {rObject} exists
+        run script bc_Return(bcOre[BC_ABODE_NUMBER_PUB])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_TOWN_CENTRE at {rObject} exists
+        run script bc_Return(bcOre[BC_ABODE_NUMBER_TOWN_CENTRE])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_CREATURE_PEN at {rObject} exists
+        run script bc_Return(bcOre[BC_ABODE_NUMBER_CREATURE_PEN])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_FIELD at {rObject} exists
+        run script bc_Return(bcOre[BC_ABODE_NUMBER_FIELD])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_MELEE_ARMOURY at {rObject} exists
+        run script bc_Return(bcOre[BC_ABODE_NUMBER_MELEE_ARMOURY])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_RANGED_ARMOURY at {rObject} exists
+        run script bc_Return(bcOre[BC_ABODE_NUMBER_RANGED_ARMOURY])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_WORKSHOP at {rObject} exists
+        run script bc_Return(bcOre[BC_ABODE_NUMBER_WORKSHOP])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_STUDY at {rObject} exists
+        run script bc_Return(bcOre[BC_ABODE_NUMBER_STUDY])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_UNIVERSITY at {rObject} exists
+        run script bc_Return(bcOre[BC_ABODE_NUMBER_UNIVERSITY])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_PRISON at {rObject} exists
+        run script bc_Return(bcOre[BC_ABODE_NUMBER_PRISON])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_SMELTER at {rObject} exists
+        run script bc_Return(bcOre[BC_ABODE_NUMBER_SMELTER])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GRANARY at {rObject} exists
+        run script bc_Return(bcOre[BC_ABODE_NUMBER_GRANARY])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_LUMBERMILL at {rObject} exists
+        run script bc_Return(bcOre[BC_ABODE_NUMBER_LUMBERMILL])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_MARKET_POT at {rObject} exists
+        run script bc_Return(bcOre[BC_ABODE_NUMBER_MARKET_POT])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_MARKET_STATUE at {rObject} exists
+        run script bc_Return(bcOre[BC_ABODE_NUMBER_MARKET_STATUE])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_MARKET_PLANT at {rObject} exists
+        run script bc_Return(bcOre[BC_ABODE_NUMBER_MARKET_PLANT])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_AMPITHEATRE at {rObject} exists
+        run script bc_Return(bcOre[BC_ABODE_NUMBER_AMPITHEATRE])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GRAVEYARD at {rObject} exists
+        run script bc_Return(bcOre[BC_ABODE_NUMBER_GRAVEYARD])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_OLD_PERSONS_HOME at {rObject} exists
+        run script bc_Return(bcOre[BC_ABODE_NUMBER_OLD_PERSONS_HOME])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_BATHHOUSE at {rObject} exists
+        run script bc_Return(bcOre[BC_ABODE_NUMBER_BATHHOUSE])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_WALLTOWER_TECH0 at {rObject} exists
+        run script bc_Return(bcOre[BC_ABODE_NUMBER_WALLTOWER_TECH0])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_WALLTOWER_TECH1 at {rObject} exists
+        run script bc_Return(bcOre[BC_ABODE_NUMBER_WALLTOWER_TECH1])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE at {rObject} exists
+        run script bc_Return(bcOre[BC_ABODE_NUMBER_GATEHOUSE])
+    elsif get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {rObject} exists
+        run script bc_Return(bcOre[BC_ABODE_NUMBER_GATEHOUSE_F])
+    end if
+end script bcGetOreCostOf
+
+
+begin script bc_Return(Value)
+start
+    wait until bcReturnLock == BC_FALSE
+    bcReturnLock = BC_TRUE
+    bcReturnVal = Value
+end script bc_Return
+
+begin script bcUnlockReturn
+start
+    bcReturnLock = BC_FALSE
+end script bcUnlockReturn

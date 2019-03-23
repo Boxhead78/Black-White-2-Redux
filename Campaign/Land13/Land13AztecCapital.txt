@@ -1,0 +1,195 @@
+///////////////////////////////////////////////////////////////////////////////
+//    Land 12 Aztec-Strategy
+//    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+///////////////////////////////////////////////////////////////////////////////
+
+define script LC13_Aztec_Capital_Impressiveness
+define script LC13_TownConversion
+define script LC13_Tribute
+define script LC13_GatehouseManager
+define script LC13_Speeches
+define script LC13_Aztec_Capital
+define script LC13_AttackNearestTownTimer
+define script LC13_GetNearestSettlement
+define script LC13_DefendPlatoons
+define script DisableLocalPlatoonResponse
+define script LC13_GetPlayerUnits
+define script LC13_GenericTalusSpeeches(whichUnit,PlayerOfUnit)
+
+define TalusPlatoon = 0
+define TalusCatapult = 0
+
+global AttackReady = 0
+global ThrowMiracleTimer = 0
+global FireRainTimer = 0
+global MiracleTimerStarted = 0
+global MiracleFireRainStarted = 0
+
+begin script LC13_Aztec_Capital_Impressiveness
+
+start
+
+end script LC13_Aztec_Capital_Impressiveness
+
+begin script LC13_TownConversion
+
+start
+
+end script LC13_TownConversion
+
+begin script LC13_Tribute
+
+start
+
+end script LC13_Tribute
+
+begin script LC13_GatehouseManager
+
+start
+
+end script LC13_GatehouseManager
+
+begin script LC13_Speeches
+
+start
+
+end script LC13_Speeches
+
+
+begin script LC13_GenericTalusSpeeches(whichUnit,PlayerOfUnit)
+
+start
+
+end script LC13_GenericTalusSpeeches
+
+
+begin script LC13_GetPlayerUnits
+
+    MyPlatoon = 0
+
+start
+
+begin loop
+    wait 2.5 seconds
+    MyPlatoon = get platoon of player 0 nearest hand position radius 100 excluding scripted
+    if MyPlatoon exists
+        run background script LC13_GenericTalusSpeeches(MyPlatoon,0)
+    end if
+end loop
+
+end script LC13_GetPlayerUnits
+
+
+begin script LC13_Aztec_Capital
+
+    AztecTown1Attacks = 0
+    AztecTown2Attacks = 0
+    AttackingPosition = 0
+    AttackingPositionFallBack = 0
+    Wall[12]
+    NearestSettlementTownCentre = 0
+    AttackDir[2]
+    SkeletonAttackTimer = create timer for 1800 * RecruitModifier seconds
+    SiegeWaypoint1 = 0
+    SiegeWaypoint2 = 0
+    SiegeWaypoint3 = 0
+
+start
+
+    AttackNearestTownTimer = create timer for 0 seconds
+
+    LC13_RecruitTimer1 = create timer for 60 seconds
+    LC13_RecruitTimer2 = create timer for 60 seconds
+    LC13_RecruitTimer3 = create timer for 60 seconds
+
+    if Difficulty >= 4
+        add resource WOOD 3000 to PlayerTown
+        add resource ORE 3000 to PlayerTown
+        add resource FOOD 3000 to PlayerTown
+    elsif Difficulty == 3
+        add resource WOOD 5000 to PlayerTown
+        add resource ORE 5000 to PlayerTown
+        add resource FOOD 5000 to PlayerTown
+    elsif Difficulty == 2
+        add resource WOOD 7500 to PlayerTown
+        add resource ORE 7500 to PlayerTown
+        add resource FOOD 7500 to PlayerTown
+    elsif Difficulty == 1
+        add resource WOOD 10000 to PlayerTown
+        add resource ORE 10000 to PlayerTown
+        add resource FOOD 10000 to PlayerTown
+    end if
+
+    wait until IntroFinished == 1
+
+    //----Create town static defenders platoons----//
+    //AztecCapital
+
+    //----Create static defenders platoons----//
+
+    //----Create patrol platoons----//
+
+    //----Create town archer platoons----//
+
+    //----Create static sieges----//
+
+    begin loop
+
+    end loop
+
+end script LC13_Aztec_Capital
+
+
+begin script LC13_DefendPlatoons
+
+start
+
+end script LC13_DefendPlatoons
+
+
+begin script LC13_GetNearestSettlement
+
+start
+
+end script LC13_GetNearestSettlement
+
+
+begin script LC13_AttackNearestTownTimer
+
+start
+
+begin loop
+
+    if get AttackNearestTownTimer time remaining <= 0
+        wait 45 seconds
+        AttackNearestTownTimer = create timer for 1200 * RecruitModifier seconds
+    end if
+
+end loop
+
+end script LC13_AttackNearestTownTimer
+
+
+begin script DisableLocalPlatoonResponse
+
+    Counter = 0
+
+start
+
+begin loop
+    if Counter > 99
+        Counter = 0
+        wait 30 seconds
+    end if
+    if LC13_Platoon[Counter] exists
+        disable platoon LC13_Platoon[Counter] respond to local platoon attack
+    end if
+    if LC13_WallArcher[Counter] exists
+        disable platoon LC13_WallArcher[Counter] respond to local platoon attack
+    end if
+
+    Counter++
+end loop
+
+end script DisableLocalPlatoonResponse
