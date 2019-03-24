@@ -8,13 +8,14 @@
 define oCreature = 0
 define script Globals
 define script LC12_CreateUndeadPlatoon(whichPlatoon,howManyVillagers,whichMesh)
+define script LC12_GhostScript(myGhost)
 
 define s_aztecwarrior_ghost = 0
 define s_skeletonadultland2 = 1
 define s_undeadwarrior_noghost = 2
 
 // Debug switch
-global DEBUG = 1
+global DEBUG = 0
 global Intro = 1
 
 global LC12_EnemyCreature = 0
@@ -148,6 +149,7 @@ start
         add villager Ghost[counter] to platoon whichPlatoon
         disable Ghost[counter] hurt by fire
         disable Ghost[counter] set on fire
+        run background script LC12_GhostScript(Ghost[counter])
 
         //Set new mesh
         if whichMesh == s_aztecwarrior_ghost
@@ -167,3 +169,19 @@ start
     delete Villager
 
 end script LC12_CreateUndeadPlatoon
+
+
+begin script LC12_GhostScript(myGhost)
+
+    myEffect = 0
+
+start
+
+    wait until HEALTH of myGhost == 0.00 or PLAYER of myGhost != 1
+
+    myEffect = create visual effect VISUAL_EFFECT_WEATHER_LIGHTNING_EXPLOSION at {myGhost} + {0,1,0} time 1.5
+    set myEffect color red 148 green 0 blue 211
+    SCALE of myEffect = 0.1
+    HEALTH of myGhost = 0.00
+
+end script LC12_GhostScript
