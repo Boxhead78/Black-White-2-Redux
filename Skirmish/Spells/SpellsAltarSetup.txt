@@ -1,12 +1,14 @@
 //--------------------------------------------------------------------------------------------------------------
 define script AltarEpics
-define script AltarEpicsLogic(TownCentre,PlayerID,whichWonder)
+define script AltarEpicsLogic(Building,PlayerID,whichWonder)
 
 define NONE = 0
 define VERDANT = 1
 define FIRERAIN = 2
 define THUNDERSTORM = 3
 define METEOR = 4
+define LIFE = 5 //Not working, no reliable way to check if object is on ground or not
+define DEATHH = 6 //Not working, no reliable way to check if object is on ground or not
 
 global EpicSpellsActivated = 0
 
@@ -15,12 +17,16 @@ run script AltarEpics
 
 begin script AltarEpics
 
+    Altar = 0
+    myAbode = 0
     Counter = 0
     VerdantActivated[25]
     FireRainActivated[25]
     ThunderStormActivated[25]
-    MapID = 0
     MeteorActivated[25]
+    RelPos[6]
+    ExistingFeature[6]
+    MapID = 0
     PlayerID = 0
     Town[25]
     TownCentre = 0
@@ -32,6 +38,7 @@ wait 10 seconds
 MapID = persistent data "LAND_ID"
 
 EpicSpellsActivated = persistent data "EPICSPELLS_CHECK"
+EpicSpellsActivated = 1
 if EpicSpellsActivated == 1
     begin loop
         if Counter >= 20
@@ -41,6 +48,12 @@ if EpicSpellsActivated == 1
         Town[Counter] = get town with id Counter
         if Town[Counter] exists
             TownCentre = get building ABODE_NUMBER_TOWN_CENTRE in Town[Counter] min built 1.0
+            myAbode = get random abode in town Town[Counter]
+            Altar = get HOUSE ABODE_NUMBER_ALTAR at {myAbode} radius 250
+            RelPos[4] = marker at get world position from Altar to {8,19}
+            RelPos[5] = marker at get world position from Altar to {8,-19}
+            ExistingFeature[4] = get FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {RelPos[4]} radius 5
+            ExistingFeature[5] = get FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {RelPos[5]} radius 5
             if PLAYER of Town[Counter] >= 0 and PLAYER of Town[Counter] < 6
                 if TownCentre exists
                     if PLAYER of Town[Counter] == 0
@@ -51,10 +64,6 @@ if EpicSpellsActivated == 1
                         PlayerID = 2
                     elsif PLAYER of Town[Counter] == 3
                         PlayerID = 3
-                    elsif PLAYER of Town[Counter] == 4
-                        PlayerID = 4
-                    elsif PLAYER of Town[Counter] == 5
-                        PlayerID = 5
                     end if
                     if PlayerID >= 1 and AISpellsActivated != 0
                         if get research ARTEFACT_EPIC_WONDER_NUMBER_SIREN available == variable RESEARCH_AVAILABILITY_RESEARCHED or PlayerID >= 1 
@@ -81,7 +90,13 @@ if EpicSpellsActivated == 1
                                 run background script AltarEpicsLogic(TownCentre,PlayerID,METEOR)
                             end if
                         end if
-                        
+                        if Altar exists and PLAYER of Altar == PlayerID and ExistingFeature[4] not exists
+                            run background script AltarEpicsLogic(Altar,PlayerID,LIFE)
+                        end if
+                        if Altar exists and PLAYER of Altar == PlayerID and ExistingFeature[5] not exists
+                            run background script AltarEpicsLogic(Altar,PlayerID,DEATHH)
+                        end if
+
                     elsif PlayerID == 0
                         if get research ARTEFACT_EPIC_WONDER_NUMBER_SIREN available == variable RESEARCH_AVAILABILITY_RESEARCHED or PlayerID >= 1 
                             if VerdantActivated[Counter] == 0
@@ -107,6 +122,14 @@ if EpicSpellsActivated == 1
                                 run background script AltarEpicsLogic(TownCentre,PlayerID,METEOR)
                             end if
                         end if
+                        /*
+                        if Altar exists and PLAYER of Altar == PlayerID and ExistingFeature[4] not exists
+                            run background script AltarEpicsLogic(Altar,PlayerID,LIFE)
+                        end if
+                        if Altar exists and PLAYER of Altar == PlayerID and ExistingFeature[5] not exists
+                            run background script AltarEpicsLogic(Altar,PlayerID,DEATHH)
+                        end if
+                        */
                     end if
                 end if
             end if
@@ -119,28 +142,31 @@ end if
 end script AltarEpics
 
 
-begin script AltarEpicsLogic(TownCentre,PlayerID,whichWonder)
+begin script AltarEpicsLogic(Building,PlayerID,whichWonder)
 
-    RelPos[4]
-    Foundation[4]
-    ParticleEffect[4]
-    ParticleEffect2[4]
+    Counter = 0
+    RelPos[6]
+    Foundation[6]
+    ParticleEffect[6]
+    ParticleEffect2[6]
     Test = 0
 
 start
 
-// Test = create visual effect VISUAL_EFFECT_TOWN_TAKEOVER_AGGRESSOR at {TownCentre} + {30,40,30} time -1 PRE EFFECT
-// Test = create visual effect VISUAL_EFFECT_WEATHER_SANDSTORM at {TownCentre} + {30,40,30} time -1 
+// Test = create visual effect VISUAL_EFFECT_TOWN_TAKEOVER_AGGRESSOR at {Building} + {30,40,30} time -1 PRE EFFECT
+// Test = create visual effect VISUAL_EFFECT_WEATHER_SANDSTORM at {Building} + {30,40,30} time -1 
 
-RelPos[0] = marker at get world position from TownCentre to {19,0}
-RelPos[1] = marker at get world position from TownCentre to {-19,0}
-RelPos[2] = marker at get world position from TownCentre to {0,19}
-RelPos[3] = marker at get world position from TownCentre to {0,-19}
+RelPos[0] = marker at get world position from Building to {19,0}
+RelPos[1] = marker at get world position from Building to {-19,0}
+RelPos[2] = marker at get world position from Building to {0,19}
+RelPos[3] = marker at get world position from Building to {0,-19}
+RelPos[4] = marker at get world position from Building to {8,19}
+RelPos[5] = marker at get world position from Building to {-8,19}
 
 if whichWonder == VERDANT
     //Verdant, 10000 mana
     Foundation[0] = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {RelPos[0]}
-    ANGLE of Foundation[0] = ANGLE of TownCentre
+    ANGLE of Foundation[0] = ANGLE of Building
     SCALE of Foundation[0] = 3.25
     ParticleEffect[0] = create visual effect VISUAL_MIRACLE_FIRE_SEED at {RelPos[0]} + {0,6,0} time -1 target {RelPos[0]} + {0,50,0}
     set ParticleEffect[0] colour red 30 green 195 blue 30
@@ -149,7 +175,7 @@ if whichWonder == VERDANT
 elsif whichWonder == FIRERAIN
     //FireRain 20000 mana
     Foundation[1] = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {RelPos[1]}
-    ANGLE of Foundation[1] = ANGLE of TownCentre
+    ANGLE of Foundation[1] = ANGLE of Building
     SCALE of Foundation[1] = 3.25
     ParticleEffect[1] = create visual effect VISUAL_MIRACLE_FIRE_SEED at {RelPos[1]} + {0,6,0} time -1 target {RelPos[1]} + {0,50,0}
     SCALE of ParticleEffect[1] = 0.75
@@ -157,7 +183,7 @@ elsif whichWonder == FIRERAIN
 elsif whichWonder == THUNDERSTORM
     //ThunderStorm 30000 mana
     Foundation[2] = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {RelPos[2]}
-    ANGLE of Foundation[2] = ANGLE of TownCentre
+    ANGLE of Foundation[2] = ANGLE of Building
     SCALE of Foundation[2] = 3.25
     ParticleEffect[2] = create visual effect VISUAL_MIRACLE_TORNODO_SEED at {RelPos[2]} + {0,6,0} time -1 target {RelPos[2]} + {0,50,0}
     SCALE of ParticleEffect[2] = 0.75
@@ -165,10 +191,28 @@ elsif whichWonder == THUNDERSTORM
 elsif whichWonder == METEOR
     //MeteorSpell 40000 mana
     Foundation[3] = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {RelPos[3]}
-    ANGLE of Foundation[3] = ANGLE of TownCentre
+    ANGLE of Foundation[3] = ANGLE of Building
     SCALE of Foundation[3] = 3.25
     ParticleEffect[3] = create visual effect VISUAL_MIRACLE_METEOR_SEED at {RelPos[3]} + {0,6,0} time -1 target {RelPos[3]} + {0,50,0}
     SCALE of ParticleEffect[3] = 0.75
+
+elsif whichWonder == LIFE
+    //Life 6000 mana
+    Foundation[4] = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {RelPos[4]}
+    ANGLE of Foundation[4] = ANGLE of Building
+    SCALE of Foundation[4] = 3.25
+    ParticleEffect[4] = create visual effect VISUAL_MIRACLE_FIRE_SEED at {RelPos[4]} + {0,6,0} time -1 target {RelPos[4]} + {0,50,0}
+    set ParticleEffect[4] colour red 255 green 255 blue 40
+    SCALE of ParticleEffect[4] = 0.75
+
+elsif whichWonder == DEATHH
+    //DEATHH 10000 mana
+    Foundation[5] = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {RelPos[5]}
+    ANGLE of Foundation[5] = ANGLE of Building
+    SCALE of Foundation[5] = 3.25
+    ParticleEffect[5] = create visual effect VISUAL_MIRACLE_FIRE_SEED at {RelPos[5]} + {0,6,0} time -1 target {RelPos[5]} + {0,50,0}
+    set ParticleEffect[5] colour red 56 green 56 blue 56
+    SCALE of ParticleEffect[5] = 0.75
 
 end if
 
@@ -238,8 +282,55 @@ begin loop
             end if
         end if
 
+    elsif whichWonder == LIFE
+        if get player PlayerID mana >= 6000
+            if ParticleEffect2[4] not exists
+                ParticleEffect2[4] = create visual effect VISUAL_EFFECT_MIRACLE_CHARGE at {RelPos[4]} + {0,1,0} time -1 target {RelPos[4]} + {0,50,0}
+                SCALE of ParticleEffect2[4] = 0.5
+            end if
+            if bindable action BINDABLE_ACTION_TYPE_ACTION performed and hand position near {Foundation[4]} radius 5
+                //run script LifeSpell(0,0)
+                wait 2 seconds
+            end if
+        else
+            if ParticleEffect2[4] exists
+                delete ParticleEffect2[4]
+            end if
+        end if
+
+    elsif whichWonder == DEATHH
+        if get player PlayerID mana >= 10000
+            if ParticleEffect2[5] not exists
+                ParticleEffect2[5] = create visual effect VISUAL_EFFECT_MIRACLE_CHARGE at {RelPos[5]} + {0,1,0} time -1 target {RelPos[5]} + {0,50,0}
+                SCALE of ParticleEffect2[5] = 0.5
+            end if
+            if bindable action BINDABLE_ACTION_TYPE_ACTION performed and hand position near {Foundation[5]} radius 5
+                //run script DeathhSpell(0,0)
+                wait 2 seconds
+            end if
+        else
+            if ParticleEffect2[5] exists
+                delete ParticleEffect2[5]
+            end if
+        end if
+
     end if
+
+    until Building not exists
 end loop
+
+while Counter < 6
+    if Foundation[Counter] exists
+        delete Foundation[Counter]
+    end if
+    if ParticleEffect[Counter] exists
+        delete ParticleEffect[Counter]
+    end if
+    if ParticleEffect2[Counter] exists
+        delete ParticleEffect2[Counter]
+    end if
+    Counter++
+end while
 
 end script AltarEpicsLogic
 //VISUAL_MIRACLE_TORNADO_SHIELD useful for implementing shields for ais
