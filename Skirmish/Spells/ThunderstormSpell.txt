@@ -93,8 +93,8 @@ SCALE of myWeather = 5
 
 wait 50 seconds
 
-run background script Thunderstorm_Miracles(PlayerID,ThunderstormSpell,myWeather)
-run background script Thunderstorm_Lightning(ThunderstormSpell,myWeather)
+run background script Thunderstorm_Miracles(PlayerID,marker at {ThunderstormSpell},myWeather)
+run background script Thunderstorm_Lightning(marker at {ThunderstormSpell},myWeather)
 
 wait 90 seconds
 
@@ -106,6 +106,7 @@ end script Thunderstorm_Clouds
 begin script Thunderstorm_Lightning(ThunderstormSpell,Weather)
 
     House = 0
+    LightningPos = 0
     Prohab = 0
     Town = 0
 
@@ -114,15 +115,19 @@ start
 Town = get TOWN at {ThunderstormSpell} radius 250
 
 begin loop
-    set lightning strike at {ThunderstormSpell} + {number from -80 to 80,0,number from -80 to 80} from Weather scale 1
+    LightningPos = marker at {ThunderstormSpell} + {number from -80 to 80,0,number from -80 to 80}
+    set lightning strike at {LightningPos} from Weather scale 1
+    add effect EFFECT_TYPE_BURN at {LightningPos} strength 0.75 radius 10
 
     if Town exists
         House = get random home in town Town excluding scripted
         wait number from 2 to 3 seconds
         Prohab = number from 1 to 3
-        if Prohab == 1
-            set lightning strike at {House} from Weather scale 1
-            delete House with explode
+        if Prohab == 1 or Prohab == 2
+            if House exists
+                set lightning strike at {House} from Weather scale 1
+                add effect EFFECT_TYPE_BURN at {House} strength 0.75 radius 10
+            end if
         end if
     end if
 
@@ -147,7 +152,7 @@ begin loop
     WindWonderTarget = marker at ({WindWonderStart} + {number from -5 to 5, number from -5 to -15, number from -5 to 5})
     WindWonder = make player PlayerID throw miracle MIRACLE_TYPE_TORNADO from ({WindWonderStart} + {0,-3.0,0}) heading ({WindWonderTarget} + {0,-21,0} - {WindWonderStart})
 
-    wait number from 2 to 10 seconds
+    wait number from 1 to 5 seconds
 
     until Weather not exists
 end loop
