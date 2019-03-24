@@ -58,6 +58,7 @@ end script talNewTalus
 begin script tal_TalusLoop(GodHandle,rTown,PlayerID)
     godHandle = GodHandle
     buildingUnderConstruction = 0
+    ClosestPosInfluenceRing = 0
     discipleCounter = 9
     waterForestCounter = 0
     resourcesCounter = 0
@@ -149,7 +150,7 @@ start
             ge_Busy[godHandle] = 0
         end if
 
-        if get ThrowMiracleTimer time remaining <= 0 and get player ge_Player[godHandle] mana > 23000 and PLAYER of PlayerTown == 0 and GB_DialogueIsRunning == 0
+        if get ThrowMiracleTimer time remaining <= 0 and get player ge_Player[godHandle] mana > 23000 and PLAYER of PlayerTown == 0 and PLAYER of AztecCapital == 1 and GB_DialogueIsRunning == 0
 
             MiracleTimerStarted = 1
             GB_DialogueIsRunning = 1
@@ -183,18 +184,23 @@ start
             end dialogue
             GB_DialogueIsRunning = 0
 
-            run script ge_MoveToRadiusAltitude(godHandle,marker at {1413.27,61.22,1473.44},geGodThrowRadius / 2,geGodThrowAltitude)
+            ClosestPosInfluenceRing = marker at get nearest position at AztecCapital influence ring from {PlayerTown}
+            run script ge_MoveToRadiusAltitude(godHandle,marker at {ClosestPosInfluenceRing},geGodThrowRadius / 2,geGodThrowAltitude)
+            
             wait until GB_DialogueIsRunning == 0
-            while myCounter < 3
-                wait number from 4 to 6 seconds
-                run script ge_ThrowMiracle(godHandle, GE_MIRACLE_TYPE_STORM, marker at {1277.97,60.64,1466.99} + {0,15,0} + {number from -15 to 15,number from -5 to 5,number from -15 to 15}, 1)
-                myCounter++
-            end while 
+            run script ge_ThrowMiracle(godHandle, GE_MIRACLE_TYPE_STORM, marker at {1277.97,60.64,1466.99} + {0,15,0} + {number from -15 to 15,number from -5 to 5,number from -15 to 15}, 1)
+            wait number from 2 to 4 seconds
+            run script ge_ThrowMiracle(godHandle, GE_MIRACLE_TYPE_STORM, marker at {1277.97,60.64,1466.99} + {0,15,0} + {number from -15 to 15,number from -5 to 5,number from -15 to 15}, 1)
+            wait number from 2 to 4 seconds
             run script ge_ThrowMiracle(godHandle, GE_MIRACLE_TYPE_FIRE, marker at {1247.97,60.64,1426.99} + {0,20,0} + {number from -15 to 15,0,number from -15 to 15}, 1)
+            wait number from 2 to 4 seconds
+            run script ge_ThrowMiracle(godHandle, GE_MIRACLE_TYPE_FIRE, marker at {1247.97,60.64,1426.99} + {0,20,0} + {number from -15 to 15,0,number from -15 to 15}, 1)
+            wait number from 2 to 4 seconds
+
             ThrowMiracleTimer = create timer for number from 300 * EpicModifier to 900 * EpicModifier seconds
         end if
 
-        if get FireRainTimer time remaining <= 0 and get player ge_Player[godHandle] mana > 20000 and GB_DialogueIsRunning == 0 and PLAYER of PlayerTown == 0
+        if get FireRainTimer time remaining <= 0 and get player ge_Player[godHandle] mana > 20000 and GB_DialogueIsRunning == 0 and PLAYER of PlayerTown == 0 and PLAYER of AztecCapital == 1
     
             MiracleFireRainStarted = 1
             myRand = number from 1 to 5

@@ -888,6 +888,8 @@ begin script LC12_Speeches
     MigrationComment = 0
     TownComment = 0
 
+    CaptureComment = 0
+
 start
 
 begin loop
@@ -2016,6 +2018,19 @@ begin loop
             clear dialogue
             close dialogue
             wait BW2XT_LAND02_PLAYER_ACCEPTS_MIGRATION_80 + 1 seconds
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+
+    PlayerPlatoon = get platoon of player 0 nearest {AztecCapital} radius 300
+    if PlayerPlatoon exists and CaptureComment == 0
+        CaptureComment = 1
+        GB_DialogueIsRunning = 1
+        begin dialogue
+            say "BW2XT_LAND02_PLAYER_ATTACKS_10"
+            clear dialogue
+            close dialogue
+            wait BW2XT_LAND02_PLAYER_ATTACKS_10 + 1 seconds
         end dialogue
         GB_DialogueIsRunning = 0
     end if
