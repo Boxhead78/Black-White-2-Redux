@@ -11,18 +11,19 @@
 //-----------------------------------------------------------------------------
 
 define LC8_NUM_OF_DEFENDERS                = 0 //Unused
-define LC8_NUM_OF_PLATOONS                = 45
+define LC8_NUM_OF_PLATOONS                = 46
 define LC8_NUM_OF_SIEGE_CATAPULTS         = 25
 define LC8_NUM_OF_WALL_ARCHERS            = 20
 //Army Types
 define Melee                             = 0
 define Ranged                            = 1
 //Army Behaivours
-define Attacker                            = 0
+define Attacker                          = 0
 define Escort                            = 1
-define Conqueror                        = 2 //Nearest Settlement Attacker
+define Conqueror                         = 2 //Nearest Settlement Attacker
 define Patrol                            = 3
-define Special                            = 4
+define PatrolLinked                      = 4
+define Special                           = 5
 
 define script LC8_StaticPlatoonsActions(Pos,Type,Platoon)
 define script Waypoints
@@ -507,6 +508,97 @@ begin loop
 end loop
 
 end script LC8_Platoon11Actions
+
+begin script LC8_Platoon42Actions
+
+    TestPlatoonGuards = 0
+    DistanceG = 0
+    disvolcano = 0
+    Position1 = 0
+    Position2 = 0
+    Position3 = 0
+    Position4 = 0
+    PlayerCreature = 0
+    PlayerPlatoon1 = 0
+    TestSiege = 0
+    oCreature = get player 0 creature
+    NumPat1 = 0
+    HeTeste1 = 0
+    WorrNum = 0
+    HomeTown = get town with id 4
+    Catapult = 0
+    Armory = get building ABODE_NUMBER_MELEE_ARMOURY in HomeTown min built 1.0
+    ArmoryRanged = get building ABODE_NUMBER_RANGED_ARMOURY in HomeTown min built 1.0
+    PlayerPlatoon1Distance = 0
+    PlayerCatapultDistance = 0
+    a = 0
+    oTown = get town with id 0
+    oTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in oTown min built 1.0
+    PlayerSettlement = 0
+    
+start
+
+begin loop    
+
+    if LC8_Platoon[42] not exists
+        //PlatoonKilled = 1
+        wait until LC8_Platoon[42] exists
+    end if
+        
+    PlayerCreature = get distance from {LC8_Platoon[42]} to {oCreature}
+    if PlayerCreature <= 200 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00 and LC8_Platoon[42] can navigate to {oCreature}
+        clear LC8_Platoon[42] action queue
+        begin loop
+            PlayerCreature = get distance from {LC8_Platoon[42]} to {oCreature}
+            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_MOVING_OBJECT using oCreature to LC8_Platoon[42] action queue
+            NumPat1 = get number of villagers in platoon LC8_Platoon[42]
+            until NumPat1 == 0 or SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature == 0.00 or not LC8_Platoon[42] can navigate to {oCreature} or PlayerCreature > 200
+        end loop
+        clear LC8_Platoon[42] action queue
+    end if
+        
+    PlayerPlatoon1 = get platoon of player 0 nearest {LC8_Platoon[42]} radius 200
+    Catapult = get siege weapon of player 0 nearest {LC8_Platoon[42]} radius 155
+    if PlayerPlatoon1 exists and LC8_Platoon[42] can navigate to {PlayerPlatoon1}
+        clear LC8_Platoon[42] action queue
+        begin loop
+            PlayerPlatoon1 = get platoon of player 0 nearest {LC8_Platoon[42]} radius 200
+            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_PLATOON using PlayerPlatoon1 to LC8_Platoon[42] action queue
+            NumPat1 = get number of villagers in platoon LC8_Platoon[42]
+            HeTeste1 = get number of villagers in platoon PlayerPlatoon1
+            until NumPat1 == 0 or HeTeste1 == 0 or not LC8_Platoon[42] can navigate to {PlayerPlatoon1} or PlayerPlatoon1 not exists
+        end loop
+        clear LC8_Platoon[42] action queue
+    elsif Catapult exists and LC8_Platoon[42] can navigate to {Catapult}
+        clear LC8_Platoon[42] action queue
+        a = 0
+        begin loop
+            Catapult = get siege weapon of player 0 nearest {LC8_Platoon[42]} radius 155
+            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Catapult to LC8_Platoon[42] action queue
+            NumPat1 = get number of villagers in platoon LC8_Platoon[42]
+            PlayerPlatoon1 = get platoon of player 0 nearest {LC8_Platoon[42]} radius 200
+            if PlayerPlatoon1 exists and LC8_Platoon[42] can navigate to {PlayerPlatoon1}
+                a = 1
+            end if
+            until NumPat1 == 0 or Catapult not exists or not LC8_Platoon[42] can navigate to {Catapult} or a == 1 or Catapult not exists
+        end loop
+        clear LC8_Platoon[42] action queue
+        a = 0
+    end if
+        
+    if LC8_Platoon[11] exists
+        if get size of LC8_Platoon[42] action queue < 1
+            add action PLATOON_AGENDA_ACTION_LINK_TO_ARMY_MEMBER using LC8_Platoon[11] to LC8_Platoon[42] action queue
+        end if
+    else
+        if get size of LC8_Platoon[42] action queue < 1
+            move LC8_Platoon[42] along WaypointsB with patrol WAYPOINTROUTE_TRAVERSAL_TYPE_CIRCULAR
+        end if
+    end if
+        
+end loop
+
+end script LC8_Platoon42Actions
 
 begin script LC8_Platoon22Actions
 

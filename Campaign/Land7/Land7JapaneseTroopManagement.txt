@@ -11,18 +11,19 @@
 //-----------------------------------------------------------------------------
 
 define LC7_NUM_OF_DEFENDERS                = 0 //Unused
-define LC7_NUM_OF_PLATOONS                = 32
+define LC7_NUM_OF_PLATOONS                = 33
 define LC7_NUM_OF_SIEGE_CATAPULTS         = 13
 define LC7_NUM_OF_WALL_ARCHERS            = 13
 //Army Types
 define Melee                             = 0
 define Ranged                            = 1
 //Army Behaivours
-define Attacker                            = 0
+define Attacker                          = 0
 define Escort                            = 1
-define Conqueror                        = 2 //Nearest Settlement Attacker
+define Conqueror                         = 2 //Nearest Settlement Attacker
 define Patrol                            = 3
-define Special                            = 4
+define PatrolLinked                      = 4
+define Special                           = 5
 
 define script LC7_StaticPlatoonsActions(Pos,Type,Platoon)
 define script LC7_ArmyBehaivours(Platoon,Type,Task,DefendObject,AttackingPoint,AttackingPointFallBack,PatrolRoute,Town)
@@ -1851,6 +1852,17 @@ begin loop
     elsif Task == Patrol
         if get size of Platoon action queue < 1
             move Platoon along PatrolRoute with patrol WAYPOINTROUTE_TRAVERSAL_TYPE_CIRCULAR
+        end if
+
+    elsif Task == PatrolLinked
+        if DefendObject exists
+            if get size of Platoon action queue < 1
+                add action PLATOON_AGENDA_ACTION_LINK_TO_ARMY_MEMBER using DefendObject to Platoon action queue
+            end if
+        else
+            if get size of Platoon action queue < 1
+                move Platoon along PatrolRoute with patrol WAYPOINTROUTE_TRAVERSAL_TYPE_CIRCULAR
+            end if
         end if
 
     elsif Task == Special
