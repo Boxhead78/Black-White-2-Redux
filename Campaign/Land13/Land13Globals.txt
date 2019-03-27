@@ -7,7 +7,8 @@
 // Other Defines
 define oCreature = 0
 define script Globals
-define script LC13_CreateUndeadPlatoon(whichPlatoon,howManyVillagers,whichMesh)
+define script LC13_CreateUndeadPlatoon(whichPlatoon,howManyVillagersToDelete,howManyVillagersToSpawn,whichMesh)
+define script LC13_GhostScript(myGhost)
 
 define s_aztecwarrior_ghost = 0
 define s_skeletonadultland2 = 1
@@ -18,6 +19,7 @@ global DEBUG = 1
 global Intro = 0
 
 global LC13_EnemyCreature = 0
+global LC13_EnemyWolf = 0
 global CinemaIsRunning = 0
 global MigrationsAccepted = 0
 global TownsConverted = 0
@@ -30,6 +32,10 @@ global AttackingPlatoons = 0
 global GenericCommentTimer = 0
 global UnitDeadTimer = 0
 global AIVolcano = 0
+global SacrificeAllowed = 0
+global SkeletonsWave = 0
+global SkeletonCatapultRecAllowed = 0
+global LC13_NumberOfSkeletonPlatoons = 0
 
 global PlayerTown = 0
 global MinorTown1 = 0
@@ -62,6 +68,8 @@ global LC13_RecruitTimer1 = 0
 global LC13_RecruitTimer2 = 0
 global LC13_RecruitTimer3 = 0
 
+global WolfVillagerTimer = 0
+
 global L12ShowingNutOil2Objective = 0
 
 begin script Globals
@@ -69,6 +77,8 @@ begin script Globals
 SecondPlaythrough = 0
 
 start
+
+    WolfVillagerTimer = create timer for 999999 seconds
 
     GenericCommentTimer = create timer for 0 seconds
     UnitDeadTimer = create timer for 200 seconds
@@ -107,7 +117,7 @@ end script Globals
 
 
 //Only works with global platoons
-begin script LC13_CreateUndeadPlatoon(whichPlatoon,howManyVillagers,whichMesh)
+begin script LC13_CreateUndeadPlatoon(whichPlatoon,howManyVillagersToDelete,howManyVillagersToSpawn,whichMesh)
 
     Ghost[200]
     counter = 0
@@ -130,8 +140,8 @@ start
     SCALE of myEffect = 2
 
     //Remove old villagers
-    while counter < howManyVillagers - 1 and size of whichPlatoon > 1
-        if counter < howManyVillagers
+    while counter < howManyVillagersToDelete - 1 and size of whichPlatoon > 1
+        if counter < howManyVillagersToDelete
             Villager = get villager from platoon whichPlatoon nearest {whichPlatoon}
             myEffect = create visual effect VISUAL_EFFECT_WEATHER_LIGHTNING_EXPLOSION at {Villager} + {0,1,0} time 1.5
             set myEffect color red 148 green 0 blue 211
@@ -140,10 +150,10 @@ start
         end if
         counter++
     end while
+
     Villager = get villager from platoon whichPlatoon nearest {whichPlatoon}
     counter = 0
-
-    while counter < howManyVillagers
+    while counter < howManyVillagersToSpawn
 
         //Create ghosts
         Ghost[counter] = create VILLAGER NORSE_HOUSEWIFE at {whichPlatoon} + {number from -10 to 10,number from -10 to 10}
@@ -153,6 +163,7 @@ start
         add villager Ghost[counter] to platoon whichPlatoon
         disable Ghost[counter] hurt by fire
         disable Ghost[counter] set on fire
+        run background script LC13_GhostScript(Ghost[counter])
 
         //Set new mesh
         if whichMesh == s_aztecwarrior_ghost
@@ -169,6 +180,25 @@ start
         counter++
     end while
 
+    myEffect = create visual effect VISUAL_EFFECT_WEATHER_LIGHTNING_EXPLOSION at {Villager} + {0,1,0} time 1.5
+    set myEffect color red 148 green 0 blue 211
+    SCALE of myEffect = 0.1
     delete Villager
 
 end script LC13_CreateUndeadPlatoon
+
+
+begin script LC13_GhostScript(myGhost)
+
+    myEffect = 0
+
+start
+
+    wait until HEALTH of myGhost == 0.00 or PLAYER of myGhost != 1
+
+    myEffect = create visual effect VISUAL_EFFECT_WEATHER_LIGHTNING_EXPLOSION at {myGhost} + {0,1,0} time 1.5
+    set myEffect color red 148 green 0 blue 211
+    SCALE of myEffect = 0.1
+    HEALTH of myGhost = 0.00
+
+end script LC13_GhostScript

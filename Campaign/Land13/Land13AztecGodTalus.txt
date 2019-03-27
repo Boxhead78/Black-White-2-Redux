@@ -149,6 +149,50 @@ start
             ge_Busy[godHandle] = 0
         end if
 
+        if SacrificeAllowed == 1 and GB_DialogueIsRunning == 0 and get player ge_Player[godHandle] mana > 20000
+            SacrificeAllowed = 0
+            GB_DialogueIsRunning = 1
+            begin dialogue
+                myRand = number from 1 to 4
+                if myRand == 1
+                    say "BW2XT_LAND03_TALUS_SACRIFICE_20"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND03_TALUS_SACRIFICE_20 + 1 seconds
+                elsif myRand == 2
+                    say "BW2XT_LAND03_TALUS_SACRIFICESVILLAGER"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND03_TALUS_SACRIFICESVILLAGER + 1 seconds
+                elsif myRand == 3
+                    say "BW2XT_LAND03_TALUS_SKELETONS_20"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND03_TALUS_SKELETONS_20 + 1 seconds
+                elsif myRand == 4
+                    say "BW2XT_LAND03_TALUS_SKELETONS_10"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND03_TALUS_SKELETONS_10 + 1 seconds
+                elsif myRand == 5
+                    say "BW2XT_LAND03_TALUS_SKELETONS_30"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND03_TALUS_SKELETONS_30 + 1 seconds
+                elsif myRand == 6
+                    say "BW2XT_LAND03_TALUS_SUMMONS_SKELETONS_10"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND03_TALUS_SUMMONS_SKELETONS_10 + 1 seconds
+                end if
+            end dialogue
+            GB_DialogueIsRunning = 0
+
+            run script ge_MoveToRadiusAltitude(godHandle,marker at {977.41,279.34,1748.11},geGodThrowRadius / 2,geGodThrowAltitude)
+            run script ge_ThrowMiracle(godHandle, GE_MIRACLE_TYPE_DEATH, marker at {977.41,279.34,1748.11}, 1)
+            wait number from 2 to 4 seconds
+        end if
+
         if townCounter >= 15
             townCounter = 0
             geChangeTown[godHandle] = 1

@@ -2,25 +2,259 @@
 //    Land 13 Creature AI
 //    ~~~~~~~~~~~~~~~~~~~
 //
-//    Start date:         29.10.16            By:    Boxhead
-//    Update date:        30.10.16            By: Boxhead
 ///////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
 //    Globals
 //-----------------------------------------------------------------------------
 
-define script LC13_AICreature
+define Wolf = 0
+define EnemyCreature = 0
 
-global CreatureAttackPos[3]
-global CreatureBuildPos[2]
-global CreatureGathererPos[3]
+define script LC13_AICreature(whichCreature)
+define script LC13_CreatureLogic(whichCreature)
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 
-begin script LC13_AICreature
+begin script LC13_AICreature(whichCreature)
+
+    CreaturePos = marker at {1400.19,321.27,1725.09}
+    PlayerCreature = 0
+    PlayerCreatureType = 0
 
 start
 
+    wait until IntroFinished == 1
+
+    if whichCreature == Wolf
+        WolfVillagerTimer = create timer for 60 seconds
+        whichCreature = create SCRIPT_OBJECT_TYPE_CREATURE CREATURE_TYPE_WOLF at {1642.66,311.26,1685.80}
+        LC13_EnemyWolf = whichCreature
+        set creature whichCreature CREATURE_SCRIPT_TRANSITIONAL_ATTRIBUTE_TYPE_SIZE 0.75
+        STRENGTH of whichCreature = 0.6
+        ALIGNMENT of whichCreature = 0.25
+        FATNESS of whichCreature = 0.4
+
+    else
+        PlayerCreature = get player 0 creature
+        PlayerCreatureType = variable get PlayerCreature sub type
+        if PlayerCreatureType == variable CREATURE_TYPE_LION
+            whichCreature = create CREATURE CREATURE_TYPE_LION at {CreaturePos}
+
+        elsif PlayerCreatureType == variable CREATURE_TYPE_APE 
+            whichCreature = create CREATURE CREATURE_TYPE_APE at {CreaturePos}
+
+        elsif PlayerCreatureType == variable CREATURE_TYPE_GORILLA
+            whichCreature = create CREATURE CREATURE_TYPE_GORILLA at {CreaturePos}
+
+        elsif PlayerCreatureType == variable CREATURE_TYPE_WOLF
+            whichCreature = create CREATURE CREATURE_TYPE_WOLF at {CreaturePos}
+
+        elsif PlayerCreatureType == variable CREATURE_TYPE_COW
+            whichCreature = create CREATURE CREATURE_TYPE_COW at {CreaturePos}
+
+        else// PlayerCreature == variable CREATURE_TYPE_TIGER
+            whichCreature = create CREATURE CREATURE_TYPE_TIGER at {CreaturePos}
+            
+        end if
+        LC13_EnemyCreature = whichCreature
+        set creature whichCreature CREATURE_SCRIPT_TRANSITIONAL_ATTRIBUTE_TYPE_SIZE 1.0
+        STRENGTH of whichCreature = 1.0
+        ALIGNMENT of whichCreature = -0.85
+        FATNESS of whichCreature = 0.5
+    end if
+
+    set creature whichCreature happiness to maximum
+    
+    set research ARTEFACT_CREATURE_MAGIC_TYPE_WATER available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_CREATURE_MAGIC_TYPE_LIGHTNING available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_CREATURE_MAGIC_TYPE_FIREBALL available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_CREATURE_MAGIC_TYPE_HEAL available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_CREATURE_ROLE_BUILDER_2 available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_CREATURE_ROLE_GATHERER_3 available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_CREATURE_ROLE_SOLDIER_3 available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+
+    disable whichCreature action availability LA_EAT with LO_PLAYER_VILLAGER
+    disable whichCreature action availability LA_EAT with LO_PLAYER_PLATOON
+    disable whichCreature action availability LA_EAT with LO_ROCKS
+    disable whichCreature action availability LA_EAT with LO_TREES
+    disable whichCreature action availability LA_EAT with LO_TOYS
+    disable whichCreature action availability LA_EAT with LO_POO
+    disable whichCreature action availability LA_EAT with LO_SPELL_ORBS
+    disable whichCreature action availability LA_POO with LO_PLAYER_VILLAGER
+    disable whichCreature action availability LA_POO with LO_PLAYER_PLATOON
+    disable whichCreature action availability LA_POO with LO_PLAYER_DEFENCES
+    disable whichCreature action availability LA_POO with LO_PLAYER_STORAGE_PIT
+    disable whichCreature action availability LA_POO with LO_PLAYER_BUILDING
+    disable whichCreature action availability LA_PLAY
+    disable whichCreature action availability LA_WATER with LO_PLAYER_VILLAGER
+    disable whichCreature action availability LA_WATER with LO_PLAYER_PLATOON
+    disable whichCreature action availability LA_HEAL with LO_OPPONENT_PLATOON
+    disable whichCreature action availability LA_ATTACK with LO_CREATURE_PEN
+    disable whichCreature action availability LA_ATTACK with LO_ROCKS
+    disable whichCreature action availability LA_ATTACK with LO_MINE
+    disable whichCreature action availability LA_ATTACK with LO_ORE_ROCKS
+    disable whichCreature action availability LA_ATTACK with LO_TREES
+    disable whichCreature action availability LA_ATTACK with LO_FIELDS
+    disable whichCreature action availability LA_ATTACK with LO_POO
+    disable whichCreature action availability LA_ATTACK with LO_SPELL_ORBS
+
+    teach whichCreature all
+    
+    set player 1 creature to whichCreature
+    
+    release whichCreature
+
+    run background script LC13_CreatureLogic(whichCreature)
+
 end script LC13_AICreature
+
+
+begin script LC13_CreatureLogic(whichCreature)
+
+    Number = 0
+    CreatureRollRoleTimer = create timer for 0 seconds
+    CreatureAttackTimer = create timer for 0 seconds
+    WallSegment = 0
+    Counter = 0
+    Town[16]
+    Villager = 0
+
+    CreatureAttackPos[3]
+    CreatureGathererPos[3]
+
+    SacrificePoint = marker at {977.41,279.34,1748.11}
+
+start
+
+begin loop
+    CreatureAttackPos[0] = marker at {1092.92,104.19,662.30}//Front
+    CreatureAttackPos[1] = marker at {906.16,74.66,714.94}//Side 1
+    CreatureAttackPos[2] = marker at {1275.18,72.96,427.78}//Side 2
+    CreatureGathererPos[0] = marker at {1496.84,322.22,1648.05}//AztecCapital
+    CreatureGathererPos[1] = marker at {1244.06,133.66,641.02}//AztecTown1
+    CreatureGathererPos[2] = marker at {1685.68,24.88,241.83}//AztecTown2
+    if whichCreature == LC13_EnemyWolf
+        if HEALTH of LC13_EnemyWolf == 0.00
+            //CreatureKilled = 1
+            wait until HEALTH of LC13_EnemyWolf > 0.00
+            set creature LC13_EnemyWolf role to CR_NONE radius 500 at {CreatureGathererPos[0]}
+            HEALTH of LC13_EnemyWolf = 1.0
+        end if
+
+        if town AztecCapital is under takeover from player 0 and HEALTH of LC13_EnemyWolf > 0
+            HEALTH of LC13_EnemyWolf = 1.0
+            set creature LC13_EnemyWolf role to CR_SOLDIER radius 100 at {AztecCapital}
+            
+            wait until HEALTH of LC13_EnemyWolf == 0.00 or not town AztecCapital is under takeover from player 0 or 1000 seconds
+
+        elsif HEALTH of LC13_EnemyWolf > 0.00 and get WolfVillagerTimer time remaining <= 0
+            Number = number from 1 to 3
+            if Number == 1 and PLAYER of MinorTown6 != 0
+                Villager = get living villager at {MinorTown6} radius 250
+                if Villager exists and not {LC13_EnemyWolf} viewed and get distance from camera position to {LC13_EnemyWolf} > 100 and not {MinorTown6} + {10,10} viewed
+                    set LC13_EnemyWolf position to {MinorTown6} + {10,10}
+                    set creature LC13_EnemyWolf role to CR_SOLDIER radius 125 at {Villager}
+                    wait until HEALTH of Villager == 0.00 or Villager not exists or 150 seconds
+                    set creature LC13_EnemyWolf role to CR_SOLDIER radius 10 at {SacrificePoint}
+                    wait until {LC13_EnemyWolf} near {SacrificePoint} radius 20
+                    Villager = create random villager of tribe TRIBE_TYPE_NORSE at {SacrificePoint}
+                    HEALTH of Villager = 0.00
+                    SacrificeAllowed = 1
+                end if
+            elsif Number == 2
+                Villager = get living villager at {MinorTown8} radius 250
+                if Villager exists and not {LC13_EnemyWolf} viewed and get distance from camera position to {LC13_EnemyWolf} > 100 and not {MinorTown8} + {10,10} viewed
+                    set LC13_EnemyWolf position to {MinorTown8} + {10,10}
+                    set creature LC13_EnemyWolf role to CR_SOLDIER radius 125 at {Villager}
+                    wait until HEALTH of Villager == 0.00 or Villager not exists or 150 seconds
+                    set creature LC13_EnemyWolf role to CR_SOLDIER radius 10 at {SacrificePoint}
+                    wait until {LC13_EnemyWolf} near {SacrificePoint} radius 20
+                    Villager = create random villager of tribe TRIBE_TYPE_NORSE at {SacrificePoint}
+                    HEALTH of Villager = 0.00
+                    SacrificeAllowed = 1
+                end if
+            elsif Number == 3
+                Villager = get living villager at {MinorTown5} radius 250
+                if Villager exists and not {LC13_EnemyWolf} viewed and get distance from camera position to {LC13_EnemyWolf} > 100 and not {MinorTown5} + {10,10} viewed
+                    set LC13_EnemyWolf position to {MinorTown5} + {10,10}
+                    set creature LC13_EnemyWolf role to CR_SOLDIER radius 125 at {Villager}
+                    wait until HEALTH of Villager == 0.00 or Villager not exists or 150 seconds
+                    set creature LC13_EnemyWolf role to CR_SOLDIER radius 10 at {SacrificePoint}
+                    wait until {LC13_EnemyWolf} near {SacrificePoint} radius 20
+                    Villager = create random villager of tribe TRIBE_TYPE_NORSE at {SacrificePoint}
+                    HEALTH of Villager = 0.00
+                    SacrificeAllowed = 1
+                end if
+            end if
+            CreatureRollRoleTimer = create timer for 0 seconds
+
+        elsif HEALTH of LC13_EnemyWolf > 0.00 and get CreatureRollRoleTimer time remaining <= 0
+            Number = number from 1 to 1
+            if Number == 1 and PLAYER of AztecCapital == 1
+                set creature LC13_EnemyWolf role to CR_GATHERER radius 200 at {CreatureGathererPos[0]}
+                CreatureRollRoleTimer = create timer for 360 seconds
+            
+            end if
+        end if
+
+    else
+    
+        while Counter > 14
+            Counter = 0
+        end while
+
+        if HEALTH of LC13_EnemyCreature == 0.00
+            //CreatureKilled = 1
+            wait until HEALTH of LC13_EnemyCreature > 0.00
+            set creature LC13_EnemyCreature role to CR_NONE radius 500 at {CreatureGathererPos[0]}
+            HEALTH of LC13_EnemyCreature = 1.0
+        end if
+
+        if town AztecCapital is under takeover from player 0 and HEALTH of LC13_EnemyCreature > 0
+            HEALTH of LC13_EnemyCreature = 1.0
+            set creature LC13_EnemyCreature role to CR_SOLDIER radius 100 at {AztecCapital}
+            
+            wait until HEALTH of LC13_EnemyCreature == 0.00 or not town AztecCapital is under takeover from player 0 or 1000 seconds
+        
+        elsif town AztecTown1 is under takeover from player 0 and HEALTH of LC13_EnemyCreature > 0
+            HEALTH of LC13_EnemyCreature = 1.0
+            set creature LC13_EnemyCreature role to CR_SOLDIER radius 100 at {AztecTown1}
+            
+            wait until HEALTH of LC13_EnemyCreature == 0.00 or not town AztecTown1 is under takeover from player 0 or 1000 seconds
+
+        elsif town AztecTown2 is under takeover from player 0 and HEALTH of LC13_EnemyCreature > 0
+            HEALTH of LC13_EnemyCreature = 1.0
+            set creature LC13_EnemyCreature role to CR_SOLDIER radius 100 at {AztecTown2}
+            
+            wait until HEALTH of LC13_EnemyCreature == 0.00 or not town AztecTown2 is under takeover from player 0 or 1000 seconds
+
+        elsif town Town[Counter] is under takeover from player 1 and HEALTH of LC13_EnemyCreature > 0
+            HEALTH of LC13_EnemyCreature = 1.0
+            set creature LC13_EnemyCreature role to CR_SOLDIER radius 100 at {PlayerTown}
+            
+            wait until HEALTH of LC13_EnemyCreature == 0.00 or not town PlayerTown is under takeover from player 0 or 1000 seconds
+
+        elsif HEALTH of LC13_EnemyCreature > 0.00 and get CreatureRollRoleTimer time remaining <= 0
+            Number = number from 1 to 3
+            if Number == 1 and PLAYER of AztecCapital == 1 and {LC13_EnemyCreature} near {CreatureGathererPos[2]} radius 500
+                set creature LC13_EnemyCreature role to CR_GATHERER radius 200 at {CreatureGathererPos[0]}
+                CreatureRollRoleTimer = create timer for 360 seconds
+                
+            elsif Number == 2 and PLAYER of AztecTown1 == 1 and {LC13_EnemyCreature} near {CreatureGathererPos[2]} radius 500
+                set creature LC13_EnemyCreature role to CR_GATHERER radius 200 at {CreatureGathererPos[1]}
+                CreatureRollRoleTimer = create timer for 360 seconds
+
+            elsif Number == 3 and PLAYER of AztecTown2 == 1
+                set creature LC13_EnemyCreature role to CR_GATHERER radius 200 at {CreatureGathererPos[2]}
+                CreatureRollRoleTimer = create timer for 360 seconds
+            
+            end if
+        end if
+
+        Counter++
+    end if
+end loop
+
+end script LC13_CreatureLogic

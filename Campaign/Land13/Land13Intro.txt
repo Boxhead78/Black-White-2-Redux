@@ -13,6 +13,124 @@ global IntroPlatoon[8]
 
 begin script LC13_Intro
 
+    IntroWolf = 0
+    Counter = 0
+    CSMixer = 0
+    WindMixer = 0
+
 start
+
+PD_ForcedSaving = 1
+wait until PD_ForcedSaving == 0 or 10 seconds
+stop script "SavePersistentDataSetData"
+set persistent data "PREVLAND_OVER" to 0
+run script SavePersistentDataGetData
+
+WindMixer = create mixer
+set mixer WindMixer channel AUDIO_MIXER_CHANNEL_GLOBAL to 0.0
+
+begin cinema
+    set fade red 0 green 0 blue 0 time 0
+    set game time 11.00
+
+    //Disable creature fisting
+    enable interface action MANACOST_BALANCE_TYPE_INITIATECREATUREFIST
+
+    wait until widescreen transition complete
+    //Intro vid
+    wait 8 seconds
+    set mixer WindMixer channel AUDIO_MIXER_CHANNEL_GLOBAL to 1.0 with fadetime 2
+    CSMixer = create mixer
+    set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 0.6
+    wait 2 seconds
+    destroy mixer WindMixer
+    disable load screen
+
+    wait 1 seconds
+
+    set fade in time 5
+    start music "cut_scene_sad_34s_01" loop -1
+    reset camera path 
+    queue camera move with position {1137.71,288.00,1506.07} focus {1107.29,277.00,1561.17} time 0.0
+    queue camera move with position {1095.87,295.00,1581.72} focus {1054.90,287.00,1629.63} time 9.0
+    queue camera move with position {984.40,310.00,1704.83} focus {979.54,285.00,1791.02} time 6.5
+    queue camera move with position {1024.28,285.00,1935.11} focus {1174.27,250.00,2028.21} time 5.0
+    queue camera move with position {1227.47,260.00,2045.08} focus {1447.95,245.00,2015.40} time 5.0
+    queue camera move with position {1679.64,260.00,1955.49} focus {1744.01,245.00,1896.20} time 5.0
+    queue camera move with position {1837.28,250.00,1676.77} focus {1820.09,230.00,1513.99} time 5.0
+    queue camera move with position {1766.88,200.00,1150.85} focus {1767.88,175.00,852.65} time 4.0
+    queue camera move with position {1848.57,150.00,944.68} focus {1621.90,125.00,573.01} time 2.0
+    queue camera move with position {1563.49,125.00,549.68} focus {1293.14,100.00,420.99} time 4.0
+    queue camera move with position {1364.59,90.00,416.30} focus {1189.02,80.00,443.39} time 4.0
+    queue camera move with position {1155.34,100.00,488.46} focus {1112.94,75.13,514.90} time 4.5
+
+
+    play camera path with easein 20 easeout 8 method SCRIPT_CAMERAPATH_SMOOTHEST
+
+    IntroWolf = create CREATURE CREATURE_TYPE_WOLF at {1067.86,279.38,1593.46}
+    set creature IntroWolf CREATURE_SCRIPT_TRANSITIONAL_ATTRIBUTE_TYPE_SIZE 0.75
+    STRENGTH of IntroWolf = 0.6
+    ALIGNMENT of IntroWolf = 0.25
+    FATNESS of IntroWolf = 0.4
+    set IntroWolf focus to {AztecCapital}
+    set player 1 creature to IntroWolf
+
+    wait 4.5 seconds
+
+    say "BW2XT_LAND03_INTRO_10"
+    clear dialogue
+    close dialogue
+    wait BW2XT_LAND03_INTRO_10 + 1.0 seconds
+
+    say "BW2XT_LAND03_INTRO_20"
+    clear dialogue
+    close dialogue
+
+    wait 3 seconds
+    play anim C_MOVE_RUN on IntroWolf loop 5
+    wait 2 seconds
+
+    say "BW2XT_LAND03_INTRO_30"
+    clear dialogue
+    close dialogue
+    wait BW2XT_LAND03_INTRO_30 + 1.0 seconds
+
+    wait 0.5 seconds
+
+    say "BW2XT_LAND03_INTRO_40"
+    clear dialogue
+    close dialogue
+    wait BW2XT_LAND03_INTRO_40 + 1.0 seconds
+
+    wait 6 seconds
+
+    say "BW2XT_LAND03_INTRO_50"
+    clear dialogue
+    close dialogue
+    wait BW2XT_LAND03_INTRO_50 + 1.0 seconds
+
+    say "BW2XT_LAND03_INTRO_120"
+    clear dialogue
+    close dialogue
+    wait BW2XT_LAND03_INTRO_120 + 1.0 seconds
+
+    say "BW2XT_LAND03_INTRO_130"
+    clear dialogue
+    close dialogue
+    wait BW2XT_LAND03_INTRO_130 + 1.0 seconds
+
+    wait until camera ready
+
+    wait 2.5 seconds
+
+    IntroFinished = 1
+
+end cinema
+
+delete IntroWolf
+
+stop music with fadetime 9
+wait 9 seconds
+set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 1.0
 
 end script LC13_Intro
