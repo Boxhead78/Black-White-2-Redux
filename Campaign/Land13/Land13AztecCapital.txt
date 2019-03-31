@@ -4,6 +4,9 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+//TODO:
+// Ghost from stones //When trigger? When AztecTown1 is captured?
+
 define script LC13_Aztec_Capital_Impressiveness
 define script LC13_TownConversion
 define script LC13_Tribute
@@ -1835,7 +1838,7 @@ begin loop
         end if
     end if
 
-    if get WolfVillagerTimer time remaining <= 0
+    if get WolfVillagerTimer time remaining <= 0 and GB_DialogueIsRunning == 0
         GB_DialogueIsRunning = 1
         Number = number from 1 to 6
         if Number == 1
@@ -1884,7 +1887,23 @@ begin loop
         GB_DialogueIsRunning = 0
         wait 2.5 seconds
         WolfVillagerTimer = create timer for number from 360 to 940 seconds
-    end if 
+    end if
+
+    if VolcanoFired == 1 and GB_DialogueIsRunning == 0
+        VolcanoFired = 2
+        GB_DialogueIsRunning = 1
+        begin dialogue
+            say "BW2XT_LAND05_EARTHQUAKE_10"
+            clear dialogue
+            close dialogue
+            wait BW2XT_LAND05_EARTHQUAKE_10 + 1 seconds
+            say "BW2XT_LAND05_EARTHQUAKE_20"
+            clear dialogue
+            close dialogue
+            wait BW2XT_LAND05_EARTHQUAKE_20 + 1 seconds
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
 
 end loop
 
@@ -2156,16 +2175,22 @@ end script LC13_GetPlayerUnits
 
 begin script LC13_Aztec_Capital
 
-    AztecTown1Attacks = 0
-    AztecTown2Attacks = 0
     AttackingPosition = 0
     AttackingPositionFallBack = 0
     Wall[14]
     NearestSettlementTownCentre = 0
-    AttackDir[2]
+    AttackDir[3]
+    Number = 0
     SiegeWaypoint1 = 0
     SiegeWaypoint2 = 0
     SiegeWaypoint3 = 0
+    AttackAztecTown1Timer = create timer for 0 seconds
+    VolcanoTimer = create timer for 0 seconds
+    VOLCANODELAY = 3000
+    VolcanoWarning = 0
+    CastEpicPos = 0
+    EpicVolc = 0
+    CaptureAztecTown1 = 0
 
 start
 
@@ -2174,6 +2199,11 @@ start
     LC13_RecruitTimer1 = create timer for 60 seconds
     LC13_RecruitTimer2 = create timer for 60 seconds
     LC13_RecruitTimer3 = create timer for 60 seconds
+
+    AIVolcano = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_VOLCANO at {AztecCapital} radius 150
+    disable AIVolcano hurt by fire
+
+    CHARGE of AIVolcano = 1.0
 
     if Difficulty >= 4
         add resource WOOD 3000 to PlayerTown
@@ -2512,46 +2542,327 @@ start
             run background script LC13_StaticPlatoonsActions(PlatoonPos[5],Ranged,LC13_Platoon[5])
             run background script LC13_GenericTalusSpeeches(LC13_Platoon[5],1)
 
-        //Skeleton Attacks
-        elsif LC13_SiegeCatapult[4] not exists and LC13_NumberOfSkeletonPlatoons >= 2 and not town AztecCapital is under takeover from player 0
-            LC13_SiegeCatapult[4] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_5 town AztecCapital siege weapon
-            LC13_RecruitTimer1 = create timer for 80 * RecruitModifier seconds
-            SiegeWaypoint1 = marker at {SiegeRoute2[0]}
-            SiegeWaypoint2 = marker at {SiegeRoute2[0]} + {0,0}
-            SiegeWaypoint3 = marker at {SiegeRoute2[0]} + {0,0}
-            run background script LC13_MoveCatapultThenAttack(LC13_SiegeCatapult[4],0,SiegeWaypoint1,SiegeWaypoint2,SiegeWaypoint3)
+        elsif LC13_WallArcher[0] not exists and Wall[0] exists and PLAYER of Wall[0] == 1 and HEALTH of Wall[0] == 1.0 and not town AztecCapital is under takeover from player 0 and get LC13_RecruitTimer1 time remaining <= 0
+            LC13_WallArcher[0] = recruit ARMY_UNIT_TYPE_RANGED_5 town AztecCapital platoon of size 20 * RecruitSizeModifier
+            LC13_RecruitTimer1 = create timer for 60 * RecruitModifier seconds
+            wait until not LC13_WallArcher[0] recruiting
+            enable platoon LC13_WallArcher[0] respond to town AztecCapital attack
+            add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[0] to LC13_WallArcher[0] action queue
+            run background script LC13_GenericTalusSpeeches(LC13_WallArcher[0],1)
 
-        elsif LC13_SiegeCatapult[5] not exists and LC13_NumberOfSkeletonPlatoons >= 4 and not town AztecCapital is under takeover from player 0
-            LC13_SiegeCatapult[5] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_5 town AztecCapital siege weapon
-            LC13_RecruitTimer1 = create timer for 80 * RecruitModifier seconds
-            SiegeWaypoint1 = marker at {SiegeRoute1[0]}
-            SiegeWaypoint2 = marker at {SiegeRoute1[0]} + {0,0}
-            SiegeWaypoint3 = marker at {SiegeRoute1[0]} + {0,0}
-            run background script LC13_MoveCatapultThenAttack(LC13_SiegeCatapult[5],0,SiegeWaypoint1,SiegeWaypoint2,SiegeWaypoint3)
+        elsif LC13_WallArcher[1] not exists and Wall[1] exists and PLAYER of Wall[1] == 1 and HEALTH of Wall[1] == 1.0 and not town AztecCapital is under takeover from player 0 and get LC13_RecruitTimer1 time remaining <= 0
+            LC13_WallArcher[1] = recruit ARMY_UNIT_TYPE_RANGED_5 town AztecCapital platoon of size 20 * RecruitSizeModifier
+            LC13_RecruitTimer1 = create timer for 60 * RecruitModifier seconds
+            wait until not LC13_WallArcher[1] recruiting
+            enable platoon LC13_WallArcher[1] respond to town AztecCapital attack
+            add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[1] to LC13_WallArcher[1] action queue
+            run background script LC13_GenericTalusSpeeches(LC13_WallArcher[1],1)
 
-        elsif LC13_SiegeCatapult[6] not exists and LC13_NumberOfSkeletonPlatoons >= 4 and not town AztecCapital is under takeover from player 0
-            LC13_SiegeCatapult[6] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_5 town AztecCapital siege weapon
-            LC13_RecruitTimer1 = create timer for 80 * RecruitModifier seconds
-            SiegeWaypoint1 = marker at {SiegeRoute1[0]}
-            SiegeWaypoint2 = marker at {SiegeRoute1[0]} + {30,0}
-            SiegeWaypoint3 = marker at {SiegeRoute1[0]} + {30,0}
-            run background script LC13_MoveCatapultThenAttack(LC13_SiegeCatapult[6],0,SiegeWaypoint1,SiegeWaypoint2,SiegeWaypoint3)
+        elsif LC13_WallArcher[2] not exists and Wall[2] exists and PLAYER of Wall[2] == 1 and HEALTH of Wall[2] == 1.0 and not town AztecCapital is under takeover from player 0 and get LC13_RecruitTimer1 time remaining <= 0
+            LC13_WallArcher[2] = recruit ARMY_UNIT_TYPE_RANGED_5 town AztecCapital platoon of size 20 * RecruitSizeModifier
+            LC13_RecruitTimer1 = create timer for 60 * RecruitModifier seconds
+            wait until not LC13_WallArcher[2] recruiting
+            enable platoon LC13_WallArcher[2] respond to town AztecCapital attack
+            add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[2] to LC13_WallArcher[2] action queue
+            run background script LC13_GenericTalusSpeeches(LC13_WallArcher[2],1)
 
-        elsif LC13_SiegeCatapult[7] not exists and LC13_NumberOfSkeletonPlatoons >= 6 and not town AztecCapital is under takeover from player 0
-            LC13_SiegeCatapult[7] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_5 town AztecCapital siege weapon
-            LC13_RecruitTimer1 = create timer for 80 * RecruitModifier seconds
-            SiegeWaypoint1 = marker at {SiegeRoute3[0]}
-            SiegeWaypoint2 = marker at {SiegeRoute3[0]} + {30,0}
-            SiegeWaypoint3 = marker at {SiegeRoute3[0]} + {30,0}
-            run background script LC13_MoveCatapultThenAttack(LC13_SiegeCatapult[7],0,SiegeWaypoint1,SiegeWaypoint2,SiegeWaypoint3)
+        elsif LC13_WallArcher[3] not exists and Wall[3] exists and PLAYER of Wall[3] == 1 and HEALTH of Wall[3] == 1.0 and not town AztecCapital is under takeover from player 0 and get LC13_RecruitTimer1 time remaining <= 0
+            LC13_WallArcher[3] = recruit ARMY_UNIT_TYPE_RANGED_5 town AztecCapital platoon of size 20 * RecruitSizeModifier
+            LC13_RecruitTimer1 = create timer for 60 * RecruitModifier seconds
+            wait until not LC13_WallArcher[3] recruiting
+            enable platoon LC13_WallArcher[3] respond to town AztecCapital attack
+            add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[3] to LC13_WallArcher[3] action queue
+            run background script LC13_GenericTalusSpeeches(LC13_WallArcher[3],1)
+        
+        elsif LC13_WallArcher[4] not exists and Wall[4] exists and PLAYER of Wall[4] == 1 and HEALTH of Wall[4] == 1.0 and not town AztecCapital is under takeover from player 0 and get LC13_RecruitTimer1 time remaining <= 0
+            LC13_WallArcher[4] = recruit ARMY_UNIT_TYPE_RANGED_5 town AztecCapital platoon of size 20 * RecruitSizeModifier
+            LC13_RecruitTimer1 = create timer for 60 * RecruitModifier seconds
+            wait until not LC13_WallArcher[4] recruiting
+            enable platoon LC13_WallArcher[4] respond to town AztecCapital attack
+            add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[4] to LC13_WallArcher[4] action queue
+            run background script LC13_GenericTalusSpeeches(LC13_WallArcher[4],1)
 
-        elsif LC13_SiegeCatapult[8] not exists and LC13_NumberOfSkeletonPlatoons >= 6 and not town AztecCapital is under takeover from player 0
-            LC13_SiegeCatapult[8] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_5 town AztecCapital siege weapon
+        elsif LC13_WallArcher[5] not exists and Wall[5] exists and PLAYER of Wall[5] == 1 and HEALTH of Wall[5] == 1.0 and not town AztecCapital is under takeover from player 0 and get LC13_RecruitTimer1 time remaining <= 0
+            LC13_WallArcher[5] = recruit ARMY_UNIT_TYPE_RANGED_5 town AztecCapital platoon of size 20 * RecruitSizeModifier
+            LC13_RecruitTimer1 = create timer for 60 * RecruitModifier seconds
+            wait until not LC13_WallArcher[5] recruiting
+            enable platoon LC13_WallArcher[5] respond to town AztecCapital attack
+            add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[5] to LC13_WallArcher[5] action queue
+            run background script LC13_GenericTalusSpeeches(LC13_WallArcher[5],1)
+
+        elsif LC13_WallArcher[6] not exists and Wall[6] exists and PLAYER of Wall[6] == 1 and HEALTH of Wall[6] == 1.0 and not town AztecCapital is under takeover from player 0 and get LC13_RecruitTimer1 time remaining <= 0
+            LC13_WallArcher[6] = recruit ARMY_UNIT_TYPE_RANGED_5 town AztecCapital platoon of size 20 * RecruitSizeModifier
+            LC13_RecruitTimer1 = create timer for 60 * RecruitModifier seconds
+            wait until not LC13_WallArcher[6] recruiting
+            enable platoon LC13_WallArcher[6] respond to town AztecCapital attack
+            add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[6] to LC13_WallArcher[6] action queue
+            run background script LC13_GenericTalusSpeeches(LC13_WallArcher[6],1)
+
+        elsif LC13_WallArcher[7] not exists and Wall[7] exists and PLAYER of Wall[7] == 1 and HEALTH of Wall[7] == 1.0 and not town AztecCapital is under takeover from player 0 and get LC13_RecruitTimer1 time remaining <= 0
+            LC13_WallArcher[7] = recruit ARMY_UNIT_TYPE_RANGED_5 town AztecCapital platoon of size 20 * RecruitSizeModifier
+            LC13_RecruitTimer1 = create timer for 60 * RecruitModifier seconds
+            wait until not LC13_WallArcher[7] recruiting
+            enable platoon LC13_WallArcher[7] respond to town AztecCapital attack
+            add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[7] to LC13_WallArcher[7] action queue
+            run background script LC13_GenericTalusSpeeches(LC13_WallArcher[7],1)
+
+        elsif LC13_WallArcher[8] not exists and Wall[8] exists and PLAYER of Wall[8] == 1 and HEALTH of Wall[8] == 1.0 and not town AztecCapital is under takeover from player 0 and get LC13_RecruitTimer1 time remaining <= 0
+            LC13_WallArcher[8] = recruit ARMY_UNIT_TYPE_RANGED_5 town AztecCapital platoon of size 20 * RecruitSizeModifier
+            LC13_RecruitTimer1 = create timer for 60 * RecruitModifier seconds
+            wait until not LC13_WallArcher[8] recruiting
+            enable platoon LC13_WallArcher[8] respond to town AztecCapital attack
+            add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[8] to LC13_WallArcher[8] action queue
+            run background script LC13_GenericTalusSpeeches(LC13_WallArcher[8],1)
+
+        elsif LC13_WallArcher[9] not exists and Wall[9] exists and PLAYER of Wall[9] == 1 and HEALTH of Wall[9] == 1.0 and not town AztecCapital is under takeover from player 0 and get LC13_RecruitTimer1 time remaining <= 0
+            LC13_WallArcher[9] = recruit ARMY_UNIT_TYPE_RANGED_5 town AztecCapital platoon of size 20 * RecruitSizeModifier
+            LC13_RecruitTimer1 = create timer for 60 * RecruitModifier seconds
+            wait until not LC13_WallArcher[9] recruiting
+            enable platoon LC13_WallArcher[9] respond to town AztecCapital attack
+            add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[9] to LC13_WallArcher[9] action queue
+            run background script LC13_GenericTalusSpeeches(LC13_WallArcher[9],1)
+
+        elsif LC13_WallArcher[10] not exists and Wall[10] exists and PLAYER of Wall[10] == 1 and HEALTH of Wall[10] == 1.0 and not town AztecCapital is under takeover from player 0 and get LC13_RecruitTimer1 time remaining <= 0
+            LC13_WallArcher[10] = recruit ARMY_UNIT_TYPE_RANGED_5 town AztecCapital platoon of size 20 * RecruitSizeModifier
+            LC13_RecruitTimer1 = create timer for 60 * RecruitModifier seconds
+            wait until not LC13_WallArcher[10] recruiting
+            enable platoon LC13_WallArcher[10] respond to town AztecCapital attack
+            add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[10] to LC13_WallArcher[10] action queue
+            run background script LC13_GenericTalusSpeeches(LC13_WallArcher[10],1)
+        
+        elsif LC13_WallArcher[11] not exists and Wall[11] exists and PLAYER of Wall[11] == 1 and HEALTH of Wall[11] == 1.0 and not town AztecCapital is under takeover from player 0 and get LC13_RecruitTimer1 time remaining <= 0
+            LC13_WallArcher[11] = recruit ARMY_UNIT_TYPE_RANGED_5 town AztecCapital platoon of size 20 * RecruitSizeModifier
+            LC13_RecruitTimer1 = create timer for 60 * RecruitModifier seconds
+            wait until not LC13_WallArcher[11] recruiting
+            enable platoon LC13_WallArcher[11] respond to town AztecCapital attack
+            add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[11] to LC13_WallArcher[11] action queue
+            run background script LC13_GenericTalusSpeeches(LC13_WallArcher[11],1)
+
+        //Capture AztecTown1
+        elsif LC13_Platoon[22] not exists and PLAYER of AztecCapital == 1 and not town AztecCapital is under takeover from player 0 and get LC13_RecruitTimer1 time remaining <= 0 and TriedAztecTown1Attack == 0 and CaptureAztecTown1 == 1
+            LC13_Platoon[22] = recruit ARMY_UNIT_TYPE_MELEE_5 town AztecCapital platoon of size 25 * RecruitSizeModifier
+            LC13_RecruitTimer1 = create timer for 120 * RecruitModifier seconds
+            enable platoon LC13_Platoon[22] respond to town AztecCapital attack
+            wait until not LC13_Platoon[22] recruiting
+            AttackingPosition = marker at {1326.08,133.27,746.30} + {0,0,0}
+            AttackingPositionFallBack = marker at {1245.49,141.35,898.79} + {0,0,0}
+            run background script LC13_GenericTalusSpeeches(LC13_Platoon[22],1)
+            run background script LC13_ArmyBehaivours(LC13_Platoon[22],Melee,CaptureSpecTown,0,AttackingPosition,AttackingPositionFallBack,0,0)
+
+        elsif LC13_Platoon[23] not exists and PLAYER of AztecCapital == 1 and not town AztecCapital is under takeover from player 0 and get LC13_RecruitTimer1 time remaining <= 0 and TriedAztecTown1Attack == 0 and CaptureAztecTown1 == 1
+            LC13_Platoon[23] = recruit ARMY_UNIT_TYPE_MELEE_5 town AztecCapital platoon of size 25 * RecruitSizeModifier
+            LC13_RecruitTimer1 = create timer for 120 * RecruitModifier seconds
+            enable platoon LC13_Platoon[23] respond to town AztecCapital attack
+            wait until not LC13_Platoon[23] recruiting
+            AttackingPosition = marker at {1326.08,133.27,746.30} + {25,0,0}
+            AttackingPositionFallBack = marker at {1245.49,141.35,898.79} + {25,0,0}
+            run background script LC13_GenericTalusSpeeches(LC13_Platoon[23],1)
+            run background script LC13_ArmyBehaivours(LC13_Platoon[23],Melee,CaptureSpecTown,0,AttackingPosition,AttackingPositionFallBack,0,0)
+
+        elsif LC13_Platoon[24] not exists and PLAYER of AztecCapital == 1 and not town AztecCapital is under takeover from player 0 and get LC13_RecruitTimer1 time remaining <= 0 and TriedAztecTown1Attack == 0 and CaptureAztecTown1 == 1
+            LC13_Platoon[24] = recruit ARMY_UNIT_TYPE_RANGED_5 town AztecCapital platoon of size 25 * RecruitSizeModifier
+            LC13_RecruitTimer1 = create timer for 120 * RecruitModifier seconds
+            enable platoon LC13_Platoon[24] respond to town AztecCapital attack
+            wait until not LC13_Platoon[24] recruiting
+            AttackingPosition = marker at {1326.08,133.27,746.30} + {0,0,25}
+            AttackingPositionFallBack = marker at {1245.49,141.35,898.79} + {0,0,25}
+            run background script LC13_GenericTalusSpeeches(LC13_Platoon[24],1)
+            run background script LC13_ArmyBehaivours(LC13_Platoon[24],Ranged,CaptureSpecTown,0,AttackingPosition,AttackingPositionFallBack,0,0)
+
+        elsif LC13_Platoon[25] not exists and PLAYER of AztecCapital == 1 and not town AztecCapital is under takeover from player 0 and get LC13_RecruitTimer1 time remaining <= 0 and TriedAztecTown1Attack == 0 and CaptureAztecTown1 == 1
+            LC13_Platoon[25] = recruit ARMY_UNIT_TYPE_RANGED_5 town AztecCapital platoon of size 25 * RecruitSizeModifier
+            LC13_RecruitTimer1 = create timer for 120 * RecruitModifier seconds
+            enable platoon LC13_Platoon[25] respond to town AztecCapital attack
+            wait until not LC13_Platoon[25] recruiting
+            AttackingPosition = marker at {1326.08,133.27,746.30} + {15,0,15}
+            AttackingPositionFallBack = marker at {1245.49,141.35,898.79} + {15,0,15}
+            run background script LC13_GenericTalusSpeeches(LC13_Platoon[25],1)
+            run background script LC13_ArmyBehaivours(LC13_Platoon[25],Ranged,CaptureSpecTown,0,AttackingPosition,AttackingPositionFallBack,0,0)
+
+        //Attack PlayerTown
+        elsif LC13_Platoon[30] not exists and PLAYER of AztecCapital == 1 and not town AztecCapital is under takeover from player 0 and get LC13_RecruitTimer1 time remaining <= 0 and TownsConverted >= 2
+            Number = number from 1 to 5
+            if Number == 1 or Number == 2
+                LC13_Platoon[30] = recruit ARMY_UNIT_TYPE_RANGED_5 town AztecCapital platoon of size 75 * RecruitSizeModifier
+            elsif Number == 3 or Number == 4
+                LC13_Platoon[30] = recruit ARMY_UNIT_TYPE_MELEE_5 town AztecCapital platoon of size 50 * RecruitSizeModifier
+            elsif Number == 5
+                LC13_Platoon[30] = recruit ARMY_UNIT_TYPE_MELEE_5 town AztecCapital platoon of size 150 * RecruitSizeModifier
+            end if
+            LC13_RecruitTimer1 = create timer for 220 * RecruitModifier seconds
+            enable platoon LC13_Platoon[30] respond to town AztecCapital attack
+            wait until not LC13_Platoon[30] recruiting
+            AttackDir[0] = number from 1 to 3
+            if AttackDir[0] == 1
+                AttackingPosition = marker at {AttackPos[0]} + {0,0,0}
+                AttackingPositionFallBack = marker at {AttackPos[1]} + {0,0,0}
+            elsif AttackDir[1] == 2
+                AttackingPosition = marker at {AttackPos[2]} + {0,0,0}
+                AttackingPositionFallBack = marker at {AttackPos[3]} + {0,0,0}
+            else
+                AttackingPosition = marker at {AttackPos[4]} + {0,0,0}
+                AttackingPositionFallBack = marker at {AttackPos[5]} + {0,0,0}
+            end if
+            run background script LC13_GenericTalusSpeeches(LC13_Platoon[30],1)
+            if Number == 1 or Number == 2
+                run background script LC13_ArmyBehaivours(LC13_Platoon[30],Ranged,Attacker,0,AttackingPosition,AttackingPositionFallBack,0,0)
+            elsif Number == 3 or Number == 4
+                run background script LC13_ArmyBehaivours(LC13_Platoon[30],Melee,Attacker,0,AttackingPosition,AttackingPositionFallBack,0,0)
+            elsif Number == 5
+                run background script LC13_ArmyBehaivours(LC13_Platoon[30],Melee,Attacker,0,AttackingPosition,AttackingPositionFallBack,0,0)
+            end if
+
+        elsif LC13_Platoon[31] not exists and PLAYER of AztecCapital == 1 and not town AztecCapital is under takeover from player 0 and get LC13_RecruitTimer1 time remaining <= 0 and TownsConverted >= 2
+            Number = number from 1 to 5
+            if Number == 1 or Number == 2
+                LC13_Platoon[31] = recruit ARMY_UNIT_TYPE_RANGED_5 town AztecCapital platoon of size 75 * RecruitSizeModifier
+            elsif Number == 3 or Number == 4
+                LC13_Platoon[31] = recruit ARMY_UNIT_TYPE_MELEE_5 town AztecCapital platoon of size 50 * RecruitSizeModifier
+            elsif Number == 5
+                LC13_Platoon[31] = recruit ARMY_UNIT_TYPE_MELEE_5 town AztecCapital platoon of size 150 * RecruitSizeModifier
+            end if
+            LC13_RecruitTimer1 = create timer for 200 * RecruitModifier seconds
+            enable platoon LC13_Platoon[31] respond to town AztecCapital attack
+            wait until not LC13_Platoon[31] recruiting
+            if AttackDir[0] == 1
+                AttackingPosition = marker at {AttackPos[0]} + {0,0,0}
+                AttackingPositionFallBack = marker at {AttackPos[1]} + {0,0,0}
+            elsif AttackDir[1] == 2
+                AttackingPosition = marker at {AttackPos[2]} + {0,0,0}
+                AttackingPositionFallBack = marker at {AttackPos[3]} + {0,0,0}
+            else
+                AttackingPosition = marker at {AttackPos[4]} + {0,0,0}
+                AttackingPositionFallBack = marker at {AttackPos[5]} + {0,0,0}
+            end if
+            run background script LC13_GenericTalusSpeeches(LC13_Platoon[31],1)
+            if Number == 1 or Number == 2
+                run background script LC13_ArmyBehaivours(LC13_Platoon[31],Ranged,Attacker,0,AttackingPosition,AttackingPositionFallBack,0,0)
+            elsif Number == 3 or Number == 4
+                run background script LC13_ArmyBehaivours(LC13_Platoon[31],Melee,Attacker,0,AttackingPosition,AttackingPositionFallBack,0,0)
+            elsif Number == 5
+                run background script LC13_ArmyBehaivours(LC13_Platoon[31],Melee,Attacker,0,AttackingPosition,AttackingPositionFallBack,0,0)
+            end if
+
+        elsif LC13_Platoon[32] not exists and PLAYER of AztecCapital == 1 and not town AztecCapital is under takeover from player 0 and get LC13_RecruitTimer1 time remaining <= 0 and TownsConverted >= 2
+            LC13_Platoon[32] = recruit ARMY_UNIT_TYPE_RANGED_5 town AztecCapital platoon of size 90 * RecruitSizeModifier
+            LC13_RecruitTimer1 = create timer for 200 * RecruitModifier seconds
+            enable platoon LC13_Platoon[32] respond to town AztecCapital attack
+            wait until not LC13_Platoon[32] recruiting
+            if AttackDir[0] == 1
+                AttackingPosition = marker at {AttackPos[0]} + {0,0,0}
+                AttackingPositionFallBack = marker at {AttackPos[1]} + {0,0,0}
+            elsif AttackDir[1] == 2
+                AttackingPosition = marker at {AttackPos[2]} + {0,0,0}
+                AttackingPositionFallBack = marker at {AttackPos[3]} + {0,0,0}
+            else
+                AttackingPosition = marker at {AttackPos[4]} + {0,0,0}
+                AttackingPositionFallBack = marker at {AttackPos[5]} + {0,0,0}
+            end if
+            run background script LC13_GenericTalusSpeeches(LC13_Platoon[32],1)
+            run background script LC13_ArmyBehaivours(LC13_Platoon[32],Ranged,Attacker,0,AttackingPosition,AttackingPositionFallBack,0,0)
+
+        elsif LC13_SiegeCatapult[12] not exists and PLAYER of AztecCapital == 1 and not town AztecCapital is under takeover from player 0 and get LC13_RecruitTimer1 time remaining <= 0 and TownsConverted >= 2
+            LC13_SiegeCatapult[12] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_7 town AztecCapital siege weapon
             LC13_RecruitTimer1 = create timer for 80 * RecruitModifier seconds
-            SiegeWaypoint1 = marker at {SiegeRoute3[0]}
-            SiegeWaypoint2 = marker at {SiegeRoute3[0]} + {30,0}
-            SiegeWaypoint3 = marker at {SiegeRoute3[0]} + {30,0}
-            run background script LC13_MoveCatapultThenAttack(LC13_SiegeCatapult[8],0,SiegeWaypoint1,SiegeWaypoint2,SiegeWaypoint3)
+            if AttackDir[0] == 1
+                SiegeWaypoint1 = marker at {SiegeRoute1[0]}
+                SiegeWaypoint2 = marker at {SiegeRoute1[0]} + {0,0}
+                SiegeWaypoint3 = marker at {SiegeRoute1[0]} + {0,0}
+            elsif AttackDir[1] == 2
+                SiegeWaypoint1 = marker at {SiegeRoute2[0]}
+                SiegeWaypoint2 = marker at {SiegeRoute2[0]} + {0,0}
+                SiegeWaypoint3 = marker at {SiegeRoute2[0]} + {0,0}
+            else
+                SiegeWaypoint1 = marker at {SiegeRoute3[0]}
+                SiegeWaypoint2 = marker at {SiegeRoute3[0]} + {0,0}
+                SiegeWaypoint3 = marker at {SiegeRoute3[0]} + {0,0}
+            end if
+            run background script LC13_MoveCatapultThenAttack(LC13_SiegeCatapult[12],0,SiegeWaypoint1,SiegeWaypoint2,SiegeWaypoint3)
+
+        elsif LC13_SiegeCatapult[13] not exists and PLAYER of AztecCapital == 1 and not town AztecCapital is under takeover from player 0 and get LC13_RecruitTimer1 time remaining <= 0 and TownsConverted >= 2
+            LC13_SiegeCatapult[13] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_7 town AztecCapital siege weapon
+            LC13_RecruitTimer1 = create timer for 80 * RecruitModifier seconds
+            if AttackDir[0] == 1
+                SiegeWaypoint1 = marker at {SiegeRoute1[0]}
+                SiegeWaypoint2 = marker at {SiegeRoute1[0]} + {0,0}
+                SiegeWaypoint3 = marker at {SiegeRoute1[0]} + {0,0}
+            elsif AttackDir[1] == 2
+                SiegeWaypoint1 = marker at {SiegeRoute2[0]}
+                SiegeWaypoint2 = marker at {SiegeRoute2[0]} + {0,0}
+                SiegeWaypoint3 = marker at {SiegeRoute2[0]} + {0,0}
+            else
+                SiegeWaypoint1 = marker at {SiegeRoute3[0]}
+                SiegeWaypoint2 = marker at {SiegeRoute3[0]} + {0,0}
+                SiegeWaypoint3 = marker at {SiegeRoute3[0]} + {0,0}
+            end if
+            run background script LC13_MoveCatapultThenAttack(LC13_SiegeCatapult[13],0,SiegeWaypoint1,SiegeWaypoint2,SiegeWaypoint3)
+
+        elsif LC13_SiegeCatapult[14] not exists and PLAYER of AztecCapital == 1 and not town AztecCapital is under takeover from player 0 and get LC13_RecruitTimer1 time remaining <= 0 and TownsConverted >= 2
+            LC13_SiegeCatapult[14] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_7 town AztecCapital siege weapon
+            LC13_RecruitTimer1 = create timer for 80 * RecruitModifier seconds
+            if AttackDir[0] == 1
+                SiegeWaypoint1 = marker at {SiegeRoute1[0]}
+                SiegeWaypoint2 = marker at {SiegeRoute1[0]} + {0,0}
+                SiegeWaypoint3 = marker at {SiegeRoute1[0]} + {0,0}
+            elsif AttackDir[1] == 2
+                SiegeWaypoint1 = marker at {SiegeRoute2[0]}
+                SiegeWaypoint2 = marker at {SiegeRoute2[0]} + {0,0}
+                SiegeWaypoint3 = marker at {SiegeRoute2[0]} + {0,0}
+            else
+                SiegeWaypoint1 = marker at {SiegeRoute3[0]}
+                SiegeWaypoint2 = marker at {SiegeRoute3[0]} + {0,0}
+                SiegeWaypoint3 = marker at {SiegeRoute3[0]} + {0,0}
+            end if
+            run background script LC13_MoveCatapultThenAttack(LC13_SiegeCatapult[14],0,SiegeWaypoint1,SiegeWaypoint2,SiegeWaypoint3)
+    
+
+        //Attack NearestSettlement
+        elsif LC13_Platoon[26] not exists and PLAYER of AztecCapital == 1 and not town AztecCapital is under takeover from player 0 and get AttackNearestTownTimer time remaining <= 0 and AttackingPlatoons == 1
+            LC13_Platoon[26] = recruit ARMY_UNIT_TYPE_MELEE_4 town AztecCapital platoon of size 45 * RecruitSizeModifier
+            LC13_RecruitTimer1 = create timer for 200 * RecruitModifier seconds
+            enable platoon LC13_Platoon[26] respond to town AztecCapital attack
+            wait until not LC13_Platoon[26] recruiting
+            run background script LC13_ArmyBehaivours(LC13_Platoon[26],Melee,Conqueror,0,0,0,0,0)
+            run background script LC13_GenericTalusSpeeches(LC13_Platoon[26],1)
+
+        elsif LC13_Platoon[27] not exists and LC13_Platoon[26] exists and {LC13_Platoon[26]} near {AztecCapital} radius 400 and PLAYER of AztecCapital == 1 and not town AztecCapital is under takeover from player 0 and get AttackNearestTownTimer time remaining <= 0 and AttackingPlatoons == 1
+            LC13_Platoon[27] = recruit ARMY_UNIT_TYPE_MELEE_4 town AztecCapital platoon of size 45 * RecruitSizeModifier
+            LC13_RecruitTimer1 = create timer for 200 * RecruitModifier seconds
+            enable platoon LC13_Platoon[27] respond to town AztecCapital attack
+            wait until not LC13_Platoon[27] recruiting
+            run background script LC13_ArmyBehaivours(LC13_Platoon[27],Melee,Conqueror,0,0,0,0,0)
+            run background script LC13_GenericTalusSpeeches(LC13_Platoon[27],1)
+
+        elsif LC13_Platoon[28] not exists and LC13_Platoon[26] exists and {LC13_Platoon[26]} near {AztecCapital} radius 400 and PLAYER of AztecCapital == 1 and not town AztecCapital is under takeover from player 0 and get AttackNearestTownTimer time remaining <= 0 and AttackingPlatoons == 1
+            LC13_Platoon[28] = recruit ARMY_UNIT_TYPE_RANGED_4 town AztecCapital platoon of size 50 * RecruitSizeModifier
+            LC13_RecruitTimer1 = create timer for 200 * RecruitModifier seconds
+            enable platoon LC13_Platoon[28] respond to town AztecCapital attack
+            wait until not LC13_Platoon[28] recruiting
+            run background script LC13_ArmyBehaivours(LC13_Platoon[28],Melee,Conqueror,0,0,0,0,0)
+            run background script LC13_GenericTalusSpeeches(LC13_Platoon[28],1)
+
+        elsif LC13_Platoon[29] not exists and LC13_Platoon[26] exists and {LC13_Platoon[26]} near {AztecCapital} radius 400 and PLAYER of AztecCapital == 1 and not town AztecCapital is under takeover from player 0 and get AttackNearestTownTimer time remaining <= 0 and AttackingPlatoons == 1
+            LC13_Platoon[29] = recruit ARMY_UNIT_TYPE_RANGED_4 town AztecCapital platoon of size 60 * RecruitSizeModifier
+            LC13_RecruitTimer1 = create timer for 200 * RecruitModifier seconds
+            enable platoon LC13_Platoon[29] respond to town AztecCapital attack
+            wait until not LC13_Platoon[29] recruiting
+            run background script LC13_ArmyBehaivours(LC13_Platoon[29],Melee,Conqueror,0,0,0,0,0)
+            run background script LC13_GenericTalusSpeeches(LC13_Platoon[29],1)
+
+        elsif LC13_SiegeCatapult[9] not exists and LC13_Platoon[26] exists and {LC13_Platoon[26]} near {AztecCapital} radius 400 and PLAYER of AztecCapital == 1 and not town AztecCapital is under takeover from player 0 and get AttackNearestTownTimer time remaining <= 0 and AttackingPlatoons == 1
+            LC13_SiegeCatapult[9] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_5 town AztecCapital siege weapon
+            LC13_RecruitTimer1 = create timer for 200 * RecruitModifier seconds
+            run background script LC13_MoveCatapultThenAttack(LC13_SiegeCatapult[9],Conqueror,0,0,0)
+
+        elsif LC13_SiegeCatapult[10] not exists and LC13_Platoon[26] exists and {LC13_Platoon[26]} near {AztecCapital} radius 400 and PLAYER of AztecCapital == 1 and not town AztecCapital is under takeover from player 0 and get AttackNearestTownTimer time remaining <= 0 and AttackingPlatoons == 1
+            LC13_SiegeCatapult[10] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_5 town AztecCapital siege weapon
+            LC13_RecruitTimer1 = create timer for 200 * RecruitModifier seconds
+            run background script LC13_MoveCatapultThenAttack(LC13_SiegeCatapult[10],Conqueror,0,0,0)
+
+        elsif LC13_SiegeCatapult[11] not exists and LC13_Platoon[26] exists and {LC13_Platoon[26]} near {AztecCapital} radius 400 and PLAYER of AztecCapital == 1 and not town AztecCapital is under takeover from player 0 and get AttackNearestTownTimer time remaining <= 0 and AttackingPlatoons == 1
+            LC13_SiegeCatapult[11] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_5 town AztecCapital siege weapon
+            LC13_RecruitTimer1 = create timer for 200 * RecruitModifier seconds
+            run background script LC13_MoveCatapultThenAttack(LC13_SiegeCatapult[11],Conqueror,0,0,0)
 
         //AztecTown1
         elsif LC13_Platoon[14] not exists and PLAYER of AztecTown1 == 1 and not town AztecTown1 is under takeover from player 0 and get LC13_RecruitTimer2 time remaining <= 0
@@ -2595,6 +2906,47 @@ start
             run background script LC13_StaticPlatoonsActions(PlatoonPos[8],Ranged,LC13_Platoon[8])
             run background script LC13_GenericTalusSpeeches(LC13_Platoon[8],1)
 
+        //Skeleton Attacks
+        elsif LC13_SiegeCatapult[4] not exists and LC13_NumberOfSkeletonPlatoons >= 2 and not town AztecCapital is under takeover from player 0
+            LC13_SiegeCatapult[4] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_5 town AztecCapital siege weapon
+            LC13_RecruitTimer1 = create timer for 80 * RecruitModifier seconds
+            SiegeWaypoint1 = marker at {SiegeRoute2[0]}
+            SiegeWaypoint2 = marker at {SiegeRoute2[1]} + {0,0}
+            SiegeWaypoint3 = marker at {SiegeRoute2[2]} + {0,0}
+            run background script LC13_MoveCatapultThenAttack(LC13_SiegeCatapult[4],0,SiegeWaypoint1,SiegeWaypoint2,SiegeWaypoint3)
+
+        elsif LC13_SiegeCatapult[5] not exists and LC13_NumberOfSkeletonPlatoons >= 4 and not town AztecCapital is under takeover from player 0
+            LC13_SiegeCatapult[5] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_5 town AztecCapital siege weapon
+            LC13_RecruitTimer1 = create timer for 80 * RecruitModifier seconds
+            SiegeWaypoint1 = marker at {SiegeRoute1[0]}
+            SiegeWaypoint2 = marker at {SiegeRoute1[1]} + {0,0}
+            SiegeWaypoint3 = marker at {SiegeRoute1[2]} + {0,0}
+            run background script LC13_MoveCatapultThenAttack(LC13_SiegeCatapult[5],0,SiegeWaypoint1,SiegeWaypoint2,SiegeWaypoint3)
+
+        elsif LC13_SiegeCatapult[6] not exists and LC13_NumberOfSkeletonPlatoons >= 4 and not town AztecCapital is under takeover from player 0
+            LC13_SiegeCatapult[6] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_5 town AztecCapital siege weapon
+            LC13_RecruitTimer1 = create timer for 80 * RecruitModifier seconds
+            SiegeWaypoint1 = marker at {SiegeRoute1[0]}
+            SiegeWaypoint2 = marker at {SiegeRoute1[1]} + {30,0}
+            SiegeWaypoint3 = marker at {SiegeRoute1[2]} + {30,0}
+            run background script LC13_MoveCatapultThenAttack(LC13_SiegeCatapult[6],0,SiegeWaypoint1,SiegeWaypoint2,SiegeWaypoint3)
+
+        elsif LC13_SiegeCatapult[7] not exists and LC13_NumberOfSkeletonPlatoons >= 6 and not town AztecCapital is under takeover from player 0
+            LC13_SiegeCatapult[7] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_5 town AztecCapital siege weapon
+            LC13_RecruitTimer1 = create timer for 80 * RecruitModifier seconds
+            SiegeWaypoint1 = marker at {SiegeRoute3[0]}
+            SiegeWaypoint2 = marker at {SiegeRoute3[1]} + {30,0}
+            SiegeWaypoint3 = marker at {SiegeRoute3[2]} + {30,0}
+            run background script LC13_MoveCatapultThenAttack(LC13_SiegeCatapult[7],0,SiegeWaypoint1,SiegeWaypoint2,SiegeWaypoint3)
+
+        elsif LC13_SiegeCatapult[8] not exists and LC13_NumberOfSkeletonPlatoons >= 6 and not town AztecCapital is under takeover from player 0
+            LC13_SiegeCatapult[8] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_5 town AztecCapital siege weapon
+            LC13_RecruitTimer1 = create timer for 80 * RecruitModifier seconds
+            SiegeWaypoint1 = marker at {SiegeRoute3[0]}
+            SiegeWaypoint2 = marker at {SiegeRoute3[1]} + {30,0}
+            SiegeWaypoint3 = marker at {SiegeRoute3[2]} + {30,0}
+            run background script LC13_MoveCatapultThenAttack(LC13_SiegeCatapult[8],0,SiegeWaypoint1,SiegeWaypoint2,SiegeWaypoint3)
+
         end if
 
         if PLAYER of AztecCapital == 0 or PLAYER of AztecTown1 == 0 or PLAYER of AztecTown2 == 0 or PLAYER of MinorTown2 == 0 or PLAYER of MinorTown3 == 0 or PLAYER of MinorTown4 == 0 or PLAYER of MinorTown5 == 0 or PLAYER of MinorTown6 == 0 or PLAYER of MinorTown8 == 0 or PLAYER of AztecCapital != 1
@@ -2606,6 +2958,96 @@ start
         elsif PLAYER of NearestSettlement == 1 and AttackingPlatoons == 1
             //Attack PlayerTown with remaining troops
             AttackingPlatoons = 0
+        end if
+
+        if get VolcanoTimer time remaining <= 300 and PLAYER of AztecCapital == 1 and HEALTH of AIVolcano >= 1.0 and CHARGE of AIVolcano != 1.0
+            CHARGE of AIVolcano = 1.0
+        end if
+
+        if HEALTH of AIVolcano >= 1.0 and get VolcanoTimer time remaining <= 0 and PLAYER of AztecCapital == 1 and CinemaIsRunning == 0 and not town PlayerTown is under takeover from player 1 and PLAYER of PlayerTown == 0
+            if get VolcanoTimer time remaining <= 0 and PLAYER of AztecTown2 != 1
+                enable predefined sky "VOLCANO" time 9
+
+                if VolcanoFired == 0
+                    VolcanoFired = 1
+                end if
+
+                Number = number from 1 to 3
+                if Number == 1
+                    CastEpicPos = marker at {1187.32,75.92,375.34}
+                elsif Number == 2
+                    CastEpicPos = marker at {1041.70,61.99,448.07}
+                else
+                    CastEpicPos = marker at {964.85,74.35,599.37}
+                end if
+
+                run script EpicTargeter(PlayerTown,marker at {CastEpicPos},1)
+                    
+                VolcanoWarning = create visual effect VISUAL_EFFECT_EPIC_TARGET_WARNING at {ET_FireEpicLocation} time 15 target {ET_FireEpicLocation}
+                wait 15 seconds
+                EpicVolc = create volcano at {ET_FireEpicLocation} player 1
+                    
+                run background script LC13_Volcano(AIVolcano, EpicVolc)
+
+                VolcanoTimer = create timer for VOLCANODELAY * EpicModifier seconds
+                VOLCANODELAY += 750
+
+            end if
+        end if
+
+        if CaptureAztecTown1 == 0
+            if TownsConverted >= 3 or TownsAggressiveConverted >= 1
+                CaptureAztecTown1 = 1
+            end if
+        end if
+
+        //Attack AztecTown1
+        if TownsConverted >= 4 and PLAYER of AztecTown1 != 1 and not town AztecTown1 is under takeover from player 1 and get AttackAztecTown1Timer time remaining <= 0
+            if LC13_Platoon[22] not exists and PLAYER of AztecCapital == 1 and not town AztecCapital is under takeover from player 0 and get LC13_RecruitTimer1 time remaining <= 0 and TriedAztecTown1Attack == 1 and CaptureAztecTown1 == 1
+                LC13_Platoon[22] = recruit ARMY_UNIT_TYPE_MELEE_5 town AztecCapital platoon of size 25 * RecruitSizeModifier
+                LC13_RecruitTimer1 = create timer for 300 * RecruitModifier seconds
+                enable platoon LC13_Platoon[22] respond to town AztecCapital attack
+                wait until not LC13_Platoon[22] recruiting
+                AttackingPosition = marker at {1326.08,133.27,746.30} + {0,0,0}
+                AttackingPositionFallBack = marker at {1245.49,141.35,898.79} + {0,0,0}
+                run background script LC13_GenericTalusSpeeches(LC13_Platoon[22],1)
+                run background script LC13_ArmyBehaivours(LC13_Platoon[22],Melee,CaptureSpecTown,0,AttackingPosition,AttackingPositionFallBack,0,0)
+            end if
+
+            if LC13_Platoon[23] not exists and PLAYER of AztecCapital == 1 and not town AztecCapital is under takeover from player 0 and get LC13_RecruitTimer1 time remaining <= 0 and TriedAztecTown1Attack == 1 and CaptureAztecTown1 == 1
+                LC13_Platoon[23] = recruit ARMY_UNIT_TYPE_MELEE_5 town AztecCapital platoon of size 25 * RecruitSizeModifier
+                LC13_RecruitTimer1 = create timer for 300 * RecruitModifier seconds
+                enable platoon LC13_Platoon[23] respond to town AztecCapital attack
+                wait until not LC13_Platoon[23] recruiting
+                AttackingPosition = marker at {1326.08,133.27,746.30} + {25,0,0}
+                AttackingPositionFallBack = marker at {1245.49,141.35,898.79} + {25,0,0}
+                run background script LC13_GenericTalusSpeeches(LC13_Platoon[23],1)
+                run background script LC13_ArmyBehaivours(LC13_Platoon[23],Melee,CaptureSpecTown,0,AttackingPosition,AttackingPositionFallBack,0,0)
+            end if
+
+            if LC13_Platoon[24] not exists and PLAYER of AztecCapital == 1 and not town AztecCapital is under takeover from player 0 and get LC13_RecruitTimer1 time remaining <= 0 and TriedAztecTown1Attack == 1 and CaptureAztecTown1 == 1
+                LC13_Platoon[24] = recruit ARMY_UNIT_TYPE_RANGED_5 town AztecCapital platoon of size 25 * RecruitSizeModifier
+                LC13_RecruitTimer1 = create timer for 300 * RecruitModifier seconds
+                enable platoon LC13_Platoon[24] respond to town AztecCapital attack
+                wait until not LC13_Platoon[24] recruiting
+                AttackingPosition = marker at {1326.08,133.27,746.30} + {0,0,25}
+                AttackingPositionFallBack = marker at {1245.49,141.35,898.79} + {0,0,25}
+                run background script LC13_GenericTalusSpeeches(LC13_Platoon[24],1)
+                run background script LC13_ArmyBehaivours(LC13_Platoon[24],Ranged,CaptureSpecTown,0,AttackingPosition,AttackingPositionFallBack,0,0)
+            end if
+
+            if LC13_Platoon[25] not exists and PLAYER of AztecCapital == 1 and not town AztecCapital is under takeover from player 0 and get LC13_RecruitTimer1 time remaining <= 0 and TriedAztecTown1Attack == 1 and CaptureAztecTown1 == 1
+                LC13_Platoon[25] = recruit ARMY_UNIT_TYPE_RANGED_5 town AztecCapital platoon of size 25 * RecruitSizeModifier
+                LC13_RecruitTimer1 = create timer for 300 * RecruitModifier seconds
+                enable platoon LC13_Platoon[25] respond to town AztecCapital attack
+                wait until not LC13_Platoon[25] recruiting
+                AttackingPosition = marker at {1326.08,133.27,746.30} + {15,0,15}
+                AttackingPositionFallBack = marker at {1245.49,141.35,898.79} + {15,0,15}
+                run background script LC13_GenericTalusSpeeches(LC13_Platoon[25],1)
+                run background script LC13_ArmyBehaivours(LC13_Platoon[25],Ranged,CaptureSpecTown,0,AttackingPosition,AttackingPositionFallBack,0,0)
+            end if
+
+            AttackAztecTown1Timer = create timer for 1500 seconds
         end if
     end loop
 
@@ -2981,6 +3423,8 @@ start
         run background script LC13_ArmyBehaivours(LC13_Platoon[17],Melee,Special,0,AttackingPosition,AttackingPositionFallBack,0,0)
         run background script LC13_GenericTalusSpeeches(LC13_Platoon[17],1)
 
+        wait 15 seconds
+
         LC13_NumberOfSkeletonPlatoons = 0
     elsif SkeletonsWave == 2 or SkeletonsWave == 3
         LC13_NumberOfSkeletonPlatoons = 4
@@ -3029,13 +3473,15 @@ start
 
         AttackingPosition = marker at {AttackPos[0]} + {33,0,0}
         AttackingPositionFallBack = marker at {AttackPos[1]} + {33,0,0}
-        run background script LC13_ArmyBehaivours(LC13_Platoon[17],Melee,Special,0,AttackingPosition,AttackingPositionFallBack,0,0)
-        run background script LC13_GenericTalusSpeeches(LC13_Platoon[17],1)
+        run background script LC13_ArmyBehaivours(LC13_Platoon[18],Melee,Special,0,AttackingPosition,AttackingPositionFallBack,0,0)
+        run background script LC13_GenericTalusSpeeches(LC13_Platoon[18],1)
 
         AttackingPosition = marker at {AttackPos[0]} + {-33,0,0}
         AttackingPositionFallBack = marker at {AttackPos[1]} + {-33,0,0}
-        run background script LC13_ArmyBehaivours(LC13_Platoon[17],Melee,Special,0,AttackingPosition,AttackingPositionFallBack,0,0)
-        run background script LC13_GenericTalusSpeeches(LC13_Platoon[17],1)
+        run background script LC13_ArmyBehaivours(LC13_Platoon[19],Melee,Special,0,AttackingPosition,AttackingPositionFallBack,0,0)
+        run background script LC13_GenericTalusSpeeches(LC13_Platoon[19],1)
+
+        wait 15 seconds
 
         LC13_NumberOfSkeletonPlatoons = 0
 
@@ -3112,8 +3558,58 @@ start
         run background script LC13_ArmyBehaivours(LC13_Platoon[21],Melee,Special,0,AttackingPosition,AttackingPositionFallBack,0,0)
         run background script LC13_GenericTalusSpeeches(LC13_Platoon[21],1)
 
+        wait 15 seconds
+
         LC13_NumberOfSkeletonPlatoons = 0
     end if
 
     SkeletonsWave++
 end script LC13_DeathSpell
+
+
+begin script LC13_PlatoonBehaivors
+
+start
+
+begin loop
+    if town AztecCapital is under takeover from player 0
+        enable platoon LC13_Platoon[0] respond to town AztecCapital attack
+        enable platoon LC13_Platoon[1] respond to town AztecCapital attack
+        enable platoon LC13_Platoon[2] respond to town AztecCapital attack
+        enable platoon LC13_Platoon[3] respond to town AztecCapital attack
+        enable platoon LC13_Platoon[4] respond to town AztecCapital attack
+        enable platoon LC13_Platoon[5] respond to town AztecCapital attack
+        enable platoon LC13_WallArcher[0] respond to town AztecCapital attack
+        enable platoon LC13_WallArcher[1] respond to town AztecCapital attack
+        enable platoon LC13_WallArcher[2] respond to town AztecCapital attack
+        enable platoon LC13_WallArcher[3] respond to town AztecCapital attack
+        enable platoon LC13_WallArcher[4] respond to town AztecCapital attack
+        enable platoon LC13_WallArcher[5] respond to town AztecCapital attack
+        enable platoon LC13_WallArcher[6] respond to town AztecCapital attack
+        enable platoon LC13_WallArcher[7] respond to town AztecCapital attack
+        enable platoon LC13_WallArcher[8] respond to town AztecCapital attack
+        enable platoon LC13_WallArcher[9] respond to town AztecCapital attack
+        enable platoon LC13_WallArcher[10] respond to town AztecCapital attack
+        enable platoon LC13_WallArcher[11] respond to town AztecCapital attack
+    else
+        disable platoon LC13_Platoon[0] respond to town AztecCapital attack
+        disable platoon LC13_Platoon[1] respond to town AztecCapital attack
+        disable platoon LC13_Platoon[2] respond to town AztecCapital attack
+        disable platoon LC13_Platoon[3] respond to town AztecCapital attack
+        disable platoon LC13_WallArcher[0] respond to town AztecCapital attack
+        disable platoon LC13_WallArcher[1] respond to town AztecCapital attack
+        disable platoon LC13_WallArcher[2] respond to town AztecCapital attack
+        disable platoon LC13_WallArcher[3] respond to town AztecCapital attack
+        disable platoon LC13_WallArcher[4] respond to town AztecCapital attack
+        disable platoon LC13_WallArcher[5] respond to town AztecCapital attack
+        disable platoon LC13_WallArcher[6] respond to town AztecCapital attack
+        disable platoon LC13_WallArcher[7] respond to town AztecCapital attack
+        disable platoon LC13_WallArcher[8] respond to town AztecCapital attack
+        disable platoon LC13_WallArcher[9] respond to town AztecCapital attack
+        disable platoon LC13_WallArcher[10] respond to town AztecCapital attack
+        disable platoon LC13_WallArcher[11] respond to town AztecCapital attack
+    end if
+    wait number from 5 to 10 seconds
+end loop
+
+end script LC13_PlatoonBehaivors

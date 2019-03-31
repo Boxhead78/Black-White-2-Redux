@@ -21,7 +21,8 @@ define Escort                            = 1
 define Conqueror                         = 2 //Nearest Settlement Attacker
 define Patrol                            = 3
 define PatrolLinked                      = 4
-define Special                           = 5
+define CaptureSpecTown                   = 5
+define Special                           = 6
 
 define script LC13_StaticPlatoonsActions(Pos,Type,Platoon)
 define script LC13_ArmyBehaivours(Platoon,Type,Task,DefendObject,AttackingPoint,AttackingPointFallBack,PatrolRoute,Town)
@@ -97,14 +98,17 @@ start
     AttackPos[5] = marker at {1462.50,82.88,550.32}
 
     //AztecCapital to PlayerTown
+    //Side1
     SiegeRoute1[0] = marker at {1117.43,273.63,1548.25}
     SiegeRoute1[1] = marker at {831.41,93.24,895.40}
     SiegeRoute1[2] = marker at {910.14,74.22,708.50}
 
+    //Front
     SiegeRoute2[0] = marker at {1117.43,273.63,1548.25}
     SiegeRoute2[1] = marker at {1216.45,140.52,894.04}
     SiegeRoute2[2] = marker at {1118.50,126.95,716.31}
 
+    //Side2
     SiegeRoute3[0] = marker at {1548.80,312.80,1603.78}
     SiegeRoute3[1] = marker at {1347.24,133.26,831.84}
     SiegeRoute3[2] = marker at {1395.27,58.79,451.38}
@@ -265,6 +269,7 @@ begin script LC13_ArmyBehaivours(Platoon,Type,Task,DefendObject,AttackingPoint,A
     Armory = 0
     oTown = get town with id 0
     oTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in oTown min built 1.0
+    AztecTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in AztecTown1 min built 1.0
     Number = 0
     AttackMode = 0
     Building = 0
@@ -278,10 +283,19 @@ begin script LC13_ArmyBehaivours(Platoon,Type,Task,DefendObject,AttackingPoint,A
 start
 
 //Group Attackers up first
+if Platoon == LC13_Platoon[22] or Platoon == LC13_Platoon[23] or Platoon == LC13_Platoon[24] or Platoon == LC13_Platoon[25]
+    wait until LC13_Platoon[22] exists and LC13_Platoon[23] exists and LC13_Platoon[24] exists and LC13_Platoon[25] exists
+    TriedAztecTown1Attack = 1
+end if
+
+if Platoon == LC13_Platoon[30] or Platoon == LC13_Platoon[31] or Platoon == LC13_Platoon[32]
+    wait until LC13_SiegeCatapult[12] exists and LC13_SiegeCatapult[13] exists and LC13_SiegeCatapult[14] exists and {LC13_SiegeCatapult[12]} near {AztecCapital} radius 400 and {LC13_SiegeCatapult[13]} near {AztecCapital} radius 400 and {LC13_SiegeCatapult[14]} near {AztecCapital} radius 400
+end if
+
 
 begin loop
 
-    if Type == Melee and Task != Special
+    if Type == Melee
         PlayerCreature = get distance from {Platoon} to {oCreature}
         if PlayerCreature <= 200 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00 and Platoon can navigate to {oCreature}
             clear Platoon action queue
@@ -323,7 +337,7 @@ begin loop
             a = 0
         end if
 
-    elsif Type == Ranged and Task != Special
+    elsif Type == Ranged
         PlayerCreature = get distance from {Platoon} to {oCreature}
         if PlayerCreature <= 200 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00 and Platoon can navigate to {oCreature}
             clear Platoon action queue
@@ -889,6 +903,112 @@ begin loop
             clear Platoon action queue
             add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPointFallBack} to Platoon action queue
         end if
+
+    elsif Task == CaptureSpecTown
+        if Platoon can navigate to object AztecTownCentre and PLAYER of AztecTown1 == 0
+            a = 1
+            clear Platoon action queue
+            Number = number from 1 to 4
+            if Number == 2 //Hunt down platoons or destroy buildings
+                AttackMode = 1
+                set Platoon attack AztecTown1 with severity 0.2
+            elsif Number == 3 or Number == 4 //Destroy value buildings
+                AttackMode = 2
+                Building = 0
+                Timer = create timer for 2 seconds
+                begin loop
+                    Number = number from 1 to 8
+                    if Number == 1 or Number == 2 or Number == 3
+                        Building = get building ALTAR in AztecTown1 min built 0.75
+                        if Building exists
+                            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                        else
+                            Building = 0
+                        end if
+                    elsif Number == 4
+                        Building = get building TEMPLE in AztecTown1 min built 0.75
+                        if Building exists
+                            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                        else
+                            Building = 0
+                        end if
+                    elsif Number == 5
+                        Building = get building CREATURE_PEN in AztecTown1 min built 0.75
+                        if Building exists
+                            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                        else
+                            Building = 0
+                        end if
+                    elsif Number == 6
+                        Building = get building UNIVERSITY in AztecTown1 min built 0.75
+                        if Building exists
+                            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                        else
+                            Building = 0
+                        end if
+                    elsif Number == 7
+                        Building = get building BATHHOUSE in AztecTown1 min built 0.75
+                        if Building exists
+                            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                        else
+                            Building = 0
+                        end if
+                    elsif Number == 8
+                        Building = get building AMPITHEATRE in AztecTown1 min built 0.75
+                        if Building exists
+                            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                        else
+                            Building = 0
+                        end if
+                    end if
+                    until Building != 0 or get Timer time remaining <= 0
+                end loop
+            else //Capture Town
+                AttackMode = 0
+                if TownCapturePlatoons[2] < 2
+                    TownCapturePlatoons[2]++
+                    set Platoon attack AztecTown1 with severity 0.3 for takeover
+                else
+                    a = 0
+                end if
+            end if
+            RecalculateTimer = create timer for 40 seconds
+            begin loop
+                PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 150
+                TestCreature2 = get distance from {Platoon} to {MyCreature}
+                NumPat1 = get number of villagers in platoon Platoon
+                //if PlayerPlatoon1 exists or TestCreature2 <= 150 or not Platoon can navigate to object AztecTown1Centre
+                    if PlayerPlatoon1 exists and not town AztecTown1 is under takeover from player 1
+                        a = 0
+                    elsif TestCreature2 <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of MyCreature > 0.00 and not town AztecTown1 is under takeover from player 1
+                        a = 0
+                    elsif not Platoon can navigate to object AztecTownCentre
+                        a = 0
+                    elsif Platoon not exists
+                        a = 0
+                    elsif AttackMode == 1 and HEALTH of MyCreature == 0
+                        a = 0
+                    elsif AttackMode == 2 and Building not exists
+                        a = 0
+                    elsif AttackMode == 2 and HEALTH of Building < 0.1
+                        a = 0
+                    elsif AttackMode == 2 and Building == 0
+                        a = 0
+                    elsif not town AztecTown1 is under takeover from player 1 and get RecalculateTimer time remaining <= 0
+                        a = 0
+                    end if
+                //end if
+                until a == 0 or Platoon not exists
+            end loop
+            TownCapturePlatoons[2]--
+            clear Platoon action queue
+        elsif Platoon can navigate to {AttackingPoint}
+            clear Platoon action queue
+            add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPoint} to Platoon action queue
+        else
+            clear Platoon action queue
+            add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPointFallBack} to Platoon action queue
+        end if
     end if
 
     until Platoon not exists
@@ -954,6 +1074,9 @@ start
 
     enable siege weapon SiegeWeapon auto attack
     //Group up first
+    if SiegeWeapon == LC13_SiegeCatapult[12] or SiegeWeapon == LC13_SiegeCatapult[13] or SiegeWeapon == LC13_SiegeCatapult[14]
+        wait until LC13_SiegeCatapult[12] exists and LC13_SiegeCatapult[13] exists and LC13_SiegeCatapult[14] exists and {LC13_SiegeCatapult[12]} near {AztecCapital} radius 400 and {LC13_SiegeCatapult[13]} near {AztecCapital} radius 400 and {LC13_SiegeCatapult[14]} near {AztecCapital} radius 400
+    end if
 
     disable siege weapon SiegeWeapon auto attack
 
