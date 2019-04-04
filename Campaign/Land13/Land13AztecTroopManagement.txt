@@ -22,7 +22,8 @@ define Conqueror                         = 2 //Nearest Settlement Attacker
 define Patrol                            = 3
 define PatrolLinked                      = 4
 define CaptureSpecTown                   = 5
-define Special                           = 6
+define GoToStonehenge                    = 6
+define Special                           = 7
 
 define script LC13_StaticPlatoonsActions(Pos,Type,Platoon)
 define script LC13_ArmyBehaivours(Platoon,Type,Task,DefendObject,AttackingPoint,AttackingPointFallBack,PatrolRoute,Town)
@@ -295,7 +296,7 @@ end if
 
 begin loop
 
-    if Type == Melee
+    if Type == Melee and Task != CaptureSpecTown
         PlayerCreature = get distance from {Platoon} to {oCreature}
         if PlayerCreature <= 200 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00 and Platoon can navigate to {oCreature}
             clear Platoon action queue
@@ -337,7 +338,7 @@ begin loop
             a = 0
         end if
 
-    elsif Type == Ranged
+    elsif Type == Ranged and Task != CaptureSpecTown
         PlayerCreature = get distance from {Platoon} to {oCreature}
         if PlayerCreature <= 200 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00 and Platoon can navigate to {oCreature}
             clear Platoon action queue
@@ -905,7 +906,92 @@ begin loop
         end if
 
     elsif Task == CaptureSpecTown
-        if Platoon can navigate to object AztecTownCentre and PLAYER of AztecTown1 == 0
+        if Type == Melee
+            PlayerCreature = get distance from {Platoon} to {oCreature}
+            if PlayerCreature <= 75 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00 and Platoon can navigate to {oCreature}
+                clear Platoon action queue
+                begin loop
+                    PlayerCreature = get distance from {Platoon} to {oCreature}
+                    add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_MOVING_OBJECT using oCreature to Platoon action queue
+                    NumPat1 = get number of villagers in platoon Platoon
+                    until NumPat1 == 0 or SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature == 0.00 or not Platoon can navigate to {oCreature} or PlayerCreature > 75
+                end loop
+                clear Platoon action queue
+            end if
+            
+            PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 75
+            Catapult = get siege weapon of player 0 nearest {Platoon} radius 60
+            if PlayerPlatoon1 exists and Platoon can navigate to {PlayerPlatoon1}
+                clear Platoon action queue
+                begin loop
+                    PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 75
+                    add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_PLATOON using PlayerPlatoon1 to Platoon action queue
+                    NumPat1 = get number of villagers in platoon Platoon
+                    HeTeste1 = get number of villagers in platoon PlayerPlatoon1
+                    until NumPat1 == 0 or HeTeste1 == 0 or not Platoon can navigate to {PlayerPlatoon1} or PlayerPlatoon1 not exists
+                end loop
+                clear Platoon action queue
+            elsif Catapult exists and Platoon can navigate to {Catapult}
+                clear Platoon action queue
+                a = 0
+                begin loop
+                    Catapult = get siege weapon of player 0 nearest {Platoon} radius 60
+                    add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Catapult to Platoon action queue
+                    NumPat1 = get number of villagers in platoon Platoon
+                    PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 75
+                    if PlayerPlatoon1 exists and Platoon can navigate to {PlayerPlatoon1}
+                        a = 1
+                    end if
+                    until NumPat1 == 0 or Catapult not exists or not Platoon can navigate to {Catapult} or a == 1 or Catapult not exists
+                end loop
+                clear Platoon action queue
+                a = 0
+            end if
+
+        elsif Type == Ranged
+            PlayerCreature = get distance from {Platoon} to {oCreature}
+            if PlayerCreature <= 75 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00 and Platoon can navigate to {oCreature}
+                clear Platoon action queue
+                begin loop
+                    PlayerCreature = get distance from {Platoon} to {oCreature}
+                    add action PLATOON_AGENDA_ACTION_RANGED_ATTACK_MAINTAINING_DISTANCE using oCreature to Platoon action queue
+                    NumPat1 = get number of villagers in platoon Platoon
+                    until NumPat1 == 0 or SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature == 0.00 or not Platoon can navigate to {oCreature} or PlayerCreature > 75
+                end loop
+                clear Platoon action queue
+            end if
+            
+            PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 75
+            Catapult = get siege weapon of player 0 nearest {Platoon} radius 60
+            if PlayerPlatoon1 exists and Platoon can navigate to {PlayerPlatoon1}
+                clear Platoon action queue
+                begin loop
+                    PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 75
+                    add action PLATOON_AGENDA_ACTION_RANGED_ATTACK_MAINTAINING_DISTANCE using PlayerPlatoon1 to Platoon action queue
+                    NumPat1 = get number of villagers in platoon Platoon
+                    HeTeste1 = get number of villagers in platoon PlayerPlatoon1
+                    until NumPat1 == 0 or HeTeste1 == 0 or not Platoon can navigate to {PlayerPlatoon1} or PlayerPlatoon1 not exists
+                end loop
+                clear Platoon action queue
+            elsif Catapult exists and Platoon can navigate to {Catapult}
+                clear Platoon action queue
+                a = 0
+                begin loop
+                    Catapult = get siege weapon of player 0 nearest {Platoon} radius 60
+                    add action PLATOON_AGENDA_ACTION_RANGED_ATTACK_MAINTAINING_DISTANCE using Catapult to Platoon action queue
+                    NumPat1 = get number of villagers in platoon Platoon
+                    PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 75
+                    if PlayerPlatoon1 exists and Platoon can navigate to {PlayerPlatoon1}
+                        a = 1
+                    end if
+                    until NumPat1 == 0 or Catapult not exists or not Platoon can navigate to {Catapult} or a == 1 or Catapult not exists
+                end loop
+                clear Platoon action queue
+                a = 0
+            end if
+        end if
+
+        if Platoon can navigate to object AztecTownCentre and PLAYER of AztecTown1 != 1
             a = 1
             clear Platoon action queue
             Number = number from 1 to 4
@@ -1008,6 +1094,14 @@ begin loop
         else
             clear Platoon action queue
             add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPointFallBack} to Platoon action queue
+        end if
+        
+    elsif Task == GoToStonehenge
+        if Platoon can navigate to {AttackingPoint} and PLAYER of AztecTown1 != 0
+            clear Platoon action queue
+            add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPoint} to Platoon action queue
+        elsif get size of Platoon action queue < 1
+            add action PLATOON_AGENDA_ACTION_LINK_TO_ARMY_MEMBER using DefendObject to Platoon action queue
         end if
     end if
 

@@ -58,11 +58,13 @@ end script talNewTalus
 begin script tal_TalusLoop(GodHandle,rTown,PlayerID)
     godHandle = GodHandle
     buildingUnderConstruction = 0
+    ClosestPosInfluenceRing = 0
     discipleCounter = 9
     waterForestCounter = 0
     resourcesCounter = 0
     townDesire = 0.0
     manaRate = 0
+    miracleCounter = 0
     myBuilding = 0
     myPlatoon = 0
     myCatapult = 0
@@ -191,6 +193,105 @@ start
             run script ge_MoveToRadiusAltitude(godHandle,marker at {977.41,279.34,1748.11},geGodThrowRadius / 2,geGodThrowAltitude)
             run script ge_ThrowMiracle(godHandle, GE_MIRACLE_TYPE_DEATH, marker at {977.41,279.34,1748.11}, 1)
             wait number from 2 to 4 seconds
+        end if
+
+        if get ThrowMiracleTimer time remaining <= 0 and get player ge_Player[godHandle] mana > 23000 and PLAYER of PlayerTown == 0 and PLAYER of AztecTown1 == 1 and GB_DialogueIsRunning == 0
+
+            MiracleTimerStarted = 1
+            GB_DialogueIsRunning = 1
+            begin dialogue
+                myRand = number from 1 to 4
+                if myRand == 1
+                    say "BW2XT_LAND02_TALUS_FIRE_20"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND02_TALUS_FIRE_20 + 1 seconds
+                    say "BW2XT_LAND02_TALUS_FIRE_50"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND02_TALUS_FIRE_50 + 1 seconds
+                elsif myRand == 2
+                    say "BW2XT_LAND05_TALUS_MIRACLE_ATTACK_40"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND05_TALUS_MIRACLE_ATTACK_40 + 1 seconds
+                elsif myRand == 3
+                    say "BW2XT_LAND02_PLAYER_ACCEPTS_MIGRATION_10"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND02_PLAYER_ACCEPTS_MIGRATION_10 + 1 seconds
+                elsif myRand == 4
+                    say "BW2XT_LAND02_PLAYER_ACCEPTS_MIGRATION_20"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND02_PLAYER_ACCEPTS_MIGRATION_20 + 1 seconds
+                end if
+            end dialogue
+            GB_DialogueIsRunning = 0
+
+            ClosestPosInfluenceRing = marker at get nearest position at PlayerTown influence ring from {AztecTown1}
+            run script ge_MoveToRadiusAltitude(godHandle,marker at {ClosestPosInfluenceRing},geGodThrowRadius / 2,geGodThrowAltitude)
+            
+            wait until GB_DialogueIsRunning == 0
+            while miracleCounter < 3
+                myRand = number from 1 to 3
+                if myRand == 1
+                    run script ge_ThrowMiracle(godHandle, GE_MIRACLE_TYPE_STORM, marker at {ClosestPosInfluenceRing} + {number from -25 to -15,number from 35 to 50,number from -5 to -10}, 1)
+                elsif myRand == 2
+                    run script ge_ThrowMiracle(godHandle, GE_MIRACLE_TYPE_FIRE, marker at {ClosestPosInfluenceRing} + {number from -25 to -15,number from 35 to 50,number from -5 to -10}, 1)
+                else
+                    run script ge_ThrowMiracle(godHandle, GE_MIRACLE_TYPE_METEOR, marker at {ClosestPosInfluenceRing} + {number from -25 to -15,number from 35 to 50,number from -5 to -10}, 1)
+                end if
+                wait number from 2 to 7 seconds
+                miracleCounter++
+            end while
+            miracleCounter = 0
+
+            ThrowMiracleTimer = create timer for number from 300 * EpicModifier to 900 * EpicModifier seconds
+        end if
+
+        if get ThunderstormTimer time remaining <= 0 and get player ge_Player[godHandle] mana > 30000 and GB_DialogueIsRunning == 0 and PLAYER of PlayerTown == 0
+    
+            MiracleThunderstormStarted = 1
+            myRand = number from 1 to 5
+            if myRand == 1 or myRand == 2
+                myBuilding = get building ALTAR in PlayerTown min built 0.75
+
+            elsif myRand == 3
+                myBuilding = get building STORAGE_YARD in PlayerTown min built 0.75
+
+            elsif myRand == 4
+                myBuilding = get building TEMPLE in PlayerTown min built 0.75
+
+            elsif myRand == 5
+                myBuilding = get random abode in town PlayerTown
+            end if
+
+            if myBuilding exists
+                GB_DialogueIsRunning = 1
+                begin dialogue
+                    myRand = number from 1 to 3
+                    if myRand == 1
+                        say "BW2XT_LAND02_TALUS_MAKES_LAND_DARK_01"
+                        clear dialogue
+                        close dialogue
+                        wait BW2XT_LAND02_TALUS_MAKES_LAND_DARK_01 + 1 seconds
+                    elsif myRand == 2
+                        say "BW2XT_LAND02_TALUS_MAKES_LAND_DARK_03"
+                        clear dialogue
+                        close dialogue
+                        wait BW2XT_LAND02_TALUS_MAKES_LAND_DARK_03 + 1 seconds
+                    elsif myRand == 3
+                        say "BW2XT_LAND02_TALUS_MAKES_LAND_DARK_04"
+                        clear dialogue
+                        close dialogue
+                        wait BW2XT_LAND02_TALUS_MAKES_LAND_DARK_04 + 1 seconds
+                    end if
+                end dialogue
+                GB_DialogueIsRunning = 0
+                run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_THUNDERSTORM,myBuilding,0)
+                ThunderstormTimer = create timer for number from 1800 * EpicModifier to 2400 * EpicModifier seconds
+            end if
         end if
 
         if townCounter >= 15
