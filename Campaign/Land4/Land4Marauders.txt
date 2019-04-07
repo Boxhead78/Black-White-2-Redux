@@ -1,0 +1,444 @@
+//==================================================================
+// Land 4 Marauders
+// Matt.L (rubbish version)
+// Tom.R (brand spanking new version)
+//==================================================================
+
+//---------------------------------------------------------
+// Cosntants
+//---------------------------------------------------------
+define KN_FALSE = 0
+define KN_TRUE = 1
+
+//Completed defines
+define KN_NOT_COMPLETED = 0
+define KN_COMPLETED_GAVE_FOOD = 1
+
+
+//---------------------------------------------------------
+// Globals
+//---------------------------------------------------------
+
+global Marauders = 0
+global Actor = 0
+global Leader
+global FoodDrop = 0
+global DayChanged = 0
+
+//---------------------------------------------------------
+// Script defines
+//---------------------------------------------------------
+define script KN_Intro
+define script KN_Outro(FinshedGood)
+define script KN_WatchTheDays
+
+
+//---------------------------------------------------------
+// Land 4 Marauders
+//---------------------------------------------------------
+begin script Land4Marauders
+	Scroll = 0
+	ScrollPos = 0
+	
+	GetVillager = 0
+	MarauderTimer = create timer for 0 seconds
+	MaraudersNear = 0
+	MarauderDestination = marker at {1255.29,98.63,549.20}
+	FoodDropPos = marker at {1227.01,98.59,616.21}
+	IntroActorPos = marker at {1277.78,98.59,545.12}
+	MaraudersFinalPos = marker at {1133.20,104.95,688.79}
+	Food = 0
+	StoragePit = 0
+	Moved = 0
+	FoodAdded = 0
+	TempRock = 0
+	Influence = 0
+	CurrFood = 0
+
+start
+	
+		ScrollPos = marker at {1227.01,98.59,616.21} + {10,10}
+
+		TempRock = create OBJECT MOBILE_STATIC_INFO_BONFIRE at {FoodDropPos} + {4,0}
+		SCALE of TempRock = 1.0
+
+		wait 45 seconds
+
+		set fade red 0 green 0 blue 0 time 1
+		wait 1 seconds
+
+		Actor = create VILLAGER NORSE_FARMER at {IntroActorPos}
+
+		Influence = create influence at {FoodDropPos} radius 6
+		FoodDrop = create STORE FOOD at {FoodDropPos}
+		enable villagers ignore FoodDrop resource
+
+		run script KN_Intro
+		Marauders = create platoon PLATOON_INFO_MARAUDER at {MaraudersFinalPos} with 30 * RecruitSizeModifier men and 0 women
+		set Marauders player 4
+		add villager Leader to platoon Marauders
+		release Actor
+
+		Scroll = create highlight SILVER name "BW2T_SCRIPT_04FINAL_NORSE_MARAUDERS_REMINDER" remind "BW2T_SCRIPT_04FINAL_NORSE_MARAUDERS_REMINDER" at {ScrollPos}
+		ALTITUDE of Scroll = 5
+
+		set player 0 objective TRIBUTE_OBJECTIVE_LAND_7 with amount 1 text "BW2T_SCRIPT_04FINAL_NORSE_MARAUDERS_REMINDER" amount 1 description "BW2T_SCRIPT_04FINAL_NORSE_MARAUDERS_REMINDER" class TRIBUTE_OBJECTIVE_CLASS_SPECIAL reward 20000
+		run background script KN_WatchTheDays
+
+		//Marauder Check
+		while Marauders exists and MaraudersNear == 0
+			if DayChanged >= 3 and Moved == 0 //get MarauderTimer time remaining == 0
+				clear Marauders action queue
+				add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {FoodDropPos} to Marauders action queue
+				Moved = 1
+				wait until GB_DialogueIsRunning == 0
+				GB_DialogueIsRunning = 1
+				begin dialogue
+					eject good spirit
+					say "BW2T_SCRIPT_04FINAL_NORSE_MARAUDERS_50"
+					wait until read
+					send good spirit home
+				end dialogue
+				GB_DialogueIsRunning = 0
+			end if
+
+			if {Marauders} near {FoodDropPos} radius 30
+				MaraudersNear = 1
+			end if
+ 
+			if FoodDrop not exists
+				FoodDrop = create STORE FOOD at {FoodDropPos}
+			end if
+			CurrFood = get resource RESOURCE_TYPE_FOOD in FoodDrop
+			if CurrFood > 5000 and FoodAdded < 1
+				FoodAdded++
+			end if
+
+			if FoodAdded == 1
+				//say "Enough food"
+				wait until GB_DialogueIsRunning == 0
+				GB_DialogueIsRunning = 1
+				begin dialogue
+					eject good spirit
+					say "BW2T_SCRIPT_04FINAL_NORSE_MARAUDERS_110"
+					wait until read
+					send good spirit home
+				end dialogue
+				GB_DialogueIsRunning = 0
+				//set MarauderTimer time to 5 seconds
+				FoodAdded++
+			end if	
+		end while
+
+		//End Check
+		if not Marauders exists
+			//You killed them
+			run script KN_Outro(KN_FALSE)
+
+			set player 0 objective TRIBUTE_OBJECTIVE_LAND_7 status to TRIBUTE_OBJECTIVE_STATE_COMPLETE
+			wait 2.5 seconds
+			set player 0 objective TRIBUTE_OBJECTIVE_LAND_7 status to TRIBUTE_OBJECTIVE_STATE_COMPLETE_HIDDEN
+		
+		elsif {Marauders} near {FoodDropPos} radius 30
+		
+			wait until GB_DialogueIsRunning == 0
+			GB_DialogueIsRunning = 1
+			begin dialogue
+				say "BW2T_SCRIPT_04FINAL_NORSE_MARAUDERS_80"
+				wait 15 seconds
+            end dialogue
+			GB_DialogueIsRunning = 0
+
+			if FoodDrop not exists
+				FoodDrop = create STORE FOOD at {FoodDropPos}
+			end if
+			CurrFood = get resource RESOURCE_TYPE_FOOD in FoodDrop
+			
+			if not Marauders exists
+				//Killed them
+				run script KN_Outro(KN_FALSE)
+
+				wait until GB_DialogueIsRunning == 0
+				GB_DialogueIsRunning = 1
+				begin dialogue
+					say "BW2T_SCRIPT_04FINAL_NORSE_MARAUDERS_60"
+					wait until read
+				end dialogue
+				GB_DialogueIsRunning = 0
+
+				wait 1 seconds
+				set player 0 objective TRIBUTE_OBJECTIVE_LAND_7 status to TRIBUTE_OBJECTIVE_STATE_COMPLETE
+				wait 2.5 seconds
+				set player 0 objective TRIBUTE_OBJECTIVE_LAND_7 status to TRIBUTE_OBJECTIVE_STATE_COMPLETE_HIDDEN
+			
+
+			//They took all your food
+			elsif FoodAdded != 0 and CurrFood > 5000
+				clear Marauders action queue
+				add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {FoodDropPos} to Marauders action queue
+				wait 10 seconds
+
+				delete FoodDrop
+				run script KN_Outro(KN_TRUE)
+
+				increment tribute by 5000
+				clear Marauders action queue
+				add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {MaraudersFinalPos} to Marauders action queue
+				set player 0 objective TRIBUTE_OBJECTIVE_LAND_7 status to TRIBUTE_OBJECTIVE_STATE_COMPLETE
+				wait 2.5 seconds
+				set player 0 objective TRIBUTE_OBJECTIVE_LAND_7 status to TRIBUTE_OBJECTIVE_STATE_COMPLETE_HIDDEN
+			else
+				//Smash the place up
+				wait until GB_DialogueIsRunning == 0
+				GB_DialogueIsRunning = 1
+				begin dialogue
+					say "BW2T_SCRIPT_04FINAL_NORSE_MARAUDERS_90"
+					wait until read
+				end dialogue
+				GB_DialogueIsRunning = 0
+				set Marauders attack PlayerTown with severity 0.3
+				//say "Oh dear you failed"
+				//Check for dead platoon
+				wait until Marauders not exists
+				if not Marauders exists
+					//Killed them
+					run script KN_Outro(KN_FALSE)
+					wait 1 seconds
+					set player 0 objective TRIBUTE_OBJECTIVE_LAND_7 status to TRIBUTE_OBJECTIVE_STATE_COMPLETE
+					wait 2.5 seconds
+					set player 0 objective TRIBUTE_OBJECTIVE_LAND_7 status to TRIBUTE_OBJECTIVE_STATE_COMPLETE_HIDDEN
+					
+					set MarauderTimer time to 0 seconds
+
+				end if
+
+			end if
+
+		end if
+
+		delete Influence
+		delete Scroll
+
+end script Land4Marauders
+
+
+
+//---------------------------------------------------------
+// Kid nap intro
+//---------------------------------------------------------
+begin script KN_Intro
+
+	MarActors1 = 0
+	MarActors2 = 0
+
+start
+	
+	MarActors1 = create platoon PLATOON_INFO_MARAUDER at {1124.09,104.97,684.19} with 15 * RecruitSizeModifier men and 0 women
+	MarActors2 = create platoon PLATOON_INFO_MARAUDER at {1124.51,104.99,703.08} with 15 * RecruitSizeModifier men and 0 women
+	set MarActors1 player 4
+	set MarActors2 player 4
+	set MarActors1 focus to {1201.91,99.67,691.34}
+	set MarActors2 focus to {1201.91,99.67,691.34}
+
+
+	begin cinema
+		start music "cut_scene_evil_34s_01"
+		move game time 10.00 time 20
+
+		Leader = create VILLAGER JAILER at {1143.05,105.03,697.90}
+		set Leader focus to {1148.24,105.03,697.57}
+		
+		if HEALTH of Actor == 0.00 or Actor not exists
+			Actor = create VILLAGER NORSE_FARMER at {1277.78,98.59,545.12}
+		end if
+
+		set Actor position to {1148.24,105.03,697.57} + {10,-5}
+		move Actor position to {1148.24,105.03,697.57}
+
+		set camera lens 75
+		set camera position to {1193.47,130.00,725.37}
+		set camera focus to {1138.37,105.01,695.22}
+		move camera position to {1164.07,115.00,711.28} time 24 easein 8 easeout 2
+		move camera focus to {1138.37,105.01,695.22} time 24 easein 8 easeout 2
+		set camera lens 32 time 24
+		set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_SPEED_MAX of MarActors1 to 2.0
+		set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_SPEED_MAX of MarActors2 to 2.0
+		
+		wait 1.5 seconds
+		set fade in time 3
+		
+		wait 6 seconds
+		say "BW2T_SCRIPT_04FINAL_NORSE_MARAUDERS_10"
+		wait until read
+		wait 1 seconds
+		say "BW2T_SCRIPT_04FINAL_NORSE_MARAUDERS_20"
+		wait until read
+
+		move Actor position to {PlayerTown}
+		wait 1 seconds
+		set fade red 0 green 0 blue 0 time 1
+		wait 1 seconds
+		delete MarActors1
+		delete MarActors2
+		delete Actor
+		set camera position to {1227.01,98.59,616.21} + {30,30,30}
+		set camera focus to {1227.01,98.59,616.21} 
+		set camera lens 70 
+		wait 1 seconds
+		eject good spirit
+		eject evil spirit
+		wait 1 seconds
+		set fade in time 1
+
+		say "BW2T_SCRIPT_04FINAL_NORSE_MARAUDERS_30"
+		wait until read
+		say "BW2T_SCRIPT_04FINAL_NORSE_MARAUDERS_40"
+		wait until read
+
+		make good spirit point at {FoodDrop}
+		//say "Drop your food here"
+		say "BW2T_SCRIPT_04FINAL_NORSE_MARAUDERS_100"
+		wait until read
+		wait 2.5 seconds
+
+		send good spirit home
+		send evil spirit home
+
+		stop music with fadetime 3
+	end cinema
+
+end script KN_Intro
+
+begin script KN_Outro(FinishedGood)	
+	PartyPeople[20]
+	PP = 0
+	Counter = 0
+	SexNumber = 0
+	PartyPos = marker at {1248.75,98.72,634.82}
+	OMan = 0 
+	CinemaActor = 0
+	Align = 0	
+
+start
+	set fade red 0 green 0 blue 0 time 2
+	wait 2 seconds
+	begin cinema
+
+		force while Counter < 20 
+			PP = marker at get target from {PartyPos} + {10, 0, 10} to {PartyPos} distance number from 4 to 8 angle Counter*18
+			SexNumber = number from 0 to 1
+			if SexNumber == 0
+				PartyPeople[Counter] = create VILLAGER NORSE_HOUSEWIFE at {PP}
+			else
+				PartyPeople[Counter] = create VILLAGER NORSE_FARMER at {PP}
+			end if 
+			
+			set PartyPeople[Counter] focus to {PartyPos} 
+			
+			Counter++
+		end while
+	
+		play anim "A_P_SHRUG_HAPPY" on PartyPeople[0] loop 100000
+		play anim "A_P_CROWD_WON_2" on PartyPeople[1] loop 100000
+		play anim "A_P_CELEBRATION3" on PartyPeople[2] loop 100000
+		play anim "A_P_CROWD_IMPRESSED_1" on PartyPeople[3] loop 100000
+		play anim "A_P_CELEBRATION2" on PartyPeople[4] loop 100000
+		play anim "A_P_EXCITED_2" on PartyPeople[5] loop 100000
+		play anim "A_P_CLAP1_LOOP" on PartyPeople[6] loop 100000
+		play anim "A_P_JAPAN_NOD_STAND" on PartyPeople[7] loop 100000
+		play anim "A_P_CLAP4_LOOP" on PartyPeople[8] loop 100000
+		play anim "A_P_REACT_PLEASANT" on PartyPeople[9] loop 100000
+		play anim "A_P_CROWD_IMPRESSED_2" on PartyPeople[10] loop 100000
+		play anim "A_P_CLAP3_LOOP" on PartyPeople[11] loop 100000
+		play anim "A_P_CLAP2_LOOP" on PartyPeople[12] loop 100000
+		play anim "A_P_AMUSEMENT" on PartyPeople[13] loop 100000
+		play anim "A_P_WELL_DONE_WOMAN" on PartyPeople[14] loop 100000
+		play anim "A_P_EXCITED_1" on PartyPeople[15] loop 100000
+		play anim "A_P_SCRATCHING_BUM" on PartyPeople[16] loop 100000
+		play anim "A_P_PICKETING_FOR_RIOT1" on PartyPeople[17] loop 100000
+		play anim "A_P_PICKETING_FOR_RIOT2" on PartyPeople[18] loop 100000
+		play anim "A_P_MALE_ENTRANCED" on PartyPeople[19] loop 100000
+
+		set camera position to {PartyPos} + {25,40,50}
+		set camera focus to {PartyPos}
+		move camera position to {PartyPos} + {10,15,20} time 15
+		move camera focus to {PartyPos} time 15
+		
+		start music "cut_scene_happy_01" loop 1000
+
+		set fade in time 3
+		wait 4 seconds
+		
+		//set clipping window across 0.7 down 0.25 width 0.3 height 0.5 time 0
+		wait 0.5 seconds
+		
+		wait 2 seconds
+		if FinishedGood == KN_TRUE
+			say "BW2T_SCRIPT_04FINAL_NORSE_MARAUDERS_130"
+			wait until read
+		else
+			say "BW2T_SCRIPT_04FINAL_NORSE_MARAUDERS_140"
+			wait until read
+		end if
+		
+		if FinishedGood == KN_TRUE
+			say "BW2T_SCRIPT_04FINAL_NORSE_MARAUDERS_120"
+			wait until read
+		end if
+		
+		set fade red 0 green 0 blue 0 time 3
+		wait 3 seconds
+
+		Counter = 0
+		force while Counter < 20 
+			delete PartyPeople[Counter]
+			Counter++
+		end while 
+		wait 2 seconds
+		set fade in time 1
+		
+		delete OMan
+		delete CinemaActor
+
+		set camera position to {PlayerTown} + {30,30,30}
+		set camera focus to {PlayerTown}
+		
+		set fade in time 2
+		wait 2 seconds
+		stop music with fadetime 5
+	end cinema
+
+	//Alignment changes
+	if FinishedGood == KN_TRUE
+		Align = get player 0 alignment
+		set player 0 alignment Align + 0.01
+	else
+		Align = get player 0 alignment
+		set player 0 alignment Align - 0.01
+	end if
+
+end script KN_Outro
+
+//---Stupid script to watch if 3 days have passed---//
+begin script KN_WatchTheDays
+
+Time = 0
+
+start
+
+	begin loop
+		Time = get game time
+		//say "Time = $d" with number Time
+		if Time >= 20.000 and Time <= 23.59
+			DayChanged++
+			begin loop
+				Time = get game time
+			until Time > 0.000 and Time < 20.000
+			end loop
+		end if
+
+	until DayChanged == 3
+	end loop
+
+
+end script KN_WatchTheDays
