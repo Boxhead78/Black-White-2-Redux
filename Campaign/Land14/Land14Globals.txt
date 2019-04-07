@@ -1,0 +1,210 @@
+///////////////////////////////////////////////////////////////////////////////
+//    Land 14 Globals
+//    ~~~~~~~~~~~~~~~
+//
+///////////////////////////////////////////////////////////////////////////////
+
+// Other Defines
+define oCreature = 0
+define script Globals
+define script LC14_CreateUndeadPlatoon(whichPlatoon,howManyVillagersToDelete,howManyVillagersToSpawn,whichMesh)
+define script LC14_GhostScript(myGhost)
+
+define s_aztecwarrior_ghost = 0
+define s_skeletonadultland2 = 1
+define s_undeadwarrior_noghost = 2
+
+// Debug switch
+global DEBUG = 1
+global Intro = 0
+
+global LC14_EnemyCreature = 0
+global CinemaIsRunning = 0
+global MigrationsAccepted = 0
+global TownsConverted = 0
+global TownsAggressiveConverted = 0
+global TownsPeacefulConverted = 0
+global UnderAttack = 0
+global IntroFinished = 0
+global DeleteWeather = 0
+global AttackingPlatoons = 0
+global GenericCommentTimer = 0
+global UnitDeadTimer = 0
+global AIVolcano = 0
+global SacrificeAllowed = 0
+global SkeletonsWave = 0
+global SkeletonCatapultRecAllowed = 0
+global LC14_NumberOfSkeletonPlatoons = 0
+global VolcanoFired = 0
+global EpicRunning = 0
+global VolcanoStopFireBalls = 0
+global VolcanoActive = 0
+global TriedAztecTown1Attack = 0
+global SendStonehengeTroops = 0
+
+global PlayerTown = 0
+global MinorTown1 = 0
+global MinorTown2 = 0
+global MinorTown3 = 0
+global MinorTown4 = 0
+global MinorTown5 = 0
+global MinorTown6 = 0
+global MinorTown7 = 0
+global MinorTown8 = 0
+global AztecTown1 = 0
+global AztecTown2 = 0
+global AztecCapital = 0
+global NearestSettlement = 0
+
+global MINOR_TOWN1_IMPRESSIVENESS = 3000
+global MINOR_TOWN2_IMPRESSIVENESS = 27000
+global MINOR_TOWN3_IMPRESSIVENESS = 5000
+global MINOR_TOWN4_IMPRESSIVENESS = 9000
+global MINOR_TOWN5_IMPRESSIVENESS = 24000
+global MINOR_TOWN6_IMPRESSIVENESS = 21000
+global MINOR_TOWN7_IMPRESSIVENESS = 17000
+global MINOR_TOWN8_IMPRESSIVENESS = 31000
+global AZTECTOWN1_IMPRESSIVENESS = 36000
+global AZTECTOWN2_IMPRESSIVENESS = 24000
+global AZTECCAPITAL_IMPRESSIVENESS = 42500
+
+global AttackNearestTownTimer = 0
+global LC14_RecruitTimer1 = 0
+global LC14_RecruitTimer2 = 0
+global LC14_RecruitTimer3 = 0
+
+global WolfVillagerTimer = 0
+
+begin script Globals
+
+SecondPlaythrough = 0
+
+start
+
+    WolfVillagerTimer = create timer for 999999 seconds
+
+    GenericCommentTimer = create timer for 0 seconds
+    UnitDeadTimer = create timer for 200 seconds
+
+    MINOR_TOWN1_IMPRESSIVENESS = MINOR_TOWN1_IMPRESSIVENESS
+    MINOR_TOWN2_IMPRESSIVENESS = MINOR_TOWN2_IMPRESSIVENESS
+    MINOR_TOWN3_IMPRESSIVENESS = MINOR_TOWN3_IMPRESSIVENESS *  ImpressivenessModifier
+    MINOR_TOWN4_IMPRESSIVENESS = MINOR_TOWN4_IMPRESSIVENESS *  ImpressivenessModifier
+    AZTECTOWN1_IMPRESSIVENESS = AZTECTOWN1_IMPRESSIVENESS *  ImpressivenessModifier
+    AZTECTOWN2_IMPRESSIVENESS = AZTECTOWN2_IMPRESSIVENESS *  ImpressivenessModifier
+    AZTECCAPITAL_IMPRESSIVENESS = AZTECCAPITAL_IMPRESSIVENESS *  ImpressivenessModifier
+
+    SecondPlaythrough = persistent data "SECOND_PLAYTHROUGH"
+
+    if SecondPlaythrough == 1
+        AZTECTOWN1_IMPRESSIVENESS += 4000
+        AZTECTOWN2_IMPRESSIVENESS += 4000
+        AZTECCAPITAL_IMPRESSIVENESS += 4000
+    end if
+
+    GB_PlayerTown = get town with id 0//For Global Script
+    PlayerTown = get town with id 0
+    MinorTown1 = get town with id 3 //First Town
+    MinorTown2 = get town with id 4 //Seventh Town
+    MinorTown3 = get town with id 5 //Second Town
+    MinorTown4 = get town with id 6 //Third Town
+    MinorTown5 = get town with id 7 //Sixth Town
+    MinorTown6 = get town with id 8 //Fifth Town
+    MinorTown7 = get town with id 9 //Fourth Town
+    MinorTown8 = get town with id 10 //Eigth Town
+    AztecTown1 = get town with id 1
+    AztecTown2 = get town with id 2
+    AztecCapital = get town with id 11
+
+end script Globals
+
+
+//Only works with global platoons
+begin script LC14_CreateUndeadPlatoon(whichPlatoon,howManyVillagersToDelete,howManyVillagersToSpawn,whichMesh)
+
+    Ghost[200]
+    counter = 0
+    myEffect = 0
+    Villager = 0
+    VillagerTemp = 0
+
+start
+
+    myEffect = create visual effect VISUAL_EFFECT_TOWN_TAKEOVER_DEFENDER at {whichPlatoon} + {0,2,0} time 10
+    set myEffect color red 148 green 0 blue 211
+    SCALE of myEffect = 2
+
+    myEffect = create visual effect VISUAL_EFFECT_TOWN_TAKEOVER_DEFENDER at {whichPlatoon} + {0,2,0} time 10
+    set myEffect color red 148 green 0 blue 211
+    SCALE of myEffect = 1.0
+
+    myEffect = create visual effect VISUAL_MIRACLE_HEAL_GROUND at {whichPlatoon} + {0,2,0} time 12
+    set myEffect color red 148 green 0 blue 211
+    SCALE of myEffect = 2
+
+    //Remove old villagers
+    while counter < howManyVillagersToDelete - 1 and size of whichPlatoon > 1
+        if counter < howManyVillagersToDelete
+            Villager = get villager from platoon whichPlatoon nearest {whichPlatoon}
+            myEffect = create visual effect VISUAL_EFFECT_WEATHER_LIGHTNING_EXPLOSION at {Villager} + {0,1,0} time 1.5
+            set myEffect color red 148 green 0 blue 211
+            SCALE of myEffect = 0.1
+            delete Villager
+        end if
+        counter++
+    end while
+
+    Villager = get villager from platoon whichPlatoon nearest {whichPlatoon}
+    counter = 0
+    while counter < howManyVillagersToSpawn
+
+        //Create ghosts
+        Ghost[counter] = create VILLAGER NORSE_HOUSEWIFE at {whichPlatoon} + {number from -10 to 10,number from -10 to 10}
+        myEffect = create visual effect VISUAL_EFFECT_WEATHER_LIGHTNING_EXPLOSION at {Ghost[counter]} + {0,1,0} time 1.5
+        set myEffect color red 148 green 0 blue 211
+        SCALE of myEffect = 0.1
+        add villager Ghost[counter] to platoon whichPlatoon
+        disable Ghost[counter] hurt by fire
+        disable Ghost[counter] set on fire
+        run background script LC14_GhostScript(Ghost[counter])
+
+        //Set new mesh
+        if whichMesh == s_aztecwarrior_ghost
+            set anim speed of Ghost[counter] to 0.75
+            override mesh for Ghost[counter] with "..\skins\s_aztecwarrior_ghost"
+            set Ghost[counter] carrying CARRIED_OBJECT_NORSE_SWORD
+            disable Ghost[counter] can be fisted
+        elsif whichMesh == s_skeletonadultland2
+            set anim speed of Ghost[counter] to 0.5
+            override mesh for Ghost[counter] with "..\skins\s_skeletonadultland2"
+            set Ghost[counter] carrying CARRIED_OBJECT_NORSE_SWORD
+        else
+            set anim speed of Ghost[counter] to 0.6
+            override mesh for Ghost[counter] with "..\skins\s_undeadwarrior_noghost"
+            set Ghost[counter] carrying CARRIED_OBJECT_AZTEC_CLUB
+        end if
+        counter++
+    end while
+
+    myEffect = create visual effect VISUAL_EFFECT_WEATHER_LIGHTNING_EXPLOSION at {Villager} + {0,1,0} time 1.5
+    set myEffect color red 148 green 0 blue 211
+    SCALE of myEffect = 0.1
+    delete Villager
+
+end script LC14_CreateUndeadPlatoon
+
+
+begin script LC14_GhostScript(myGhost)
+
+    myEffect = 0
+
+start
+
+    wait until HEALTH of myGhost == 0.00 or PLAYER of myGhost != 1
+
+    myEffect = create visual effect VISUAL_EFFECT_WEATHER_LIGHTNING_EXPLOSION at {myGhost} + {0,1,0} time 1.5
+    set myEffect color red 148 green 0 blue 211
+    SCALE of myEffect = 0.1
+    HEALTH of myGhost = 0.00
+
+end script LC14_GhostScript
