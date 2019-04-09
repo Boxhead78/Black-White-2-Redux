@@ -13,35 +13,454 @@ define script LC14_GatehouseManager
 define script LC14_Speeches
 define script LC14_Aztec_Capital
 define script LC14_AttackNearestTownTimer
-//define script LC14_GetNearestSettlement
+define script LC14_GetNearestSettlement
 define script DisableLocalPlatoonResponse
 define script LC14_GetPlayerUnits
 define script LC14_GenericTalusSpeeches(whichUnit,PlayerOfUnit)
+define script LC14_DefendPlatoons
 
 define TalusPlatoon = 0
 define TalusCatapult = 0
 
 begin script LC14_Aztec_Capital_Impressiveness
 
+    Threshold = 0
+
 start
+
+    Threshold = get town AztecTown1 impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from AztecTown1 to PlayerTown AZTECTOWN1_IMPRESSIVENESS - Threshold
+
+    Threshold = get town AztecTown2 impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from AztecTown2 to PlayerTown AZTECTOWN2_IMPRESSIVENESS - Threshold
+
+    Threshold = get town AztecTown3 impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from AztecTown3 to PlayerTown AZTECTOWN3_IMPRESSIVENESS - Threshold
+
+    Threshold = get town AztecCapital impressiveness
+    Threshold = Threshold / 3
+    set migration threshold from AztecCapital to PlayerTown AZTECCAPITAL_IMPRESSIVENESS - Threshold
+
+begin loop
+
+    if PLAYER of AztecTown1 == 0
+        enable migration from AztecTown2 to AztecTown1
+        enable migration from AztecTown3 to AztecTown1
+        enable migration from AztecCapital to AztecTown1
+        
+    elsif PLAYER of AztecTown1 >= 1
+        disable migration from AztecTown2 to AztecTown1
+        disable migration from AztecTown3 to AztecTown1
+        disable migration from AztecCapital to AztecTown1
+    end if
+
+    if PLAYER of AztecTown2 == 0
+        enable migration from AztecTown1 to AztecTown2
+        enable migration from AztecTown3 to AztecTown2
+        enable migration from AztecCapital to AztecTown2
+        
+    elsif PLAYER of AztecTown2 >= 1
+        disable migration from AztecTown1 to AztecTown2
+        disable migration from AztecTown3 to AztecTown2
+        disable migration from AztecCapital to AztecTown2
+    end if
+
+    if PLAYER of AztecTown3 == 0
+        enable migration from AztecTown1 to AztecTown3
+        enable migration from AztecTown2 to AztecTown3
+        enable migration from AztecCapital to AztecTown3
+        
+    elsif PLAYER of AztecTown3 >= 1
+        disable migration from AztecTown1 to AztecTown3
+        disable migration from AztecTown2 to AztecTown3
+        disable migration from AztecCapital to AztecTown3
+    end if
+
+    if PLAYER of AztecCapital == 0
+        enable migration from AztecTown1 to AztecCapital
+        enable migration from AztecTown2 to AztecCapital
+        enable migration from AztecTown3 to AztecCapital
+        
+    elsif PLAYER of AztecCapital >= 1
+        disable migration from AztecTown1 to AztecCapital
+        disable migration from AztecTown2 to AztecCapital
+        disable migration from AztecTown3 to AztecCapital
+    end if
+
+end loop
 
 end script LC14_Aztec_Capital_Impressiveness
 
 begin script LC14_TownConversion
 
+    isConverted1 = 0
+    isConverted2 = 0
+    isConverted3 = 0
+    isConverted4 = 0
+    a = 0
+    b = 0
+    c = 0
+    d = 0
+    
 start
+
+begin loop
+
+    isConverted1 = variable get town AztecTown1 method of last conversion
+    isConverted2 = variable get town AztecTown2 method of last conversion
+    isConverted3 = variable get town AztecTown3 method of last conversion
+    isConverted4 = variable get town AztecCapital method of last conversion
+    
+    if isConverted1 != 0 and a == 0
+        if PLAYER of AztecTown1 == 0 or get town AztecTown1 is migrating to == PlayerTown
+            a = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted1 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            elsif isConverted1 == 2
+                TownsPeacefulConverted = TownsPeacefulConverted + 1
+            end if
+        end if
+    end if
+    
+    if isConverted1 != 0
+        if PLAYER of AztecCapital == 1
+            disable migration from AztecTown1 to AztecTown2
+            disable migration from AztecTown1 to AztecTown3
+            disable migration from AztecTown1 to AztecCapital
+            disable migration from AztecTown1 to PlayerTown
+        else
+            enable migration from AztecTown1 to AztecTown2
+            enable migration from AztecTown1 to AztecTown3
+            enable migration from AztecTown1 to AztecCapital
+            enable migration from AztecTown1 to PlayerTown
+        end if
+    end if
+
+    if isConverted2 != 0 and b == 0
+        if PLAYER of AztecTown2 == 0 or get town AztecTown2 is migrating to == PlayerTown
+            b = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted2 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            elsif isConverted2 == 2
+                TownsPeacefulConverted = TownsPeacefulConverted + 1
+            end if
+        end if
+    end if
+
+    if isConverted2 != 0
+        if PLAYER of AztecCapital == 1
+            disable migration from AztecTown2 to AztecTown1
+            disable migration from AztecTown2 to AztecTown3
+            disable migration from AztecTown2 to AztecCapital
+            disable migration from AztecTown2 to PlayerTown
+        else
+            enable migration from AztecTown2 to AztecTown1
+            enable migration from AztecTown2 to AztecTown3
+            enable migration from AztecTown2 to AztecCapital
+            enable migration from AztecTown2 to PlayerTown
+        end if
+    end if
+    
+    if isConverted3 != 0 and c == 0
+        if PLAYER of AztecTown3 == 0 or get town AztecTown3 is migrating to == PlayerTown
+            c = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted3 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            elsif isConverted3 == 2
+                TownsPeacefulConverted = TownsPeacefulConverted + 1
+            end if
+        end if
+    end if    
+    
+    if isConverted3 != 0
+        if PLAYER of AztecTown3 == 1
+            disable migration from AztecTown3 to AztecTown1
+            disable migration from AztecTown3 to AztecTown2
+            disable migration from AztecTown3 to AztecCapital
+            disable migration from AztecTown3 to PlayerTown
+        else
+            enable migration from AztecTown3 to AztecTown1
+            enable migration from AztecTown3 to AztecTown2
+            enable migration from AztecTown3 to AztecCapital
+            enable migration from AztecTown3 to PlayerTown
+        end if
+    end if
+
+    if isConverted4 != 0 and d == 0
+        if PLAYER of AztecCapital == 0 or get town AztecCapital is migrating to == PlayerTown
+            d = 1
+            TownsConverted = TownsConverted + 1
+            if isConverted4 == 1
+                TownsAggressiveConverted = TownsAggressiveConverted + 1
+            elsif isConverted4 == 2
+                TownsPeacefulConverted = TownsPeacefulConverted + 1
+            end if
+        end if
+    end if    
+    
+    if isConverted4 != 0
+        if PLAYER of AztecCapital == 1
+            disable migration from AztecCapital to AztecTown1
+            disable migration from AztecCapital to AztecTown2
+            disable migration from AztecCapital to AztecTown3
+            disable migration from AztecCapital to PlayerTown
+        else
+            enable migration from AztecCapital to AztecTown1
+            enable migration from AztecCapital to AztecTown2
+            enable migration from AztecCapital to AztecTown3
+            enable migration from AztecCapital to PlayerTown
+        end if
+    end if
+
+end loop
 
 end script LC14_TownConversion
 
 begin script LC14_Tribute
 
+    mig1 = 0
+    mig2 = 0
+    mig3 = 0
+    mig4 = 0
+    mig5 = 0
+    mig6 = 0
+    mig7 = 0
+    mig8 = 0
+    mig9 = 0
+    mig10 = 0
+    mig11 = 0
+    mig12 = 0
+    a = 0
+
 start
+
+begin loop
+
+    if (variable get town AztecTown1 status == variable MIGRATION_MIGRATED) and mig1 == 0 and get town AztecTown1 has migrated to == PlayerTown
+        mig1 = 1
+        MigrationsAccepted = MigrationsAccepted + 1
+    end if
+    
+    if (variable get town AztecTown2 status == variable MIGRATION_MIGRATED) and mig2 == 0 and get town AztecTown2 has migrated to == PlayerTown
+        mig2 = 1
+        MigrationsAccepted = MigrationsAccepted + 1
+    end if
+    
+    if (variable get town AztecTown3 status == variable MIGRATION_MIGRATED) and mig3 == 0 and get town AztecTown3 has migrated to == PlayerTown
+        mig3 = 1
+        MigrationsAccepted = MigrationsAccepted + 1
+    end if
+
+    if (variable get town AztecCapital status == variable MIGRATION_MIGRATED) and mig4 == 0 and get town AztecCapital has migrated to == PlayerTown
+        mig4 = 1
+        MigrationsAccepted = MigrationsAccepted + 1
+    end if
+
+    if MigrationsAccepted >= 1 and a == 0
+        a = 1
+        increment tribute by 150000
+    end if
+    
+    if MigrationsAccepted >= 2 and a == 1
+        a = 2
+        increment tribute by 150000
+    end if
+
+    if MigrationsAccepted >= 3 and a == 2
+        a = 3
+        increment tribute by 150000
+    end if
+
+    if TownsAggressiveConverted >= 1 and a == 0
+        a = 1
+        increment tribute by 75000
+    end if
+
+    if TownsAggressiveConverted >= 2 and a == 1
+        a = 2
+        increment tribute by 150000
+    end if
+
+    if TownsAggressiveConverted >= 3 and a == 1
+        a = 2
+        increment tribute by 150000
+    end if
+
+    if TownsAggressiveConverted >= 4 and a == 2
+        a = 3
+        increment tribute by 150000
+    end if
+
+end loop
 
 end script LC14_Tribute
 
 begin script LC14_GatehouseManager
 
+    GateHouseT11 = 0
+    GateHouseT21 = 0
+    GateHouseT22 = 0
+    GateHouseT31 = 0
+    GateHouseT32 = 0
+
+    Counter = 0
+    Cnt = 0
+
+    oCreature = get player 0 creature
+
+    PlayerPlatoonT11 = 0
+    CatapultT11 = 0
+    TestCreatureT11 = 0
+
+    EnemyNearDoorT11 = 0
+
+    PlayerPlatoonT21 = 0
+    CatapultT21 = 0
+    TestCreatureT21 = 0
+    PlayerPlatoonT22 = 0
+    CatapultT22 = 0
+    TestCreatureT22 = 0
+
+    EnemyNearDoorT21 = 0
+    EnemyNearDoorT22 = 0
+
+    PlayerPlatoonT31 = 0
+    CatapultT31 = 0
+    TestCreatureT31 = 0
+
+    EnemyNearDoorT31 = 0
 start
+
+begin loop
+
+    GateHouseT11 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {1705.57,181.94,1243.39} radius 15
+    
+    oCreature = get player 0 creature
+
+    if PLAYER of AztecCapital == 1
+
+        if not town AztecCapital is under takeover from player 0
+            PlayerPlatoonT11 = get platoon of player 0 nearest {GateHouseT11} radius 100
+            CatapultT11 = get siege weapon of player 0 nearest {GateHouseT11} radius 100
+            TestCreatureT11 = get distance from {GateHouseT11} to {oCreature}
+            
+            if PlayerPlatoonT11 exists
+                EnemyNearDoorT11 = 1
+            elsif CatapultT11 exists
+                EnemyNearDoorT11 = 1
+            elsif TestCreatureT11 < 200 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+                EnemyNearDoorT11 = 1
+            else
+                EnemyNearDoorT11 = 0
+            end if
+            
+            if EnemyNearDoorT11 == 1
+                set gate GateHouseT11 close
+            else
+                set gate GateHouseT11 open
+            end if
+
+        else
+            set gate GateHouseT11 open
+        end if
+    end if
+
+
+    GateHouseT21 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {1450.94,141.84,1872.16} radius 15
+    GateHouseT22 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {1723.31,115.99,1681.52} radius 15
+    
+    oCreature = get player 0 creature
+
+    if PLAYER of AztecTown1 == 1
+
+        if not town AztecTown1 is under takeover from player 0
+            PlayerPlatoonT21 = get platoon of player 0 nearest {GateHouseT21} radius 100
+            CatapultT21 = get siege weapon of player 0 nearest {GateHouseT21} radius 100
+            TestCreatureT21 = get distance from {GateHouseT21} to {oCreature}
+            
+            if PlayerPlatoonT21 exists
+                EnemyNearDoorT21 = 1
+            elsif CatapultT21 exists
+                EnemyNearDoorT21 = 1
+            elsif TestCreatureT21 < 200 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+                EnemyNearDoorT21 = 1
+            else
+                EnemyNearDoorT21 = 0
+            end if
+            
+            if EnemyNearDoorT21 == 1
+                set gate GateHouseT21 close
+            else
+                set gate GateHouseT21 open
+            end if
+
+
+            PlayerPlatoonT22 = get platoon of player 0 nearest {GateHouseT22} radius 100
+            CatapultT22 = get siege weapon of player 0 nearest {GateHouseT22} radius 100
+            TestCreatureT22 = get distance from {GateHouseT22} to {oCreature}
+            
+            if PlayerPlatoonT22 exists
+                EnemyNearDoorT22 = 1
+            elsif CatapultT22 exists
+                EnemyNearDoorT22 = 1
+            elsif TestCreatureT22 < 200 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+                EnemyNearDoorT22 = 1
+            else
+                EnemyNearDoorT22 = 0
+            end if
+            
+            if EnemyNearDoorT22 == 1
+                set gate GateHouseT22 close
+            else
+                set gate GateHouseT22 open
+            end if
+        else
+            set gate GateHouseT21 open
+            set gate GateHouseT22 open
+        end if
+
+    end if
+
+    GateHouseT31 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {1149.15,56.47,1218.94} radius 15
+    
+    oCreature = get player 0 creature
+
+    if PLAYER of AztecTown2 == 1
+
+        if not town AztecTown2 is under takeover from player 0
+            PlayerPlatoonT31 = get platoon of player 0 nearest {GateHouseT31} radius 100
+            CatapultT31 = get siege weapon of player 0 nearest {GateHouseT31} radius 100
+            TestCreatureT31 = get distance from {GateHouseT31} to {oCreature}
+            
+            if PlayerPlatoonT31 exists
+                EnemyNearDoorT31 = 1
+            elsif CatapultT31 exists
+                EnemyNearDoorT31 = 1
+            elsif TestCreatureT31 < 200 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+                EnemyNearDoorT31 = 1
+            else
+                EnemyNearDoorT31 = 0
+            end if
+            
+            if EnemyNearDoorT31 == 1
+                set gate GateHouseT31 close
+            else
+                set gate GateHouseT31 open
+            end if
+
+        else
+            set gate GateHouseT31 open
+        end if
+
+    end if
+
+end loop
 
 end script LC14_GatehouseManager
 
@@ -258,7 +677,7 @@ begin loop
         AttackTimer = create timer for 45 seconds
     end if
     
-    if PLAYER of PlayerTown != 0 and PLAYER of MinorTown1 != 0 and PLAYER of MinorTown2 != 0 and PLAYER of MinorTown3 != 0 and PLAYER of MinorTown4 != 0 and PLAYER of AztecTown1 != 0 and PLAYER of AztecTown2 != 0 and PLAYER of AztecCapital != 0  and get LoseTimer time remaining <= 0 and GB_DialogueIsRunning == 0
+    if PLAYER of PlayerTown != 0 and PLAYER of AztecTown1 != 0 and PLAYER of AztecTown2 != 0 and PLAYER of AztecTown3 != 0 and PLAYER of AztecCapital != 0  and get LoseTimer time remaining <= 0 and GB_DialogueIsRunning == 0
         GB_DialogueIsRunning = 1
         LoseDialogue1 = number from 1 to 5
         if LoseDialogue1 == 1
@@ -659,12 +1078,289 @@ begin loop
 
     if get AttackNearestTownTimer time remaining <= 0
         wait 45 seconds
-        AttackNearestTownTimer = create timer for 1200 * RecruitModifier seconds
+        AttackNearestTownTimer = create timer for 750 * RecruitModifier seconds
     end if
 
 end loop
 
 end script LC14_AttackNearestTownTimer
+
+
+begin script LC14_DefendPlatoons
+
+    PlayerPlatoon = 0
+    DefendRecruitTimer1 = create timer for 0 seconds
+    DefendRecruitTimer2 = create timer for 0 seconds
+    DefendRecruitTimer3 = create timer for 0 seconds
+    DefendRecruitTimer4 = create timer for 0 seconds
+
+    DefenderPlatoon[9]
+    DelayDone = 0
+
+start
+
+    begin loop
+        if PLAYER of AztecTown1 == 1 and DelayDone == 0
+            DefendRecruitTimer1 = create timer for 300 seconds
+            DelayDone = 1
+        end if
+        PlayerPlatoon = get platoon of player 0 nearest {AztecTown1} radius 250
+        if PlayerPlatoon exists and DefenderPlatoon[0] not exists and DefenderPlatoon[0] not exists and get DefendRecruitTimer1 time remaining <= 0 and PLAYER of AztecTown1 == 1 //Makes a couple of defend platoons
+            DefenderPlatoon[0] = recruit ARMY_UNIT_TYPE_MELEE_5 town AztecTown1 platoon of size 40 * RecruitSizeModifier
+            enable platoon DefenderPlatoon[0] respond to town AztecTown1 attack
+            wait until not DefenderPlatoon[0] recruiting
+            
+            DefenderPlatoon[1] = recruit ARMY_UNIT_TYPE_RANGED_5 town AztecTown1 platoon of size 40 * RecruitSizeModifier
+            enable platoon DefenderPlatoon[1] respond to town AztecTown1 attack
+            wait until not DefenderPlatoon[1] recruiting
+            
+            DefendRecruitTimer1 = create timer for 180 * RecruitModifier seconds
+        end if
+
+        PlayerPlatoon = get platoon of player 0 nearest {AztecTown2} radius 250
+        if PlayerPlatoon exists and DefenderPlatoon[2] not exists and DefenderPlatoon[3] not exists and get DefendRecruitTimer2 time remaining <= 0 and PLAYER of AztecTown2 == 1 //Makes a couple of defend platoons
+            DefenderPlatoon[2] = recruit ARMY_UNIT_TYPE_MELEE_5 town AztecTown2 platoon of size 40 * RecruitSizeModifier
+            enable platoon DefenderPlatoon[2] respond to town AztecTown2 attack
+            wait until not DefenderPlatoon[2] recruiting
+            
+            DefenderPlatoon[3] = recruit ARMY_UNIT_TYPE_RANGED_5 town AztecTown2 platoon of size 40 * RecruitSizeModifier
+            enable platoon DefenderPlatoon[3] respond to town AztecTown2 attack
+            wait until not DefenderPlatoon[3] recruiting
+
+            DefendRecruitTimer2 = create timer for 180 * RecruitModifier seconds
+        end if
+
+        /*
+        PlayerPlatoon = get platoon of player 0 nearest {AztecTown3} radius 250
+        if PlayerPlatoon exists and DefenderPlatoon[4] not exists and DefenderPlatoon[5] not exists and get DefendRecruitTimer3 time remaining <= 0 and PLAYER of AztecTown3 == 1 //Makes a couple of defend platoons
+            DefenderPlatoon[4] = recruit ARMY_UNIT_TYPE_MELEE_5 town AztecTown3 platoon of size 40 * RecruitSizeModifier
+            enable platoon DefenderPlatoon[4] respond to town AztecTown3 attack
+            wait until not DefenderPlatoon[4] recruiting
+            
+            DefenderPlatoon[5] = recruit ARMY_UNIT_TYPE_RANGED_5 town AztecTown3 platoon of size 40 * RecruitSizeModifier
+            enable platoon DefenderPlatoon[5] respond to town AztecTown3 attack
+            wait until not DefenderPlatoon[5] recruiting
+
+            DefendRecruitTimer3 = create timer for 180 * RecruitModifier seconds
+        end if
+        */
+
+        PlayerPlatoon = get platoon of player 0 nearest {AztecCapital} radius 250
+        if PlayerPlatoon exists and DefenderPlatoon[6] not exists and DefenderPlatoon[7] not exists and DefenderPlatoon[8] not exists and get DefendRecruitTimer4 time remaining <= 0 and PLAYER of AztecCapital == 1 //Makes a couple of defend platoons
+            DefenderPlatoon[6] = recruit ARMY_UNIT_TYPE_MELEE_5 town AztecCapital platoon of size 40 * RecruitSizeModifier
+            enable platoon DefenderPlatoon[6] respond to town AztecCapital attack
+            wait until not DefenderPlatoon[6] recruiting
+            
+            DefenderPlatoon[7] = recruit ARMY_UNIT_TYPE_RANGED_5 town AztecCapital platoon of size 40 * RecruitSizeModifier
+            enable platoon DefenderPlatoon[7] respond to town AztecCapital attack
+            wait until not DefenderPlatoon[7] recruiting
+            
+            DefenderPlatoon[8] = recruit ARMY_UNIT_TYPE_MELEE_5 town AztecCapital platoon of size 40 * RecruitSizeModifier
+            enable platoon DefenderPlatoon[8] respond to town AztecCapital attack
+            wait until not DefenderPlatoon[8] recruiting
+
+            DefendRecruitTimer4 = create timer for 180 * RecruitModifier seconds
+        end if
+    end loop
+
+end script LC14_DefendPlatoons
+
+
+begin script LC14_GetNearestSettlement
+
+    NearestTown = 0
+
+start
+
+begin loop
+    if PLAYER of AztecCapital == 0
+        NearestTown = AztecCapital
+
+    elsif PLAYER of AztecTown1 == 0
+        NearestTown = AztecTown1
+
+    elsif PLAYER of AztecTown2 == 0
+        NearestTown = AztecTown2
+
+    elsif PLAYER of AztecTown3 == 0
+        NearestTown = AztecTown3
+
+    else
+        NearestTown = PlayerTown
+
+    end if
+
+    NearestSettlement = NearestTown
+    wait 45 seconds
+end loop
+
+end script LC14_GetNearestSettlement
+
+
+begin script LC14_AztecCapitalRessourceManager
+
+start
+
+begin loop
+
+    wait 5 seconds
+
+    if PLAYER of AztecCapital == 1
+        if (get town AztecCapital RESOURCE_TYPE_ORE total < 40000)
+            add resource RESOURCE_TYPE_ORE number from 100 to 500 to AztecCapital
+        elsif (get town AztecCapital RESOURCE_TYPE_WOOD total < 40000)
+            add resource RESOURCE_TYPE_WOOD number from 500 to 1000 to AztecCapital
+        elsif (get town AztecCapital RESOURCE_TYPE_FOOD total < 40000)
+            add resource RESOURCE_TYPE_FOOD number from 500 to 1500 to AztecCapital
+        end if
+    end if
+    until PLAYER of AztecCapital != 1
+end loop    
+
+end script LC14_AztecCapitalRessourceManager
+
+begin script LC14_AztecCapitalVillagerManager
+
+    Counter = 0
+    Villager = 0
+    HousesBuilt = 0
+
+start
+
+begin loop
+
+    wait 900 * BuilderModifier seconds
+    Counter = 0
+
+    if PLAYER of AztecCapital == 1
+        if HousesBuilt == 0
+            HousesBuilt = 1
+            build all town AztecCapital buildings in group 10
+        end if
+        begin loop
+            Villager = create random villager of tribe TRIBE_TYPE_AZTEC at {AztecCapital} + {number from -12 to 12, 0, number from -12 to 12}//create VILLAGER VILLAGER_INFO_JAPANESE_FORESTER_MALE at {1013.581, 132.333, 2002.798} + {number from -3 to 3, 0, number from -3 to 3}
+            attach Villager to AztecCapital
+            release Villager
+            
+            wait number from 6 to 10 seconds
+            Counter++
+            until Counter >= 50 or PLAYER of AztecCapital != 1
+        end loop
+    end if
+
+end loop
+
+end script LC14_AztecCapitalVillagerManager
+
+begin script LC14_AztecTown1RessourceManager
+
+start
+
+begin loop
+
+    wait 5 seconds
+
+    if PLAYER of AztecTown1 == 1
+        if (get town AztecTown1 RESOURCE_TYPE_ORE total < 22000)
+            add resource RESOURCE_TYPE_ORE number from 100 to 500 to AztecTown1
+        elsif (get town AztecTown1 RESOURCE_TYPE_WOOD total < 22000)
+            add resource RESOURCE_TYPE_WOOD number from 500 to 1000 to AztecTown1
+        elsif (get town AztecTown1 RESOURCE_TYPE_FOOD total < 22000)
+            add resource RESOURCE_TYPE_FOOD number from 500 to 1500 to AztecTown1
+        end if
+    end if
+
+end loop    
+
+end script LC14_AztecTown1RessourceManager
+
+begin script LC14_AztecTown1VillagerManager
+
+    Counter = 0
+    Villager = 0
+    HousesBuilt = 0
+
+start
+
+begin loop
+
+    wait 900 * BuilderModifier seconds
+    Counter = 0
+
+    if PLAYER of AztecTown1 == 1
+        if HousesBuilt == 0
+            HousesBuilt = 1
+            build all town AztecTown1 buildings in group 10
+        end if
+        begin loop
+            Villager = create random villager of tribe TRIBE_TYPE_GREEK at {AztecTown1} + {number from -12 to 12, 0, number from -12 to 12}//create VILLAGER VILLAGER_INFO_JAPANESE_FORESTER_MALE at {1013.581, 132.333, 2002.798} + {number from -3 to 3, 0, number from -3 to 3}
+            attach Villager to AztecTown1
+            release Villager
+            
+            wait number from 6 to 10 seconds
+            Counter++
+            until Counter >= 20 or PLAYER of AztecTown1 != 1
+        end loop
+    end if
+
+end loop
+
+end script LC14_AztecTown1VillagerManager
+
+begin script LC14_AztecTown2RessourceManager
+
+start
+
+begin loop
+
+    wait 5 seconds
+
+    if PLAYER of AztecTown2 == 1
+        if (get town AztecTown2 RESOURCE_TYPE_ORE total < 35000)
+            add resource RESOURCE_TYPE_ORE number from 100 to 500 to AztecTown2
+        elsif (get town AztecTown2 RESOURCE_TYPE_WOOD total < 35000)
+            add resource RESOURCE_TYPE_WOOD number from 500 to 1000 to AztecTown2
+        elsif (get town AztecTown2 RESOURCE_TYPE_FOOD total < 35000)
+            add resource RESOURCE_TYPE_FOOD number from 500 to 1500 to AztecTown2
+        end if
+    end if
+
+end loop    
+
+end script LC14_AztecTown2RessourceManager
+
+begin script LC14_AztecTown2VillagerManager
+
+    Counter = 0
+    Villager = 0
+    HousesBuilt = 0
+
+start
+
+begin loop
+
+    wait 900 * BuilderModifier seconds
+    Counter = 0
+
+    if PLAYER of AztecTown2 == 1
+        if HousesBuilt == 0
+            HousesBuilt = 1
+            build all town AztecTown2 buildings in group 10
+        end if
+        begin loop
+            Villager = create random villager of tribe TRIBE_TYPE_AZTEC at {AztecTown2} + {number from -12 to 12, 0, number from -12 to 12}//create VILLAGER VILLAGER_INFO_JAPANESE_FORESTER_MALE at {1013.581, 132.333, 2002.798} + {number from -3 to 3, 0, number from -3 to 3}
+            attach Villager to AztecTown2
+            release Villager
+            
+            wait number from 6 to 10 seconds
+            Counter++
+            until Counter >= 20 or PLAYER of AztecTown2 != 1
+        end loop
+    end if
+
+end loop
+
+end script LC14_AztecTown2VillagerManager
 
 
 begin script DisableLocalPlatoonResponse
