@@ -3212,7 +3212,7 @@ begin loop
 
     if get AttackNearestTownTimer time remaining <= 0
         wait 45 seconds
-        AttackNearestTownTimer = create timer for 1200 * RecruitModifier seconds
+        AttackNearestTownTimer = create timer for 900 * RecruitModifier seconds
     end if
 
 end loop
@@ -3271,8 +3271,6 @@ begin script LC13_AztecCapitalVillagerManager
     Counter = 0
     Villager = 0
     HousesBuilt = 0
-    RoadPos = marker at {481.25,408.44,1058.25}
-    Road = 0
 
 start
 
@@ -3285,8 +3283,6 @@ begin loop
         if HousesBuilt == 0
             HousesBuilt = 1
             build all town AztecCapital buildings in group 10
-            Road = build building at {RoadPos} desire 1
-            release Road
         end if
         begin loop
             Villager = create random villager of tribe TRIBE_TYPE_AZTEC at {AztecCapital} + {number from -12 to 12, 0, number from -12 to 12}//create VILLAGER VILLAGER_INFO_JAPANESE_FORESTER_MALE at {1013.581, 132.333, 2002.798} + {number from -3 to 3, 0, number from -3 to 3}
@@ -3700,6 +3696,12 @@ if whichPlatoon exists
     AttackingPositionFallBack = marker at {AttackPos[1]} + {number from -50 to 50,number from -50 to 50}
     run background script LC13_ArmyBehaivours(whichPlatoon,Melee,Attacker,0,AttackingPosition,AttackingPositionFallBack,0,0)
     run background script LC13_GenericTalusSpeeches(whichPlatoon,1)
+
+    wait 5 seconds
+
+    if get size of whichPlatoon action queue < 1
+        add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {whichPlatoon} + {-50,50} to whichPlatoon action queue
+    end if
 end if
 
 wait number from 20 to 40 seconds
