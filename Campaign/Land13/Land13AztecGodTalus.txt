@@ -151,7 +151,7 @@ start
             ge_Busy[godHandle] = 0
         end if
 
-        if SacrificeAllowed == 1 and GB_DialogueIsRunning == 0 and get player ge_Player[godHandle] mana > 20000
+        if SacrificeAllowed == 1 and GB_DialogueIsRunning == 0 and get player ge_Player[godHandle] mana > 20000 and ge_EmergencyMode[godHandle] == 0
             SacrificeAllowed = 0
             GB_DialogueIsRunning = 1
             begin dialogue
@@ -195,7 +195,7 @@ start
             wait number from 2 to 4 seconds
         end if
 
-        if get ThrowMiracleTimer time remaining <= 0 and get player ge_Player[godHandle] mana > 23000 and PLAYER of PlayerTown == 0 and PLAYER of AztecTown1 == 1 and GB_DialogueIsRunning == 0
+        if get ThrowMiracleTimer time remaining <= 0 and get player ge_Player[godHandle] mana > 23000 and PLAYER of PlayerTown == 0 and PLAYER of AztecTown1 == 1 and GB_DialogueIsRunning == 0 and ge_EmergencyMode[godHandle] == 0
 
             MiracleTimerStarted = 1
             GB_DialogueIsRunning = 1
@@ -247,10 +247,10 @@ start
             end while
             miracleCounter = 0
 
-            ThrowMiracleTimer = create timer for number from 300 * EpicModifier to 900 * EpicModifier seconds
+            ThrowMiracleTimer = create timer for number from 180 * EpicModifier to 300 * EpicModifier seconds
         end if
 
-        if get ThunderstormTimer time remaining <= 0 and get player ge_Player[godHandle] mana > 30000 and GB_DialogueIsRunning == 0 and PLAYER of PlayerTown == 0
+        if get ThunderstormTimer time remaining <= 0 and get player ge_Player[godHandle] mana > 30000 and GB_DialogueIsRunning == 0 and PLAYER of PlayerTown == 0 and ge_EmergencyMode[godHandle] == 0
     
             MiracleThunderstormStarted = 1
             myRand = number from 1 to 5
@@ -290,7 +290,7 @@ start
                 end dialogue
                 GB_DialogueIsRunning = 0
                 run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_THUNDERSTORM,myBuilding,0)
-                ThunderstormTimer = create timer for number from 1800 * EpicModifier to 2400 * EpicModifier seconds
+                ThunderstormTimer = create timer for number from 1200 * EpicModifier to 1800 * EpicModifier seconds
             end if
         end if
 
