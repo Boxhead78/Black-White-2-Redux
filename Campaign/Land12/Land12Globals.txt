@@ -8,7 +8,7 @@
 define oCreature = 0
 define script Globals
 define script LC12_CreateUndeadPlatoon(whichPlatoon,howManyVillagers,whichMesh)
-define script LC12_GhostScript(myGhost)
+define script LC12_GhostScript(myGhost,whichMesh)
 
 define s_aztecwarrior_ghost = 0
 define s_skeletonadultland2 = 1
@@ -147,7 +147,7 @@ start
         add villager Ghost[counter] to platoon whichPlatoon
         disable Ghost[counter] hurt by fire
         disable Ghost[counter] set on fire
-        run background script LC12_GhostScript(Ghost[counter])
+        run background script LC12_GhostScript(Ghost[counter],whichMesh)
 
         //Set new mesh
         if whichMesh == s_aztecwarrior_ghost
@@ -175,13 +175,28 @@ start
 end script LC12_CreateUndeadPlatoon
 
 
-begin script LC12_GhostScript(myGhost)
+begin script LC12_GhostScript(myGhost,whichMesh)
 
     myEffect = 0
 
 start
 
-    wait until HEALTH of myGhost == 0.00 or PLAYER of myGhost != 1
+    while myGhost exists and HEALTH of myGhost > 0.00
+        if whichMesh == s_aztecwarrior_ghost
+            set anim speed of myGhost to 0.75
+            override mesh for myGhost with "..\skins\s_aztecwarrior_ghost"
+            set myGhost carrying CARRIED_OBJECT_NORSE_SWORD
+            disable myGhost can be fisted
+        elsif whichMesh == s_skeletonadultland2
+            set anim speed of myGhost to 0.5
+            override mesh for myGhost with "..\skins\s_skeletonadultland2"
+            set myGhost carrying CARRIED_OBJECT_NORSE_SWORD
+        else
+            set anim speed of myGhost to 0.6
+            override mesh for myGhost with "..\skins\s_undeadwarrior_noghost"
+            set myGhost carrying CARRIED_OBJECT_AZTEC_CLUB
+        end if
+    end while
 
     myEffect = create visual effect VISUAL_EFFECT_WEATHER_LIGHTNING_EXPLOSION at {myGhost} + {0,1,0} time 1.5
     set myEffect color red 148 green 0 blue 211
