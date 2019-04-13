@@ -77,6 +77,7 @@ begin script tal_TalusLoop(GodHandle,rTown,PlayerID)
     Timer = create timer for 0 seconds
     townCounter = 0
     whichSpell = 0
+    FirstSkelArmy = 0
 start
     ge_MiracleDelay[godHandle] = create timer for 0 seconds
     while 1 == 1 // make sure godHandle is valid
@@ -186,6 +187,23 @@ start
                     clear dialogue
                     close dialogue
                     wait BW2XT_LAND03_TALUS_SUMMONS_SKELETONS_10 + 1 seconds
+                end if
+                
+                if FirstSkelArmy == 0
+                    FirstSkelArmy = 1
+                    wait 5 seconds
+                    make evil spirit appear
+                    make good spirit appear
+                    say "BW2XT_LAND03_TALUS_ARMY_10"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND03_TALUS_ARMY_10 + 1 seconds
+                    say "BW2XT_LAND03_TALUS_ARMY_20"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND03_TALUS_ARMY_20 + 1 seconds
+                    send evil spirit home
+                    send good spirit home
                 end if
             end dialogue
             GB_DialogueIsRunning = 0
@@ -367,6 +385,14 @@ start
                 
             elsif Target == 0 or currentMana < geManaCostFire or ge_Altar[godHandle] == 0
                 ge_EmergencyMode[godHandle] = 0
+            end if
+            if get ge_MiracleDelay[godHandle] time remaining > 5
+                // Prevent from idling
+                if ge_Busy[godHandle] == 0 and ge_EmergencyMode[godHandle] == 1
+                    ge_Busy[godHandle] = 1
+                    run script tal_MoveRandom(godHandle,ge_HomeTown[godHandle])
+                    ge_Busy[godHandle] = 0
+                end if
             end if
         end if
 
