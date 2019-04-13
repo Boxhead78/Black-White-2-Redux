@@ -331,6 +331,14 @@ start
             elsif Target == 0 or currentMana < geManaCostFire or ge_Altar[godHandle] == 0
                 ge_EmergencyMode[godHandle] = 0
             end if
+            if get ge_MiracleDelay[godHandle] time remaining > 5
+                // Prevent from idling
+                if ge_Busy[godHandle] == 0 and ge_EmergencyMode[godHandle] == 1
+                    ge_Busy[godHandle] = 1
+                    run script tal_MoveRandom(godHandle,ge_HomeTown[godHandle])
+                    ge_Busy[godHandle] = 0
+                end if
+            end if
         end if
 
         myCounter++
