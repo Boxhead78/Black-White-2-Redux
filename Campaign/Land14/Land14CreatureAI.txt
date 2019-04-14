@@ -8,21 +8,173 @@
 //    Globals
 //-----------------------------------------------------------------------------
 
-define script LC14_AICreature(whichCreature)
-define script LC14_CreatureLogic(whichCreature)
+define script LC14_AICreature
+define script LC14_CreatureLogic
+
+global CreatureAttackPos[3]
+global CreatureBuildPos[2]
+global CreatureGathererPos[3]
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 
-begin script LC14_AICreature(whichCreature)
+begin script LC14_AICreature
+
+    CreaturePos = marker at {1719.73,113.45,1772.07}
+    PlayerCreature = 0
+    PlayerCreatureType = 0
 
 start
+
+    CreatureAttackPos[0] = marker at {995.26,116.08,1965.74}//AztecCapital
+
+    CreatureGathererPos[0] = marker at {1991.19,101.86,902.51}//AztecCapital
+    CreatureGathererPos[1] = marker at {1643.38,126.45,1805.61}//AztecTown1
+    CreatureGathererPos[2] = marker at {958.86,56.72,1208.12}//AztecTown2
+
+    PlayerCreature = get player 0 creature
+    PlayerCreatureType = variable get PlayerCreature sub type
+    if PlayerCreatureType == variable CREATURE_TYPE_LION
+        LC14_EnemyCreature = create CREATURE CREATURE_TYPE_LION at {CreaturePos}
+
+    elsif PlayerCreatureType == variable CREATURE_TYPE_APE 
+        LC14_EnemyCreature = create CREATURE CREATURE_TYPE_APE at {CreaturePos}
+
+    elsif PlayerCreatureType == variable CREATURE_TYPE_GORILLA
+        LC14_EnemyCreature = create CREATURE CREATURE_TYPE_GORILLA at {CreaturePos}
+
+    elsif PlayerCreatureType == variable CREATURE_TYPE_WOLF
+        LC14_EnemyCreature = create CREATURE CREATURE_TYPE_WOLF at {CreaturePos}
+
+    elsif PlayerCreatureType == variable CREATURE_TYPE_COW
+        LC14_EnemyCreature = create CREATURE CREATURE_TYPE_COW at {CreaturePos}
+
+    else// PlayerCreature == variable CREATURE_TYPE_TIGER
+        LC14_EnemyCreature = create CREATURE CREATURE_TYPE_TIGER at {CreaturePos}
+        
+    end if
+
+    ALIGNMENT of LC14_EnemyCreature = -1.0
+    set creature LC14_EnemyCreature happiness to maximum
+    
+    teach LC14_EnemyCreature all
+    
+    set player 1 creature to LC14_EnemyCreature
+    
+    set research ARTEFACT_CREATURE_MAGIC_TYPE_WATER available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_CREATURE_MAGIC_TYPE_LIGHTNING available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_CREATURE_MAGIC_TYPE_FIREBALL available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_CREATURE_MAGIC_TYPE_HEAL available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_CREATURE_ROLE_BUILDER_3 available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_CREATURE_ROLE_GATHERER_3 available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+    set research ARTEFACT_CREATURE_ROLE_SOLDIER_3 available to RESEARCH_AVAILABILITY_RESEARCHED player 1
+
+    set creature LC14_EnemyCreature CREATURE_SCRIPT_TRANSITIONAL_ATTRIBUTE_TYPE_SIZE 1.0
+    STRENGTH of LC14_EnemyCreature = 1.0
+    ALIGNMENT of LC14_EnemyCreature = -0.85
+    FATNESS of LC14_EnemyCreature = 0.5
+
+    disable LC14_EnemyCreature action availability LA_EAT with LO_PLAYER_VILLAGER
+    disable LC14_EnemyCreature action availability LA_EAT with LO_PLAYER_PLATOON
+    disable LC14_EnemyCreature action availability LA_EAT with LO_ROCKS
+    disable LC14_EnemyCreature action availability LA_EAT with LO_TREES
+    disable LC14_EnemyCreature action availability LA_EAT with LO_TOYS
+    disable LC14_EnemyCreature action availability LA_EAT with LO_POO
+    disable LC14_EnemyCreature action availability LA_EAT with LO_SPELL_ORBS
+    disable LC14_EnemyCreature action availability LA_POO with LO_PLAYER_VILLAGER
+    disable LC14_EnemyCreature action availability LA_POO with LO_PLAYER_PLATOON
+    disable LC14_EnemyCreature action availability LA_POO with LO_PLAYER_DEFENCES
+    disable LC14_EnemyCreature action availability LA_POO with LO_PLAYER_STORAGE_PIT
+    disable LC14_EnemyCreature action availability LA_POO with LO_PLAYER_BUILDING
+    disable LC14_EnemyCreature action availability LA_PLAY
+    disable LC14_EnemyCreature action availability LA_WATER with LO_PLAYER_VILLAGER
+    disable LC14_EnemyCreature action availability LA_WATER with LO_PLAYER_PLATOON
+    disable LC14_EnemyCreature action availability LA_HEAL with LO_OPPONENT_PLATOON
+    disable LC14_EnemyCreature action availability LA_ATTACK with LO_CREATURE_PEN
+    disable LC14_EnemyCreature action availability LA_ATTACK with LO_ROCKS
+    disable LC14_EnemyCreature action availability LA_ATTACK with LO_MINE
+    disable LC14_EnemyCreature action availability LA_ATTACK with LO_ORE_ROCKS
+    disable LC14_EnemyCreature action availability LA_ATTACK with LO_TREES
+    disable LC14_EnemyCreature action availability LA_ATTACK with LO_FIELDS
+    disable LC14_EnemyCreature action availability LA_ATTACK with LO_POO
+    disable LC14_EnemyCreature action availability LA_ATTACK with LO_SPELL_ORBS
+
+    release LC14_EnemyCreature
+
+    run background script LC14_CreatureLogic
+
+    wait 45 seconds
 
 end script LC14_AICreature
 
 
-begin script LC14_CreatureLogic(whichCreature)
+begin script LC14_CreatureLogic
+
+    Number = 0
+    CreatureRollRoleTimer = create timer for 0 seconds
+    CreatureAttackTimer = create timer for 0 seconds
+    WallSegment = 0
+    Counter = 0
+    Town[16]
+    CreatureSent = 0
 
 start
+
+begin loop
+
+    while Counter > 14
+        Counter = 0
+    end while
+
+    if HEALTH of LC14_EnemyCreature == 0.00
+        //CreatureKilled = 1
+        wait until HEALTH of LC14_EnemyCreature > 0.00
+        set creature LC14_EnemyCreature role to CR_NONE radius 500 at {CreatureGathererPos[0]}
+        HEALTH of LC14_EnemyCreature = 1.0
+    end if
+
+    if town AztecCapital is under takeover from player 0 and HEALTH of LC14_EnemyCreature > 0
+        HEALTH of LC14_EnemyCreature = 1.0
+        set creature LC14_EnemyCreature role to CR_SOLDIER radius 100 at {AztecCapital}
+        
+        wait until HEALTH of LC14_EnemyCreature == 0.00 or not town AztecCapital is under takeover from player 0 or 1000 seconds
+    
+    elsif town AztecTown1 is under takeover from player 0 and HEALTH of LC14_EnemyCreature > 0
+        HEALTH of LC14_EnemyCreature = 1.0
+        set creature LC14_EnemyCreature role to CR_SOLDIER radius 100 at {AztecTown1}
+        
+        wait until HEALTH of LC14_EnemyCreature == 0.00 or not town AztecTown1 is under takeover from player 0 or 1000 seconds
+
+    elsif town AztecTown2 is under takeover from player 0 and HEALTH of LC14_EnemyCreature > 0
+        HEALTH of LC14_EnemyCreature = 1.0
+        set creature LC14_EnemyCreature role to CR_SOLDIER radius 100 at {AztecTown2}
+        
+        wait until HEALTH of LC14_EnemyCreature == 0.00 or not town AztecTown2 is under takeover from player 0 or 1000 seconds
+
+    elsif town Town[Counter] is under takeover from player 1 and HEALTH of LC14_EnemyCreature > 0
+        HEALTH of LC14_EnemyCreature = 1.0
+        set creature LC14_EnemyCreature role to CR_SOLDIER radius 100 at {Town[Counter]}
+        
+        wait until HEALTH of LC14_EnemyCreature == 0.00 or not town PlayerTown is under takeover from player 0 or 1000 seconds
+
+    elsif EarlyAttackWaveAllowed == 1 and CreatureSent == 0 and HEALTH of LC14_EnemyCreature > 0
+        if LC14_Platoon[20] exists or LC14_Platoon[21] exists
+            CreatureAttackTimer = create timer for 900 seconds
+            HEALTH of LC14_EnemyCreature = 1.0
+            begin loop
+                if LC14_Platoon[20] exists
+                    set creature LC14_EnemyCreature role to CR_SOLDIER radius 75 at {LC14_Platoon[20]}
+                elsif LC14_Platoon[21] exists
+                    set creature LC14_EnemyCreature role to CR_SOLDIER radius 75 at {LC14_Platoon[21]}
+                end if
+                until LC14_Platoon[20] not exists and LC14_Platoon[21] not exists or 720 seconds or HEALTH of LC14_EnemyCreature == 0.00
+            end loop
+            set creature LC14_EnemyCreature role to CR_SOLDIER radius 300 at {PlayerTown}
+            wait until HEALTH of LC14_EnemyCreature == 0.00 or 360 seconds
+        end if
+    end if
+
+    Counter++
+end loop
 
 end script LC14_CreatureLogic

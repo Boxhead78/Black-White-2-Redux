@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-//    Land 12 Aztec Troop-Management
+//    Land 14 Aztec Troop-Management
 //    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -16,11 +16,12 @@ define LC14_NUM_OF_WALL_ARCHERS            = 20
 define Melee                             = 0
 define Ranged                            = 1
 //Army Behaivours
-define Attacker                            = 0
+define Attacker                          = 0
 define Escort                            = 1
-define Conqueror                        = 2 //Nearest Settlement Attacker
+define Conqueror                         = 2 //Nearest Settlement Attacker
 define Patrol                            = 3
-define Special                            = 4
+define PatrolLinked                      = 4
+define Special                           = 5
 
 define script LC14_StaticPlatoonsActions(Pos,Type,Platoon)
 define script LC14_ArmyBehaivours(Platoon,Type,Task,DefendObject,AttackingPoint,AttackingPointFallBack,PatrolRoute,Town)
@@ -45,7 +46,7 @@ global SiegeWeaponPos[1]
 global Script1WP[2]
 global PlayerWallPos = 0
 
-global PatrolRouteA[4]
+global PatrolRouteA[3]
 global WaypointsA = 0
 global PatrolRouteB[3]
 global WaypointsB = 0
@@ -64,44 +65,47 @@ start
 
     PlayerWallPos = marker at {1230.47,121.51,758.87}
 
-    PlatoonPos[0] = marker at {1679.74,73.14,1578.63}
-    PlatoonPos[1] = marker at {1639.48,73.13,1530.27}
-    PlatoonPos[2] = marker at {1613.31,73.16,1499.07}
-    PlatoonPos[3] = marker at {1585.38,73.16,1467.98}
-    PlatoonPos[4] = marker at {1030.88,26.22,1007.18}
-    PlatoonPos[5] = marker at {1122.31,25.91,964.67}
-    PlatoonPos[6] = marker at {960.09,27.99,804.32}
-    PlatoonPos[7] = marker at {1099.06,31.16,789.79}
-    PlatoonPos[8] = marker at {1192.91,20.22,1146.12}
-    PlatoonPos[9] = marker at {641.38,132.64,1233.19}
-    PlatoonPos[10] = marker at {842.31,39.24,861.17}
-    PlatoonPos[11] = marker at {828.92,40.23,850.67}
-    PlatoonPos[12] = marker at {812.22,40.80,833.45}
-    PlatoonPos[13] = marker at {784.41,42.22,857.73}
-    PlatoonPos[14] = marker at {796.72,43.26,873.24}
-    PlatoonPos[15] = marker at {815.89,42.54,892.02}
-    PlatoonPos[16] = marker at {837.82,41.12,909.26}
-    PlatoonPos[17] = marker at {860.19,37.21,932.61}
-    PlatoonPos[18] = marker at {747.05,11.71,1692.99}
-    PlatoonPos[19] = marker at {511.58,30.69,1481.95}
-    PlatoonPos[20] = marker at {495.02,19.12,1671.68}
-    PlatoonPos[21] = marker at {564.65,16.49,1711.04}
-    PlatoonPos[22] = marker at {841.18,52.05,1298.01}
-    PlatoonPos[23] = marker at {846.39,54.46,1272.47}
-    PlatoonPos[24] = marker at {860.84,54.74,1245.93}
+    //AztecCapital
+    PlatoonPos[0] = marker at {1708.05,176.92,1215.90}
+    PlatoonPos[1] = marker at {1737.06,121.33,640.86}
+    PlatoonPos[2] = marker at {1752.12,118.47,634.41}
+    PlatoonPos[3] = marker at {1768.11,118.15,628.65}
+    PlatoonPos[4] = marker at {1765.23,116.91,612.81}
+    PlatoonPos[5] = marker at {1747.23,118.09,616.26}
+    PlatoonPos[6] = marker at {1730.19,121.35,619.68}
 
-    StaticSiegePos[0] = marker at {1388.52,17.99,1065.48}
-    StaticSiegePos[1] = marker at {860.45,28.37,1375.64}
-    StaticSiegePos[2] = marker at {819.45,36.72,1391.34}
-    StaticSiegePos[3] = marker at {814.88,40.26,1366.27}
+    //AztecTown1
+    PlatoonPos[7] = marker at {1584.18,144.44,1858.67}
+    PlatoonPos[8] = marker at {1571.86,147.25,1820.81}
+    PlatoonPos[9] = marker at {1718.01,119.39,1650.25}
+    PlatoonPos[10] = marker at {1726.41,133.66,1468.50}
 
-    //From AztecTown2
-    AttackPos[0] = marker at {954.40,35.87,1477.61}
-    AttackPos[1] = marker at {823.35,21.02,1645.53}
-    //From AztecCapital
+    //AztecTown2
+    PlatoonPos[11] = marker at {1087.18,56.72,1202.63}
+    PlatoonPos[12] = marker at {1111.83,56.72,1209.01}
+
+    //PlayerTown
+    PlatoonPos[13] = marker at {779.47,122.54,1917.40}
+    PlatoonPos[14] = marker at {897.15,115.95,1945.80}
+    PlatoonPos[15] = marker at {955.74,114.50,2000.49}
+
+    PlatoonPos[16] = marker at {957.48,49.69,689.92}
+    PlatoonPos[17] = marker at {1424.22,137.25,1901.17}
+    PlatoonPos[18] = marker at {1431.94,135.67,1929.84}
+
+    StaticSiegePos[0] = marker at {938.43,115.08,1994.13}
+    StaticSiegePos[1] = marker at {1615.47,212.13,925.39}
+    StaticSiegePos[2] = marker at {1581.25,222.82,1036.54}
+    StaticSiegePos[3] = marker at {1636.63,159.58,1482.41}
+    StaticSiegePos[4] = marker at {1663.14,159.75,1485.17}
+
+    //PlayerTown
+    AttackPos[0] = marker at {1065.28,121.11,1957.26}
+    AttackPos[1] = marker at {1246.66,122.26,1945.31}
+    //From 123
     AttackPos[2] = marker at {1252.38,62.97,1474.54}
     AttackPos[3] = marker at {1401.36,60.42,1484.40}
-    //From AztecTown1
+    //From 123
     AttackPos[4] = marker at {995.48,44.16,1480.19}
     AttackPos[5] = marker at {877.48,27.07,1530.44}
 
@@ -110,24 +114,6 @@ start
     SiegeRoute1[1] = marker at {1374.71,58.12,1476.12}
     SiegeRoute1[2] = marker at {1273.79,60.94,1470.33}
 
-    SiegeRoute2[0] = marker at {1438.30,67.50,1490.81}
-    SiegeRoute2[1] = marker at {1372.08,51.19,1592.96}
-    SiegeRoute2[2] = marker at {1255.26,57.17,1699.67}
-
-    //AztecTown1 to PlayerTown
-    SiegeRoute3[0] = marker at {809.09,20.65,1658.24}
-    SiegeRoute3[1] = marker at {852.37,20.74,1578.05}
-    SiegeRoute3[2] = marker at {923.86,30.39,1485.08}
-
-    //AztecTown2 to PlayerTown
-    SiegeRoute4[0] = marker at {1145.31,21.74,1052.39}
-    SiegeRoute4[1] = marker at {1034.20,21.75,1234.81}
-    SiegeRoute4[2] = marker at {928.50,24.37,1444.47}
-
-    SiegeRoute5[0] = marker at {1145.31,21.74,1052.39}
-    SiegeRoute5[1] = marker at {1353.79,44.02,1298.75}
-    SiegeRoute5[2] = marker at {1278.44,60.61,1466.58}
-
     SiegeWeaponPos[0] = marker at {821.96,41.12,875.78}
 
     SiegePlatoonPos[0] = marker at {1313.19,294.29,1797.43}
@@ -135,19 +121,17 @@ start
     Script1WP[0] = marker at {1345.16,298.65,1914.31}
     Script1WP[1] = marker at {1345.16,298.65,1914.31}
 
-    PatrolRouteA[0] = marker at {1734.23,71.11,1530.10}
-    PatrolRouteA[1] = marker at {1634.02,73.16,1618.94}
-    PatrolRouteA[2] = marker at {1532.40,72.72,1497.92}
-    PatrolRouteA[3] = marker at {1607.42,71.38,1435.90}
+    PatrolRouteA[0] = marker at {1632.85,147.26,701.86}
+    PatrolRouteA[1] = marker at {1769.12,125.13,685.24}
+    PatrolRouteA[2] = marker at {1936.64,100.20,828.57}
 
     add {PatrolRouteA[0]} to waypoint list WaypointsA
     add {PatrolRouteA[1]} to waypoint list WaypointsA
     add {PatrolRouteA[2]} to waypoint list WaypointsA
-    add {PatrolRouteA[3]} to waypoint list WaypointsA
 
-    PatrolRouteB[0] = marker at {794.75,44.04,1369.53}
-    PatrolRouteB[1] = marker at {596.60,125.74,1270.01}
-    PatrolRouteB[2] = marker at {492.60,36.58,1447.21}
+    PatrolRouteB[0] = marker at {1704.73,172.99,1280.47}
+    PatrolRouteB[1] = marker at {1724.02,137.10,1426.59}
+    PatrolRouteB[2] = marker at {1596.72,112.01,1345.65}
 
     add {PatrolRouteB[0]} to waypoint list WaypointsB
     add {PatrolRouteB[1]} to waypoint list WaypointsB
@@ -308,10 +292,14 @@ begin script LC14_ArmyBehaivours(Platoon,Type,Task,DefendObject,AttackingPoint,A
     FirstAttack = 1
     Ready = 0
     myTimer = 0
+    myTimer2 = 0
 
 start
 
 //Group Attackers up first
+if Platoon == LC14_Platoon[20] or Platoon == LC14_Platoon[21]
+    wait until EarlyAttackWaveAllowed == 1
+end if
 
 begin loop
 
@@ -769,7 +757,7 @@ begin loop
         //end if
 
     elsif Task == Patrol
-        if Platoon == LC14_Platoon[33]
+        if Platoon == LC14_Platoon[17]
             if {Platoon} near {PatrolRouteA[0]} radius 10 or get size of Platoon action queue < 1 or get myTimer time remaining <= 0
                 myTimer = create timer for 120 seconds
                 clear Platoon action queue
@@ -783,14 +771,10 @@ begin loop
                 clear Platoon action queue
                 add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {PatrolRouteA[3]} to Platoon action queue
                 wait 5 seconds
-            elsif {Platoon} near {PatrolRouteA[3]} radius 10
-                clear Platoon action queue
-                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {PatrolRouteA[0]} to Platoon action queue
-                wait 5 seconds
             end if
-        elsif Platoon == LC14_Platoon[34]
-            if {Platoon} near {PatrolRouteB[0]} radius 10 or get size of Platoon action queue < 1 or get myTimer time remaining <= 0
-                myTimer = create timer for 120 seconds
+        elsif Platoon == LC14_Platoon[19]
+            if {Platoon} near {PatrolRouteB[0]} radius 10 or get size of Platoon action queue < 1 or get myTimer2 time remaining <= 0
+                myTimer2 = create timer for 120 seconds
                 clear Platoon action queue
                 add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {PatrolRouteB[1]} to Platoon action queue
                 wait 5 seconds
@@ -804,6 +788,31 @@ begin loop
                 wait 5 seconds
             end if
         end if
+
+    elsif Task == PatrolLinked
+        if DefendObject exists
+            if get size of Platoon action queue < 1
+                add action PLATOON_AGENDA_ACTION_LINK_TO_ARMY_MEMBER using DefendObject to Platoon action queue
+            end if
+        else
+            if Platoon == LC14_Platoon[18]
+                if {Platoon} near {PatrolRouteA[0]} radius 10 or get size of Platoon action queue < 1 or get myTimer time remaining <= 0
+                    myTimer = create timer for 120 seconds
+                    clear Platoon action queue
+                    add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {PatrolRouteA[1]} to Platoon action queue
+                    wait 5 seconds
+                elsif {Platoon} near {PatrolRouteA[1]} radius 10
+                    clear Platoon action queue
+                    add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {PatrolRouteA[2]} to Platoon action queue
+                    wait 5 seconds
+                elsif {Platoon} near {PatrolRouteA[2]} radius 10
+                    clear Platoon action queue
+                    add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {PatrolRouteA[3]} to Platoon action queue
+                    wait 5 seconds
+                end if
+            end if
+        end if
+
     elsif Task == Special
  
     end if

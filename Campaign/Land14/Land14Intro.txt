@@ -8,9 +8,186 @@ define False = 0
 define True = 1
 
 define script LC14_Intro
+define script LC14_Music
 
 begin script LC14_Intro
 
+    Counter = 0
+    CSMixer = 0
+    IntroPortal = 0
+    WindMixer = 0
+    PlayerArmy[5]
+
 start
 
+PD_ForcedSaving = 1
+wait until PD_ForcedSaving == 0 or 10 seconds
+stop script "SavePersistentDataSetData"
+set persistent data "PREVLAND_OVER" to 0
+run script SavePersistentDataGetData
+
+WindMixer = create mixer
+set mixer WindMixer channel AUDIO_MIXER_CHANNEL_GLOBAL to 0.0
+
+begin cinema
+    set fade red 0 green 0 blue 0 time 0
+    set game time 7.00
+
+    //Disable creature fisting
+    enable interface action MANACOST_BALANCE_TYPE_INITIATECREATUREFIST
+
+    wait until widescreen transition complete
+    //Intro vid
+    wait 8 seconds
+    set mixer WindMixer channel AUDIO_MIXER_CHANNEL_GLOBAL to 1.0 with fadetime 2
+    CSMixer = create mixer
+    set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 0.85
+    wait 2 seconds
+    destroy mixer WindMixer
+    disable load screen
+
+    wait 1 seconds
+
+    set fade in time 5
+    start music "womd" loop -1
+    reset camera path 
+    queue camera move with position {1520.63,50.00,2440.45} focus {1741.65,60.61,1790.41} time 0.0
+    queue camera move with position {1757.57,175.00,1950.49} focus {1741.65,140,1790.41} time 12.0
+    queue camera move with position {2600.32,275.65,1100.14} focus {1991.81,101.22,925.63} time 11.0
+    queue camera move with position {2095.27,150.00,748.60} focus {2019.86,101.72,910.64} time 10.0
+    queue camera move with position {1799.18,175.00,706.06} focus {1727.64,155.03,1122.84} time 7.0
+    queue camera move with position {1563.50,280.00,1010.39} focus {AztecTown2} time 13.0
+
+    play camera path with easein 20 easeout 8 method SCRIPT_CAMERAPATH_SMOOTHEST
+
+    IntroPortal = create visual effect VISUAL_EFFECT_TELEPORTER_HOOP at {595.68,46.65,2052.27} + {0, 1.5, 0} time -1
+    SCALE of IntroPortal = 2.0
+
+    wait 10 seconds
+    
+    start music "exintro1" loop 1
+
+    say "BW2XT_LAND05_INTRO_10"
+    clear dialogue
+    close dialogue
+    wait BW2XT_LAND05_INTRO_10 + 0.75 seconds
+
+    say "BW2XT_LAND05_INTRO_30"
+    clear dialogue
+    close dialogue
+    wait BW2XT_LAND05_INTRO_30 + 0.75 seconds
+
+    say "BW2XT_LAND05_INTRO_40"
+    clear dialogue
+    close dialogue
+    wait BW2XT_LAND05_INTRO_40 + 0.75 seconds
+
+    wait 2 seconds
+
+    say "BW2XT_LAND05_INTRO_50"
+    clear dialogue
+    close dialogue
+    wait BW2XT_LAND05_INTRO_50 + 0.75 seconds
+
+    say "BW2XT_LAND05_INTRO_60"
+    clear dialogue
+    close dialogue
+    wait BW2XT_LAND05_INTRO_60 + 0.75 seconds
+
+    say "BW2XT_LAND05_INTRO_70"
+    clear dialogue
+    close dialogue
+    wait BW2XT_LAND05_INTRO_70 + 0.75 seconds
+
+    say "BW2XT_LAND05_INTRO_80"
+    clear dialogue
+    close dialogue
+    wait BW2XT_LAND05_INTRO_80 + 0.75 seconds
+
+    say "BW2XT_LAND05_INTRO_90"
+    clear dialogue
+    close dialogue
+    wait BW2XT_LAND05_INTRO_90 + 0.75 seconds
+
+    wait until camera ready
+
+    wait 2.5 seconds
+
+    set fade red 0 green 0 blue 0 time 3
+    wait 3 seconds
+    set camera position to {509.45,75.00,2092.15}
+    set camera focus to {595.68,46.65,2052.27}
+    wait 1 seconds
+    set fade in time 3
+
+    PlayerArmy[0] = create platoon PLATOON_INFO_GREEK_MELEE_6 at {595.68,46.65,2052.27} with 50 men and 0 women
+    PLAYER of PlayerArmy[0] = 0
+    add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {724.87,79.78,2061.11} to PlayerArmy[0] action queue
+    wait 2 seconds
+
+    PlayerArmy[1] = create platoon PLATOON_INFO_GREEK_MELEE_6 at {595.68,46.65,2052.27} with 50 men and 0 women
+    PLAYER of PlayerArmy[1] = 0
+    add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {695.78,73.43,2058.59} to PlayerArmy[1] action queue
+    wait 2 seconds
+
+    IntroFinished = 1
+
+end cinema
+
+PlayerArmy[2] = create platoon PLATOON_INFO_GREEK_RANGED_6 at {595.68,46.65,2052.27} with 50 men and 0 women
+PLAYER of PlayerArmy[2] = 0
+add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {677.41,69.40,2055.51} to PlayerArmy[2] action queue
+wait 2 seconds
+
+PlayerArmy[3] = create platoon PLATOON_INFO_GREEK_RANGED_6 at {595.68,46.65,2052.27} with 50 men and 0 women
+PLAYER of PlayerArmy[3] = 0
+add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {652.82,63.52,2049.60} to PlayerArmy[3] action queue
+wait 2 seconds
+
+PlayerArmy[4] = create siege weapon SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_6 belonging to PlayerTempTown at {595.68,46.65,2052.27}
+PLAYER of PlayerArmy[4] = 0
+wait 2 seconds
+
+run background script LC14_Music
+delete IntroPortal with fade
+
 end script LC14_Intro
+
+
+begin script LC14_Music
+
+    GreekPlatoon = 0
+    land14mixer = 0
+
+start
+
+    stop music with fadetime 9
+    start dynamic music
+    set dynamic music "small" loop -1
+    begin loop
+        GreekPlatoon = get platoon of player 0 nearest {913.09,114.20,2014.43} radius 400
+        until GreekPlatoon can navigate to {913.09,114.20,2014.43}
+    end loop
+    TalusCommentWall = 1
+    wait 5 seconds
+
+    set dynamic music "largeevent1" loop -1
+    wait 40 seconds
+    set dynamic music "small" loop -1
+    wait 10 seconds
+
+    begin dialogue
+        request dialogue EVENT_TYPE_GENERIC_PLAYERS_TOWN_UNDER_ATTACK
+    end dialogue
+
+    wait until PLAYER of PlayerTown == 0
+    wait 1 seconds
+    set dynamic music "smallendofbattle2" loop -1 urgent
+    wait 60 seconds
+    land14mixer = create mixer
+    set mixer land14mixer channel AUDIO_MIXER_CHANNEL_MUSIC to 0.0 with fadetime 10
+    wait 10 seconds 
+    stop dynamic music
+    destroy mixer land14mixer with fadetime 3
+
+end script LC14_Music
