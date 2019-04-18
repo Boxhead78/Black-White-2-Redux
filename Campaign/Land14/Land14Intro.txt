@@ -16,7 +16,7 @@ begin script LC14_Intro
     CSMixer = 0
     IntroPortal = 0
     WindMixer = 0
-    PlayerArmy[5]
+    PlayerArmy[7]
 
 start
 
@@ -151,6 +151,41 @@ wait 2 seconds
 run background script LC14_Music
 delete IntroPortal with fade
 
+wait until town PlayerTown is under takeover from player 0
+
+IntroPortal = create visual effect VISUAL_EFFECT_TELEPORTER_HOOP at {595.68,46.65,2052.27} + {0, 1.5, 0} time -1
+SCALE of IntroPortal = 2.0
+
+wait 10 seconds
+
+PlayerArmy[5] = create platoon PLATOON_INFO_GREEK_MELEE_6 at {595.68,46.65,2052.27} with 30 men and 0 women
+PLAYER of PlayerArmy[5] = 0
+add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {724.87,79.78,2061.11} to PlayerArmy[5] action queue
+wait 2 seconds
+
+PlayerArmy[6] = create platoon PLATOON_INFO_GREEK_MELEE_6 at {595.68,46.65,2052.27} with 30 men and 0 women
+PLAYER of PlayerArmy[6] = 0
+add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {695.78,73.43,2058.59} to PlayerArmy[6] action queue
+wait 2 seconds
+
+wait until GB_DialogueIsRunning == 0
+GB_DialogueIsRunning = 1
+begin dialogue
+    eject evil spirit
+    eject good spirit
+    say "BW2T_SCRIPT_11FINAL_ADVISORS_AZTEC_ANGER_90"
+    wait until read
+    say "BW2T_SCRIPT_11FINAL_ADVISORS_AZTEC_ANGER_100"
+    wait until read
+    send evil spirit home
+    send good spirit home
+end dialogue
+GB_DialogueIsRunning = 0
+
+wait 5 seconds
+
+delete IntroPortal with fade
+
 end script LC14_Intro
 
 
@@ -158,6 +193,8 @@ begin script LC14_Music
 
     GreekPlatoon = 0
     land14mixer = 0
+    GateHouse = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {890.15,2034.94} radius 15
+    GateHouseOpen = 0
 
 start
 
@@ -165,6 +202,10 @@ start
     start dynamic music
     set dynamic music "small" loop -1
     begin loop
+        if LC14_WallArcher[8] not exists and LC14_WallArcher[9] not exists and GateHouseOpen == 0
+            GateHouseOpen = 1
+            set gate GateHouse open
+        end if
         GreekPlatoon = get platoon of player 0 nearest {913.09,114.20,2014.43} radius 400
         until GreekPlatoon can navigate to {913.09,114.20,2014.43}
     end loop

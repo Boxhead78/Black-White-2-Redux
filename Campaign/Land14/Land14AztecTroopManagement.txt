@@ -109,10 +109,10 @@ start
     AttackPos[4] = marker at {995.48,44.16,1480.19}
     AttackPos[5] = marker at {877.48,27.07,1530.44}
 
-    //AztecCapital to PlayerTown
-    SiegeRoute1[0] = marker at {1438.30,67.50,1490.81}
-    SiegeRoute1[1] = marker at {1374.71,58.12,1476.12}
-    SiegeRoute1[2] = marker at {1273.79,60.94,1470.33}
+    //AztecTown1 to PlayerTown
+    SiegeRoute1[0] = marker at {1446.13,141.74,1870.50}
+    SiegeRoute1[1] = marker at {1239.01,122.44,1937.62}
+    SiegeRoute1[2] = marker at {1039.05,120.71,1960.96}
 
     SiegeWeaponPos[0] = marker at {821.96,41.12,875.78}
 
@@ -393,8 +393,8 @@ begin loop
     Armory = get building ABODE_NUMBER_TOWN_CENTRE in PlayerSettlement min built 1.0
     if Armory exists and PlayerSettlement != PlayerTown and PLAYER of PlayerSettlement == 0 and Task != Conqueror
         if Platoon can navigate to object Armory
-            if TownCapturePlatoons[0] < 2
-                TownCapturePlatoons[0]++
+            if TownCapturePlatoons[2] < 2
+                TownCapturePlatoons[2]++
                 clear Platoon action queue
                 set Platoon attack PlayerSettlement with severity 0.3 for takeover
                 a = 1
@@ -412,7 +412,7 @@ begin loop
                     end if
                     until a == 0 or Platoon not exists or PLAYER of PlayerSettlement == 1
                 end loop
-                TownCapturePlatoons[0]--
+                TownCapturePlatoons[2]--
             end if
             clear Platoon action queue
         end if
@@ -484,36 +484,38 @@ begin loop
                     if TownCapturePlatoons[0] < 2
                         TownCapturePlatoons[0]++
                         set Platoon attack PlayerTown with severity 0.3 for takeover
-                        RecalculateTimer = create timer for 40 seconds
-                        begin loop
-                            PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 150
-                            TestCreature2 = get distance from {Platoon} to {MyCreature}
-                            NumPat1 = get number of villagers in platoon Platoon
-                            //if PlayerPlatoon1 exists or TestCreature2 <= 150 or not Platoon can navigate to object PlayerTownCentre
-                                if PlayerPlatoon1 exists and not town PlayerTown is under takeover from player 1
-                                    a = 0
-                                elsif TestCreature2 <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of MyCreature > 0.00 and not town PlayerTown is under takeover from player 1
-                                    a = 0
-                                elsif not Platoon can navigate to object oTownCentre
-                                    a = 0
-                                elsif Platoon not exists
-                                    a = 0
-                                elsif AttackMode == 1 and HEALTH of MyCreature == 0
-                                    a = 0
-                                elsif AttackMode == 2 and Building not exists
-                                    a = 0
-                                elsif AttackMode == 2 and HEALTH of Building < 0.1
-                                    a = 0
-                                elsif AttackMode == 2 and Building == 0
-                                    a = 0
-                                elsif not town PlayerTown is under takeover from player 1 and get RecalculateTimer time remaining <= 0
-                                    a = 0
-                                end if
-                            //end if
-                            until a == 0 or Platoon not exists
-                        end loop
-                        TownCapturePlatoons[0]--
                     end if
+                end if
+                RecalculateTimer = create timer for 40 seconds
+                begin loop
+                    PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 150
+                    TestCreature2 = get distance from {Platoon} to {MyCreature}
+                    NumPat1 = get number of villagers in platoon Platoon
+                    //if PlayerPlatoon1 exists or TestCreature2 <= 150 or not Platoon can navigate to object PlayerTownCentre
+                        if PlayerPlatoon1 exists and not town PlayerTown is under takeover from player 1
+                            a = 0
+                        elsif TestCreature2 <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of MyCreature > 0.00 and not town PlayerTown is under takeover from player 1
+                            a = 0
+                        elsif not Platoon can navigate to object oTownCentre
+                            a = 0
+                        elsif Platoon not exists
+                            a = 0
+                        elsif AttackMode == 1 and HEALTH of MyCreature == 0
+                            a = 0
+                        elsif AttackMode == 2 and Building not exists
+                            a = 0
+                        elsif AttackMode == 2 and HEALTH of Building < 0.1
+                            a = 0
+                        elsif AttackMode == 2 and Building == 0
+                            a = 0
+                        elsif not town PlayerTown is under takeover from player 1 and get RecalculateTimer time remaining <= 0
+                            a = 0
+                        end if
+                    //end if
+                    until a == 0 or Platoon not exists
+                end loop
+                if AttackMode == 0
+                    TownCapturePlatoons[0]--
                 end if
                 clear Platoon action queue
             elsif Platoon can navigate to {AttackingPoint}
@@ -606,36 +608,38 @@ begin loop
                     if TownCapturePlatoons[0] < 2
                         TownCapturePlatoons[0]++
                         set Platoon attack PlayerTown with severity 0.3 for takeover
-                        RecalculateTimer = create timer for 40 seconds
-                        begin loop
-                            PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 150
-                            TestCreature2 = get distance from {Platoon} to {MyCreature}
-                            NumPat1 = get number of villagers in platoon Platoon
-                            //if PlayerPlatoon1 exists or TestCreature2 <= 150 or not Platoon can navigate to object PlayerTownCentre
-                                if PlayerPlatoon1 exists and not town PlayerTown is under takeover from player 1
-                                    a = 0
-                                elsif TestCreature2 <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of MyCreature > 0.00 and not town PlayerTown is under takeover from player 1
-                                    a = 0
-                                elsif not Platoon can navigate to object oTownCentre
-                                    a = 0
-                                elsif Platoon not exists
-                                    a = 0
-                                elsif AttackMode == 1 and HEALTH of MyCreature == 0
-                                    a = 0
-                                elsif AttackMode == 2 and Building not exists
-                                    a = 0
-                                elsif AttackMode == 2 and HEALTH of Building < 0.1
-                                    a = 0
-                                elsif AttackMode == 2 and Building == 0
-                                    a = 0
-                                elsif not town PlayerTown is under takeover from player 1 and get RecalculateTimer time remaining <= 0
-                                    a = 0
-                                end if
-                            //end if
-                            until a == 0 or Platoon not exists
-                        end loop
-                        TownCapturePlatoons[0]--
                     end if
+                end if
+                RecalculateTimer = create timer for 40 seconds
+                begin loop
+                    PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 150
+                    TestCreature2 = get distance from {Platoon} to {MyCreature}
+                    NumPat1 = get number of villagers in platoon Platoon
+                    //if PlayerPlatoon1 exists or TestCreature2 <= 150 or not Platoon can navigate to object PlayerTownCentre
+                        if PlayerPlatoon1 exists and not town PlayerTown is under takeover from player 1
+                            a = 0
+                        elsif TestCreature2 <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of MyCreature > 0.00 and not town PlayerTown is under takeover from player 1
+                            a = 0
+                        elsif not Platoon can navigate to object oTownCentre
+                            a = 0
+                        elsif Platoon not exists
+                            a = 0
+                        elsif AttackMode == 1 and HEALTH of MyCreature == 0
+                            a = 0
+                        elsif AttackMode == 2 and Building not exists
+                            a = 0
+                        elsif AttackMode == 2 and HEALTH of Building < 0.1
+                            a = 0
+                        elsif AttackMode == 2 and Building == 0
+                            a = 0
+                        elsif not town PlayerTown is under takeover from player 1 and get RecalculateTimer time remaining <= 0
+                            a = 0
+                        end if
+                    //end if
+                    until a == 0 or Platoon not exists
+                end loop
+                if AttackMode == 0
+                    TownCapturePlatoons[0]--
                 end if
                 clear Platoon action queue
             elsif Platoon can navigate to {AttackingPoint}
@@ -719,36 +723,38 @@ begin loop
                     if TownCapturePlatoons[1] < 2
                         TownCapturePlatoons[1]++
                         set Platoon attack NearestSettlement with severity 0.3 for takeover
-                        RecalculateTimer = create timer for 40 seconds
-                        begin loop
-                            PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 150
-                            TestCreature2 = get distance from {Platoon} to {MyCreature}
-                            NumPat1 = get number of villagers in platoon Platoon
-                            //if PlayerPlatoon1 exists or TestCreature2 <= 150 or not Platoon can navigate to object PlayerTownCentre
-                                if PlayerPlatoon1 exists and not town NearestSettlement is under takeover from player 1
-                                    a = 0
-                                elsif TestCreature2 <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of MyCreature > 0.00 and not town NearestSettlement is under takeover from player 1
-                                    a = 0
-                                elsif not Platoon can navigate to object oTownCentre
-                                    a = 0
-                                elsif Platoon not exists
-                                    a = 0
-                                elsif AttackMode == 1 and HEALTH of MyCreature == 0
-                                    a = 0
-                                elsif AttackMode == 2 and Building not exists
-                                    a = 0
-                                elsif AttackMode == 2 and HEALTH of Building < 0.1
-                                    a = 0
-                                elsif AttackMode == 2 and Building == 0
-                                    a = 0
-                                elsif not town NearestSettlement is under takeover from player 1 and get RecalculateTimer time remaining <= 0
-                                    a = 0
-                                end if
-                            //end if
-                            until a == 0 or Platoon not exists
-                        end loop
-                        TownCapturePlatoons[1]--
                     end if
+                end if
+                RecalculateTimer = create timer for 40 seconds
+                begin loop
+                    PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 150
+                    TestCreature2 = get distance from {Platoon} to {MyCreature}
+                    NumPat1 = get number of villagers in platoon Platoon
+                    //if PlayerPlatoon1 exists or TestCreature2 <= 150 or not Platoon can navigate to object PlayerTownCentre
+                        if PlayerPlatoon1 exists and not town NearestSettlement is under takeover from player 1
+                            a = 0
+                        elsif TestCreature2 <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of MyCreature > 0.00 and not town NearestSettlement is under takeover from player 1
+                            a = 0
+                        elsif not Platoon can navigate to object oTownCentre
+                            a = 0
+                        elsif Platoon not exists
+                            a = 0
+                        elsif AttackMode == 1 and HEALTH of MyCreature == 0
+                            a = 0
+                        elsif AttackMode == 2 and Building not exists
+                            a = 0
+                        elsif AttackMode == 2 and HEALTH of Building < 0.1
+                            a = 0
+                        elsif AttackMode == 2 and Building == 0
+                            a = 0
+                        elsif not town NearestSettlement is under takeover from player 1 and get RecalculateTimer time remaining <= 0
+                            a = 0
+                        end if
+                    //end if
+                    until a == 0 or Platoon not exists
+                end loop
+                if AttackMode == 0
+                    TownCapturePlatoons[1]--
                 end if
                 clear Platoon action queue
             else
@@ -814,7 +820,114 @@ begin loop
         end if
 
     elsif Task == Special
- 
+        if LC14_LargeSiegeIsRunning == 1 or LC14_LargeSiegeLaunchAttack == 1
+            oTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in PlayerTown min built 1.0
+            if Platoon can navigate to object oTownCentre and LC14_LargeSiegeLaunchAttack == 1 and PLAYER of PlayerTown == 0
+                wait number from 5 to 25 seconds
+                a = 1
+                clear Platoon action queue
+                Number = number from 1 to 4
+                if Number == 2 and HEALTH of MyCreature > 0 //Hunt down platoons or destroy buildings
+                    AttackMode = 1
+                    set Platoon attack PlayerTown with severity 0.2
+                elsif Number == 3 or Number == 4 //Destroy value buildings
+                    AttackMode = 2
+                    Building = 0
+                    Timer = create timer for 2 seconds
+                    begin loop
+                        Number = number from 1 to 8
+                        if Number == 1 or Number == 2 or Number == 3
+                            Building = get building ALTAR in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                            else
+                                Building = 0
+                            end if
+                        elsif Number == 4
+                            Building = get building TEMPLE in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                            else
+                                Building = 0
+                            end if
+                        elsif Number == 5
+                            Building = get building CREATURE_PEN in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                            else
+                                Building = 0
+                            end if
+                        elsif Number == 6
+                            Building = get building UNIVERSITY in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                            else
+                                Building = 0
+                            end if
+                        elsif Number == 7
+                            Building = get building BATHHOUSE in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                            else
+                                Building = 0
+                            end if
+                        elsif Number == 8
+                            Building = get building AMPITHEATRE in PlayerTown min built 0.75
+                            if Building exists
+                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                            else
+                                Building = 0
+                            end if
+                        end if
+                        until Building != 0 or get Timer time remaining <= 0
+                    end loop
+                else //Capture Town
+                    AttackMode = 0
+                    if TownCapturePlatoons[0] < 2
+                        TownCapturePlatoons[0]++
+                        set Platoon attack PlayerTown with severity 0.3 for takeover
+                    end if
+                end if
+                RecalculateTimer = create timer for 40 seconds
+                begin loop
+                    PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 150
+                    TestCreature2 = get distance from {Platoon} to {MyCreature}
+                    NumPat1 = get number of villagers in platoon Platoon
+                    //if PlayerPlatoon1 exists or TestCreature2 <= 150 or not Platoon can navigate to object PlayerTownCentre
+                        if PlayerPlatoon1 exists and not town PlayerTown is under takeover from player 1
+                            a = 0
+                        elsif TestCreature2 <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of MyCreature > 0.00 and not town PlayerTown is under takeover from player 1
+                            a = 0
+                        elsif not Platoon can navigate to object oTownCentre
+                            a = 0
+                        elsif Platoon not exists
+                            a = 0
+                        elsif AttackMode == 1 and HEALTH of MyCreature == 0
+                            a = 0
+                        elsif AttackMode == 2 and Building not exists
+                            a = 0
+                        elsif AttackMode == 2 and HEALTH of Building < 0.1
+                            a = 0
+                        elsif AttackMode == 2 and Building == 0
+                            a = 0
+                        elsif not town PlayerTown is under takeover from player 1 and get RecalculateTimer time remaining <= 0
+                            a = 0
+                        end if
+                    //end if
+                    until a == 0 or Platoon not exists
+                end loop
+                if AttackMode == 0
+                    TownCapturePlatoons[0]--
+                end if
+                clear Platoon action queue
+            elsif Platoon can navigate to {AttackingPoint} and LC14_LargeSiegeLaunchAttack == 1
+                clear Platoon action queue
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPoint} to Platoon action queue
+            elsif Platoon can navigate to {AttackingPointFallBack} and LC14_LargeSiegeLaunchAttack == 0
+                clear Platoon action queue
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPointFallBack} to Platoon action queue
+            end if
+        end if
     end if
 
     until Platoon not exists
@@ -885,6 +998,11 @@ start
     disable siege weapon SiegeWeapon auto attack
 
     if Type != Conqueror
+        if Type == Special and LC14_LargeSiegeLaunchAttack == 0
+            wait until LC14_LargeSiegeLaunchAttack == 1
+            wait 5.5 seconds//Delay so that dialogue matches with actions
+        end if
+
         begin loop
             if PointOn != 3
                 if SiegeWeapon exists
@@ -909,6 +1027,10 @@ start
                             elsif PointOn == 1
                                 if SiegeWeapon can navigate to {Waypoint2}
                                     add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {Waypoint2} to siege weapon SiegeWeapon action queue
+                                    if Type == Special
+                                        wait until LC14_LargeSiegeLaunchAttack == 1
+                                        SiegeOnPointTimer = create timer for 40 seconds
+                                    end if
                                 end if
 
                             elsif PointOn == 2

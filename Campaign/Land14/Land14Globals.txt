@@ -35,6 +35,9 @@ global AztecTemple[3]
 global TalusCommentWall = 0
 global TempleDestroyed[3]
 global EarlyAttackWaveAllowed = 0
+global LC14_LargeSiegeIsRunning = 0
+global LC14_LargeSiegeLaunchAttack = 0
+global LC14_LargeSiegeOver = 0
 
 global PlayerTown = 0
 global AztecTown1 = 0
@@ -45,10 +48,10 @@ global NearestSettlement = 0
 global PlayerTempTown = 0
 global AztecTempleTown[3]
 
-global AZTECTOWN1_IMPRESSIVENESS = 36000
-global AZTECTOWN2_IMPRESSIVENESS = 24000
-global AZTECTOWN3_IMPRESSIVENESS = 24000
-global AZTECCAPITAL_IMPRESSIVENESS = 42500
+global AZTECTOWN1_IMPRESSIVENESS = 17500
+global AZTECTOWN2_IMPRESSIVENESS = 50000
+global AZTECTOWN3_IMPRESSIVENESS = 999999 //Scrapped, only a Temple now
+global AZTECCAPITAL_IMPRESSIVENESS = 47000
 
 global AttackNearestTownTimer = 0
 global LC14_RecruitTimer1 = 0
@@ -102,6 +105,8 @@ begin script LC14_CreateUndeadPlatoon(whichPlatoon,howManyVillagersToDelete,howM
 
 start
 
+    attach atmos "ghost_legion" to whichPlatoon
+
     myEffect = create visual effect VISUAL_EFFECT_TOWN_TAKEOVER_DEFENDER at {whichPlatoon} + {0,2,0} time 10
     set myEffect color red 148 green 0 blue 211
     SCALE of myEffect = 2
@@ -147,11 +152,11 @@ start
             set Ghost[counter] carrying CARRIED_OBJECT_NORSE_SWORD
             disable Ghost[counter] can be fisted
         elsif whichMesh == s_skeletonadultland2
-            set anim speed of Ghost[counter] to 0.5
+            set anim speed of Ghost[counter] to 0.7
             override mesh for Ghost[counter] with "..\skins\s_skeletonadultland2"
             set Ghost[counter] carrying CARRIED_OBJECT_NORSE_SWORD
         else
-            set anim speed of Ghost[counter] to 0.6
+            set anim speed of Ghost[counter] to 0.7
             override mesh for Ghost[counter] with "..\skins\s_undeadwarrior_noghost"
             set Ghost[counter] carrying CARRIED_OBJECT_AZTEC_CLUB
         end if
