@@ -25,6 +25,8 @@ define script LC14_TempleDestroyed(whichTemple)
 define script LC14_DeathSpell(PlayerID,SpellPosition,GodPosition)
 define script LC14_MainScript
 define script LC14_PlayRandomBanter
+define script LC14_Epics
+define script LC14_EarthquakeCinema(Earthquake)
 
 define TalusPlatoon = 0
 define TalusCatapult = 0
@@ -1497,11 +1499,6 @@ begin script LC14_Aztec_Capital
     SiegeWaypoint2 = 0
     SiegeWaypoint3 = 0
     AttackAztecTown1Timer = create timer for 0 seconds
-    VolcanoTimer = create timer for 0 seconds
-    VOLCANODELAY = 3000
-    VolcanoWarning = 0
-    CastEpicPos = 0
-    EpicVolc = 0
     CapturePlayer0Timer = 0
     CapturePlayerTown = 0
     TownCentre = 0
@@ -1524,6 +1521,24 @@ start
     run background script LC14_FireRain(AztecTemple[0],marker at {1163.26,121.20,1938.87})
     run background script LC14_FireRain(AztecTemple[1],marker at {1349.81,47.53,1241.44})
     run background script LC14_FireRain(AztecTemple[2],marker at {1387.88,151.23,578.09})
+
+    while AIVolcano not exists
+        AIVolcano = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_VOLCANO at {AztecTown2} radius 150
+    end while
+    disable AIVolcano hurt by fire
+    CHARGE of AIVolcano = 1.0
+
+    while AIEarthquake not exists
+        AIEarthquake = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_EARTHQUAKE at {1962.57,101.50,942.89} radius 150
+    end while
+    disable AIEarthquake hurt by fire
+    CHARGE of AIEarthquake = 1.0
+
+    while AIHurricane not exists
+        AIHurricane = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_HURRICANE at {1750.17,157.69,943.01} radius 150
+    end while
+    disable AIHurricane hurt by fire
+    CHARGE of AIHurricane = 1.0
 
     AttackNearestTownTimer = create timer for 0 seconds
 
@@ -2168,9 +2183,12 @@ begin script LC14_MainScript
     SiegeWaypoint2 = 0
     SiegeWaypoint3 = 0
 
+    VolcanoWarning = 0
+    EpicVolc = 0
+
 start
 
-    wait until dialogue ready
+    wait until dialogue ready and DynamicMusicReady == 1
     //Respawn Platoons, are pre-placed already
     GB_DialogueIsRunning = 1
     begin dialogue
@@ -2257,12 +2275,12 @@ start
     enemyPlatoon[2] = recruit ARMY_UNIT_TYPE_MELEE_6 town AztecTown1 platoon of size 20 * RecruitSizeModifier
     AttackingPosition = marker at {AttackPos[0]} + {45,0}
     AttackingPositionFallBack = marker at {AttackPos[1]} + {0,45}
-    run background script LC14_ArmyBehaivours(enemyPlatoon[0],Melee,Special,0,AttackingPosition,AttackingPositionFallBack,0,0)
+    run background script LC14_ArmyBehaivours(enemyPlatoon[2],Melee,Special,0,AttackingPosition,AttackingPositionFallBack,0,0)
 
     enemyPlatoon[3] = recruit ARMY_UNIT_TYPE_RANGED_6 town AztecTown1 platoon of size 20 * RecruitSizeModifier
     AttackingPosition = marker at {AttackPos[0]} + {-45,0}
     AttackingPositionFallBack = marker at {AttackPos[1]} + {0,-45}
-    run background script LC14_ArmyBehaivours(enemyPlatoon[1],Ranged,Special,0,AttackingPosition,AttackingPositionFallBack,0,0)
+    run background script LC14_ArmyBehaivours(enemyPlatoon[3],Ranged,Special,0,AttackingPosition,AttackingPositionFallBack,0,0)
 
     wait 15 seconds
 
@@ -2270,6 +2288,8 @@ start
 
     run script LC14_PlayRandomBanter
 
+    set dynamic music "small" loop -1
+    wait 15 seconds
     set dynamic music "largeevent1" loop -1 urgent
     wait 35 seconds
     set dynamic music "smallevent4" loop 0 urgent
@@ -2284,7 +2304,7 @@ start
 
     run script LC14_PlayRandomBanter
 
-    wait 30 seconds
+    wait 15 seconds
 
     enemyPlatoon[0] = recruit ARMY_UNIT_TYPE_MELEE_6 town AztecTown1 platoon of size 150 * RecruitSizeModifier
     AttackingPosition = marker at {AttackPos[0]} + {45,45}
@@ -2305,15 +2325,257 @@ start
     SiegeWaypoint3 = marker at {SiegeRoute1[2]} + {-20,-20}
     run background script LC14_MoveCatapultThenAttack(enemyPlatoon[2],0,SiegeWaypoint1,SiegeWaypoint2,SiegeWaypoint3)
 
-    wait 100 seconds
+    wait 45 seconds
 
     run script LC14_PlayRandomBanter
     AztecGodThrowFirerain = 1
     LC14_LargeSiegeOver = 1
 
-    wait 120 seconds
+    set dynamic music "small" loop -1
+
+    wait 30 seconds
+
+    set dynamic music "smallendofbattle" loop -1
+    wait 60 seconds
+    land14mixer = create mixer
+    set mixer land14mixer channel AUDIO_MIXER_CHANNEL_MUSIC to 0.0 with fadetime 10
+    wait 10 seconds 
+    stop dynamic music
+    destroy mixer land14mixer with fadetime 3
+
+    wait until PLAYER of AztecTown1 != 1 or 60 seconds
+
+    enable predefined sky "VOLCANO" time 10
+    run script EpicTargeter(AztecTown1,marker at {1583.71,143.96,1841.69},1)
+    VolcanoWarning = create visual effect VISUAL_EFFECT_EPIC_TARGET_WARNING at {ET_FireEpicLocation} time 15 target {ET_FireEpicLocation}
+    wait 15 seconds
+    EpicVolc = create volcano at {ET_FireEpicLocation} player 1
+    run background script LC14_Volcano(AIVolcano, EpicVolc)
+
+    wait 75 seconds
+
+    run background script LC14_Epics
+
+    wait 345 seconds
+
+    //Spawn undead armies
+    begin cinema
+        set fade red 0 green 0 blue 0 time 2
+        wait 2 seconds
+        start music "womd" loop 1
+
+        set fade in time 2
+        wait 2 seconds
+    end cinema
 
 end script LC14_MainScript
+
+
+begin script LC14_Epics
+
+    EpicWarning = 0
+    EnemyEpic = 0
+    Number = 0
+    EpicTimer = create timer for 0 seconds
+    EPICDELAY = 1500
+    myTown = 0
+
+start
+
+while LandOver == 0
+    if get EpicTimer time remaining <= 0
+        Number = number from 1 to 3
+        if Number == 1 and CHARGE of AIVolcano == 1.0
+            if PLAYER of PlayerTown == 0
+                myTown = PlayerTown
+            elsif PLAYER of AztecCapital == 0
+                myTown = AztecCapital
+            elsif PLAYER of AztecTown1 == 0
+                myTown = AztecTown1
+            elsif PLAYER of AztecTown2 == 0
+                myTown = AztecTown2
+            end if
+
+            wait until dialogue ready
+            GB_DialogueIsRunning = 1
+            begin dialogue
+                say "BW2XT_LAND05_EARTHQUAKE_20"
+                clear dialogue
+                close dialogue
+                wait BW2XT_LAND05_EARTHQUAKE_20 + 1 seconds
+            end dialogue
+            GB_DialogueIsRunning = 0
+
+            enable predefined sky "VOLCANO" time 10
+            run script EpicTargeter(myTown,marker at {myTown},0)
+            EpicWarning = create visual effect VISUAL_EFFECT_EPIC_TARGET_WARNING at {ET_FireEpicLocation} time 15 target {ET_FireEpicLocation}
+            wait 15 seconds
+            EnemyEpic = create volcano at {ET_FireEpicLocation} player 1
+            run background script LC14_Volcano(AIVolcano, EnemyEpic)
+            EpicTimer = create timer for EPICDELAY * EpicModifier seconds
+
+        elsif Number == 2 and CHARGE of AIEarthquake == 1.0
+            if PLAYER of PlayerTown == 0
+                myTown = PlayerTown
+            elsif PLAYER of AztecCapital == 0
+                myTown = AztecCapital
+            elsif PLAYER of AztecTown1 == 0
+                myTown = AztecTown1
+            elsif PLAYER of AztecTown2 == 0
+                myTown = AztecTown2
+            end if
+
+            wait until dialogue ready
+            GB_DialogueIsRunning = 1
+            begin dialogue
+                Number = number from 1 to 2
+                if Number == 1
+                    say "BW2XT_LAND05_EARTHQUAKE_60"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND05_EARTHQUAKE_60 + 1 seconds
+                elsif Number == 2
+                    say "BW2XT_LAND05_EARTHQUAKE_70"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND05_EARTHQUAKE_70 + 1 seconds
+                end if
+            end dialogue
+            GB_DialogueIsRunning = 0
+
+            run script EpicTargeter(myTown,marker at {myTown},0)
+            enable predefined sky "EARTHQUAKE" time 9
+
+            wait 5 seconds
+            invoke AIEarthquake EPIC_WONDER_STAGE_1
+            play sound "SCRIPT2_EEPIC_SYNTH3" at {AIEarthquake}
+            wait 2.5 seconds
+            wait 2 seconds
+            play sound "SCRIPT2_EEPIC_SYNTH3" at {AIEarthquake}
+            invoke AIEarthquake EPIC_WONDER_STAGE_2
+            wait 1 second
+            enable predefined sky "EARTHQUAKE" time 5
+            wait 2 seconds
+            invoke AIEarthquake EPIC_WONDER_STAGE_3
+            invoke AIEarthquake EPIC_WONDER_STAGE_4
+            invoke AIEarthquake EPIC_WONDER_STAGE_5
+            invoke AIEarthquake EPIC_WONDER_STAGE_6
+            play sound "BEAMOFLIGHTLOOP1" at {AIEarthquake}
+            wait 2 seconds
+            play sound "BEAMOFLIGHTLOOP1" at {AIEarthquake}
+            play sound "SCRIPT2_EEPIC_SYNTH2" at {AIEarthquake}
+            invoke AIEarthquake EPIC_WONDER_STAGE_7
+            invoke AIEarthquake EPIC_WONDER_STAGE_8
+            invoke AIEarthquake EPIC_WONDER_STAGE_9
+            invoke AIEarthquake EPIC_WONDER_STAGE_10
+            invoke AIEarthquake EPIC_WONDER_STAGE_START_BEAM
+            invoke AIEarthquake EPIC_START_CASTING
+            invoke AIEarthquake EPIC_PULSE_UP
+
+            EpicWarning = create visual effect VISUAL_EFFECT_EPIC_TARGET_WARNING at {ET_FireEpicLocation} time 15 target {ET_FireEpicLocation}
+            wait 13 seconds
+            wait until dialogue ready and camera ready
+            run background script LC14_EarthquakeCinema(ET_FireEpicLocation)
+            wait 2 seconds
+            EnemyEpic = create earthquake start {myTown} end {ET_FireEpicLocation} player 1
+            run background script LC14_Earthquake(AIEarthquake, EnemyEpic)
+            EpicTimer = create timer for EPICDELAY * EpicModifier seconds
+
+        elsif Number == 3 and CHARGE of AIHurricane == 1.0
+            if PLAYER of PlayerTown == 0
+                myTown = PlayerTown
+            elsif PLAYER of AztecCapital == 0
+                myTown = AztecCapital
+            elsif PLAYER of AztecTown1 == 0
+                myTown = AztecTown1
+            elsif PLAYER of AztecTown2 == 0
+                myTown = AztecTown2
+            end if
+
+            wait until dialogue ready
+            GB_DialogueIsRunning = 1
+            begin dialogue
+                Number = number from 1 to 2
+                if Number == 1
+                    say "BW2XT_LAND05_HURRICANE_20"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND05_HURRICANE_20 + 1 seconds
+                    say "BW2XT_LAND05_HURRICANE_30"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND05_HURRICANE_30 + 1 seconds
+                elsif Number == 2
+                    say "BW2XT_LAND05_HURRICANE_50"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND05_HURRICANE_50 + 1 seconds
+                end if
+            end dialogue
+            GB_DialogueIsRunning = 0
+
+            enable predefined sky "HURRICANE" time 9
+            run script EpicTargeter(myTown,marker at {myTown},0)
+
+            EpicWarning = create visual effect VISUAL_EFFECT_EPIC_TARGET_WARNING at {ET_FireEpicLocation} time 15 target {ET_FireEpicLocation}
+            wait 15 seconds
+            EnemyEpic = create hurricane at {ET_FireEpicLocation} player 1 direction {myTown}
+
+            run script EpicTargeter(myTown,marker at {myTown},0)
+            EpicWarning = create visual effect VISUAL_EFFECT_EPIC_TARGET_WARNING at {ET_FireEpicLocation} time 15 target {ET_FireEpicLocation}
+            wait 15 seconds
+            EnemyEpic = create volcano at {ET_FireEpicLocation} player 1
+            run background script LC14_Hurricane(AIHurricane, EnemyEpic)
+            EpicTimer = create timer for EPICDELAY * EpicModifier seconds
+
+        end if
+    end if
+end while
+
+end script LC14_Epics
+
+
+begin script LC14_EarthquakeCinema(Earthquake)
+
+X = 0
+Y = 150
+Z = 0
+XOK = 0
+ZOK = 0
+
+start
+
+XOK = 0
+ZOK = 0
+X = 0
+Y = 150
+Z = 0
+
+begin loop
+    if X < 80 and X > -80
+        X = number from -125 to 125
+    else
+        XOK = 1
+    end if
+    if Z < 80 and Z > -80
+        Z = number from -125 to 125
+    else
+        ZOK = 1
+    end if
+
+    until XOK == 1 and ZOK == 1
+end loop
+
+
+begin interruptible cinema
+
+    set camera position to {Earthquake} + {X,Y,Z}
+    set camera focus to {Earthquake} + {0,10,0 }
+    wait 5 seconds
+
+end cinema
+
+end script LC14_EarthquakeCinema
 
 
 begin script LC14_LargeSiegePlatoons
@@ -2325,7 +2587,7 @@ begin script LC14_LargeSiegePlatoons
     SiegeWaypoint3 = 0
 
 start
-//Troops not attacking?
+
 begin loop
 
     if PLAYER of AztecTown1 == 1
