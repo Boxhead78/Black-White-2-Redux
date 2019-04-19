@@ -188,7 +188,15 @@ start
                     close dialogue
                     wait BW2XT_LAND03_TALUS_SUMMONS_SKELETONS_10 + 1 seconds
                 end if
-                
+            end dialogue
+            GB_DialogueIsRunning = 0
+
+            run script ge_MoveToRadiusAltitude(godHandle,marker at {977.41,279.34,1748.11},geGodThrowRadius / 2,geGodThrowAltitude)
+            run script ge_ThrowMiracle(godHandle, GE_MIRACLE_TYPE_DEATH, marker at {977.41,279.34,1748.11}, 1)
+
+            wait until GB_DialogueIsRunning == 0
+            GB_DialogueIsRunning = 1
+            begin dialogue
                 if FirstSkelArmy == 0
                     FirstSkelArmy = 1
                     wait 5 seconds
@@ -207,9 +215,6 @@ start
                 end if
             end dialogue
             GB_DialogueIsRunning = 0
-
-            run script ge_MoveToRadiusAltitude(godHandle,marker at {977.41,279.34,1748.11},geGodThrowRadius / 2,geGodThrowAltitude)
-            run script ge_ThrowMiracle(godHandle, GE_MIRACLE_TYPE_DEATH, marker at {977.41,279.34,1748.11}, 1)
             wait number from 2 to 4 seconds
         end if
 
