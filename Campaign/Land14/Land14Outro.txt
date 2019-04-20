@@ -8,6 +8,8 @@ define script LC14_Outro
 
 begin script LC14_Outro
 
+    CSMixer = create mixer
+
 start
 
 PD_ForcedSaving = 1
@@ -16,6 +18,31 @@ stop script "SavePersistentDataSetData"
 set persistent data "PREVLAND_OVER" to 1
 set persistent data "SECOND_PLAYTHROUGH" to 1
 run script SavePersistentDataGetData
+
+begin cinema
+
+//CREDITS.....................
+set mixer CSMixer channel AUDIO_MIXER_CHANNEL_ATMOS_MAP to 0.0 
+set mixer CSMixer channel AUDIO_MIXER_CHANNEL_ATMOS_POSITIONAL to 0.0 
+set mixer CSMixer channel AUDIO_MIXER_CHANNEL_ANIMATION_CREATURE to 0.0 
+set mixer CSMixer channel AUDIO_MIXER_CHANNEL_SFX to 0.0 
+set mixer CSMixer channel AUDIO_MIXER_CHANNEL_SCRIPT_SFX to 0.0 
+set mixer CSMixer channel AUDIO_MIXER_CHANNEL_DIALOGUE to 0.0 
+set mixer CSMixer channel AUDIO_MIXER_CHANNEL_PHYSICS_SFX to 0.0 
+set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 1.0 
+start music "end_credits" loop 1000
+wait 4 seconds
+play credits    
+set mixer CSMixer channel AUDIO_MIXER_CHANNEL_ATMOS_MAP to 0.6 
+set mixer CSMixer channel AUDIO_MIXER_CHANNEL_ATMOS_POSITIONAL to 0.6
+set mixer CSMixer channel AUDIO_MIXER_CHANNEL_ANIMATION_CREATURE to 1.0 
+set mixer CSMixer channel AUDIO_MIXER_CHANNEL_SFX to 1.0 
+set mixer CSMixer channel AUDIO_MIXER_CHANNEL_SCRIPT_SFX to 1.0 
+set mixer CSMixer channel AUDIO_MIXER_CHANNEL_DIALOGUE to 1.0 
+set mixer CSMixer channel AUDIO_MIXER_CHANNEL_PHYSICS_SFX to 1.0 
+set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 1.0 
+
+end cinema
 
 end script LC14_Outro
 
