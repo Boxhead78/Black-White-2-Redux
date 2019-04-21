@@ -105,6 +105,7 @@ end script Thunderstorm_Clouds
 
 begin script Thunderstorm_Lightning(ThunderstormSpell,Weather)
 
+    Altar = 0
     House = 0
     LightningPos = 0
     Prohab = 0
@@ -117,21 +118,34 @@ Town = get TOWN at {ThunderstormSpell} radius 250
 begin loop
     if Town exists
         LightningPos = marker at {ThunderstormSpell} + {number from -80 to 80,0,number from -80 to 80}
-        set lightning strike at {LightningPos} from Weather scale 1
-        add effect EFFECT_TYPE_BURN at {LightningPos} strength 0.75 radius 10
+        Altar = get HOUSE ALTAR at {LightningPos} radius 15
+        if Altar not exists
+            set lightning strike at {LightningPos} from Weather scale 1
+            add effect EFFECT_TYPE_BURN at {LightningPos} strength 0.75 radius 10
+        end if
+        Altar = 0
         House = get random home in town Town excluding scripted
         wait number from 2 to 3 seconds
         Prohab = number from 1 to 3
         if Prohab == 1 or Prohab == 2
             if House exists
-                set lightning strike at {House} from Weather scale 1
-                add effect EFFECT_TYPE_BURN at {House} strength 0.75 radius 10
+                Altar = get HOUSE ALTAR at {House} radius 15
+                if Altar not exists
+                    set lightning strike at {House} from Weather scale 1
+                    add effect EFFECT_TYPE_BURN at {House} strength 0.75 radius 10
+                end if
+                Altar = 0
             end if
         end if
     else
         LightningPos = marker at {ThunderstormSpell} + {number from -80 to 80,0,number from -80 to 80}
         set lightning strike at {LightningPos} from Weather scale 1
-        add effect EFFECT_TYPE_BURN at {LightningPos} strength 0.75 radius 10
+        Altar = get HOUSE ALTAR at {LightningPos} radius 15
+        if Altar not exists
+            set lightning strike at {LightningPos} from Weather scale 1
+            add effect EFFECT_TYPE_BURN at {LightningPos} strength 0.75 radius 10
+        end if
+        Altar = 0
     end if
 
     wait number from 3 to 10 seconds
