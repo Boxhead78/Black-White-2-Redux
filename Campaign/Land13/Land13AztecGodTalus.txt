@@ -310,6 +310,12 @@ start
                         close dialogue
                         wait BW2XT_LAND02_TALUS_MAKES_LAND_DARK_04 + 1 seconds
                     end if
+                    make evil spirit appear
+                    say "BW2XT_HELP_TEXT_GUIDANCE_NEED_SHIELD_MIRACLE_10"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_HELP_TEXT_GUIDANCE_NEED_SHIELD_MIRACLE_10 + 1 seconds
+                    send evil spirit home
                 end dialogue
                 GB_DialogueIsRunning = 0
                 run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_THUNDERSTORM,myBuilding,0)
@@ -791,10 +797,16 @@ end script tal_Firefight
 begin script tal_Disciples(GodHandle,rTown)
     godHandle = GodHandle
     numberOfDisciples = 0
+    thisBuilding = 0
 start
     if rGodInstance[godHandle] exists
         tal_MaleBreeders = adult size of ge_HomeTown[godHandle] * 4 / 100 //4 percent of town
-        tal_Prayers = adult size of ge_HomeTown[godHandle] * 2 / 100 //2 percent of town
+        thisBuilding = get building ABODE_NUMBER_ALTAR in ge_HomeTown[godHandle] min built 1.0
+        if thisBuilding exists
+            tal_Prayers = adult size of ge_HomeTown[godHandle] * 2 / 100 //2 percent of town
+        else
+            tal_Prayers = 0
+        end if
         tal_Miners = adult size of ge_HomeTown[godHandle] * 1 / 100 //1 percent of town
         tal_NumDiscipleOther = adult size of ge_HomeTown[godHandle] * 2 / 100 //2 percent of town
         //say "Disciples"
