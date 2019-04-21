@@ -5,12 +5,20 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 define script LC14_Outro
+define script FireWorks(CentrePos)
+
+global DoFireworks = 0
+
 
 begin script LC14_Outro
 
     CSMixer = create mixer
+    myEffect = 0
+    PlayerAlignment = 0
 
 start
+
+wait until PLAYER of AztecTown1 != 1 and PLAYER of AztecTown2 != 1 and PLAYER of AztecCapital != 1 and PLAYER of PlayerTown != 1 and TempleDestroyed[0] == 1 and TempleDestroyed[1] == 1 and TempleDestroyed[2] == 1
 
 PD_ForcedSaving = 1
 wait until PD_ForcedSaving == 0 or 10 seconds
@@ -21,28 +29,249 @@ run script SavePersistentDataGetData
 
 begin cinema
 
-//CREDITS.....................
-set mixer CSMixer channel AUDIO_MIXER_CHANNEL_ATMOS_MAP to 0.0 
-set mixer CSMixer channel AUDIO_MIXER_CHANNEL_ATMOS_POSITIONAL to 0.0 
-set mixer CSMixer channel AUDIO_MIXER_CHANNEL_ANIMATION_CREATURE to 0.0 
-set mixer CSMixer channel AUDIO_MIXER_CHANNEL_SFX to 0.0 
-set mixer CSMixer channel AUDIO_MIXER_CHANNEL_SCRIPT_SFX to 0.0 
-set mixer CSMixer channel AUDIO_MIXER_CHANNEL_DIALOGUE to 0.0 
-set mixer CSMixer channel AUDIO_MIXER_CHANNEL_PHYSICS_SFX to 0.0 
-set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 1.0 
-start music "end_credits" loop 1000
-wait 4 seconds
-play credits    
-set mixer CSMixer channel AUDIO_MIXER_CHANNEL_ATMOS_MAP to 0.6 
-set mixer CSMixer channel AUDIO_MIXER_CHANNEL_ATMOS_POSITIONAL to 0.6
-set mixer CSMixer channel AUDIO_MIXER_CHANNEL_ANIMATION_CREATURE to 1.0 
-set mixer CSMixer channel AUDIO_MIXER_CHANNEL_SFX to 1.0 
-set mixer CSMixer channel AUDIO_MIXER_CHANNEL_SCRIPT_SFX to 1.0 
-set mixer CSMixer channel AUDIO_MIXER_CHANNEL_DIALOGUE to 1.0 
-set mixer CSMixer channel AUDIO_MIXER_CHANNEL_PHYSICS_SFX to 1.0 
-set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 1.0 
+    //AGC: Moved fade out & wait inside the cinema block
+    set fade red 0 green 0 blue 0 time 2
+    wait 2 seconds
+    run background script LC14_Departure
+    set town PlayerTown capture all enemy towns
+    disable dialogue manager
+    disable game can be lost
+    set player 0 objective TRIBUTE_OBJECTIVE_SCRIPT_CONTROLLED_WIN_LAND value 1
+    PlayerAlignment = get player 0 alignment
+    if PLAYER of AztecCapital == 0
+        PlayerAlignment = PlayerAlignment - 0.05
+        ALIGNMENT of MyCreature = ALIGNMENT of MyCreature - 0.1
+    else
+        PlayerAlignment = PlayerAlignment + 0.05
+        ALIGNMENT of MyCreature = ALIGNMENT of MyCreature + 0.1
+    end if
+    set player 0 alignment PlayerAlignment
+    stop script "LC14_Speeches"
+    stop script "LC14_GateHouseManager"
+    stop script "LC14_CreatureLogic"
+    stop script "tal_TalusLoop"
+    stop script "tal_TalusEmergency"
+
+    disable atmos sound
+    set atmos volume 0
+
+    LandOver = 1
+    set camera position to {1250.30,100.00,1069.34}
+    set camera focus to {1100.49,56.72,1193.42}
+    set camera lens 45
+    shake camera strength 6.5
+    play string sound "SCRIPT2_EEPIC_EARTHQUAKECRACK"
+    start music "exintro1" loop -1
+
+    set fade in time 2
+
+    myEffect = create visual effect VISUAL_MIRACLE_HEAL_EFFECTED_IMPACT at {1100.49,56.72,1193.42} + {0,2,0} time 8
+    SCALE of myEffect = 5.0
+    set myEffect color red 148 green 0 blue 211
+    myEffect = create visual effect VISUAL_MIRACLE_HEAL_EFFECTED at {1100.49,56.72,1193.42} + {0,2,0} time 8
+    SCALE of myEffect = 5.0
+    set myEffect color red 148 green 0 blue 211
+    myEffect = create visual effect VISUAL_MIRACLE_HEAL_GROUND at {1100.49,56.72,1193.42} + {0,2,0} time 8
+    SCALE of myEffect = 5.0
+    set myEffect color red 148 green 0 blue 211
+    myEffect = create visual effect VISUAL_MIRACLE_HEAL_EFFECTED_IMPACT at {1100.49,56.72,1193.42} + {0,2,0} time 8
+    SCALE of myEffect = 5.0
+    set myEffect color red 148 green 0 blue 211
+    myEffect = create visual effect VISUAL_MIRACLE_HEAL_EFFECTED at {1100.49,56.72,1193.42} + {0,2,0} time 8
+    SCALE of myEffect = 5.0
+    set myEffect color red 148 green 0 blue 211
+    myEffect = create visual effect VISUAL_MIRACLE_HEAL_GROUND at {1100.49,56.72,1193.42} + {0,2,0} time 8
+    SCALE of myEffect = 5.0
+    set myEffect color red 148 green 0 blue 211
+    myEffect = create visual effect VISUAL_EFFECT_MIRACLE_CHARGE at {1100.49,56.72,1193.42} + {0,7,0} time 7.5
+    SCALE of myEffect = 5.0
+    set myEffect color red 148 green 0 blue 211
+
+    wait 2.5 seconds
+
+    myEffect = create visual effect VISUAL_EFFECT_MIRACLE_CHARGE at {1100.49,56.72,1193.42} + {0,7,0} time 7.5
+    SCALE of myEffect = 5.0
+    set myEffect color red 148 green 0 blue 211
+
+    say "BW2XT_LAND05_OUTRO_10"
+    clear dialogue
+    close dialogue
+    wait BW2XT_LAND05_OUTRO_10 - 0.75 seconds
+
+    myEffect = create visual effect VISUAL_EFFECT_MIRACLE_CHARGE at {1100.49,56.72,1193.42} + {0,7,0} time 7.5
+    SCALE of myEffect = 5.0
+    set myEffect color red 148 green 0 blue 211
+
+    stop music with fadetime 2
+    set fade red 255 green 255 blue 255 time 2
+    wait 3.5 seconds
+
+    DoFireworks = 1
+    DeleteGodOnceAndForAll = 1
+    run background script FireWorks(PlayerTown)
+    run background script FireWorks(AztecCapital)
+    run background script FireWorks(AztecTown1)
+    run background script FireWorks(AztecTown2)
+    stop camera shake
+    stop sound "SCRIPT2_EEPIC_EARTHQUAKECRACK"
+    wait 1.5 seconds
+
+    //24 seconds
+    reset camera path
+    queue camera move with position {2586.46,500.00,1501.73} focus {AztecTown2} + {0,100,0} time 0.0
+    queue camera move with position {2250.73,425.00,1430.65} focus {AztecTown2} time 30.0
+    play camera path with easein 20 easeout 8 method SCRIPT_CAMERAPATH_SMOOTHEST
+    set camera lens 70
+
+    set fade in time 2
+    wait 2 seconds
+    start music "cut_scene_celtic_song" loop -1
+
+    say "BW2XT_LAND05_OUTRO_30"
+    clear dialogue
+    close dialogue
+    wait BW2XT_LAND05_OUTRO_30 + 1 seconds
+
+    say "BW2XT_LAND05_OUTRO_40"
+    clear dialogue
+    close dialogue
+    wait BW2XT_LAND05_OUTRO_40 + 1 seconds
+
+    say "BW2XT_LAND05_OUTRO_50"
+    clear dialogue
+    close dialogue
+    wait BW2XT_LAND05_OUTRO_50 + 1 seconds
+
+    say "BW2XT_LAND05_OUTRO_60"
+    clear dialogue
+    close dialogue
+    wait BW2XT_LAND05_OUTRO_60 + 1 seconds
+
+    wait until camera ready
+
+    stop music with fadetime 5
+    set fade red 0 green 0 blue 0 time 5
+    wait 5 seconds
+
+    //CREDITS.....................
+    DoFireworks = 0
+    set mixer CSMixer channel AUDIO_MIXER_CHANNEL_ATMOS_MAP to 0.0 
+    set mixer CSMixer channel AUDIO_MIXER_CHANNEL_ATMOS_POSITIONAL to 0.0 
+    set mixer CSMixer channel AUDIO_MIXER_CHANNEL_ANIMATION_CREATURE to 0.0 
+    set mixer CSMixer channel AUDIO_MIXER_CHANNEL_SFX to 0.0 
+    set mixer CSMixer channel AUDIO_MIXER_CHANNEL_SCRIPT_SFX to 0.0 
+    set mixer CSMixer channel AUDIO_MIXER_CHANNEL_DIALOGUE to 0.0 
+    set mixer CSMixer channel AUDIO_MIXER_CHANNEL_PHYSICS_SFX to 0.0 
+    set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 1.0 
+    start music "end_credits" loop 1000
+    wait 4 seconds
+    play credits    
+    set mixer CSMixer channel AUDIO_MIXER_CHANNEL_ATMOS_MAP to 0.6 
+    set mixer CSMixer channel AUDIO_MIXER_CHANNEL_ATMOS_POSITIONAL to 0.6
+    set mixer CSMixer channel AUDIO_MIXER_CHANNEL_ANIMATION_CREATURE to 1.0 
+    set mixer CSMixer channel AUDIO_MIXER_CHANNEL_SFX to 1.0 
+    set mixer CSMixer channel AUDIO_MIXER_CHANNEL_SCRIPT_SFX to 1.0 
+    set mixer CSMixer channel AUDIO_MIXER_CHANNEL_DIALOGUE to 1.0 
+    set mixer CSMixer channel AUDIO_MIXER_CHANNEL_PHYSICS_SFX to 1.0 
+    set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 1.0 
+
+    stop music with fadetime 5
+    set fade in time 5
+    wait 5 seconds
 
 end cinema
 
 end script LC14_Outro
 
+
+begin script FireWorks(CentrePos)
+fW1 = 0
+fW2 = 0
+NewPos = 0
+SplashEffect = 0
+start
+
+    begin loop
+        NewPos = marker at {CentrePos} + {number from -20 to 20, 0, number from -20 to 20}
+        fW1 = create visual effect "gp_s_firework_g01.ves" strength 1 scale 1 at {NewPos} time 5
+        fW2 = create visual effect "gp_s_firework_g02.ves" strength 1 scale 1 at {NewPos} time 5
+        //fW2 = cast SPELL_FIREBALL_LEVEL_1 spell at {NewPos}+{0, -3, 0} from {NewPos} radius 3.0 time 3 curl 0
+        
+        //fW2 = create visual effect "hd_s_nightlight.ves" strength 3 scale 3 at {NewPos} time 5
+        wait 0.5 seconds
+        until DoFireworks == 0
+    end loop
+    
+        
+end script FireWorks
+
+
+begin script LC14_Departure
+
+    DepartureScrollPos = marker at {937.48,47.71,694.24}
+    DepartureScroll = 0
+    Portal = 0
+    
+start
+
+    enable global influence
+
+    Portal = create visual effect VISUAL_EFFECT_TELEPORTER_HOOP at {DepartureScrollPos} + {0, 1.5, 0} time -1
+
+    DepartureScroll = create highlight GOLD name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {DepartureScrollPos}
+    ALTITUDE of DepartureScroll = 3
+
+    wait until DepartureScroll right clicked
+
+    begin dialogue
+        eject evil spirit
+        say "BW2XT_HELP_TEXT_GUIDANCE_END_EXPANSION_PACK_30"
+        clear dialogue
+        close dialogue
+        wait BW2XT_HELP_TEXT_GUIDANCE_END_EXPANSION_PACK_30 + 1 seconds
+        send evil spirit home
+    end dialogue
+    
+    clear right clicked object
+    wait until DepartureScroll right clicked
+    delete DepartureScroll
+    
+    // Get the dialogue for the enemy and for the advisors
+    
+    set fade red 0 green 0 blue 0 time 2
+    wait 2 seconds
+    begin cinema
+        start music "farming_communtiy_land2" loop 10
+        wait 2 seconds
+    
+        queue camera move with position {937.48,52.71,694.24} + {10,7.5,10} focus {937.48,52.71,694.24} + {0,5,0} time 0.0
+        queue camera move with position {937.48,52.71,694.24} + {7.5,5,7.5} focus {937.48,52.71,694.24} time 5.0
+        queue camera move with position {937.48,52.71,694.24} + {1,1.5,1} focus {937.48,52.71,694.24} time 4.0
+        play camera path with easein 4 easeout 4 method SCRIPT_CAMERAPATH_EQUALDISTANCE
+        set fade in time 1
+        wait 4 seconds
+        set fade red 0 green 0 blue 0 time 3
+        wait 3 seconds
+        wait 1 seconds
+    end cinema
+    
+    //TRIGGER processing of land end objectives
+    process land end objectives
+    wait until land end objectives processed    
+    
+    release MyCreature
+    MyCreature = get player 0 creature
+    if MyCreature exists
+        save my_creature
+    end if
+
+    disable game can be lost
+    run script LandExit
+
+    PD_ForcedSaving = 1
+    wait until PD_ForcedSaving == 0 or 10 seconds
+
+    load map "./Data/Landscape/BW2/Land4.bwe"
+    wait 3 seconds
+
+end script LC14_Departure

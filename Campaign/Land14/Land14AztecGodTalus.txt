@@ -78,6 +78,7 @@ begin script tal_TalusLoop(GodHandle,rTown,PlayerID)
     ThrowMiracleTimer = create timer for 0 seconds
     ScriptedThunderstorm = 0
     townCounter = 0
+    miniEpicTimer = create timer for 1800 * EpicModifier seconds
     whichSpell = 0
 start
     ge_MiracleDelay[godHandle] = create timer for 0 seconds
@@ -212,6 +213,12 @@ start
                 clear dialogue
                 close dialogue
                 wait BW2XT_LAND05_HURRICANE_20 + 1 seconds
+                make good spirit appear
+                say "BW2XT_LAND05_TALUS_MIRACLE_ATTACK_50"
+                clear dialogue
+                close dialogue
+                wait BW2XT_LAND05_TALUS_MIRACLE_ATTACK_50 + 1 seconds
+                make good spirit disappear
             end dialogue
             GB_DialogueIsRunning = 0
             run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_THUNDERSTORM,marker at {myBuilding},0)
@@ -313,6 +320,62 @@ start
                 end dialogue
                 GB_DialogueIsRunning = 0
                 run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_FIRERAIN,myBuilding,0)
+            end if
+        end if
+
+        if get miniEpicTimer time remaining <= 0 and get player ge_Player[godHandle] mana > 30000 and PLAYER of PlayerTown == 0 and GB_DialogueIsRunning == 0 and ge_EmergencyMode[godHandle] == 0
+            myRand = number from 1 to 5
+            if myRand == 1 or myRand == 2
+                myBuilding = get building ALTAR in PlayerTown min built 0.75
+
+            elsif myRand == 3
+                myBuilding = get building STORAGE_YARD in PlayerTown min built 0.75
+
+            elsif myRand == 4
+                myBuilding = get building TEMPLE in PlayerTown min built 0.75
+
+            elsif myRand == 5
+                myBuilding = get random abode in town PlayerTown
+            end if
+
+            if myBuilding exists
+                GB_DialogueIsRunning = 1
+                begin dialogue
+                    myRand = number from 1 to 4
+                    if myRand == 1
+                        say "BW2XT_LAND02_TALUS_FIRE_20"
+                        clear dialogue
+                        close dialogue
+                        wait BW2XT_LAND02_TALUS_FIRE_20 + 1 seconds
+                        say "BW2XT_LAND02_TALUS_FIRE_50"
+                        clear dialogue
+                        close dialogue
+                        wait BW2XT_LAND02_TALUS_FIRE_50 + 1 seconds
+                    elsif myRand == 2
+                        say "BW2XT_LAND05_TALUS_MIRACLE_ATTACK_40"
+                        clear dialogue
+                        close dialogue
+                        wait BW2XT_LAND05_TALUS_MIRACLE_ATTACK_40 + 1 seconds
+                    elsif myRand == 3
+                        say "BW2XT_LAND02_PLAYER_ACCEPTS_MIGRATION_10"
+                        clear dialogue
+                        close dialogue
+                        wait BW2XT_LAND02_PLAYER_ACCEPTS_MIGRATION_10 + 1 seconds
+                    elsif myRand == 4
+                        say "BW2XT_LAND02_PLAYER_ACCEPTS_MIGRATION_20"
+                        clear dialogue
+                        close dialogue
+                        wait BW2XT_LAND02_PLAYER_ACCEPTS_MIGRATION_20 + 1 seconds
+                    end if
+                end dialogue
+                GB_DialogueIsRunning = 0
+                myRand = number from 1 to 2
+                if myRand == 1
+                    run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_FIRERAIN,myBuilding,0)
+                else
+                    run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_THUNDERSTORM,myBuilding,0)
+                end if
+                miniEpicTimer = create timer for 1200 * EpicModifier seconds
             end if
         end if
 
@@ -798,10 +861,16 @@ end script tal_Firefight
 begin script tal_Disciples(GodHandle,rTown)
     godHandle = GodHandle
     numberOfDisciples = 0
+    thisBuilding = 0
 start
     if rGodInstance[godHandle] exists
         tal_MaleBreeders = adult size of ge_HomeTown[godHandle] * 4 / 100 //4 percent of town
-        tal_Prayers = adult size of ge_HomeTown[godHandle] * 2 / 100 //2 percent of town
+        thisBuilding = get building ABODE_NUMBER_ALTAR in ge_HomeTown[godHandle] min built 1.0
+        if thisBuilding exists
+            tal_Prayers = adult size of ge_HomeTown[godHandle] * 2 / 100 //2 percent of town
+        else
+            tal_Prayers = 0
+        end if
         tal_Miners = adult size of ge_HomeTown[godHandle] * 1 / 100 //1 percent of town
         tal_NumDiscipleOther = adult size of ge_HomeTown[godHandle] * 2 / 100 //2 percent of town
         //say "Disciples"

@@ -102,12 +102,9 @@ start
     //PlayerTown
     AttackPos[0] = marker at {1065.28,121.11,1957.26}
     AttackPos[1] = marker at {1246.66,122.26,1945.31}
-    //From 123
-    AttackPos[2] = marker at {1252.38,62.97,1474.54}
-    AttackPos[3] = marker at {1401.36,60.42,1484.40}
-    //From 123
-    AttackPos[4] = marker at {995.48,44.16,1480.19}
-    AttackPos[5] = marker at {877.48,27.07,1530.44}
+    //AztecTown1
+    AttackPos[2] = marker at {1729.75,120.48,1614.95}
+    AttackPos[3] = marker at {1709.18,137.74,1385.72}
 
     //AztecTown1 to PlayerTown
     SiegeRoute1[0] = marker at {1446.13,141.74,1870.50}
@@ -306,6 +303,10 @@ if Platoon == LC14_Platoon[20] or Platoon == LC14_Platoon[21]
     wait until EarlyAttackWaveAllowed == 1
 end if
 
+if Platoon == LC14_Platoon[33] or Platoon == LC14_Platoon[34] or Platoon == LC14_Platoon[35] or Platoon == LC14_Platoon[36] or Platoon == LC14_Platoon[37] or Platoon == LC14_Platoon[38] or Platoon == LC14_Platoon[39]
+    wait until get AttackNearestTownTimer time remaining <= 0
+end if
+
 begin loop
 
     if Type == Melee
@@ -425,110 +426,219 @@ begin loop
 
     if Task == Attacker
         //if get size of Platoon action queue < 1
-            if Platoon can navigate to object oTownCentre and PLAYER of PlayerTown == 0
-                wait number from 5 to 25 seconds
-                a = 1
-                clear Platoon action queue
-                Number = number from 1 to 4
-                if Number == 2 and HEALTH of MyCreature > 0 //Hunt down platoons or destroy buildings
-                    AttackMode = 1
-                    set Platoon attack PlayerTown with severity 0.2
-                elsif Number == 3 or Number == 4 //Destroy value buildings
-                    AttackMode = 2
-                    Building = 0
-                    Timer = create timer for 2 seconds
-                    begin loop
-                        Number = number from 1 to 8
-                        if Number == 1 or Number == 2 or Number == 3
-                            Building = get building ALTAR in PlayerTown min built 0.75
-                            if Building exists
-                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
-                            else
-                                Building = 0
+            if PLAYER of AztecTown1 != 0
+                if Platoon can navigate to object oTownCentre and PLAYER of PlayerTown == 0
+                    wait number from 5 to 25 seconds
+                    a = 1
+                    clear Platoon action queue
+                    Number = number from 1 to 4
+                    if Number == 2 and HEALTH of MyCreature > 0 //Hunt down platoons or destroy buildings
+                        AttackMode = 1
+                        set Platoon attack PlayerTown with severity 0.2
+                    elsif Number == 3 or Number == 4 //Destroy value buildings
+                        AttackMode = 2
+                        Building = 0
+                        Timer = create timer for 2 seconds
+                        begin loop
+                            Number = number from 1 to 8
+                            if Number == 1 or Number == 2 or Number == 3
+                                Building = get building ALTAR in PlayerTown min built 0.75
+                                if Building exists
+                                    add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                else
+                                    Building = 0
+                                end if
+                            elsif Number == 4
+                                Building = get building TEMPLE in PlayerTown min built 0.75
+                                if Building exists
+                                    add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                else
+                                    Building = 0
+                                end if
+                            elsif Number == 5
+                                Building = get building CREATURE_PEN in PlayerTown min built 0.75
+                                if Building exists
+                                    add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                else
+                                    Building = 0
+                                end if
+                            elsif Number == 6
+                                Building = get building UNIVERSITY in PlayerTown min built 0.75
+                                if Building exists
+                                    add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                else
+                                    Building = 0
+                                end if
+                            elsif Number == 7
+                                Building = get building BATHHOUSE in PlayerTown min built 0.75
+                                if Building exists
+                                    add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                else
+                                    Building = 0
+                                end if
+                            elsif Number == 8
+                                Building = get building AMPITHEATRE in PlayerTown min built 0.75
+                                if Building exists
+                                    add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                else
+                                    Building = 0
+                                end if
                             end if
-                        elsif Number == 4
-                            Building = get building TEMPLE in PlayerTown min built 0.75
-                            if Building exists
-                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
-                            else
-                                Building = 0
-                            end if
-                        elsif Number == 5
-                            Building = get building CREATURE_PEN in PlayerTown min built 0.75
-                            if Building exists
-                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
-                            else
-                                Building = 0
-                            end if
-                        elsif Number == 6
-                            Building = get building UNIVERSITY in PlayerTown min built 0.75
-                            if Building exists
-                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
-                            else
-                                Building = 0
-                            end if
-                        elsif Number == 7
-                            Building = get building BATHHOUSE in PlayerTown min built 0.75
-                            if Building exists
-                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
-                            else
-                                Building = 0
-                            end if
-                        elsif Number == 8
-                            Building = get building AMPITHEATRE in PlayerTown min built 0.75
-                            if Building exists
-                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
-                            else
-                                Building = 0
-                            end if
+                            until Building != 0 or get Timer time remaining <= 0
+                        end loop
+                    else //Capture Town
+                        AttackMode = 0
+                        if TownCapturePlatoons[0] < 2
+                            TownCapturePlatoons[0]++
+                            set Platoon attack PlayerTown with severity 0.3 for takeover
                         end if
-                        until Building != 0 or get Timer time remaining <= 0
-                    end loop
-                else //Capture Town
-                    AttackMode = 0
-                    if TownCapturePlatoons[0] < 2
-                        TownCapturePlatoons[0]++
-                        set Platoon attack PlayerTown with severity 0.3 for takeover
                     end if
+                    RecalculateTimer = create timer for 40 seconds
+                    begin loop
+                        PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 150
+                        TestCreature2 = get distance from {Platoon} to {MyCreature}
+                        NumPat1 = get number of villagers in platoon Platoon
+                        //if PlayerPlatoon1 exists or TestCreature2 <= 150 or not Platoon can navigate to object PlayerTownCentre
+                            if PlayerPlatoon1 exists and not town PlayerTown is under takeover from player 1
+                                a = 0
+                            elsif TestCreature2 <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of MyCreature > 0.00 and not town PlayerTown is under takeover from player 1
+                                a = 0
+                            elsif not Platoon can navigate to object oTownCentre
+                                a = 0
+                            elsif Platoon not exists
+                                a = 0
+                            elsif AttackMode == 1 and HEALTH of MyCreature == 0
+                                a = 0
+                            elsif AttackMode == 2 and Building not exists
+                                a = 0
+                            elsif AttackMode == 2 and HEALTH of Building < 0.1
+                                a = 0
+                            elsif AttackMode == 2 and Building == 0
+                                a = 0
+                            elsif not town PlayerTown is under takeover from player 1 and get RecalculateTimer time remaining <= 0
+                                a = 0
+                            end if
+                        //end if
+                        until a == 0 or Platoon not exists
+                    end loop
+                    if AttackMode == 0
+                        TownCapturePlatoons[0]--
+                    end if
+                    clear Platoon action queue
+                elsif Platoon can navigate to {AttackingPoint}
+                    clear Platoon action queue
+                    add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPoint} to Platoon action queue
+                else
+                    clear Platoon action queue
+                    add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPointFallBack} to Platoon action queue
                 end if
-                RecalculateTimer = create timer for 40 seconds
-                begin loop
-                    PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 150
-                    TestCreature2 = get distance from {Platoon} to {MyCreature}
-                    NumPat1 = get number of villagers in platoon Platoon
-                    //if PlayerPlatoon1 exists or TestCreature2 <= 150 or not Platoon can navigate to object PlayerTownCentre
-                        if PlayerPlatoon1 exists and not town PlayerTown is under takeover from player 1
-                            a = 0
-                        elsif TestCreature2 <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of MyCreature > 0.00 and not town PlayerTown is under takeover from player 1
-                            a = 0
-                        elsif not Platoon can navigate to object oTownCentre
-                            a = 0
-                        elsif Platoon not exists
-                            a = 0
-                        elsif AttackMode == 1 and HEALTH of MyCreature == 0
-                            a = 0
-                        elsif AttackMode == 2 and Building not exists
-                            a = 0
-                        elsif AttackMode == 2 and HEALTH of Building < 0.1
-                            a = 0
-                        elsif AttackMode == 2 and Building == 0
-                            a = 0
-                        elsif not town PlayerTown is under takeover from player 1 and get RecalculateTimer time remaining <= 0
-                            a = 0
-                        end if
-                    //end if
-                    until a == 0 or Platoon not exists
-                end loop
-                if AttackMode == 0
-                    TownCapturePlatoons[0]--
-                end if
-                clear Platoon action queue
-            elsif Platoon can navigate to {AttackingPoint}
-                clear Platoon action queue
-                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPoint} to Platoon action queue
             else
-                clear Platoon action queue
-                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPointFallBack} to Platoon action queue
+                oTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in AztecTown1 min built 1.0
+                if Platoon can navigate to object oTownCentre and PLAYER of AztecTown1 == 0
+                    wait number from 5 to 25 seconds
+                    a = 1
+                    clear Platoon action queue
+                    Number = number from 1 to 4
+                    if Number == 2 and HEALTH of MyCreature > 0 //Hunt down platoons or destroy buildings
+                        AttackMode = 1
+                        set Platoon attack AztecTown1 with severity 0.2
+                    elsif Number == 3 or Number == 4 //Destroy value buildings
+                        AttackMode = 2
+                        Building = 0
+                        Timer = create timer for 2 seconds
+                        begin loop
+                            Number = number from 1 to 8
+                            if Number == 1 or Number == 2 or Number == 3
+                                Building = get building ALTAR in AztecTown1 min built 0.75
+                                if Building exists
+                                    add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                else
+                                    Building = 0
+                                end if
+                            elsif Number == 4
+                                Building = get building TEMPLE in AztecTown1 min built 0.75
+                                if Building exists
+                                    add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                else
+                                    Building = 0
+                                end if
+                            elsif Number == 5
+                                Building = get building CREATURE_PEN in AztecTown1 min built 0.75
+                                if Building exists
+                                    add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                else
+                                    Building = 0
+                                end if
+                            elsif Number == 6
+                                Building = get building UNIVERSITY in AztecTown1 min built 0.75
+                                if Building exists
+                                    add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                else
+                                    Building = 0
+                                end if
+                            elsif Number == 7
+                                Building = get building BATHHOUSE in AztecTown1 min built 0.75
+                                if Building exists
+                                    add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                else
+                                    Building = 0
+                                end if
+                            elsif Number == 8
+                                Building = get building AMPITHEATRE in AztecTown1 min built 0.75
+                                if Building exists
+                                    add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                else
+                                    Building = 0
+                                end if
+                            end if
+                            until Building != 0 or get Timer time remaining <= 0
+                        end loop
+                    else //Capture Town
+                        AttackMode = 0
+                        if TownCapturePlatoons[0] < 2
+                            TownCapturePlatoons[0]++
+                            set Platoon attack AztecTown1 with severity 0.3 for takeover
+                        end if
+                    end if
+                    RecalculateTimer = create timer for 40 seconds
+                    begin loop
+                        PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 150
+                        TestCreature2 = get distance from {Platoon} to {MyCreature}
+                        NumPat1 = get number of villagers in platoon Platoon
+                        //if PlayerPlatoon1 exists or TestCreature2 <= 150 or not Platoon can navigate to object AztecTown1Centre
+                            if PlayerPlatoon1 exists and not town AztecTown1 is under takeover from player 1
+                                a = 0
+                            elsif TestCreature2 <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of MyCreature > 0.00 and not town AztecTown1 is under takeover from player 1
+                                a = 0
+                            elsif not Platoon can navigate to object oTownCentre
+                                a = 0
+                            elsif Platoon not exists
+                                a = 0
+                            elsif AttackMode == 1 and HEALTH of MyCreature == 0
+                                a = 0
+                            elsif AttackMode == 2 and Building not exists
+                                a = 0
+                            elsif AttackMode == 2 and HEALTH of Building < 0.1
+                                a = 0
+                            elsif AttackMode == 2 and Building == 0
+                                a = 0
+                            elsif not town AztecTown1 is under takeover from player 1 and get RecalculateTimer time remaining <= 0
+                                a = 0
+                            end if
+                        //end if
+                        until a == 0 or Platoon not exists
+                    end loop
+                    if AttackMode == 0
+                        TownCapturePlatoons[0]--
+                    end if
+                    clear Platoon action queue
+                elsif Platoon can navigate to {AttackingPoint}
+                    clear Platoon action queue
+                    add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPoint} to Platoon action queue
+                else
+                    clear Platoon action queue
+                    add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPointFallBack} to Platoon action queue
+                end if
             end if
         //end if
 
@@ -999,6 +1109,9 @@ start
     enable siege weapon SiegeWeapon auto attack
 
     //Group Attackers up first
+    if SiegeWeapon == LC14_SiegeCatapult[14] or SiegeWeapon == LC14_SiegeCatapult[15] or SiegeWeapon == LC14_SiegeCatapult[16] or SiegeWeapon == LC14_SiegeCatapult[17] or SiegeWeapon == LC14_SiegeCatapult[18] or SiegeWeapon == LC14_SiegeCatapult[19]
+        wait until get AttackNearestTownTimer time remaining <= 0
+    end if
 
     disable siege weapon SiegeWeapon auto attack
 
@@ -1009,114 +1122,222 @@ start
         end if
 
         begin loop
-            if PointOn != 3
-                if SiegeWeapon exists
-                    if get SiegeOnPointTimer time remaining <= 0
-                        SiegeWeaponPoint = marker at {SiegeWeapon}
-                        SiegeOnPointTimer = create timer for 40 seconds
-                    elsif get SiegeOnPointTimer time remaining <= 5
-                        if {SiegeWeapon} near {SiegeWeaponPoint} radius 10
-                            clear siege weapon SiegeWeapon action queue
-                            delete SiegeWeapon
-                            SiegeStucked = 1
-                        end if
-                    end if
-                    if get CatapultMoveTimer1 time remaining <= 0
-                        if get size of SiegeWeapon action queue < 1
-
-                            if PointOn == 0
-                                if SiegeWeapon can navigate to {Waypoint1}
-                                    add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {Waypoint1} to siege weapon SiegeWeapon action queue
-                                end if
-                    
-                            elsif PointOn == 1
-                                if SiegeWeapon can navigate to {Waypoint2}
-                                    add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {Waypoint2} to siege weapon SiegeWeapon action queue
-                                    if Type == Special
-                                        wait until LC14_LargeSiegeLaunchAttack == 1
-                                        SiegeOnPointTimer = create timer for 40 seconds
-                                    end if
-                                end if
-
-                            elsif PointOn == 2
-                                if SiegeWeapon can navigate to {Waypoint3}
-                                    add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {Waypoint3} to siege weapon SiegeWeapon action queue
-                                end if
-
-                            CatapultMoveTimer1 = create timer for 10 seconds
-                            
+            if PLAYER of AztecTown1 != 0
+                if PointOn != 3
+                    if SiegeWeapon exists
+                        if get SiegeOnPointTimer time remaining <= 0
+                            SiegeWeaponPoint = marker at {SiegeWeapon}
+                            SiegeOnPointTimer = create timer for 40 seconds
+                        elsif get SiegeOnPointTimer time remaining <= 5
+                            if {SiegeWeapon} near {SiegeWeaponPoint} radius 10
+                                clear siege weapon SiegeWeapon action queue
+                                delete SiegeWeapon
+                                SiegeStucked = 1
                             end if
                         end if
-                    end if        
+                        if get CatapultMoveTimer1 time remaining <= 0
+                            if get size of SiegeWeapon action queue < 1
 
-                    if {SiegeWeapon} near {Waypoint1} radius 15 and PointOn != 1
-                        PointOn = 1
-                    elsif {SiegeWeapon} near {Waypoint2} radius 15 and PointOn != 2
-                        PointOn = 2
-                    elsif {SiegeWeapon} near {Waypoint3} radius 15 and PointOn != 3
-                        PointOn = 3
-                    elsif not SiegeWeapon can navigate to {Waypoint3} and {SiegeWeapon} near {Waypoint2} radius 15 and PointOn != 3
-                        PointOn = 3
-                    end if
-                end if
-            end if
+                                if PointOn == 0
+                                    if SiegeWeapon can navigate to {Waypoint1}
+                                        add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {Waypoint1} to siege weapon SiegeWeapon action queue
+                                    end if
+                        
+                                elsif PointOn == 1
+                                    if SiegeWeapon can navigate to {Waypoint2}
+                                        add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {Waypoint2} to siege weapon SiegeWeapon action queue
+                                        if Type == Special
+                                            wait until LC14_LargeSiegeLaunchAttack == 1
+                                            SiegeOnPointTimer = create timer for 40 seconds
+                                        end if
+                                    end if
 
-            if get ActionTimer time remaining <= 0 and PointOn == 3
-                enable siege weapon SiegeWeapon auto attack
-                ActionTimer = create timer for 60 seconds
-                House = get building ALTAR in PlayerTown min built 0.75
-                if House exists and PLAYER of House == 0 and SiegeWeapon can navigate to object oTownCentre
-                    NumPat1 = number from 1 to 5
-                else
-                    NumPat1 = number from 1 to 3
-                end if
-                if NumPat1 == 1 or NumPat1 == 2
-                    GateHouse = get HOUSE GATEHOUSE at {SiegeWeapon} radius 250
-                    if GateHouse not exists
-                        GateHouse = get HOUSE GATEHOUSE_F at {SiegeWeapon} radius 250
-                    end if
-                    if GateHouse exists and PLAYER of GateHouse == 0
-                        clear siege weapon SiegeWeapon action queue
-                        Target = marker at get target from {SiegeWeapon} to {GateHouse} distance 10 angle 180
-                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using GateHouse to siege weapon SiegeWeapon action queue
-                    elsif GateHouse not exists
-                        GateHouse = get HOUSE GATEHOUSE at {SiegeWeapon} radius 750
-                        if GateHouse not exists
-                            GateHouse = get HOUSE GATEHOUSE_F at {SiegeWeapon} radius 750
+                                elsif PointOn == 2
+                                    if SiegeWeapon can navigate to {Waypoint3}
+                                        add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {Waypoint3} to siege weapon SiegeWeapon action queue
+                                    end if
+
+                                CatapultMoveTimer1 = create timer for 10 seconds
+                                
+                                end if
+                            end if
+                        end if        
+
+                        if {SiegeWeapon} near {Waypoint1} radius 15 and PointOn != 1
+                            PointOn = 1
+                        elsif {SiegeWeapon} near {Waypoint2} radius 15 and PointOn != 2
+                            PointOn = 2
+                        elsif {SiegeWeapon} near {Waypoint3} radius 15 and PointOn != 3
+                            PointOn = 3
+                        elsif not SiegeWeapon can navigate to {Waypoint3} and {SiegeWeapon} near {Waypoint2} radius 15 and PointOn != 3
+                            PointOn = 3
                         end if
-                        clear siege weapon SiegeWeapon action queue
-                        Target = marker at get target from {SiegeWeapon} to {GateHouse} distance 10 angle 180
-                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using GateHouse to siege weapon SiegeWeapon action queue
+                    end if
+                end if
+
+                if get ActionTimer time remaining <= 0 and PointOn == 3
+                    enable siege weapon SiegeWeapon auto attack
+                    ActionTimer = create timer for 60 seconds
+                    House = get building ALTAR in PlayerTown min built 0.75
+                    if House exists and PLAYER of House == 0 and SiegeWeapon can navigate to object oTownCentre
+                        NumPat1 = number from 1 to 5
                     else
-                        GateHouse = get random abode of type GATEHOUSE in town PlayerTown
+                        NumPat1 = number from 1 to 3
+                    end if
+                    if NumPat1 == 1 or NumPat1 == 2
+                        GateHouse = get HOUSE GATEHOUSE at {SiegeWeapon} radius 250
                         if GateHouse not exists
-                            GateHouse = get random abode of type GATEHOUSE_F in town PlayerTown
+                            GateHouse = get HOUSE GATEHOUSE_F at {SiegeWeapon} radius 250
                         end if
                         if GateHouse exists and PLAYER of GateHouse == 0
                             clear siege weapon SiegeWeapon action queue
                             Target = marker at get target from {SiegeWeapon} to {GateHouse} distance 10 angle 180
                             add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using GateHouse to siege weapon SiegeWeapon action queue
+                        elsif GateHouse not exists
+                            GateHouse = get HOUSE GATEHOUSE at {SiegeWeapon} radius 750
+                            if GateHouse not exists
+                                GateHouse = get HOUSE GATEHOUSE_F at {SiegeWeapon} radius 750
+                            end if
+                            clear siege weapon SiegeWeapon action queue
+                            Target = marker at get target from {SiegeWeapon} to {GateHouse} distance 10 angle 180
+                            add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using GateHouse to siege weapon SiegeWeapon action queue
+                        else
+                            GateHouse = get random abode of type GATEHOUSE in town PlayerTown
+                            if GateHouse not exists
+                                GateHouse = get random abode of type GATEHOUSE_F in town PlayerTown
+                            end if
+                            if GateHouse exists and PLAYER of GateHouse == 0
+                                clear siege weapon SiegeWeapon action queue
+                                Target = marker at get target from {SiegeWeapon} to {GateHouse} distance 10 angle 180
+                                add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using GateHouse to siege weapon SiegeWeapon action queue
+                            else
+                                ActionTimer = create timer for 2 seconds
+                            end if
+                        end if
+                    elsif NumPat1 == 3
+                        Wall1 = get wall segment nearest {SiegeWeapon} radius 750
+                        if Wall1 exists and PLAYER of Wall1 == 0
+                            clear siege weapon SiegeWeapon action queue
+                            Target = marker at get target from {SiegeWeapon} to {Wall1} distance 10 angle 180
+                            add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Wall1 to siege weapon SiegeWeapon action queue
+                        else
+                            ActionTimer = create timer for 2 seconds
+                        end if
+                    else
+                        House = get building ALTAR in PlayerTown min built 0.75
+                        if House exists and PLAYER of House == 0 and SiegeWeapon can navigate to object oTownCentre
+                            clear siege weapon SiegeWeapon action queue
+                            Target = marker at get target from {SiegeWeapon} to {House} distance 10 angle 180
+                            add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using House to siege weapon SiegeWeapon action queue
                         else
                             ActionTimer = create timer for 2 seconds
                         end if
                     end if
-                elsif NumPat1 == 3
-                    Wall1 = get wall segment nearest {SiegeWeapon} radius 750
-                    if Wall1 exists and PLAYER of Wall1 == 0
-                        clear siege weapon SiegeWeapon action queue
-                        Target = marker at get target from {SiegeWeapon} to {Wall1} distance 10 angle 180
-                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Wall1 to siege weapon SiegeWeapon action queue
-                    else
-                        ActionTimer = create timer for 2 seconds
+                end if
+            else
+                if PointOn != 3
+                    if SiegeWeapon exists
+                        if get SiegeOnPointTimer time remaining <= 0
+                            SiegeWeaponPoint = marker at {SiegeWeapon}
+                            SiegeOnPointTimer = create timer for 40 seconds
+                        elsif get SiegeOnPointTimer time remaining <= 5
+                            if {SiegeWeapon} near {SiegeWeaponPoint} radius 10
+                                clear siege weapon SiegeWeapon action queue
+                                delete SiegeWeapon
+                                SiegeStucked = 1
+                            end if
+                        end if
+                        if get CatapultMoveTimer1 time remaining <= 0
+                            if get size of SiegeWeapon action queue < 1
+
+                                if PointOn == 0
+                                    if SiegeWeapon can navigate to {Waypoint1}
+                                        add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {Waypoint1} to siege weapon SiegeWeapon action queue
+                                    end if
+                        
+                                elsif PointOn == 1
+                                    if SiegeWeapon can navigate to {Waypoint2}
+                                        add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {Waypoint2} to siege weapon SiegeWeapon action queue
+                                        if Type == Special
+                                            wait until LC14_LargeSiegeLaunchAttack == 1
+                                            SiegeOnPointTimer = create timer for 40 seconds
+                                        end if
+                                    end if
+
+                                elsif PointOn == 2
+                                    if SiegeWeapon can navigate to {Waypoint3}
+                                        add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {Waypoint3} to siege weapon SiegeWeapon action queue
+                                    end if
+
+                                CatapultMoveTimer1 = create timer for 10 seconds
+                                
+                                end if
+                            end if
+                        end if        
+
+                        if {SiegeWeapon} near {Waypoint1} radius 15 and PointOn != 3
+                            PointOn = 3
+                        end if
                     end if
-                else
-                    House = get building ALTAR in PlayerTown min built 0.75
+                end if
+
+                if get ActionTimer time remaining <= 0 and PointOn == 3
+                    enable siege weapon SiegeWeapon auto attack
+                    ActionTimer = create timer for 60 seconds
+                    House = get building ALTAR in AztecTown1 min built 0.75
                     if House exists and PLAYER of House == 0 and SiegeWeapon can navigate to object oTownCentre
-                        clear siege weapon SiegeWeapon action queue
-                        Target = marker at get target from {SiegeWeapon} to {House} distance 10 angle 180
-                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using House to siege weapon SiegeWeapon action queue
+                        NumPat1 = number from 1 to 5
                     else
-                        ActionTimer = create timer for 2 seconds
+                        NumPat1 = number from 1 to 3
+                    end if
+                    if NumPat1 == 1 or NumPat1 == 2
+                        GateHouse = get HOUSE GATEHOUSE at {SiegeWeapon} radius 250
+                        if GateHouse not exists
+                            GateHouse = get HOUSE GATEHOUSE_F at {SiegeWeapon} radius 250
+                        end if
+                        if GateHouse exists and PLAYER of GateHouse == 0
+                            clear siege weapon SiegeWeapon action queue
+                            Target = marker at get target from {SiegeWeapon} to {GateHouse} distance 10 angle 180
+                            add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using GateHouse to siege weapon SiegeWeapon action queue
+                        elsif GateHouse not exists
+                            GateHouse = get HOUSE GATEHOUSE at {SiegeWeapon} radius 750
+                            if GateHouse not exists
+                                GateHouse = get HOUSE GATEHOUSE_F at {SiegeWeapon} radius 750
+                            end if
+                            clear siege weapon SiegeWeapon action queue
+                            Target = marker at get target from {SiegeWeapon} to {GateHouse} distance 10 angle 180
+                            add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using GateHouse to siege weapon SiegeWeapon action queue
+                        else
+                            GateHouse = get random abode of type GATEHOUSE in town AztecTown1
+                            if GateHouse not exists
+                                GateHouse = get random abode of type GATEHOUSE_F in town AztecTown1
+                            end if
+                            if GateHouse exists and PLAYER of GateHouse == 0
+                                clear siege weapon SiegeWeapon action queue
+                                Target = marker at get target from {SiegeWeapon} to {GateHouse} distance 10 angle 180
+                                add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using GateHouse to siege weapon SiegeWeapon action queue
+                            else
+                                ActionTimer = create timer for 2 seconds
+                            end if
+                        end if
+                    elsif NumPat1 == 3
+                        Wall1 = get wall segment nearest {SiegeWeapon} radius 750
+                        if Wall1 exists and PLAYER of Wall1 == 0
+                            clear siege weapon SiegeWeapon action queue
+                            Target = marker at get target from {SiegeWeapon} to {Wall1} distance 10 angle 180
+                            add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Wall1 to siege weapon SiegeWeapon action queue
+                        else
+                            ActionTimer = create timer for 2 seconds
+                        end if
+                    else
+                        House = get building ALTAR in AztecTown1 min built 0.75
+                        if House exists and PLAYER of House == 0 and SiegeWeapon can navigate to object oTownCentre
+                            clear siege weapon SiegeWeapon action queue
+                            Target = marker at get target from {SiegeWeapon} to {House} distance 10 angle 180
+                            add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using House to siege weapon SiegeWeapon action queue
+                        else
+                            ActionTimer = create timer for 2 seconds
+                        end if
                     end if
                 end if
             end if

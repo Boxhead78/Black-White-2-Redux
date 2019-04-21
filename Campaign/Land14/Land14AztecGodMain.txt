@@ -193,24 +193,34 @@ start
                 if {rGodInstance[godHandle]} near {GodPoint} radius 5
                     DeleteGod = 1
                 end if
+            elsif LandOver == 1
+                DeleteGod = 1
             end if
             until DeleteGod == 1
         end loop
 
         //say "Deleting God"
-        FakeGod = create with angle geAvatarAngle and scale geAvatarScale geAvatarScriptType geAvatarObjectType at {rGodInstance[godHandle]}
-        FakeGodEffect = create visual effect geAvatarVisualEffect on rGodInstance[godHandle] time -1
-        SCALE of FakeGodEffect = geGlowEffectScale
-        set rGodVisualEffect color red 148 green 0 blue 211
+        if LandOver == 0
+            FakeGod = create with angle geAvatarAngle and scale geAvatarScale geAvatarScriptType geAvatarObjectType at {rGodInstance[godHandle]}
+            FakeGodEffect = create visual effect geAvatarVisualEffect on rGodInstance[godHandle] time -1
+            SCALE of FakeGodEffect = geGlowEffectScale
+            set rGodVisualEffect color red 148 green 0 blue 211
 
-        delete rGodInstance[godHandle]
+            delete rGodInstance[godHandle]
 
-        wait 5 seconds
+            wait 5 seconds
 
-        delete FakeGod
+            delete FakeGod
+        elsif LandOver == 1
+            set rGodInstance[godHandle] position to {1100.31,90.72,1192.28}
+
+            wait until DeleteGodOnceAndForAll == 1
+
+            delete rGodInstance[godHandle]
+        end if
 
         //say "God Deleted"
-        if PLAYER of rTown == ge_Player[GodHandle]
+        if PLAYER of rTown == ge_Player[GodHandle] and LandOver == 0
             rGodInstance[godHandle] = create with angle geAvatarAngle and scale geAvatarScale geAvatarScriptType geAvatarObjectType at {ge_HomeTown[godHandle]}
             rGodVisualEffect = create visual effect geAvatarVisualEffect on rGodInstance[godHandle] time -1
             SCALE of rGodVisualEffect = geGlowEffectScale
