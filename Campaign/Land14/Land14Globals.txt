@@ -60,10 +60,10 @@ global NearestSettlement = 0
 global PlayerTempTown = 0
 global AztecTempleTown[3]
 
-global AZTECTOWN1_IMPRESSIVENESS = 17500
-global AZTECTOWN2_IMPRESSIVENESS = 50000
+global AZTECTOWN1_IMPRESSIVENESS = 2500
+global AZTECTOWN2_IMPRESSIVENESS = 45000
 global AZTECTOWN3_IMPRESSIVENESS = 999999 //Scrapped, only a Temple now
-global AZTECCAPITAL_IMPRESSIVENESS = 47000
+global AZTECCAPITAL_IMPRESSIVENESS = 32000
 
 global AttackNearestTownTimer = 0
 global LC14_RecruitTimer1 = 0
@@ -187,11 +187,12 @@ end script LC14_CreateUndeadPlatoon
 begin script LC14_GhostScript(myGhost,whichMesh)
 
     myEffect = 0
+    PlayerAlignment = 0
 
 start
 
     while myGhost exists and HEALTH of myGhost > 0.00
-        wait 5 seconds
+        wait until HEALTH of myGhost == 0 or 5 seconds
         if whichMesh == s_aztecwarrior_ghost
             set anim speed of myGhost to 0.75
             override mesh for myGhost with "..\skins\s_aztecwarrior_ghost"
@@ -214,7 +215,7 @@ start
     HEALTH of myGhost = 0.00
 
     while myGhost exists
-        wait 5 seconds
+        wait until HEALTH of myGhost == 0 or 5 seconds
         if whichMesh == s_aztecwarrior_ghost
             set anim speed of myGhost to 0.75
             override mesh for myGhost with "..\skins\s_aztecwarrior_ghost"
@@ -230,5 +231,9 @@ start
             set myGhost carrying CARRIED_OBJECT_AZTEC_CLUB
         end if
     end while
+
+    PlayerAlignment = get player 0 alignment
+    PlayerAlignment = PlayerAlignment + 0.00025
+    set player 0 alignment PlayerAlignment
 
 end script LC14_GhostScript
