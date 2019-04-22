@@ -107,7 +107,7 @@ begin loop
         
         wait until HEALTH of LC4_EnemyCreature == 0.00 or not town NorseTown is under takeover from player 0 or 1000 seconds
 
-    elsif ENEMY_CREATURE_ALLOWED_TO_ATTACK == 1 and HEALTH of LC4_EnemyCreature > 0.00
+    elsif ENEMY_CREATURE_ALLOWED_TO_ATTACK == 1 and HEALTH of LC4_EnemyCreature > 0.00 and Difficulty >= 3
         HEALTH of LC4_EnemyCreature = 1.0
         begin loop
             if {LC4_Platoon[13]} near {SiegePlatoonPos[0]} radius 100
@@ -123,7 +123,9 @@ begin loop
         CreatureAttackTimer = create timer for 1200 seconds
 
     elsif not ENEMY_CREATURE_ALLOWED_TO_ATTACK == 1 and HEALTH of LC4_EnemyCreature > 0.00 and get CreatureRollRoleTimer time remaining <= 0
-        if PLAYER of NorseTown == 1 and PLAYER of NorseCapital == 1 Number = number from 1 to 2 else Number = number from 1 to 1 end if
+        if PLAYER of NorseTown == 1 and PLAYER of NorseCapital == 1 
+            Number = number from 1 to 2 else Number = number from 1 to 1 
+        end if
         if Number == 1 and PLAYER of NorseCapital == 1
             set creature LC4_EnemyCreature role to CR_GATHERER radius 300 at {CreatureGathererPos[0]}
             CreatureRollRoleTimer = create timer for 360 seconds
