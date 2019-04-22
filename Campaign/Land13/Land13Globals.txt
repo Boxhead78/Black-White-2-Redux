@@ -173,7 +173,6 @@ start
 
         //Set new mesh
         if whichMesh == s_aztecwarrior_ghost
-            wait 5 seconds
             //set anim speed of Ghost[counter] to 0.75
             override mesh for Ghost[counter] with "..\skins\s_aztecwarrior_ghost"
             set Ghost[counter] carrying CARRIED_OBJECT_NORSE_SWORD
@@ -201,6 +200,7 @@ end script LC13_CreateUndeadPlatoon
 begin script LC13_GhostScript(myGhost,whichMesh)
 
     myEffect = 0
+    PlayerAlignment = 0
 
 start
 
@@ -227,7 +227,7 @@ start
     HEALTH of myGhost = 0.00
 
     while myGhost exists
-        wait 5 seconds
+        wait until HEALTH of myGhost == 0 or 5 seconds
         if whichMesh == s_aztecwarrior_ghost
             set anim speed of myGhost to 0.75
             override mesh for myGhost with "..\skins\s_aztecwarrior_ghost"
@@ -243,5 +243,9 @@ start
             set myGhost carrying CARRIED_OBJECT_AZTEC_CLUB
         end if
     end while
+
+    PlayerAlignment = get player 0 alignment
+    PlayerAlignment = PlayerAlignment + 0.00025
+    set player 0 alignment PlayerAlignment
 
 end script LC13_GhostScript
