@@ -76,6 +76,7 @@ begin script tal_TalusLoop(GodHandle,rTown,PlayerID)
     Timer = create timer for 0 seconds
     townCounter = 0
     whichSpell = 0
+    FireBallUsed = 0
 start
     ge_MiracleDelay[godHandle] = create timer for 0 seconds
     while 1 == 1 // make sure godHandle is valid
@@ -150,7 +151,7 @@ start
             ge_Busy[godHandle] = 0
         end if
 
-        if get ThrowMiracleTimer time remaining <= 0 and get player ge_Player[godHandle] mana > 23000 and PLAYER of PlayerTown == 0 and PLAYER of AztecCapital == 1 and GB_DialogueIsRunning == 0 and ge_EmergencyMode[godHandle] == 0
+        if get ThrowMiracleTimer time remaining <= 0 and get player ge_Player[godHandle] mana > 23000 and PLAYER of PlayerTown == 0 and PLAYER of AztecCapital == 1 and GB_DialogueIsRunning == 0 and ge_EmergencyMode[godHandle] == 0 and ge_Altar[godHandle] == 1
 
             GB_DialogueIsRunning = 1
             begin dialogue
@@ -180,12 +181,15 @@ start
                     close dialogue
                     wait BW2XT_LAND02_PLAYER_ACCEPTS_MIGRATION_20 + 1 seconds
                 end if
-                make evil spirit appear
-                say "BW2XT_HELP_TEXT_GUIDANCE_NEED_SHIELD_MIRACLE_10"
-                clear dialogue
-                close dialogue
-                wait BW2XT_HELP_TEXT_GUIDANCE_NEED_SHIELD_MIRACLE_10 + 1 seconds
-                send evil spirit home
+                if FireBallUsed == 0
+                    FireBallUsed = 1
+                    make evil spirit appear
+                    say "BW2XT_HELP_TEXT_GUIDANCE_NEED_SHIELD_MIRACLE_10"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_HELP_TEXT_GUIDANCE_NEED_SHIELD_MIRACLE_10 + 1 seconds
+                    send evil spirit home
+                end if
             end dialogue
             GB_DialogueIsRunning = 0
 
@@ -202,10 +206,10 @@ start
             run script ge_ThrowMiracle(godHandle, GE_MIRACLE_TYPE_FIRE, marker at {1277.97,60.64,1466.99} + {0,26,0} + {number from -15 to 15,0,number from -15 to 15}, 1)
             wait number from 2 to 4 seconds
 
-            ThrowMiracleTimer = create timer for number from 240 * EpicModifier to 600 * EpicModifier seconds
+            ThrowMiracleTimer = create timer for number from 360 * EpicModifier to 720 * EpicModifier seconds
         end if
 
-        if get FireRainTimer time remaining <= 0 and get player ge_Player[godHandle] mana > 20000 and GB_DialogueIsRunning == 0 and PLAYER of PlayerTown == 0 and ge_EmergencyMode[godHandle] == 0
+        if get FireRainTimer time remaining <= 0 and get player ge_Player[godHandle] mana > 20000 and GB_DialogueIsRunning == 0 and PLAYER of PlayerTown == 0 and ge_EmergencyMode[godHandle] == 0 and ge_Altar[godHandle] == 1
 
             myRand = number from 1 to 5
             if myRand == 1 or myRand == 2
@@ -911,15 +915,15 @@ start
 
             end if
             if Difficulty == 1
-                ge_MiracleDelay[godHandle] = create timer for 80 seconds
+                ge_MiracleDelay[godHandle] = create timer for 120 seconds
             elsif Difficulty == 2
-                ge_MiracleDelay[godHandle] = create timer for 60 seconds
+                ge_MiracleDelay[godHandle] = create timer for 90 seconds
             elsif Difficulty == 3
-                ge_MiracleDelay[godHandle] = create timer for 35 seconds
+                ge_MiracleDelay[godHandle] = create timer for 60 seconds
             elsif Difficulty == 4
-                ge_MiracleDelay[godHandle] = create timer for 15 seconds
+                ge_MiracleDelay[godHandle] = create timer for 45 seconds
             else
-                ge_MiracleDelay[godHandle] = create timer for 7 seconds
+                ge_MiracleDelay[godHandle] = create timer for 30 seconds
             end if
         end if
     end if

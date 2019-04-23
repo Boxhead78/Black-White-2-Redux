@@ -3276,25 +3276,27 @@ start
             LC12_LargeSiegeLaunchAttack = 1
         end if
 
-        if TownsConverted >= 2 or TownsAggressiveConverted == 1
+        if TownsConverted >= 2 or size of PlayerTown > 125
             if MiracleTimerStarted == 0
                 MiracleTimerStarted = 1
                 ThrowMiracleTimer = create timer for 120 seconds
             end if
         end if
 
-        if TownsConverted >= 3 and MiracleFireRainStarted == 0
-            MiracleFireRainStarted = 1
-            FireRainTimer = create timer for 60 seconds
+        if MiracleFireRainStarted == 0
+            if TownsConverted >= 3 or TownsAggressiveConverted >= 1
+                MiracleFireRainStarted = 1
+                FireRainTimer = create timer for 60 seconds
+            end if
         end if
 
-        if TownsConverted >= 2 or TownsAggressiveConverted >= 1
+        if TownsConverted >= 2 or TownsAggressiveConverted >= 1 or size of PlayerTown > 200
             if AztecTown1Attacks == 0
                 AztecTown1Attacks = 1
             end if
         end if
 
-        if TownsConverted >= 3 or TownsAggressiveConverted >= 2
+        if TownsConverted >= 3 or TownsAggressiveConverted >= 2 or size of PlayerTown > 275
             if AztecTown2Attacks == 0
                 AztecTown2Attacks = 1
             end if
@@ -3319,24 +3321,20 @@ start
     begin loop
         PlayerPlatoon = get platoon of player 0 nearest {AztecTown1} radius 250
         if PlayerPlatoon exists and DefenderPlatoon[0] not exists and DefenderPlatoon[0] not exists and get DefendRecruitTimer1 time remaining <= 0 and PLAYER of AztecTown1 == 1 //Makes a couple of defend platoons
-            DefenderPlatoon[0] = recruit ARMY_UNIT_TYPE_MELEE_5 town AztecTown1 platoon of size 30 * RecruitSizeModifier
+            DefenderPlatoon[0] = recruit ARMY_UNIT_TYPE_MELEE_5 town AztecTown1 platoon of size 25 * RecruitSizeModifier
             enable platoon DefenderPlatoon[0] respond to town AztecTown1 attack
             wait until not DefenderPlatoon[0] recruiting
-            
-            DefenderPlatoon[1] = recruit ARMY_UNIT_TYPE_RANGED_5 town AztecTown1 platoon of size 30 * RecruitSizeModifier
-            enable platoon DefenderPlatoon[1] respond to town AztecTown1 attack
-            wait until not DefenderPlatoon[1] recruiting
             
             DefendRecruitTimer1 = create timer for 180 * RecruitModifier seconds
         end if
 
         PlayerPlatoon = get platoon of player 0 nearest {AztecTown2} radius 250
         if PlayerPlatoon exists and DefenderPlatoon[2] not exists and DefenderPlatoon[3] not exists and get DefendRecruitTimer2 time remaining <= 0 and PLAYER of AztecTown2 == 1 //Makes a couple of defend platoons
-            DefenderPlatoon[2] = recruit ARMY_UNIT_TYPE_MELEE_5 town AztecTown2 platoon of size 30 * RecruitSizeModifier
+            DefenderPlatoon[2] = recruit ARMY_UNIT_TYPE_MELEE_5 town AztecTown2 platoon of size 25 * RecruitSizeModifier
             enable platoon DefenderPlatoon[2] respond to town AztecTown2 attack
             wait until not DefenderPlatoon[2] recruiting
             
-            DefenderPlatoon[3] = recruit ARMY_UNIT_TYPE_RANGED_5 town AztecTown2 platoon of size 30 * RecruitSizeModifier
+            DefenderPlatoon[3] = recruit ARMY_UNIT_TYPE_RANGED_5 town AztecTown2 platoon of size 25 * RecruitSizeModifier
             enable platoon DefenderPlatoon[3] respond to town AztecTown2 attack
             wait until not DefenderPlatoon[3] recruiting
 
@@ -3345,11 +3343,11 @@ start
 
         PlayerPlatoon = get platoon of player 0 nearest {AztecCapital} radius 250
         if PlayerPlatoon exists and DefenderPlatoon[4] not exists and DefenderPlatoon[5] not exists and get DefendRecruitTimer3 time remaining <= 0 and PLAYER of AztecCapital == 1 //Makes a couple of defend platoons
-            DefenderPlatoon[4] = recruit ARMY_UNIT_TYPE_MELEE_5 town AztecCapital platoon of size 35 * RecruitSizeModifier
+            DefenderPlatoon[4] = recruit ARMY_UNIT_TYPE_MELEE_5 town AztecCapital platoon of size 25 * RecruitSizeModifier
             enable platoon DefenderPlatoon[4] respond to town AztecCapital attack
             wait until not DefenderPlatoon[4] recruiting
             
-            DefenderPlatoon[5] = recruit ARMY_UNIT_TYPE_RANGED_5 town AztecCapital platoon of size 35 * RecruitSizeModifier
+            DefenderPlatoon[5] = recruit ARMY_UNIT_TYPE_RANGED_5 town AztecCapital platoon of size 25 * RecruitSizeModifier
             enable platoon DefenderPlatoon[5] respond to town AztecCapital attack
             wait until not DefenderPlatoon[5] recruiting
             

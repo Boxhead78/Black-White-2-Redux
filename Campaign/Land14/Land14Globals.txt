@@ -15,7 +15,7 @@ define s_skeletonadultland2 = 1
 define s_undeadwarrior_noghost = 2
 
 // Debug switch
-global DEBUG = 1
+global DEBUG = 0
 global Intro = 1
 
 global LC14_EnemyCreature = 0
@@ -50,6 +50,7 @@ global LandOver = 0
 global AIAttacksAllowed = 0
 global myAttackTimer = 0
 global DeleteGodOnceAndForAll = 0
+global MusicIsRunning = 0
 
 global PlayerTown = 0
 global AztecTown1 = 0
@@ -60,10 +61,10 @@ global NearestSettlement = 0
 global PlayerTempTown = 0
 global AztecTempleTown[3]
 
-global AZTECTOWN1_IMPRESSIVENESS = 2500
-global AZTECTOWN2_IMPRESSIVENESS = 45000
+global AZTECTOWN1_IMPRESSIVENESS = 6500
+global AZTECTOWN2_IMPRESSIVENESS = 35000
 global AZTECTOWN3_IMPRESSIVENESS = 999999 //Scrapped, only a Temple now
-global AZTECCAPITAL_IMPRESSIVENESS = 32000
+global AZTECCAPITAL_IMPRESSIVENESS = 28000
 
 global AttackNearestTownTimer = 0
 global LC14_RecruitTimer1 = 0
@@ -80,7 +81,7 @@ start
     UnitDeadTimer = create timer for 200 seconds
     myAttackTimer = create timer for 0 seconds
 
-    AZTECTOWN1_IMPRESSIVENESS = AZTECTOWN1_IMPRESSIVENESS *  ImpressivenessModifier
+    AZTECTOWN1_IMPRESSIVENESS = AZTECTOWN1_IMPRESSIVENESS
     AZTECTOWN2_IMPRESSIVENESS = AZTECTOWN2_IMPRESSIVENESS *  ImpressivenessModifier
     AZTECTOWN3_IMPRESSIVENESS = AZTECTOWN3_IMPRESSIVENESS *  ImpressivenessModifier
     AZTECCAPITAL_IMPRESSIVENESS = AZTECCAPITAL_IMPRESSIVENESS *  ImpressivenessModifier
@@ -160,16 +161,16 @@ start
 
         //Set new mesh
         if whichMesh == s_aztecwarrior_ghost
-            //set anim speed of Ghost[counter] to 0.75
+            set anim speed of Ghost[counter] to 0.75
             override mesh for Ghost[counter] with "..\skins\s_aztecwarrior_ghost"
             set Ghost[counter] carrying CARRIED_OBJECT_NORSE_SWORD
             disable Ghost[counter] can be fisted
         elsif whichMesh == s_skeletonadultland2
-            //set anim speed of Ghost[counter] to 0.7
+            set anim speed of Ghost[counter] to 0.7
             override mesh for Ghost[counter] with "..\skins\s_skeletonadultland2"
             set Ghost[counter] carrying CARRIED_OBJECT_NORSE_SWORD
         else
-            //set anim speed of Ghost[counter] to 0.7
+            set anim speed of Ghost[counter] to 0.7
             override mesh for Ghost[counter] with "..\skins\s_undeadwarrior_noghost"
             set Ghost[counter] carrying CARRIED_OBJECT_AZTEC_CLUB
         end if
@@ -194,16 +195,16 @@ start
     while myGhost exists and HEALTH of myGhost > 0.00
         wait until HEALTH of myGhost == 0 or 5 seconds
         if whichMesh == s_aztecwarrior_ghost
-            set anim speed of myGhost to 0.75
+            //set anim speed of myGhost to 0.75
             override mesh for myGhost with "..\skins\s_aztecwarrior_ghost"
             set myGhost carrying CARRIED_OBJECT_NORSE_SWORD
             disable myGhost can be fisted
         elsif whichMesh == s_skeletonadultland2
-            set anim speed of myGhost to 0.5
+            //set anim speed of myGhost to 0.5
             override mesh for myGhost with "..\skins\s_skeletonadultland2"
             set myGhost carrying CARRIED_OBJECT_NORSE_SWORD
         else
-            set anim speed of myGhost to 0.6
+            //set anim speed of myGhost to 0.6
             override mesh for myGhost with "..\skins\s_undeadwarrior_noghost"
             set myGhost carrying CARRIED_OBJECT_AZTEC_CLUB
         end if
@@ -217,23 +218,23 @@ start
     while myGhost exists
         wait until HEALTH of myGhost == 0 or 5 seconds
         if whichMesh == s_aztecwarrior_ghost
-            set anim speed of myGhost to 0.75
+            //set anim speed of myGhost to 0.75
             override mesh for myGhost with "..\skins\s_aztecwarrior_ghost"
             set myGhost carrying CARRIED_OBJECT_NORSE_SWORD
             disable myGhost can be fisted
         elsif whichMesh == s_skeletonadultland2
-            set anim speed of myGhost to 0.5
+            //set anim speed of myGhost to 0.5
             override mesh for myGhost with "..\skins\s_skeletonadultland2"
             set myGhost carrying CARRIED_OBJECT_NORSE_SWORD
         else
-            set anim speed of myGhost to 0.6
+            //set anim speed of myGhost to 0.6
             override mesh for myGhost with "..\skins\s_undeadwarrior_noghost"
             set myGhost carrying CARRIED_OBJECT_AZTEC_CLUB
         end if
     end while
 
     PlayerAlignment = get player 0 alignment
-    PlayerAlignment = PlayerAlignment + 0.00025
+    PlayerAlignment = PlayerAlignment + 0.00040
     set player 0 alignment PlayerAlignment
 
 end script LC14_GhostScript

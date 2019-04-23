@@ -78,6 +78,7 @@ begin script tal_TalusLoop(GodHandle,rTown,PlayerID)
     townCounter = 0
     whichSpell = 0
     FirstSkelArmy = 0
+    ThunderStormUsed = 0
 start
     ge_MiracleDelay[godHandle] = create timer for 0 seconds
     while 1 == 1 // make sure godHandle is valid
@@ -152,7 +153,7 @@ start
             ge_Busy[godHandle] = 0
         end if
 
-        if SacrificeAllowed == 1 and GB_DialogueIsRunning == 0 and get player ge_Player[godHandle] mana > 20000 and ge_EmergencyMode[godHandle] == 0
+        if SacrificeAllowed == 1 and GB_DialogueIsRunning == 0 and get player ge_Player[godHandle] mana > 20000 and ge_EmergencyMode[godHandle] == 0 and ge_Altar[godHandle] == 1
             SacrificeAllowed = 0
             GB_DialogueIsRunning = 1
             begin dialogue
@@ -218,7 +219,7 @@ start
             wait number from 2 to 4 seconds
         end if
 
-        if get ThrowMiracleTimer time remaining <= 0 and get player ge_Player[godHandle] mana > 23000 and PLAYER of PlayerTown == 0 and PLAYER of AztecTown1 == 1 and GB_DialogueIsRunning == 0 and ge_EmergencyMode[godHandle] == 0
+        if get ThrowMiracleTimer time remaining <= 0 and get player ge_Player[godHandle] mana > 23000 and PLAYER of PlayerTown == 0 and PLAYER of AztecTown1 == 1 and GB_DialogueIsRunning == 0 and ge_EmergencyMode[godHandle] == 0 and ge_Altar[godHandle] == 1
 
             MiracleTimerStarted = 1
             GB_DialogueIsRunning = 1
@@ -273,7 +274,7 @@ start
             ThrowMiracleTimer = create timer for number from 180 * EpicModifier to 300 * EpicModifier seconds
         end if
 
-        if get ThunderstormTimer time remaining <= 0 and get player ge_Player[godHandle] mana > 30000 and GB_DialogueIsRunning == 0 and PLAYER of PlayerTown == 0 and ge_EmergencyMode[godHandle] == 0
+        if get ThunderstormTimer time remaining <= 0 and get player ge_Player[godHandle] mana > 30000 and GB_DialogueIsRunning == 0 and PLAYER of PlayerTown == 0 and ge_EmergencyMode[godHandle] == 0 and ge_Altar[godHandle] == 1
     
             MiracleThunderstormStarted = 1
             myRand = number from 1 to 5
@@ -310,12 +311,15 @@ start
                         close dialogue
                         wait BW2XT_LAND02_TALUS_MAKES_LAND_DARK_04 + 1 seconds
                     end if
-                    make evil spirit appear
-                    say "BW2XT_HELP_TEXT_GUIDANCE_NEED_SHIELD_MIRACLE_10"
-                    clear dialogue
-                    close dialogue
-                    wait BW2XT_HELP_TEXT_GUIDANCE_NEED_SHIELD_MIRACLE_10 + 1 seconds
-                    send evil spirit home
+                    if ThunderStormUsed == 0
+                        ThunderStormUsed = 1
+                        make evil spirit appear
+                        say "BW2XT_HELP_TEXT_GUIDANCE_NEED_SHIELD_MIRACLE_10"
+                        clear dialogue
+                        close dialogue
+                        wait BW2XT_HELP_TEXT_GUIDANCE_NEED_SHIELD_MIRACLE_10 + 1 seconds
+                        send evil spirit home
+                    end if
                 end dialogue
                 GB_DialogueIsRunning = 0
                 run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_THUNDERSTORM,myBuilding,0)
@@ -971,15 +975,15 @@ start
 
             end if
             if Difficulty == 1
-                ge_MiracleDelay[godHandle] = create timer for 80 seconds
+                ge_MiracleDelay[godHandle] = create timer for 120 seconds
             elsif Difficulty == 2
-                ge_MiracleDelay[godHandle] = create timer for 60 seconds
+                ge_MiracleDelay[godHandle] = create timer for 90 seconds
             elsif Difficulty == 3
-                ge_MiracleDelay[godHandle] = create timer for 35 seconds
+                ge_MiracleDelay[godHandle] = create timer for 60 seconds
             elsif Difficulty == 4
-                ge_MiracleDelay[godHandle] = create timer for 15 seconds
+                ge_MiracleDelay[godHandle] = create timer for 45 seconds
             else
-                ge_MiracleDelay[godHandle] = create timer for 7 seconds
+                ge_MiracleDelay[godHandle] = create timer for 30 seconds
             end if
         end if
     end if

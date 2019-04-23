@@ -26,7 +26,7 @@ begin script LC14_AICreature
 
 start
 
-    CreatureAttackPos[0] = marker at {995.26,116.08,1965.74}//AztecCapital
+    CreatureAttackPos[0] = marker at {1105.73,121.39,1961.69}//AztecCapital
 
     CreatureGathererPos[0] = marker at {1991.19,101.86,902.51}//AztecCapital
     CreatureGathererPos[1] = marker at {1643.38,126.45,1805.61}//AztecTown1
@@ -170,6 +170,24 @@ begin loop
                 until LC14_Platoon[20] not exists and LC14_Platoon[21] not exists or 720 seconds or HEALTH of LC14_EnemyCreature == 0.00
             end loop
             set creature LC14_EnemyCreature role to CR_SOLDIER radius 300 at {PlayerTown}
+            wait until HEALTH of LC14_EnemyCreature == 0.00 or 360 seconds
+        end if
+
+    elsif get CreatureAttackTimer time remaining <= 0 and HEALTH of LC14_EnemyCreature > 0.00 and LC14_Platoon[39] exists
+        if LC14_Platoon[37] exists or LC14_Platoon[38] exists or LC14_Platoon[39] exists
+            CreatureAttackTimer = create timer for 1200 seconds
+            HEALTH of LC14_EnemyCreature = 1.0
+            begin loop
+                if LC14_Platoon[37] exists
+                    set creature LC14_EnemyCreature role to CR_SOLDIER radius 75 at {LC14_Platoon[37]}
+                elsif LC14_Platoon[38] exists
+                    set creature LC14_EnemyCreature role to CR_SOLDIER radius 75 at {LC14_Platoon[38]}
+                elsif LC14_Platoon[39] exists
+                    set creature LC14_EnemyCreature role to CR_SOLDIER radius 75 at {LC14_Platoon[39]}
+                end if
+                until LC14_Platoon[37] not exists and LC14_Platoon[38] not exists and LC14_Platoon[39] not exists or 720 seconds or HEALTH of LC14_EnemyCreature == 0.00
+            end loop
+            set creature LC14_EnemyCreature role to CR_SOLDIER radius 300 at {CreatureAttackPos[0]}
             wait until HEALTH of LC14_EnemyCreature == 0.00 or 360 seconds
         end if
     end if

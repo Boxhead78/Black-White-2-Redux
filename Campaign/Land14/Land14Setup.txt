@@ -7,13 +7,10 @@
 define script Land14Script
 define script Land14ScriptManager
 define script LC14_SetupCreature
-define script LC14_RevivePlayerCreature
 define script LC14_SetupGodReq
 
 run script Land14Script
 
-//TODO:
-//Couldn't capture aztectown1???
 
 begin script Land14Script
     
@@ -232,12 +229,12 @@ start
     run background script LC14_AztecCapitalVillagerManager
     run background script LC14_GetPlayerUnits
     run background script LC14_AICreature
-    run background script LC14_RevivePlayerCreature
     run background script MaintainVillagers(0)
 
 /*
     //if DEBUG == 1
-    wait 5 seconds
+    wait until IntroFinished == 1
+        wait 5 seconds
         set player 0 town PlayerTown capture reason LAST_CAPTURE_AGGRESSIVE
         set player 0 mana 50000
         delete LC14_Platoon[13]
@@ -256,8 +253,16 @@ end script Land14ScriptManager
 begin script LC14_SetupCreature
 
     CreaturePos    = marker at {694.38,73.19,2060.62}
+    IntroPortal    = 0
     
 start
+
+    wait until PLAYER of PlayerTown == 0 and IntroFinished == 1
+
+    IntroPortal = create visual effect VISUAL_EFFECT_TELEPORTER_HOOP at {CreaturePos} + {0, 1.5, 0} time -1
+    SCALE of IntroPortal = 2.0
+
+    wait 5 seconds
 
     //Load the creature and get it into global
     load my_creature at {CreaturePos}
@@ -310,29 +315,13 @@ start
     end if
 
     MyCreature = get player 0 creature
-    wait until IntroFinished == 1
     release MyCreature
 
+    wait 5 seconds
+
+    delete IntroPortal with fade
+
 end script LC14_SetupCreature
-
-
-begin script LC14_RevivePlayerCreature
-
-    PlayerCreature = 0
-
-start
-
-begin loop
-    PlayerCreature = get player 0 creature
-    wait until HEALTH of PlayerCreature == 0.00 and PLAYER of PlayerTown == 0
-    wait 150 seconds
-    wait until not {PlayerCreature} viewed and not {PlayerTown} + {10,10} viewed
-    HEALTH of PlayerCreature = 0.25
-    set PlayerCreature position to {PlayerTown} + {10,10}
-    release PlayerCreature
-end loop
-
-end script LC14_RevivePlayerCreature
 
 
 begin script LC14_SetupGodReq
