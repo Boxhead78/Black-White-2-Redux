@@ -450,76 +450,78 @@ begin script ge_ThrowMiracle(GodHandle, MiracleType, rTargetObject, Scripted)
     newMiracle = 0
     currMana = 0
 start
-    if miracleType > GE_MIRACLE_TYPE_NONE and miracleType < GE_MIRACLE_TYPE_LAST and rGodInstance[godHandle] exists
+    if miracleType > GE_MIRACLE_TYPE_NONE and miracleType < GE_MIRACLE_TYPE_LAST and rGodInstance[godHandle] exists and ge_Altar[godHandle] == 1
         if Scripted == 0
             run script ge_MoveToRadiusAltitude(godHandle,rTargetObject,geGodThrowRadius,geGodThrowAltitude)
         end if
         //SCRIPT_OBJECT_PROPERTY_TYPE_YPOS of rGodInstance[godHandle] = geGodThrowAltitude
         wait 1 seconds
-        if miracleType == GE_MIRACLE_TYPE_HEAL
-            currMana = get player ge_Player[godHandle] mana
-            set player ge_Player[godHandle] mana currMana - geManaCostHeal
-            newMiracle = make player ge_Player[godHandle] throw miracle MIRACLE_TYPE_HEAL from ({rGodInstance[godHandle]} + {0, -3.0, 0}) heading (({rTargetObject} + {0,geThrowArc,0}) - {rGodInstance[godHandle]})
-        elsif miracleType == GE_MIRACLE_TYPE_LIFE
-            currMana = get player ge_Player[godHandle] mana
-            set player ge_Player[godHandle] mana currMana - geManaCostLife
-            newMiracle = make player ge_Player[godHandle] throw miracle MIRACLE_TYPE_LIFE from ({rGodInstance[godHandle]} + {0, -3.0, 0}) heading (({rTargetObject} + {0,geThrowArc,0}) - {rGodInstance[godHandle]})
-        elsif miracleType == GE_MIRACLE_TYPE_DECAY
-            currMana = get player ge_Player[godHandle] mana
-            set player ge_Player[godHandle] mana currMana - geManaCostDecay
-            newMiracle = make player ge_Player[godHandle] throw miracle MIRACLE_TYPE_DECAY from ({rGodInstance[godHandle]} + {0, -3.0, 0}) heading (({rTargetObject} + {0,geThrowArc,0}) - {rGodInstance[godHandle]})
-        elsif miracleType == GE_MIRACLE_TYPE_DEATH
-            currMana = get player ge_Player[godHandle] mana
-            set player ge_Player[godHandle] mana currMana - 20000
-            run background script LC13_DeathSpell(ge_Player[godHandle],rTargetObject,marker at {rGodInstance[godHandle]})
-        elsif miracleType == GE_MIRACLE_TYPE_FIRE
-            currMana = get player ge_Player[godHandle] mana
-            set player ge_Player[godHandle] mana currMana - geManaCostFire
-            newMiracle = make player ge_Player[godHandle] throw miracle MIRACLE_TYPE_FIRE from ({rGodInstance[godHandle]} + {0, -3.0, 0}) heading (({rTargetObject} + {0,geThrowArc,0}) - {rGodInstance[godHandle]})
-        elsif miracleType == GE_MIRACLE_TYPE_LAVA
-            currMana = get player ge_Player[godHandle] mana
-            set player ge_Player[godHandle] mana currMana - geManaCostLava
-            newMiracle = make player ge_Player[godHandle] throw miracle MIRACLE_TYPE_LAVA from ({rGodInstance[godHandle]} + {0, -3.0, 0}) heading (({rTargetObject} + {0,geThrowArc,0}) - {rGodInstance[godHandle]})
-        elsif miracleType == GE_MIRACLE_TYPE_TREMOR
-            currMana = get player ge_Player[godHandle] mana
-            set player ge_Player[godHandle] mana currMana - geManaCostTremor
-            newMiracle = make player ge_Player[godHandle] throw miracle MIRACLE_TYPE_TREMOR from ({rGodInstance[godHandle]} + {0, -3.0, 0}) heading (({rTargetObject} + {0,geThrowArc,0}) - {rGodInstance[godHandle]})
-        elsif miracleType == GE_MIRACLE_TYPE_METEOR
-            currMana = get player ge_Player[godHandle] mana
-            set player ge_Player[godHandle] mana currMana - geManaCostMeteor
-            newMiracle = make player ge_Player[godHandle] throw miracle MIRACLE_TYPE_METEOR from ({rGodInstance[godHandle]} + {0, -3.0, 0}) heading (({rTargetObject} + {0,geThrowArc,0}) - {rGodInstance[godHandle]})
-        elsif miracleType == GE_MIRACLE_TYPE_WIND
-            currMana = get player ge_Player[godHandle] mana
-            set player ge_Player[godHandle] mana currMana - geManaCostWind
-            newMiracle = make player ge_Player[godHandle] throw miracle MIRACLE_TYPE_WIND from ({rGodInstance[godHandle]} + {0, -3.0, 0}) heading (({rTargetObject} + {0,geThrowArc,0}) - {rGodInstance[godHandle]})
-        elsif miracleType == GE_MIRACLE_TYPE_TORNADO
-            currMana = get player ge_Player[godHandle] mana
-            set player ge_Player[godHandle] mana currMana - geManaCostTornado
-            newMiracle = make player ge_Player[godHandle] throw miracle MIRACLE_TYPE_TORNADO from ({rGodInstance[godHandle]} + {0, -3.0, 0}) heading (({rTargetObject} + {0,geThrowArc,0}) - {rGodInstance[godHandle]})
-        elsif miracleType == GE_MIRACLE_TYPE_WATER
-            currMana = get player ge_Player[godHandle] mana
-            set player ge_Player[godHandle] mana currMana - geManaCostWater
-            newMiracle = make player ge_Player[godHandle] throw miracle MIRACLE_TYPE_WATER from ({rGodInstance[godHandle]} + {0, -3.0, 0}) heading (({rTargetObject} + {0,geThrowArc,0}) - {rGodInstance[godHandle]})
-        elsif miracleType == GE_MIRACLE_TYPE_STORM
-            currMana = get player ge_Player[godHandle] mana
-            set player ge_Player[godHandle] mana currMana - geManaCostStorm
-            newMiracle = make player ge_Player[godHandle] throw miracle MIRACLE_TYPE_STORM from ({rGodInstance[godHandle]} + {0, -3.0, 0}) heading (({rTargetObject} + {0,geThrowArc,0}) - {rGodInstance[godHandle]})
-        elsif miracleType == GE_MIRACLE_TYPE_VERDANT
-            currMana = get player ge_Player[godHandle] mana
-            set player ge_Player[godHandle] mana currMana - geManaCostVerdant
-            run background script VerdantSpell(ge_Player[godHandle],rTargetObject)
-        elsif miracleType == GE_MIRACLE_TYPE_FIRERAIN
-            currMana = get player ge_Player[godHandle] mana
-            set player ge_Player[godHandle] mana currMana - geManaCostFirerain
-            run background script FirerainSpell(ge_Player[godHandle],rTargetObject)
-        elsif miracleType == GE_MIRACLE_TYPE_THUNDERSTORM
-            currMana = get player ge_Player[godHandle] mana
-            set player ge_Player[godHandle] mana currMana - geManaCostThunderstorm
-            run background script ThunderstormSpell(ge_Player[godHandle],rTargetObject)
-        elsif miracleType == GE_MIRACLE_TYPE_METEORID
-            currMana = get player ge_Player[godHandle] mana
-            set player ge_Player[godHandle] mana currMana - geManaCostMeteorid
-            run background script MeteorSpell(ge_Player[godHandle],rTargetObject)
+        if ge_Altar[godHandle] == 1
+            if miracleType == GE_MIRACLE_TYPE_HEAL
+                currMana = get player ge_Player[godHandle] mana
+                set player ge_Player[godHandle] mana currMana - geManaCostHeal
+                newMiracle = make player ge_Player[godHandle] throw miracle MIRACLE_TYPE_HEAL from ({rGodInstance[godHandle]} + {0, -3.0, 0}) heading (({rTargetObject} + {0,geThrowArc,0}) - {rGodInstance[godHandle]})
+            elsif miracleType == GE_MIRACLE_TYPE_LIFE
+                currMana = get player ge_Player[godHandle] mana
+                set player ge_Player[godHandle] mana currMana - geManaCostLife
+                newMiracle = make player ge_Player[godHandle] throw miracle MIRACLE_TYPE_LIFE from ({rGodInstance[godHandle]} + {0, -3.0, 0}) heading (({rTargetObject} + {0,geThrowArc,0}) - {rGodInstance[godHandle]})
+            elsif miracleType == GE_MIRACLE_TYPE_DECAY
+                currMana = get player ge_Player[godHandle] mana
+                set player ge_Player[godHandle] mana currMana - geManaCostDecay
+                newMiracle = make player ge_Player[godHandle] throw miracle MIRACLE_TYPE_DECAY from ({rGodInstance[godHandle]} + {0, -3.0, 0}) heading (({rTargetObject} + {0,geThrowArc,0}) - {rGodInstance[godHandle]})
+            elsif miracleType == GE_MIRACLE_TYPE_DEATH
+                currMana = get player ge_Player[godHandle] mana
+                set player ge_Player[godHandle] mana currMana - 20000
+                run background script LC13_DeathSpell(ge_Player[godHandle],rTargetObject,marker at {rGodInstance[godHandle]})
+            elsif miracleType == GE_MIRACLE_TYPE_FIRE
+                currMana = get player ge_Player[godHandle] mana
+                set player ge_Player[godHandle] mana currMana - geManaCostFire
+                newMiracle = make player ge_Player[godHandle] throw miracle MIRACLE_TYPE_FIRE from ({rGodInstance[godHandle]} + {0, -3.0, 0}) heading (({rTargetObject} + {0,geThrowArc,0}) - {rGodInstance[godHandle]})
+            elsif miracleType == GE_MIRACLE_TYPE_LAVA
+                currMana = get player ge_Player[godHandle] mana
+                set player ge_Player[godHandle] mana currMana - geManaCostLava
+                newMiracle = make player ge_Player[godHandle] throw miracle MIRACLE_TYPE_LAVA from ({rGodInstance[godHandle]} + {0, -3.0, 0}) heading (({rTargetObject} + {0,geThrowArc,0}) - {rGodInstance[godHandle]})
+            elsif miracleType == GE_MIRACLE_TYPE_TREMOR
+                currMana = get player ge_Player[godHandle] mana
+                set player ge_Player[godHandle] mana currMana - geManaCostTremor
+                newMiracle = make player ge_Player[godHandle] throw miracle MIRACLE_TYPE_TREMOR from ({rGodInstance[godHandle]} + {0, -3.0, 0}) heading (({rTargetObject} + {0,geThrowArc,0}) - {rGodInstance[godHandle]})
+            elsif miracleType == GE_MIRACLE_TYPE_METEOR
+                currMana = get player ge_Player[godHandle] mana
+                set player ge_Player[godHandle] mana currMana - geManaCostMeteor
+                newMiracle = make player ge_Player[godHandle] throw miracle MIRACLE_TYPE_METEOR from ({rGodInstance[godHandle]} + {0, -3.0, 0}) heading (({rTargetObject} + {0,geThrowArc,0}) - {rGodInstance[godHandle]})
+            elsif miracleType == GE_MIRACLE_TYPE_WIND
+                currMana = get player ge_Player[godHandle] mana
+                set player ge_Player[godHandle] mana currMana - geManaCostWind
+                newMiracle = make player ge_Player[godHandle] throw miracle MIRACLE_TYPE_WIND from ({rGodInstance[godHandle]} + {0, -3.0, 0}) heading (({rTargetObject} + {0,geThrowArc,0}) - {rGodInstance[godHandle]})
+            elsif miracleType == GE_MIRACLE_TYPE_TORNADO
+                currMana = get player ge_Player[godHandle] mana
+                set player ge_Player[godHandle] mana currMana - geManaCostTornado
+                newMiracle = make player ge_Player[godHandle] throw miracle MIRACLE_TYPE_TORNADO from ({rGodInstance[godHandle]} + {0, -3.0, 0}) heading (({rTargetObject} + {0,geThrowArc,0}) - {rGodInstance[godHandle]})
+            elsif miracleType == GE_MIRACLE_TYPE_WATER
+                currMana = get player ge_Player[godHandle] mana
+                set player ge_Player[godHandle] mana currMana - geManaCostWater
+                newMiracle = make player ge_Player[godHandle] throw miracle MIRACLE_TYPE_WATER from ({rGodInstance[godHandle]} + {0, -3.0, 0}) heading (({rTargetObject} + {0,geThrowArc,0}) - {rGodInstance[godHandle]})
+            elsif miracleType == GE_MIRACLE_TYPE_STORM
+                currMana = get player ge_Player[godHandle] mana
+                set player ge_Player[godHandle] mana currMana - geManaCostStorm
+                newMiracle = make player ge_Player[godHandle] throw miracle MIRACLE_TYPE_STORM from ({rGodInstance[godHandle]} + {0, -3.0, 0}) heading (({rTargetObject} + {0,geThrowArc,0}) - {rGodInstance[godHandle]})
+            elsif miracleType == GE_MIRACLE_TYPE_VERDANT
+                currMana = get player ge_Player[godHandle] mana
+                set player ge_Player[godHandle] mana currMana - geManaCostVerdant
+                run background script VerdantSpell(ge_Player[godHandle],rTargetObject)
+            elsif miracleType == GE_MIRACLE_TYPE_FIRERAIN
+                currMana = get player ge_Player[godHandle] mana
+                set player ge_Player[godHandle] mana currMana - geManaCostFirerain
+                run background script FirerainSpell(ge_Player[godHandle],rTargetObject)
+            elsif miracleType == GE_MIRACLE_TYPE_THUNDERSTORM
+                currMana = get player ge_Player[godHandle] mana
+                set player ge_Player[godHandle] mana currMana - geManaCostThunderstorm
+                run background script ThunderstormSpell(ge_Player[godHandle],rTargetObject)
+            elsif miracleType == GE_MIRACLE_TYPE_METEORID
+                currMana = get player ge_Player[godHandle] mana
+                set player ge_Player[godHandle] mana currMana - geManaCostMeteorid
+                run background script MeteorSpell(ge_Player[godHandle],rTargetObject)
+            end if
         end if
         SCRIPT_OBJECT_PROPERTY_TYPE_SPEED of newMiracle = geThrowSpeed
         wait 1 seconds
