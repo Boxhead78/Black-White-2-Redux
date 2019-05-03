@@ -153,7 +153,8 @@ start
             ge_Busy[godHandle] = 0
         end if
 
-        if SacrificeAllowed == 1 and GB_DialogueIsRunning == 0 and get player ge_Player[godHandle] mana > 20000 and ge_EmergencyMode[godHandle] == 0 and ge_Altar[godHandle] == 1
+        if ge_Busy[godHandle] == 0 and SacrificeAllowed == 1 and GB_DialogueIsRunning == 0 and get player ge_Player[godHandle] mana > 20000 and ge_EmergencyMode[godHandle] == 0 and ge_Altar[godHandle] == 1
+            ge_Busy[godHandle] = 1
             SacrificeAllowed = 0
             GB_DialogueIsRunning = 1
             begin dialogue
@@ -217,10 +218,11 @@ start
             end dialogue
             GB_DialogueIsRunning = 0
             wait number from 2 to 4 seconds
+            ge_Busy[godHandle] = 0
         end if
 
-        if get ThrowMiracleTimer time remaining <= 0 and get player ge_Player[godHandle] mana > 23000 and PLAYER of PlayerTown == 0 and PLAYER of AztecTown1 == 1 and GB_DialogueIsRunning == 0 and ge_EmergencyMode[godHandle] == 0 and ge_Altar[godHandle] == 1
-
+        if ge_Busy[godHandle] == 0 and get ThrowMiracleTimer time remaining <= 0 and get player ge_Player[godHandle] mana > 23000 and PLAYER of PlayerTown == 0 and PLAYER of AztecTown1 == 1 and GB_DialogueIsRunning == 0 and ge_EmergencyMode[godHandle] == 0 and ge_Altar[godHandle] == 1
+            ge_Busy[godHandle] = 1
             MiracleTimerStarted = 1
             GB_DialogueIsRunning = 1
             begin dialogue
@@ -272,10 +274,11 @@ start
             miracleCounter = 0
 
             ThrowMiracleTimer = create timer for number from 180 * EpicModifier to 300 * EpicModifier seconds
+            ge_Busy[godHandle] = 0
         end if
 
-        if get ThunderstormTimer time remaining <= 0 and get player ge_Player[godHandle] mana > 30000 and GB_DialogueIsRunning == 0 and PLAYER of PlayerTown == 0 and ge_EmergencyMode[godHandle] == 0 and ge_Altar[godHandle] == 1
-    
+        if ge_Busy[godHandle] == 0 and get ThunderstormTimer time remaining <= 0 and get player ge_Player[godHandle] mana > 30000 and GB_DialogueIsRunning == 0 and PLAYER of PlayerTown == 0 and ge_EmergencyMode[godHandle] == 0 and ge_Altar[godHandle] == 1
+            ge_Busy[godHandle] = 1
             MiracleThunderstormStarted = 1
             myRand = number from 1 to 5
             if myRand == 1 or myRand == 2
@@ -325,6 +328,7 @@ start
                 run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_THUNDERSTORM,myBuilding,0)
                 ThunderstormTimer = create timer for number from 1200 * EpicModifier to 1800 * EpicModifier seconds
             end if
+            ge_Busy[godHandle] = 0
         end if
 
         if townCounter >= 15 or PLAYER of ge_HomeTown[godHandle] != ge_Player[godHandle]

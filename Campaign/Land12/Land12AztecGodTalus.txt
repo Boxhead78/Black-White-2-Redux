@@ -151,8 +151,8 @@ start
             ge_Busy[godHandle] = 0
         end if
 
-        if get ThrowMiracleTimer time remaining <= 0 and get player ge_Player[godHandle] mana > 23000 and PLAYER of PlayerTown == 0 and PLAYER of AztecCapital == 1 and GB_DialogueIsRunning == 0 and ge_EmergencyMode[godHandle] == 0 and ge_Altar[godHandle] == 1
-
+        if ge_Busy[godHandle] == 0 and get ThrowMiracleTimer time remaining <= 0 and get player ge_Player[godHandle] mana > 23000 and PLAYER of PlayerTown == 0 and PLAYER of AztecCapital == 1 and GB_DialogueIsRunning == 0 and ge_EmergencyMode[godHandle] == 0 and ge_Altar[godHandle] == 1
+            ge_Busy[godHandle] = 1
             GB_DialogueIsRunning = 1
             begin dialogue
                 myRand = number from 1 to 4
@@ -206,11 +206,12 @@ start
             run script ge_ThrowMiracle(godHandle, GE_MIRACLE_TYPE_FIRE, marker at {1277.97,60.64,1466.99} + {0,26,0} + {number from -15 to 15,0,number from -15 to 15}, 1)
             wait number from 2 to 4 seconds
 
+            ge_Busy[godHandle] = 0
             ThrowMiracleTimer = create timer for number from 360 * EpicModifier to 720 * EpicModifier seconds
         end if
 
-        if get FireRainTimer time remaining <= 0 and get player ge_Player[godHandle] mana > 20000 and GB_DialogueIsRunning == 0 and PLAYER of PlayerTown == 0 and ge_EmergencyMode[godHandle] == 0 and ge_Altar[godHandle] == 1
-
+        if ge_Busy[godHandle] == 0 and get FireRainTimer time remaining <= 0 and get player ge_Player[godHandle] mana > 20000 and GB_DialogueIsRunning == 0 and PLAYER of PlayerTown == 0 and ge_EmergencyMode[godHandle] == 0 and ge_Altar[godHandle] == 1
+            ge_Busy[godHandle] = 1
             myRand = number from 1 to 5
             if myRand == 1 or myRand == 2
                 myBuilding = get building ALTAR in PlayerTown min built 0.75
@@ -259,6 +260,7 @@ start
                 run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_FIRERAIN,myBuilding,0)
                 FireRainTimer = create timer for number from 600 * EpicModifier to 900 * EpicModifier seconds
             end if
+            ge_Busy[godHandle] = 0
         end if
 
         if townCounter >= 15 or PLAYER of ge_HomeTown[godHandle] != ge_Player[godHandle]

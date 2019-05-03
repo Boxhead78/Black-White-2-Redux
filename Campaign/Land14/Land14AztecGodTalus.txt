@@ -154,7 +154,8 @@ start
             ge_Busy[godHandle] = 0
         end if
 
-        if get ThrowMiracleTimer time remaining <= 0 and TempleDestroyed[0] == 1 and get player ge_Player[godHandle] mana > 17000 and PLAYER of PlayerTown == 0 and PLAYER of AztecTown1 == 1 and GB_DialogueIsRunning == 0 and ge_EmergencyMode[godHandle] == 0 and ge_Altar[godHandle] == 1
+        if ge_Busy[godHandle] == 0 and get ThrowMiracleTimer time remaining <= 0 and TempleDestroyed[0] == 1 and get player ge_Player[godHandle] mana > 17000 and PLAYER of PlayerTown == 0 and PLAYER of AztecTown1 == 1 and GB_DialogueIsRunning == 0 and ge_EmergencyMode[godHandle] == 0 and ge_Altar[godHandle] == 1
+            ge_Busy[godHandle] = 1
             GB_DialogueIsRunning = 1
             begin dialogue
                 myRand = number from 1 to 4
@@ -197,11 +198,13 @@ start
                 miracleCounter++
             end while
 
+            ge_Busy[godHandle] = 0
             ThrowMiracleTimer = create timer for number from 420 * EpicModifier to 600 * EpicModifier seconds
         end if
 
         //Only used once
-        if Difficulty >= 3 and ScriptedThunderstorm == 0 and get player ge_Player[godHandle] mana > 30000 and PLAYER of PlayerTown == 0 and GB_DialogueIsRunning == 0 and ge_EmergencyMode[godHandle] == 0 and ge_Altar[godHandle] == 1
+        if ge_Busy[godHandle] == 0 and Difficulty >= 3 and ScriptedThunderstorm == 0 and get player ge_Player[godHandle] mana > 30000 and PLAYER of PlayerTown == 0 and GB_DialogueIsRunning == 0 and ge_EmergencyMode[godHandle] == 0 and ge_Altar[godHandle] == 1
+            ge_Busy[godHandle] = 1
             myBuilding = marker at {886.27,120.00,1976.60}
             GB_DialogueIsRunning = 1
             begin dialogue
@@ -223,9 +226,11 @@ start
             GB_DialogueIsRunning = 0
             run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_THUNDERSTORM,marker at {myBuilding},0)
             ScriptedThunderstorm = 1
+            ge_Busy[godHandle] = 0
         end if
 
-        if AztecGodThrowBlitz == 1 and get player ge_Player[godHandle] mana > 10000 and PLAYER of PlayerTown == 0 and PLAYER of AztecTown1 == 1 and GB_DialogueIsRunning == 0 and ge_EmergencyMode[godHandle] == 0 and ge_Altar[godHandle] == 1
+        if ge_Busy[godHandle] == 0 and AztecGodThrowBlitz == 1 and get player ge_Player[godHandle] mana > 10000 and PLAYER of PlayerTown == 0 and PLAYER of AztecTown1 == 1 and GB_DialogueIsRunning == 0 and ge_EmergencyMode[godHandle] == 0 and ge_Altar[godHandle] == 1
+            ge_Busy[godHandle] = 1
             AztecGodThrowBlitz = 0
             GB_DialogueIsRunning = 1
             begin dialogue
@@ -269,10 +274,12 @@ start
                 miracleCounter++
             end while
 
+            ge_Busy[godHandle] = 0
             ThrowMiracleTimer = create timer for number from 420 * EpicModifier to 600 * EpicModifier seconds
         end if
 
-        if AztecGodThrowFirerain == 1 and get player ge_Player[godHandle] mana > 22000 and PLAYER of PlayerTown == 0 and GB_DialogueIsRunning == 0 and ge_EmergencyMode[godHandle] == 0 and ge_Altar[godHandle] == 1
+        if ge_Busy[godHandle] == 0 and AztecGodThrowFirerain == 1 and get player ge_Player[godHandle] mana > 22000 and PLAYER of PlayerTown == 0 and GB_DialogueIsRunning == 0 and ge_EmergencyMode[godHandle] == 0 and ge_Altar[godHandle] == 1
+            ge_Busy[godHandle] = 1
             AztecGodThrowFirerain = 0
             myRand = number from 1 to 5
             if myRand == 1 or myRand == 2
@@ -321,9 +328,11 @@ start
                 GB_DialogueIsRunning = 0
                 run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_FIRERAIN,myBuilding,0)
             end if
+            ge_Busy[godHandle] = 0
         end if
 
-        if get miniEpicTimer time remaining <= 0 and get player ge_Player[godHandle] mana > 30000 and PLAYER of PlayerTown == 0 and GB_DialogueIsRunning == 0 and ge_EmergencyMode[godHandle] == 0 and ge_Altar[godHandle] == 1
+        if ge_Busy[godHandle] == 0 and get miniEpicTimer time remaining <= 0 and get player ge_Player[godHandle] mana > 30000 and PLAYER of PlayerTown == 0 and GB_DialogueIsRunning == 0 and ge_EmergencyMode[godHandle] == 0 and ge_Altar[godHandle] == 1
+            ge_Busy[godHandle] = 1
             myRand = number from 1 to 5
             if myRand == 1 or myRand == 2
                 myBuilding = get building ALTAR in PlayerTown min built 0.75
@@ -377,6 +386,7 @@ start
                 end if
                 miniEpicTimer = create timer for 1000 * EpicModifier seconds
             end if
+            ge_Busy[godHandle] = 0
         end if
 
         if PLAYER of PlayerTown == 0
