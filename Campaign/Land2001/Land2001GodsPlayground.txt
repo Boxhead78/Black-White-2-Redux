@@ -314,7 +314,7 @@ end script MapLoader
 begin script SkirmishLoader
 
     DescriptionScroll = 0
-    MapScrolls[3]
+    MapScrolls[4]
     SettingScrolls[6]
     Portal = 0
     ExtraTemp = 0
@@ -327,9 +327,11 @@ start
     MapScrolls[0] = create highlight GOLD name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {1884.53,93.00,1343.59}
     MapScrolls[1] = create highlight GOLD name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {1953.78,106.00,1293.09}
     MapScrolls[2] = create highlight GOLD name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {1900.48,98.00,1225.89}
-    run background script LoadSkirmishMap(MapScrolls[0],21)
-    run background script LoadSkirmishMap(MapScrolls[1],22)
-    run background script LoadSkirmishMap(MapScrolls[2],23)
+    MapScrolls[3] = create highlight GOLD name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {1896.62,96.79,1365.12}
+    run background script LoadSkirmishMap(MapScrolls[0],2002)
+    run background script LoadSkirmishMap(MapScrolls[1],2003)
+    run background script LoadSkirmishMap(MapScrolls[2],2004)
+    run background script LoadSkirmishMap(MapScrolls[3],2005)
 
     Portal = create visual effect VISUAL_EFFECT_TELEPORTER_HOOP at {1895.47,75.80,1282.96} + {0.000,1.000,0.000} time -1
     SCALE of Portal = 1.25
@@ -499,30 +501,39 @@ begin loop
 
     if myScroll right clicked and AreYouSureCommentSaid == 0
         clear right clicked object
-        if skirmishMap == 21
+        if skirmishMap == 2002
             begin dialogue
                 if Language == English
-                    say "Through this portal you get to the 2 gods skirmish map. Click again to confirm."
+                    say "Through this portal you get to the 2 gods skirmish map Flugumyrr. Click again to confirm."
                 elsif Language == German
-                    say "Durch dieses Portal gelangst du zur 2-Goetter Gefechtskarte."
+                    say "Durch dieses Portal gelangst du zur 2-Goetter Gefechtskarte Flugumyrr."
                 end if
                 wait 5 seconds
             end dialogue
-        elsif skirmishMap == 22
+        elsif skirmishMap == 2003
             begin dialogue
                 if Language == English
-                    say "Through this portal you get to the 3 gods skirmish map. Click again to confirm."
+                    say "Through this portal you get to the 3 gods skirmish map Theatho. Click again to confirm."
                 elsif Language == German
-                    say "Durch dieses Portal gelangst du zur 3-Goetter Gefechtskarte."
+                    say "Durch dieses Portal gelangst du zur 3-Goetter Gefechtskarte Theatho."
                 end if
                 wait 5 seconds
             end dialogue
-        elsif skirmishMap == 23
+        elsif skirmishMap == 2004
             begin dialogue
                 if Language == English
-                    say "Through this portal you get to the 4 gods skirmish map. Click again to confirm."
+                    say "Through this portal you get to the 4 gods skirmish map Wagener. Click again to confirm."
                 elsif Language == German
-                    say "Durch dieses Portal gelangst du zur 4-Goetter Gefechtskarte."
+                    say "Durch dieses Portal gelangst du zur 4-Goetter Gefechtskarte Wagener."
+                end if
+                wait 5 seconds
+            end dialogue
+        elsif skirmishMap == 2005
+            begin dialogue
+                if Language == English
+                    say "Through this portal you get to the 2 gods skirmish map Shikoku. Click again to confirm."
+                elsif Language == German
+                    say "Durch dieses Portal gelangst du zur 2-Goetter Gefechtskarte Shikoku."
                 end if
                 wait 5 seconds
             end dialogue
@@ -552,7 +563,7 @@ begin cinema
     set mixer CSMixer channel AUDIO_MIXER_CHANNEL_GLOBAL to 0.0 with fadetime 3
     wait 3.5 seconds    
     
-    if skirmishMap == 21
+    if skirmishMap == 2002
         disable game can be lost
         run script LandExit
         run map script line "SET_LAND_NUMBER(2001)"
@@ -565,7 +576,7 @@ begin cinema
         wait 1.5 seconds
         load map "./Data/Landscape/BW2/land2002.bwe"
         
-    elsif skirmishMap == 22
+    elsif skirmishMap == 2003
         disable game can be lost
         run script LandExit
         run map script line "SET_LAND_NUMBER(2002)"
@@ -578,7 +589,7 @@ begin cinema
         wait 1.5 seconds
         load map "./Data/Landscape/BW2/land2003.bwe"
 
-    elsif skirmishMap == 23
+    elsif skirmishMap == 2004
         disable game can be lost
         run script LandExit
         run map script line "SET_LAND_NUMBER(2003)"
@@ -590,6 +601,19 @@ begin cinema
         end if
         wait 1.5 seconds
         load map "./Data/Landscape/BW2/land2004.bwe"
+
+    elsif skirmishMap == 2005
+        disable game can be lost
+        run script LandExit
+        run map script line "SET_LAND_NUMBER(2004)"
+        wait 1.5 seconds 
+        release MyCreature
+        MyCreature = get player 0 creature
+        if MyCreature exists
+            save my_creature
+        end if
+        wait 1.5 seconds
+        load map "./Data/Landscape/BW2/land2005.bwe"
 
     end if
 
