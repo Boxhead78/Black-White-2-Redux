@@ -1,0 +1,224 @@
+///////////////////////////////////////////////////////////////////////////////
+//       Villager Disciples Script
+//    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+///////////////////////////////////////////////////////////////////////////////
+
+define script VillagerDisciples
+define script vd_CreateDisciple(DiscipleType,whichTown)
+define script vd_RemoveDisciple(DiscipleType,TownRadius,whichTown)
+
+global VD_VILLAGER_DISCIPLE_NONE                          =  0
+global VD_VILLAGER_DISCIPLE_FARMER                        =  1
+global VD_VILLAGER_DISCIPLE_FORESTER                      =  2
+global VD_VILLAGER_DISCIPLE_FISHERMAN                     =  3 // Does not work
+global VD_VILLAGER_DISCIPLE_BUILDER                       =  4
+global VD_VILLAGER_DISCIPLE_BREEDER                       =  5
+global VD_VILLAGER_DISCIPLE_PROTECTION                    =  6 // Does not work
+global VD_VILLAGER_DISCIPLE_MISSIONARY                    =  7 // Does not work
+global VD_VILLAGER_DISCIPLE_CRAFTSMAN                     =  8 // Does not work
+global VD_VILLAGER_DISCIPLE_TRADER                        =  9 // Does not work
+global VD_VILLAGER_DISCIPLE_CHANGE_HOUSE                  =  10
+global VD_VILLAGER_DISCIPLE_WORSHIP                       =  11
+global VD_VILLAGER_DISCIPLE_PROTESTOR                     =  12 // Does not work
+global VD_VILLAGER_DISCIPLE_RESEARCHER                    =  13 // Does not work
+global VD_VILLAGER_DISCIPLE_MINER                         =  14
+global VD_VILLAGER_DISCIPLE_PILGRIM                       =  15 // Does not work
+global VD_VILLAGER_DISCIPLE_REFINER                       =  16
+
+
+run script VillagerDisciples
+
+begin script VillagerDisciples
+
+    Counter = 0
+    myTown[20]
+    myTownCentre = 0
+    MaleBreeders = 0
+    thisBuilding = 0
+    Prayers = 0
+    Miners = 0
+    NumDiscipleOther = 0
+    numberOfDisciples = 0
+
+start
+
+begin loop
+
+    //Reset Data
+    Counter = 0
+    //Store Data here
+    begin loop
+        myTown[Counter] = get town with id Counter
+        if PLAYER of myTown[Counter] == 0
+            myTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in myTown[Counter] min built 1.0
+            if myTownCentre exists and size of myTown[Counter] > 225
+                MaleBreeders = adult size of myTown[Counter] * 1.5 / 100
+                thisBuilding = get building ABODE_NUMBER_ALTAR in myTown[Counter] min built 1.0
+                if thisBuilding exists
+                    Prayers = adult size of myTown[Counter] * 0.5 / 100
+                else
+                    Prayers = 0
+                end if
+                Miners = adult size of myTown[Counter] * 0.25 / 100
+                NumDiscipleOther = adult size of myTown[Counter] * 1 / 100
+                //say "Disciples"
+                numberOfDisciples = get number of disciple VILLAGER_DISCIPLE_FARMER in town myTown[Counter]
+                while numberOfDisciples < NumDiscipleOther // Need more
+                    run script vd_CreateDisciple(VD_VILLAGER_DISCIPLE_FARMER,myTown[Counter])
+                    numberOfDisciples += 1
+                end while
+                while numberOfDisciples > NumDiscipleOther // Need less
+                    run script vd_RemoveDisciple(VD_VILLAGER_DISCIPLE_FARMER,600,myTown[Counter])
+                    numberOfDisciples -= 1
+                end while
+                
+                numberOfDisciples = get number of disciple VILLAGER_DISCIPLE_FORESTER in town myTown[Counter]
+                while numberOfDisciples < NumDiscipleOther // Need more
+                    run script vd_CreateDisciple(VD_VILLAGER_DISCIPLE_FORESTER,myTown[Counter])
+                    numberOfDisciples += 1
+                end while
+                while numberOfDisciples > NumDiscipleOther // Need less
+                    run script vd_RemoveDisciple(VD_VILLAGER_DISCIPLE_FORESTER,600,myTown[Counter])
+                    numberOfDisciples -= 1
+                end while 
+                
+                numberOfDisciples = get number of disciple VILLAGER_DISCIPLE_BUILDER in town myTown[Counter]
+                while numberOfDisciples < NumDiscipleOther // Need more
+                    run script vd_CreateDisciple(VD_VILLAGER_DISCIPLE_BUILDER,myTown[Counter])
+                    numberOfDisciples += 1
+                end while
+                while numberOfDisciples > NumDiscipleOther // Need less
+                    run script vd_RemoveDisciple(VD_VILLAGER_DISCIPLE_BUILDER,600,myTown[Counter])
+                    numberOfDisciples -= 1
+                end while 
+                
+                numberOfDisciples = get number of disciple VILLAGER_DISCIPLE_BREEDER in town myTown[Counter]
+                while numberOfDisciples < MaleBreeders // Need more
+                    run script vd_CreateDisciple(VD_VILLAGER_DISCIPLE_BREEDER,myTown[Counter])
+                    numberOfDisciples += 1
+                end while
+                while numberOfDisciples > MaleBreeders // Need less
+                    run script vd_RemoveDisciple(VD_VILLAGER_DISCIPLE_BREEDER,600,myTown[Counter])
+                    numberOfDisciples -= 1
+                end while 
+                
+                numberOfDisciples = get number of disciple VILLAGER_DISCIPLE_WORSHIP in town myTown[Counter]
+                while numberOfDisciples < Prayers // Need more
+                    run script vd_CreateDisciple(VD_VILLAGER_DISCIPLE_WORSHIP,myTown[Counter])
+                    numberOfDisciples += 1
+                end while
+                while numberOfDisciples > Prayers // Need less
+                    run script vd_RemoveDisciple(VD_VILLAGER_DISCIPLE_WORSHIP,600,myTown[Counter])
+                    numberOfDisciples -= 1
+                end while 
+                
+                numberOfDisciples = get number of disciple VILLAGER_DISCIPLE_MINER in town myTown[Counter]
+                while numberOfDisciples < Miners // Need more
+                    run script vd_CreateDisciple(VD_VILLAGER_DISCIPLE_MINER,myTown[Counter])
+                    numberOfDisciples += 1
+                end while
+                while numberOfDisciples > Miners // Need less
+                    run script vd_RemoveDisciple(VD_VILLAGER_DISCIPLE_MINER,600,myTown[Counter])
+                    numberOfDisciples -= 1
+                end while
+            end if
+        end if
+        Counter++
+        until Counter >= 20
+    end loop
+
+end loop
+
+end script VillagerDisciples
+
+
+begin script vd_CreateDisciple(DiscipleType,whichTown)
+    discipleType = DiscipleType
+    villagerToMod = 0
+    randomPlace = 0
+start
+    while not villagerToMod exists or (discipleType == VD_VILLAGER_DISCIPLE_BREEDER and not villagerToMod is male)
+        randomPlace = get random abode in town whichTown
+        villagerToMod = get disciple VILLAGER_DISCIPLE_NONE at {randomPlace} radius 50.0
+    end while
+
+    if discipleType == VD_VILLAGER_DISCIPLE_FARMER
+        set villagerToMod disciple VILLAGER_DISCIPLE_FARMER with sound
+    elsif discipleType == VD_VILLAGER_DISCIPLE_FORESTER
+        set villagerToMod disciple VILLAGER_DISCIPLE_FORESTER with sound
+    elsif discipleType == VD_VILLAGER_DISCIPLE_FISHERMAN
+        set villagerToMod disciple VILLAGER_DISCIPLE_FISHERMAN with sound
+    elsif discipleType == VD_VILLAGER_DISCIPLE_BUILDER
+        set villagerToMod disciple VILLAGER_DISCIPLE_BUILDER with sound
+    elsif discipleType == VD_VILLAGER_DISCIPLE_BREEDER
+        set villagerToMod disciple VILLAGER_DISCIPLE_BREEDER with sound
+    elsif discipleType == VD_VILLAGER_DISCIPLE_PROTECTION
+        set villagerToMod disciple VILLAGER_DISCIPLE_PROTECTION with sound
+    elsif discipleType == VD_VILLAGER_DISCIPLE_MISSIONARY
+        set villagerToMod disciple VILLAGER_DISCIPLE_MISSIONARY with sound
+    elsif discipleType == VD_VILLAGER_DISCIPLE_CRAFTSMAN
+        set villagerToMod disciple VILLAGER_DISCIPLE_CRAFTSMAN with sound
+    elsif discipleType == VD_VILLAGER_DISCIPLE_TRADER
+        set villagerToMod disciple VILLAGER_DISCIPLE_TRADER with sound
+    elsif discipleType == VD_VILLAGER_DISCIPLE_CHANGE_HOUSE
+        set villagerToMod disciple VILLAGER_DISCIPLE_CHANGE_HOUSE with sound
+    elsif discipleType == VD_VILLAGER_DISCIPLE_WORSHIP
+        set villagerToMod disciple VILLAGER_DISCIPLE_WORSHIP with sound
+    elsif discipleType == VD_VILLAGER_DISCIPLE_PROTESTOR
+        set villagerToMod disciple VILLAGER_DISCIPLE_PROTESTOR with sound
+    elsif discipleType == VD_VILLAGER_DISCIPLE_RESEARCHER
+        set villagerToMod disciple VILLAGER_DISCIPLE_RESEARCHER with sound
+    elsif discipleType == VD_VILLAGER_DISCIPLE_MINER
+        set villagerToMod disciple VILLAGER_DISCIPLE_MINER with sound
+    elsif discipleType == VD_VILLAGER_DISCIPLE_PILGRIM
+        set villagerToMod disciple VILLAGER_DISCIPLE_PILGRIM with sound
+    elsif discipleType == VD_VILLAGER_DISCIPLE_REFINER
+        set villagerToMod disciple VILLAGER_DISCIPLE_REFINER with sound
+    end if
+end script vd_CreateDisciple
+
+
+begin script vd_RemoveDisciple(DiscipleType,TownRadius,whichTown)
+    discipleType = DiscipleType
+    villagerToMod = 0
+    townRadius = TownRadius
+start
+    if discipleType == VD_VILLAGER_DISCIPLE_FARMER
+        villagerToMod = get disciple VILLAGER_DISCIPLE_FARMER at {whichTown} radius townRadius
+    elsif discipleType == VD_VILLAGER_DISCIPLE_FORESTER
+        villagerToMod = get disciple VILLAGER_DISCIPLE_FORESTER at {whichTown} radius townRadius
+    elsif discipleType == VD_VILLAGER_DISCIPLE_FISHERMAN
+        villagerToMod = get disciple VILLAGER_DISCIPLE_FISHERMAN at {whichTown} radius townRadius
+    elsif discipleType == VD_VILLAGER_DISCIPLE_BUILDER
+        villagerToMod = get disciple VILLAGER_DISCIPLE_BUILDER at {whichTown} radius townRadius
+    elsif discipleType == VD_VILLAGER_DISCIPLE_BREEDER
+        villagerToMod = get disciple VILLAGER_DISCIPLE_BREEDER at {whichTown} radius townRadius
+    elsif discipleType == VD_VILLAGER_DISCIPLE_PROTECTION
+        villagerToMod = get disciple VILLAGER_DISCIPLE_PROTECTION at {whichTown} radius townRadius
+    elsif discipleType == VD_VILLAGER_DISCIPLE_MISSIONARY
+        villagerToMod = get disciple VILLAGER_DISCIPLE_MISSIONARY at {whichTown} radius townRadius
+    elsif discipleType == VD_VILLAGER_DISCIPLE_CRAFTSMAN
+        villagerToMod = get disciple VILLAGER_DISCIPLE_CRAFTSMAN at {whichTown} radius townRadius
+    elsif discipleType == VD_VILLAGER_DISCIPLE_TRADER
+        villagerToMod = get disciple VILLAGER_DISCIPLE_TRADER at {whichTown} radius townRadius
+    elsif discipleType == VD_VILLAGER_DISCIPLE_CHANGE_HOUSE
+        villagerToMod = get disciple VILLAGER_DISCIPLE_CHANGE_HOUSE at {whichTown} radius townRadius
+    elsif discipleType == VD_VILLAGER_DISCIPLE_WORSHIP
+        villagerToMod = get disciple VILLAGER_DISCIPLE_WORSHIP at {whichTown} radius townRadius
+    elsif discipleType == VD_VILLAGER_DISCIPLE_PROTESTOR
+        villagerToMod = get disciple VILLAGER_DISCIPLE_PROTESTOR at {whichTown} radius townRadius
+    elsif discipleType == VD_VILLAGER_DISCIPLE_RESEARCHER
+        villagerToMod = get disciple VILLAGER_DISCIPLE_RESEARCHER at {whichTown} radius townRadius
+    elsif discipleType == VD_VILLAGER_DISCIPLE_MINER
+        villagerToMod = get disciple VILLAGER_DISCIPLE_MINER at {whichTown} radius townRadius
+    elsif discipleType == VD_VILLAGER_DISCIPLE_PILGRIM
+        villagerToMod = get disciple VILLAGER_DISCIPLE_PILGRIM at {whichTown} radius townRadius
+    elsif discipleType == VD_VILLAGER_DISCIPLE_REFINER
+        villagerToMod = get disciple VILLAGER_DISCIPLE_REFINER at {whichTown} radius townRadius
+    end if
+    
+    if villagerToMod exists
+        set villagerToMod disciple VILLAGER_DISCIPLE_NONE with sound
+    end if
+end script vd_RemoveDisciple
