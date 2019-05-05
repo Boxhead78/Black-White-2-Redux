@@ -1556,123 +1556,114 @@ begin loop
                     EnemyTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in EnemySettlement min built 1.0
                 end if
             end if
-            if PLAYER of EnemySettlement == PlayerID or EnemySettlement not exists or EnemyTownCentre not exists
+            if PLAYER of EnemySettlement == PlayerID
                 //say "Else"
                 EnemySettlement = get TOWN at {Platoon} radius AttackRadiusTown
                 EnemyTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in EnemySettlement min built 1.0
             end if
             if EnemyTownCentre exists and PLAYER of EnemySettlement != PlayerID
                 //say "Town Center"
-                if EnemySettlement == SpecTown1 or EnemySettlement == SpecTown2 or EnemySettlement == SpecTown3
+                if Platoon can navigate to object EnemyTownCentre
+                    //wait number from 5 to 25 seconds
                     if Platoon can navigate to object EnemyTownCentre
-                        //wait number from 5 to 25 seconds
-                        if Platoon can navigate to object EnemyTownCentre
-                            VariableB = 1
-                            clear Platoon action queue
-                            if PLAYER of EnemySettlement >= 0 and PLAYER of EnemySettlement <= 5 and PLAYER of EnemySettlement != PlayerID
-                                Number = number from 1 to 4
-                            else
-                                Number = 1
-                            end if
-                            if Number == 2 and HEALTH of EnemyCreature > 0 //Hunt down platoons or destroy buildings
-                                AttackMode = 1
-                                set Platoon attack EnemySettlement with severity 0.2
-                            elsif Number == 3 or Number == 4 //Destroy value buildings
-                                AttackMode = 2
-                                Building = 0
-                                Timer = create timer for 2 seconds
-                                begin loop
-                                    Number = number from 1 to 8
-                                    if Number == 1 or Number == 2 or Number == 3
-                                        Building = get building ALTAR in EnemySettlement min built 0.75
-                                        if Building exists
-                                            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
-                                        else
-                                            Building = 0
-                                        end if
-                                    elsif Number == 4
-                                        Building = get building TEMPLE in EnemySettlement min built 0.75
-                                        if Building exists
-                                            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
-                                        else
-                                            Building = 0
-                                        end if
-                                    elsif Number == 5
-                                        Building = get building CREATURE_PEN in EnemySettlement min built 0.75
-                                        if Building exists
-                                            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
-                                        else
-                                            Building = 0
-                                        end if
-                                    elsif Number == 6
-                                        Building = get building UNIVERSITY in EnemySettlement min built 0.75
-                                        if Building exists
-                                            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
-                                        else
-                                            Building = 0
-                                        end if
-                                    elsif Number == 7
-                                        Building = get building BATHHOUSE in EnemySettlement min built 0.75
-                                        if Building exists
-                                            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
-                                        else
-                                            Building = 0
-                                        end if
-                                    elsif Number == 8
-                                        Building = get building AMPITHEATRE in EnemySettlement min built 0.75
-                                        if Building exists
-                                            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
-                                        else
-                                            Building = 0
-                                        end if
-                                    end if
-                                    until Building != 0 or get Timer time remaining <= 0
-                                end loop
-                            else //Capture Town
-                                CurrTowns = get player PlayerID town total
-                                if CurrTowns <= TownsTemp
-                                    AttackMode = 0
-                                    set Platoon attack EnemySettlement with severity 0.3 for takeover
-                                end if
-                                if PLAYER of EnemySettlement >= 0 and PLAYER of EnemySettlement <= 5 and PLAYER of EnemySettlement != PlayerID
-                                    AttackMode = 0
-                                    set Platoon attack EnemySettlement with severity 0.3 for takeover
-                                end if
-                            end if
-                            RecalculateTimer = create timer for 40 seconds
-                            begin loop
-                                if Counter >= SK_MaxPlayers
-                                    Counter = 0
-                                end if
-                                EnemyCreature = get player Counter creature
-                                EnemyPlatoon = get platoon of player Counter nearest {Platoon} radius 150
-                                EnemyCreatureDist = get distance from {Platoon} to {EnemyCreature}
-                                //if PlayerPlatoon1 exists or TestCreature2 <= 150 or not Platoon can navigate to object EnemySettlementCentre
-                                    if EnemyPlatoon exists and not town EnemySettlement is under takeover from player PlayerID and Counter != PlayerID
-                                        VariableB = 0
-                                    elsif EnemyCreatureDist <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of EnemyCreature > 0.00 and not town EnemySettlement is under takeover from player PlayerID and Counter != PlayerID
-                                        VariableB = 0
-                                    elsif not Platoon can navigate to object EnemyTownCentre
-                                        VariableB = 0
-                                    elsif Platoon not exists
-                                        VariableB = 0
-                                    elsif AttackMode == 1 and HEALTH of EnemyCreature == 0
-                                        VariableB = 0
-                                    elsif AttackMode == 2 and Building not exists
-                                        VariableB = 0
-                                    elsif AttackMode == 2 and HEALTH of Building < 0.1
-                                        VariableB = 0
-                                    elsif AttackMode == 2 and Building == 0
-                                        VariableB = 0
-                                    elsif not town EnemySettlement is under takeover from player PlayerID and get RecalculateTimer time remaining <= 0
-                                        VariableB = 0
-                                    end if
-                                //end if
-                                Counter++
-                                until VariableB == 0 or Platoon not exists
-                            end loop
-                            clear Platoon action queue
+                        VariableB = 1
+                        clear Platoon action queue
+                        if PLAYER of EnemySettlement >= 0 and PLAYER of EnemySettlement <= 5 and PLAYER of EnemySettlement != PlayerID
+                            Number = number from 1 to 4
+                        else
+                            Number = 1
                         end if
+                        if Number == 2 and HEALTH of EnemyCreature > 0 //Hunt down platoons or destroy buildings
+                            AttackMode = 1
+                            set Platoon attack EnemySettlement with severity 0.2
+                        elsif Number == 3 or Number == 4 //Destroy value buildings
+                            AttackMode = 2
+                            Building = 0
+                            Timer = create timer for 2 seconds
+                            begin loop
+                                Number = number from 1 to 8
+                                if Number == 1 or Number == 2 or Number == 3
+                                    Building = get building ALTAR in EnemySettlement min built 0.75
+                                    if Building exists
+                                        add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 4
+                                    Building = get building TEMPLE in EnemySettlement min built 0.75
+                                    if Building exists
+                                        add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 5
+                                    Building = get building CREATURE_PEN in EnemySettlement min built 0.75
+                                    if Building exists
+                                        add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 6
+                                    Building = get building UNIVERSITY in EnemySettlement min built 0.75
+                                    if Building exists
+                                        add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 7
+                                    Building = get building BATHHOUSE in EnemySettlement min built 0.75
+                                    if Building exists
+                                        add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 8
+                                    Building = get building AMPITHEATRE in EnemySettlement min built 0.75
+                                    if Building exists
+                                        add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                end if
+                                until Building != 0 or get Timer time remaining <= 0
+                            end loop
+                        else //Capture Town
+                            AttackMode = 0
+                            set Platoon attack EnemySettlement with severity 0.3 for takeover
+                        end if
+                        RecalculateTimer = create timer for 40 seconds
+                        begin loop
+                            if Counter >= SK_MaxPlayers
+                                Counter = 0
+                            end if
+                            EnemyCreature = get player Counter creature
+                            EnemyPlatoon = get platoon of player Counter nearest {Platoon} radius 150
+                            EnemyCreatureDist = get distance from {Platoon} to {EnemyCreature}
+                            //if PlayerPlatoon1 exists or TestCreature2 <= 150 or not Platoon can navigate to object EnemySettlementCentre
+                                if EnemyPlatoon exists and not town EnemySettlement is under takeover from player PlayerID and Counter != PlayerID
+                                    VariableB = 0
+                                elsif EnemyCreatureDist <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of EnemyCreature > 0.00 and not town EnemySettlement is under takeover from player PlayerID and Counter != PlayerID
+                                    VariableB = 0
+                                elsif not Platoon can navigate to object EnemyTownCentre
+                                    VariableB = 0
+                                elsif Platoon not exists
+                                    VariableB = 0
+                                elsif AttackMode == 1 and HEALTH of EnemyCreature == 0
+                                    VariableB = 0
+                                elsif AttackMode == 2 and Building not exists
+                                    VariableB = 0
+                                elsif AttackMode == 2 and HEALTH of Building < 0.1
+                                    VariableB = 0
+                                elsif AttackMode == 2 and Building == 0
+                                    VariableB = 0
+                                elsif not town EnemySettlement is under takeover from player PlayerID and get RecalculateTimer time remaining <= 0
+                                    VariableB = 0
+                                end if
+                            //end if
+                            Counter++
+                            until VariableB == 0 or Platoon not exists
+                        end loop
+                        clear Platoon action queue
                     end if
                 end if
             end if
