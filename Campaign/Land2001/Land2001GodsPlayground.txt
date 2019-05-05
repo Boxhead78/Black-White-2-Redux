@@ -314,7 +314,7 @@ end script MapLoader
 begin script SkirmishLoader
 
     DescriptionScroll = 0
-    MapScrolls[4]
+    MapScrolls[6]
     SettingScrolls[6]
     Portal = 0
     ExtraTemp = 0
@@ -327,11 +327,15 @@ start
     MapScrolls[0] = create highlight GOLD name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {1884.53,93.00,1343.59}
     MapScrolls[1] = create highlight GOLD name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {1953.78,106.00,1293.09}
     MapScrolls[2] = create highlight GOLD name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {1900.48,98.00,1225.89}
-    MapScrolls[3] = create highlight GOLD name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {1896.62,96.79,1365.12}
+    MapScrolls[3] = create highlight GOLD name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {1905.55,89.50,1341.40}
+    MapScrolls[4] = create highlight GOLD name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {1950.41,104.46,1274.78}
+    MapScrolls[5] = create highlight GOLD name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {1832.94,89.10,1271.20}
     run background script LoadSkirmishMap(MapScrolls[0],2002)
     run background script LoadSkirmishMap(MapScrolls[1],2003)
     run background script LoadSkirmishMap(MapScrolls[2],2004)
     run background script LoadSkirmishMap(MapScrolls[3],2005)
+    run background script LoadSkirmishMap(MapScrolls[4],2006)
+    run background script LoadSkirmishMap(MapScrolls[5],0)
 
     Portal = create visual effect VISUAL_EFFECT_TELEPORTER_HOOP at {1895.47,75.80,1282.96} + {0.000,1.000,0.000} time -1
     SCALE of Portal = 1.25
@@ -537,6 +541,24 @@ begin loop
                 end if
                 wait 5 seconds
             end dialogue
+        elsif skirmishMap == 2006
+            begin dialogue
+                if Language == English
+                    say "Through this portal you get to the 3 gods skirmish map Greenpatch-Island. Click again to confirm."
+                elsif Language == German
+                    say "Durch dieses Portal gelangst du zur 3-Goetter Gefechtskarte Greenpatch-Island."
+                end if
+                wait 5 seconds
+            end dialogue
+        elsif skirmishMap == 0
+            begin dialogue
+                if Language == English
+                    say "Through this portal you get to the a random skirmish map. Click again to confirm."
+                elsif Language == German
+                    say "Durch dieses Portal gelangst du zu einer zufaelligen Gefechtskarte."
+                end if
+                wait 5 seconds
+            end dialogue
         end if
         AreYouSureCommentSaid = 1
         clear right clicked object
@@ -549,6 +571,11 @@ end loop
 
 set fade red 0 green 0 blue 0 time 1
 wait 1 seconds
+
+if skirmishMap == 0
+    skirmishMap = number from 2002 to 2006
+end if
+
 begin cinema
     start music "cut_scene_sinister_02" loop 10 
 
@@ -614,6 +641,19 @@ begin cinema
         end if
         wait 1.5 seconds
         load map "./Data/Landscape/BW2/land2005.bwe"
+
+    elsif skirmishMap == 2006
+        disable game can be lost
+        run script LandExit
+        run map script line "SET_LAND_NUMBER(2005)"
+        wait 1.5 seconds 
+        release MyCreature
+        MyCreature = get player 0 creature
+        if MyCreature exists
+            save my_creature
+        end if
+        wait 1.5 seconds
+        load map "./Data/Landscape/BW2/land2006.bwe"
 
     end if
 
