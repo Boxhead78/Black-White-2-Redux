@@ -9,6 +9,7 @@ define oCreature = 0
 define script Globals
 define script LC13_CreateUndeadPlatoon(whichPlatoon,howManyVillagersToDelete,howManyVillagersToSpawn,whichMesh)
 define script LC13_GhostScript(myGhost,whichMesh)
+define script LC13_AIAltarCounter(whichBuilding)
 
 define s_aztecwarrior_ghost = 0
 define s_skeletonadultland2 = 1
@@ -42,6 +43,7 @@ global VolcanoStopFireBalls = 0
 global VolcanoActive = 0
 global TriedAztecTown1Attack = 0
 global SendStonehengeTroops = 0
+global LC13_AltarCounter = 0
 
 global PlayerTown = 0
 global MinorTown1 = 0
@@ -255,3 +257,25 @@ start
     set player 0 alignment PlayerAlignment
 
 end script LC13_GhostScript
+
+
+begin script LC13_AIAltarCounter(whichBuilding)
+
+    AltarCount = 0
+
+start
+
+begin loop
+    if HEALTH of whichBuilding == 1.0 and PLAYER of whichBuilding == 1 and AltarCount == 0
+        AltarCount = 1
+        LC13_AltarCounter += 1
+    elsif AltarCount == 1
+        if HEALTH of whichBuilding < 1.0 or PLAYER of whichBuilding != 1 or whichBuilding not exists
+            AltarCount = 0
+            LC13_AltarCounter -= 1
+        end if
+    end if
+    until whichBuilding not exists and AltarCount == 0
+end loop
+
+end script LC13_AIAltarCounter
