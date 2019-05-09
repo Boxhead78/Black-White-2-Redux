@@ -16,6 +16,7 @@ define script SK_AIEpicBuild(PlayerID,Wonder,AITown)
 define script SK_AITownBuildingAltarWorkaround(PlayerID,Altar)
 define script SK_AITownBuildingStopMusic
 define script SK_AIEpicWorshippers(PlayerID,Wonder,AITown)
+define script SK_AIAltarCounter(PlayerID,whichBuilding)
 
 define BuildingWaitTime = 25 //Gets divided with the difficulty multiplier
 define BuildingWaitTimeMinimum = 3
@@ -31,6 +32,7 @@ global CurrTries[SK_MaxPlayers]
 global NextBuildingPos[SK_MaxPlayers]
 global BuildBuilding[SK_MaxPlayers]
 global DelayAllowed[SK_MaxPlayers]
+global SK_AltarCounter[SK_MaxPlayers]
 
 begin script SK_AITownBuildingMaxBuildings(PlayerID)
 
@@ -1921,6 +1923,7 @@ start
         elsif Building == 4
             NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_GREEK_ALTAR at {NextBuildingPos[PlayerID]}
             run background script SK_AITownBuildingAltarWorkaround(PlayerID,NewBuilding)
+            run background script SK_AIAltarCounter(PlayerID,NewBuilding)
         //    disable music on NewBuilding
         //    detach music from NewBuilding
         //    detach atmos from NewBuilding
@@ -2036,6 +2039,7 @@ start
         elsif Building == 8
             NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_GREEK_ALTAR at {NextBuildingPos[PlayerID]}
             run background script SK_AITownBuildingAltarWorkaround(PlayerID,NewBuilding)
+            run background script SK_AIAltarCounter(PlayerID,NewBuilding)
         //    disable music on NewBuilding
         //    detach music from NewBuilding
         //    detach atmos from NewBuilding
@@ -2140,6 +2144,7 @@ start
         elsif Building == 4
             NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_GREEK_ALTAR at {NextBuildingPos[PlayerID]}
             run background script SK_AITownBuildingAltarWorkaround(PlayerID,NewBuilding)
+            run background script SK_AIAltarCounter(PlayerID,NewBuilding)
         //    disable music on NewBuilding
         //    detach music from NewBuilding
         //    detach atmos from NewBuilding
@@ -2383,3 +2388,25 @@ begin loop
 end loop
 
 end script SK_AIEpicWorshippers
+
+
+begin script SK_AIAltarCounter(PlayerID,whichBuilding)
+
+    AltarCount = 0
+
+start
+
+begin loop
+    if HEALTH of whichBuilding == 1.0 and PLAYER of whichBuilding == PlayerID and AltarCount == 0
+        AltarCount = 1
+        SK_AltarCounter[PlayerID] += 1
+    elsif AltarCount == 1
+        if HEALTH of whichBuilding < 1.0 or PLAYER of whichBuilding != PlayerID or whichBuilding not exists
+            AltarCount = 0
+            SK_AltarCounter[PlayerID] -= 1
+        end if
+    end if
+    until whichBuilding not exists and AltarCount == 0
+end loop
+
+end script SK_AIAltarCounter
