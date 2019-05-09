@@ -25,6 +25,7 @@ global ge_ManaPerSecond[2]
 global ge_MiracleDelay[2]
 global ge_EpicSpellDelay[2]
 global geChangeTown[2]
+global tal_AltarCounter[2]
 
 
 ////////////////////////////
@@ -617,8 +618,9 @@ start
         run script ge_MoveToRadiusAltitude(godHandle,rBuilding,4.0,geGodBuildAltitude)
 
         //run background script ge_VisualGodBuild(godHandle,buildTime)
-        while HEALTH of rBuilding < 1.0 and 0 < woodBuildTime
-            HEALTH of rBuilding += buildRate
+        while HEALTH of rBuilding < 1.0 and 0 < woodBuildTime and rBuilding exists and not rBuilding on fire
+            HEALTH of rBuilding += buildRate / 2
+            BUILT of rBuilding += buildRate / 2
             woodBuildTime -= 1
             wait 0.1 seconds
         end while
@@ -626,7 +628,7 @@ start
         ge_QuantityInHand[godHandle] = 0
         ge_TypeInHand[godHandle] = GE_HT_EMPTY
 
-        if finalOreCost > 0
+        if finalOreCost > 0 and not rBuilding on fire
             if not ge_TypeInHand[godHandle] == GE_HT_ORE and not ge_TypeInHand[godHandle] == GE_HT_EMPTY
                 run script ge_DropInStorehouse(godHandle,myStorehouse,-1)
             end if
@@ -636,8 +638,9 @@ start
         run script ge_MoveToRadiusAltitude(godHandle,rBuilding,4.0,geGodBuildAltitude)
         
         //run background script ge_VisualGodBuild(godHandle,buildTime)
-        while HEALTH of rBuilding < 1.0
-            HEALTH of rBuilding += buildRate
+        while HEALTH of rBuilding < 1.0 and rBuilding exists and not rBuilding on fire
+            HEALTH of rBuilding += buildRate / 2
+            BUILT of rBuilding += buildRate / 2
             wait 0.1 seconds
         end while
         
@@ -656,6 +659,7 @@ begin script ge_GoGetOre(GodHandle,AmountNeeded,ResourceGatherRadius)
     resourceGatherRadius = ResourceGatherRadius
     myStorehouse = 0
     maxStorehouseChecks = get number of type SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_STORAGE_PIT in ge_HomeTown[godHandle] min built 1.0
+    maxTries = 0
     myOreRock = 0
 start
     if rGodInstance[godHandle] exists
@@ -663,17 +667,21 @@ start
             ge_QuantityInHand[godHandle] = 0
             ge_TypeInHand[godHandle] = GE_HT_ORE
         end if
-        while ge_QuantityInHand[godHandle] < amountNeeded and 0 < maxStorehouseChecks
+        maxTries = 0
+        while ge_QuantityInHand[godHandle] < amountNeeded and 0 < maxStorehouseChecks and maxTries < 5
             maxStorehouseChecks -= 1
             myStorehouse = get town ge_HomeTown[godHandle] storage pit with most RESOURCE_TYPE_ORE
             if myStorehouse exists
                 run script ge_PickupResource(godHandle,myStorehouse,GE_HT_ORE,amountNeeded)
             end if
+            maxTries++
         end while
+        maxTries = 0
         myOreRock = get SCRIPT_OBJECT_TYPE_ORE_ROCK at {ge_HomeTown[godHandle]} radius resourceGatherRadius
-        while ge_QuantityInHand[godHandle] < amountNeeded and myOreRock exists
+        while ge_QuantityInHand[godHandle] < amountNeeded and myOreRock exists and maxTries < 5
             run script ge_PickupResource(godHandle,myOreRock,GE_HT_ORE,amountNeeded)
             myOreRock = get SCRIPT_OBJECT_TYPE_ORE_ROCK at {ge_HomeTown[godHandle]} radius resourceGatherRadius
+            maxTries++
         end while
     end if
 end script ge_GoGetOre
@@ -686,6 +694,7 @@ begin script ge_GoGetWood(GodHandle,AmountNeeded,ResourceGatherRadius)
     resourceGatherRadius = ResourceGatherRadius
     myStorehouse = 0
     maxStorehouseChecks = get number of type SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_STORAGE_PIT in ge_HomeTown[godHandle] min built 1.0
+    maxTries = 0
     myTree = 0
 start
     if rGodInstance[godHandle] exists
@@ -693,17 +702,21 @@ start
             ge_QuantityInHand[godHandle] = 0
             ge_TypeInHand[godHandle] = GE_HT_WOOD
         end if
-        while ge_QuantityInHand[godHandle] < amountNeeded and 0 < maxStorehouseChecks
+        maxTries = 0
+        while ge_QuantityInHand[godHandle] < amountNeeded and 0 < maxStorehouseChecks and maxTries < 5
             maxStorehouseChecks -= 1
             myStorehouse = get town ge_HomeTown[godHandle] storage pit with most RESOURCE_TYPE_WOOD
             if myStorehouse exists
                 run script ge_PickupResource(godHandle,myStorehouse,GE_HT_WOOD,amountNeeded)
             end if
+            maxTries++
         end while
+        maxTries = 0
         myTree = get SCRIPT_OBJECT_TYPE_TREE at {ge_HomeTown[godHandle]} radius resourceGatherRadius
-        while ge_QuantityInHand[godHandle] < amountNeeded and myTree exists
+        while ge_QuantityInHand[godHandle] < amountNeeded and myTree exists and maxTries < 5
             run script ge_PickupResource(godHandle,myTree,GE_HT_WOOD,amountNeeded)
             myTree = get SCRIPT_OBJECT_TYPE_TREE at {ge_HomeTown[godHandle]} radius resourceGatherRadius
+            maxTries++
         end while
     end if
 end script ge_GoGetWood
@@ -721,21 +734,7 @@ start
 
 begin loop
     wait until rGodInstance[godHandle] exists
-    Counter = 0
-    AltarCounter = 0
-    begin loop
-        myTown[Counter] = get town with id Counter
-        if PLAYER of myTown[Counter] == ge_Player[godHandle]
-            myAltar = get building ABODE_NUMBER_ALTAR in myTown[Counter] min built 1.0
-            if myAltar exists and HEALTH of myAltar == 1.0
-                AltarCounter++
-            end if
-        end if
-        Counter++
-        until Counter >= 20
-    end loop
-
-    if AltarCounter >= 1
+    if SK_AltarCounter[godHandle] >= 1
         ge_Altar[godHandle] = 1
     else
         ge_Altar[godHandle] = 0
