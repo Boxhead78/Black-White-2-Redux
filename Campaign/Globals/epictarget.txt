@@ -1,9 +1,9 @@
-define script EpicTargeter(whichTown,EpicPos,Volcano)
+define script EpicTargeter(whichTown,EpicPos,Volcano,whichEpic)
 
 global ET_FireEpicLocation = 0
 
 
-begin script EpicTargeter(whichTown,EpicPos,Volcano)
+begin script EpicTargeter(whichTown,EpicPos,Volcano,whichEpic)
 
     CounterEpic = 0
     Building = 0
@@ -19,7 +19,7 @@ start
 
 begin loop
     CounterEpic = 0
-    while CounterEpic < 25 and ExitLoop == 0
+    while CounterEpic < 35 and ExitLoop == 0
         if Volcano == 0
             InfluencePos = get player 0 influence at {EpicPos}
             if InfluencePos < 1
@@ -37,9 +37,11 @@ begin loop
             ET_FireEpicLocation = marker at {EpicPos} + {number from minNumber to maxNumber, number from minNumber to maxNumber}
         end if
         Influence = get player 0 influence at {ET_FireEpicLocation}
-        Villager = create VILLAGER NORSE_HOUSEWIFE at {ET_FireEpicLocation} + {number from minNumber to maxNumber, number from minNumber to maxNumber}
+        Villager = create VILLAGER NORSE_HOUSEWIFE at {ET_FireEpicLocation} + {number from -5 to 5, number from -5 to 5}
         if Influence < 1 and not {ET_FireEpicLocation} under water and not {whichTown} near {ET_FireEpicLocation} radius 30
-            if Villager can navigate to {ET_FireEpicLocation} and not {Villager} near {ET_FireEpicLocation} radius 5
+            if Villager can navigate to {ET_FireEpicLocation} and whichEpic == 2 or whichEpic == 4
+                ExitLoop = 1
+            else 
                 ExitLoop = 1
             end if
         end if
