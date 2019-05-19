@@ -249,17 +249,20 @@ start
 
 	Number = number from 0 to 4
 	Skeleton = create VILLAGER NORSE_HOUSEWIFE at {SkeletonSpawnPos[Number]} 
+	disable Skeleton pickup
 	disable Skeleton reactable
 	override mesh for Skeleton with "..\skins\s_skeletonadultland2"
 	set anim speed of Skeleton to 0.66
 	SPEED of Skeleton = SkeletonSpeed
 
 	Number = number from 0 to 4
-	move Skeleton position to {SkeletonRunToPos[Number]} using NAV_FAILURE_MODE_GO_TO_CLOSEST_POINT navigation
 
 	SkeletonCounter++
 
-	wait until HEALTH of Skeleton == 0.00 or {Skeleton} near {SkeletonRunToPos[Number]} radius 3.5 or SkeletonCleanUp == 1
+	while HEALTH of Skeleton > 0.00 and not {Skeleton} near {SkeletonRunToPos[Number]} radius 3.5 and SkeletonCleanUp != 1
+		move Skeleton position to {SkeletonRunToPos[Number]} using NAV_FAILURE_MODE_GO_TO_CLOSEST_POINT navigation
+		wait until SkeletonCleanUp == 1 or 5 seconds
+	end while
 
 	SkeletonCounter--
 
@@ -289,13 +292,16 @@ start
 
 	Number = number from 0 to 4
 	Villager = create random villager of tribe TRIBE_TYPE_JAPANESE at {SkeletonSpawnPos[Number]}
+	disable Villager pickup
 	disable Villager reactable
 	SPEED of Villager = SkeletonSpeed + 0.1
 
 	Number = number from 0 to 4
-	move Villager position to {SkeletonRunToPos[Number]} using NAV_FAILURE_MODE_GO_TO_CLOSEST_POINT navigation
 
-	wait until HEALTH of Villager == 0.00 or {Villager} near {SkeletonRunToPos[Number]} radius 3.5 or SkeletonCleanUp == 1
+	while HEALTH of Villager > 0.00 and not {Villager} near {SkeletonRunToPos[Number]} radius 3.5 and SkeletonCleanUp != 1
+		move Villager position to {SkeletonRunToPos[Number]} using NAV_FAILURE_MODE_GO_TO_CLOSEST_POINT navigation
+		wait until SkeletonCleanUp == 1 or 5 seconds
+	end while
 
 	if HEALTH of Villager == 0.00 and SkeletonCleanUp == 0
 		SkeletonLoseCounter += 3
