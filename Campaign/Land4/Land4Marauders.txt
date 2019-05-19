@@ -90,7 +90,7 @@ start
 		while Marauders exists and MaraudersNear == 0
 			if DayChanged >= 3 and Moved == 0 //get MarauderTimer time remaining == 0
 				clear Marauders action queue
-				add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {FoodDropPos} to Marauders action queue
+				add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {FoodDropPos} + {10,10} to Marauders action queue
 				Moved = 1
 				wait until GB_DialogueIsRunning == 0
 				GB_DialogueIsRunning = 1
@@ -132,7 +132,6 @@ start
 		end while
 
 		//End Check
-		TempSize = get number of villagers in platoon Marauders
 		if not Marauders exists
 			//You killed them
 			run script KN_Outro(KN_FALSE)
@@ -143,6 +142,7 @@ start
 		
 		elsif {Marauders} near {FoodDropPos} radius 30
 		
+			TempSize = get number of villagers in platoon Marauders
 			wait until GB_DialogueIsRunning == 0
 			GB_DialogueIsRunning = 1
 			begin dialogue
@@ -155,7 +155,10 @@ start
 				FoodDrop = create STORE FOOD at {FoodDropPos}
 			end if
 			CurrFood = get resource RESOURCE_TYPE_FOOD in FoodDrop
-			
+			if CurrFood > 5000 and FoodAdded < 1 and get number of villagers in platoon Marauders >= TempSize
+				FoodAdded++
+			end if
+
 			if not Marauders exists
 				//Killed them
 				run script KN_Outro(KN_FALSE)
@@ -183,7 +186,6 @@ start
 				delete FoodDrop
 				run script KN_Outro(KN_TRUE)
 
-				increment tribute by 5000
 				clear Marauders action queue
 				add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {MaraudersFinalPos} to Marauders action queue
 				set player 0 objective TRIBUTE_OBJECTIVE_LAND_7 status to TRIBUTE_OBJECTIVE_STATE_COMPLETE
