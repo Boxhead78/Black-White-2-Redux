@@ -9,6 +9,7 @@
 define script MapLoader
 define script SkirmishLoader
 define script LoadSkirmishMap(myScroll, skirmishMap)
+define script InitiateHardMode
 
 
 begin script MapLoader
@@ -469,7 +470,7 @@ start
                     elsif Language == German
                         say "Eigene Wunder aktiviert."
                     end if
-                    wait until SettingScrolls[2] right clicked or 2 seconds
+                    wait until SettingScrolls[3] right clicked or 2 seconds
                 end dialogue
             elsif EpicSpellsTemp == 2
                 begin dialogue
@@ -478,7 +479,7 @@ start
                     elsif Language == German
                         say "Eigene Wunder deaktiviert."
                     end if
-                    wait until SettingScrolls[2] right clicked or 2 seconds
+                    wait until SettingScrolls[3] right clicked or 2 seconds
                 end dialogue
             end if
             PD_ForcedSaving = 1
@@ -662,3 +663,65 @@ begin cinema
 end cinema
 
 end script LoadSkirmishMap
+
+
+begin script InitiateHardMode
+
+    HM_ScrollPos = 0
+    HM_Scroll = 0
+    HM_ScrollBronze = 0
+    HardModeTemp = 0
+
+start
+
+    //Initiate Silver scroll
+    HM_ScrollPos = marker at {836.32,70.75,1837.46}
+    HM_Scroll = create highlight SILVER name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {HM_ScrollPos}
+    HM_ScrollBronze = create highlight BRONZE name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {HM_ScrollPos} + {20,0,20}
+
+begin loop
+
+    if HM_ScrollBronze right clicked
+        clear right clicked object
+        if Language == English
+            say "With this scroll you activate the Hard Mode for campaign."
+        elsif Language == German
+            say "Hier aktivierst du die erweiterte Kampagne."
+        end if
+    end if
+
+    if HM_Scroll right clicked
+        clear right clicked object
+        HardModeTemp++
+        if HardModeTemp == 1 or HardModeTemp == 3
+            if HardModeTemp == 3
+                HardModeTemp = 1
+            end if
+            begin dialogue
+                if Language == English
+                    say "Hard Mode enabled."
+                elsif Language == German
+                    say "Erweiterte Kampagne aktiviert."
+                end if
+                wait until HM_Scroll right clicked or 2 seconds
+            end dialogue
+        elsif HardModeTemp == 2
+            begin dialogue
+                if Language == English
+                    say "Hard Mode disabled."
+                elsif Language == German
+                    say "Erweiterte Kampagne deaktiviert."
+                end if
+                wait until HM_Scroll right clicked or 2 seconds
+            end dialogue
+        end if
+        PD_ForcedSaving = 1
+        wait until PD_ForcedSaving == 0 or 10 seconds
+        stop script "SavePersistentDataSetData"
+        set persistent data "HARD_MODE" to HardModeTemp
+        run script SavePersistentDataGetData
+    end if
+
+end loop
+
+end script InitiateHardMode
