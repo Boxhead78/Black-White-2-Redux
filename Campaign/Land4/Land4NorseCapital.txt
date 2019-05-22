@@ -21,6 +21,7 @@ define script ResourceManagerNorseTown
 define script VillagerManagerNorseTown
 define script NorseScript1
 define script DisableLocalPlatoonResponse
+define script LC4_VolcanoResourceManager
 
 begin script LC4_Norse_Capital_Impressiveness
 
@@ -1141,6 +1142,14 @@ begin loop
         GB_DialogueIsRunning = 0
     end if
     
+    if VolcanoFired == 1
+        VolcanoFired = 2
+        begin dialogue
+            say "BW2T_SCRIPT_04FINAL_EPIC_VOLCANO_READY"
+            wait until read
+        end dialogue
+    end if
+
 end loop
     
 end script LC4_Speeches
@@ -1310,6 +1319,15 @@ begin script LC4_Norse_Capital
     AttackingPosition = 0
     AttackingPositionFallBack = 0
     CatapultScriptFired = 1
+    HardModeAttackTimer = create timer for 999999 seconds
+    VolcanoBuilt = 0
+    VolcanoWarning = 0
+    VolcanoTimer = create timer for 0 seconds
+    VOLCANODELAY = 2500
+    EpicVolc = 0
+    SiegeWaypoint1 = 0
+    SiegeWaypoint2 = 0
+    SiegeWaypoint3 = 0
 
 start
 
@@ -1366,6 +1384,43 @@ start
     enable platoon LC4_Platoon[1] respond to town NorseCapital attack
     set LC4_Platoon[1] focus to {PlatoonPos[1]}
     
+    if HardMode == 1
+        LC4_Platoon[21] = create platoon PLATOON_INFO_NORSE_MELEE_2 at {PlatoonPos[7]} with 30 * RecruitSizeModifier men and 0 women
+        attach LC4_Platoon[21] to NorseCapital
+        PLAYER of LC4_Platoon[21] = 1
+        run background script LC4_StaticPlatoonsActions(PlatoonPos[7],Melee,LC4_Platoon[21])
+        enable platoon LC4_Platoon[21] respond to town NorseCapital attack
+        set LC4_Platoon[21] focus to {PlayerTown}
+
+        LC4_Platoon[22] = create platoon PLATOON_INFO_NORSE_RANGED_2 at {PlatoonPos[8]} with 30 * RecruitSizeModifier men and 0 women
+        attach LC4_Platoon[22] to NorseCapital
+        PLAYER of LC4_Platoon[22] = 1
+        run background script LC4_StaticPlatoonsActions(PlatoonPos[8],Ranged,LC4_Platoon[22])
+        enable platoon LC4_Platoon[22] respond to town NorseCapital attack
+        set LC4_Platoon[22] focus to {PlayerTown}
+
+        LC4_Platoon[23] = create platoon PLATOON_INFO_NORSE_MELEE_2 at {PlatoonPos[9]} with 30 * RecruitSizeModifier men and 0 women
+        attach LC4_Platoon[23] to NorseCapital
+        PLAYER of LC4_Platoon[23] = 1
+        run background script LC4_StaticPlatoonsActions(PlatoonPos[9],Melee,LC4_Platoon[23])
+        enable platoon LC4_Platoon[23] respond to town NorseCapital attack
+        set LC4_Platoon[23] focus to {PlayerTown}
+
+        LC4_Platoon[24] = create platoon PLATOON_INFO_NORSE_MELEE_2 at {PlatoonPos[10]} with 30 * RecruitSizeModifier men and 0 women
+        attach LC4_Platoon[24] to NorseCapital
+        PLAYER of LC4_Platoon[24] = 1
+        run background script LC4_StaticPlatoonsActions(PlatoonPos[10],Melee,LC4_Platoon[24])
+        enable platoon LC4_Platoon[24] respond to town NorseCapital attack
+        set LC4_Platoon[24] focus to {PlayerTown}
+
+        LC4_Platoon[25] = create platoon PLATOON_INFO_NORSE_MELEE_2 at {PlatoonPos[11]} with 30 * RecruitSizeModifier men and 0 women
+        attach LC4_Platoon[25] to NorseCapital
+        PLAYER of LC4_Platoon[25] = 1
+        run background script LC4_StaticPlatoonsActions(PlatoonPos[11],Melee,LC4_Platoon[25])
+        enable platoon LC4_Platoon[25] respond to town NorseCapital attack
+        set LC4_Platoon[25] focus to {PlayerTown}
+    end if
+
     RecruitTimer1 = create timer for 60 seconds
     RecruitTimer2 = create timer for 60 seconds
     //RecruitTimers for different towns
@@ -1539,6 +1594,89 @@ start
             //end if
         end if
 
+        //Build volcano, trigger a large attack after timer if hard mode
+        if HardMode == 1
+            if VolcanoBuilt == 0
+                VolcanoBuilt = 1
+                build all town NorseCapital buildings in group 11
+                run background script LC4_VolcanoResourceManager
+            end if
+            //Trigger Attack
+            if get HardModeAttackTimer time remaining <= 0
+                HardModeAttackTimer = create timer for 1350 * RecruitModifier seconds
+                if LC4_Platoon[19] not exists and PLAYER of NorseCapital == 1
+                    wait number from 2 to 4 seconds
+                    LC4_Platoon[19] = recruit ARMY_UNIT_TYPE_MELEE_3 town NorseCapital platoon of size 45 * RecruitSizeModifier
+                    wait until not LC4_Platoon[19] recruiting
+                    AttackingPosition = marker at {AttackPos[6]}
+                    AttackingPositionFallBack = marker at {AttackPos[7]}
+                    run background script LC4_ArmyBehaivours(LC4_Platoon[19],Melee,Attacker,0,AttackingPosition,AttackingPositionFallBack,0,0)
+                end if
+
+                if LC4_Platoon[20] not exists and PLAYER of NorseCapital == 1
+                    wait number from 2 to 4 seconds
+                    LC4_Platoon[20] = recruit ARMY_UNIT_TYPE_RANGED_3 town NorseCapital platoon of size 45 * RecruitSizeModifier
+                    wait until not LC4_Platoon[20] recruiting
+                    AttackingPosition = marker at {AttackPos[6]} + {40,0}
+                    AttackingPositionFallBack = marker at {AttackPos[7]} + {40,0}
+                    run background script LC4_ArmyBehaivours(LC4_Platoon[20],Ranged,Attacker,0,AttackingPosition,AttackingPositionFallBack,0,0)
+                end if
+
+                if LC4_SiegeCatapult[2] not exists and PLAYER of NorseCapital == 1
+                    wait number from 1 to 3 seconds
+                    LC4_SiegeCatapult[2] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town NorseCapital siege weapon
+                    disable siege weapon LC4_SiegeCatapult[2] auto attack
+                    SiegeWaypoint1 = marker at {SiegeRoute1[0]}
+                    SiegeWaypoint2 = marker at {SiegeRoute1[1]} + {0,0}
+                    SiegeWaypoint3 = marker at {SiegeRoute1[2]} + {0,0}
+                    run background script LC4_MoveCatapultThenAttack(LC4_SiegeCatapult[2],0,SiegeWaypoint1,SiegeWaypoint2,SiegeWaypoint3)
+                end if
+
+                if LC4_SiegeCatapult[3] not exists and PLAYER of NorseCapital == 1
+                    wait number from 1 to 3 seconds
+                    LC4_SiegeCatapult[3] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town NorseCapital siege weapon
+                    disable siege weapon LC4_SiegeCatapult[3] auto attack
+                    SiegeWaypoint1 = marker at {SiegeRoute1[0]}
+                    SiegeWaypoint2 = marker at {SiegeRoute1[1]} + {40,0}
+                    SiegeWaypoint3 = marker at {SiegeRoute1[2]} + {40,0}
+                    run background script LC4_MoveCatapultThenAttack(LC4_SiegeCatapult[3],0,SiegeWaypoint1,SiegeWaypoint2,SiegeWaypoint3)
+                end if
+
+                if LC4_SiegeCatapult[4] not exists and PLAYER of NorseCapital == 1
+                    wait number from 1 to 3 seconds
+                    LC4_SiegeCatapult[4] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town NorseCapital siege weapon
+                    disable siege weapon LC4_SiegeCatapult[4] auto attack
+                    SiegeWaypoint1 = marker at {SiegeRoute1[0]}
+                    SiegeWaypoint2 = marker at {SiegeRoute1[1]} + {80,0}
+                    SiegeWaypoint3 = marker at {SiegeRoute1[2]} + {80,0}
+                    run background script LC4_MoveCatapultThenAttack(LC4_SiegeCatapult[4],0,SiegeWaypoint1,SiegeWaypoint2,SiegeWaypoint3)
+                end if
+            end if
+
+            if get VolcanoTimer time remaining <= 300 and HEALTH of AIVolcano >= 1.0 and CHARGE of AIVolcano != 1.0 and PLAYER of NorseCapital == 1
+                CHARGE of AIVolcano = 1.0
+            end if
+
+            if HEALTH of AIVolcano >= 1.0 and get VolcanoTimer time remaining <= 0 and PLAYER of NorseCapital == 1 and not town PlayerTown is under takeover from player 1 and PLAYER of PlayerTown == 0
+                if TownsConverted >= 3 or size of PlayerTown > 225 or PLAYER of NorseTown == 0
+
+                    enable predefined sky "VOLCANO" time 9
+                    VolcanoFired = 1
+
+                    run script EpicTargeter(PlayerTown,marker at {PlayerTown},0,4)
+                        
+                    VolcanoWarning = create visual effect VISUAL_EFFECT_EPIC_TARGET_WARNING at {ET_FireEpicLocation} time 15 target {ET_FireEpicLocation}
+                    wait 15 seconds
+                    EpicVolc = create volcano at {ET_FireEpicLocation} player 1
+                        
+                    run background script LC4_Volcano(AIVolcano, EpicVolc)
+
+                    VolcanoTimer = create timer for VOLCANODELAY * EpicModifier seconds
+                    VOLCANODELAY += 500
+                end if
+            end if
+        end if
+
         if PLAYER of Minor_FrontTown == 0 or PLAYER of Minor_MountainTown == 0 or PLAYER of NorseTown == 0
             //Take over a town and start attacking the player a lot    
             if NearestSettlement != 0 and PLAYER of NearestSettlement == 0
@@ -1561,6 +1699,7 @@ start
         
         if TownsConverted >= 2 or TownsAggressiveConverted >= 1
             if NorseTownScriptStarted == 0
+                HardModeAttackTimer = create timer for 300 seconds
                 NorseTownScriptStarted = 1
                 LC4_Platoon[14] = recruit ARMY_UNIT_TYPE_MELEE_1 town NorseCapital platoon of size 25 * RecruitSizeModifier
                 enable platoon LC4_Platoon[14] respond to town NorseCapital attack
@@ -1580,6 +1719,48 @@ start
     end loop
     
 end script LC4_Norse_Capital
+
+begin script LC4_VolcanoResourceManager
+
+    Counter = 0
+    Tree = 0
+
+start
+
+begin loop
+    AIVolcano = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_VOLCANO at {1218.12,301.75,1875.03} radius 150
+    
+until AIVolcano exists
+end loop
+
+disable AIVolcano hurt by fire
+
+begin loop
+    
+    while Counter < 100 and not {AIVolcano} viewed
+        add resource ORE number from 40 to 50 to AIVolcano
+        add resource WOOD number from 100 to 110 to AIVolcano
+        
+        wait number from 2 to 6 seconds
+        
+        Counter++
+    end while
+    
+    until Counter == 100
+end loop
+
+wait until HEALTH of AIVolcano >= 1.0
+
+//Players like to destroy epics using a burning tree, so delete the tree
+begin loop
+    Tree = get MOBILE_OBJECT at {AIVolcano} radius 20
+    if Tree on fire and Tree is HELD
+        empty player hand
+        delete Tree
+    end if
+end loop
+
+end script LC4_VolcanoResourceManager
 
 begin script LC4_AttackNearestTownTimer
 
