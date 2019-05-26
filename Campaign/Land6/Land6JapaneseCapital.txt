@@ -30,6 +30,9 @@ define script Armory_Builder
 define script SirenResourceManager
 define script SirenPreCutscene
 define script LC6_AltarBehavior
+define script LC6_JapaneseMinorTown5VillagerManager
+define script LC6_JapaneseMinorTown5RessourceManager
+define script LC6_JapaneseMinorTown5TownBuilding
 
 begin script LC6_Capital_Impressiveness
 
@@ -2417,6 +2420,10 @@ begin script LC6_Japanese_Capital
 
     Influence = 0
 
+    SiegeWaypoint1 = 0
+    SiegeWaypoint2 = 0
+    SiegeWaypoint3 = 0
+
 start
     
     //extend town JapaneseCapital influence by 35
@@ -2779,6 +2786,13 @@ begin loop
             enable platoon LC6_Platoon[15] respond to town JapaneseCapital attack
             wait until not LC6_Platoon[15] recruiting
 
+        //Capture MinorTown5
+        elsif LC6_Platoon[23] not exists and PLAYER of JapaneseCapital == 1 and get LC6_RecruitTimer1 time remaining <= 0 and HardMode == 1 and PLAYER of MinorTown5 != 0 and not town JapaneseCapital is under takeover from player 0
+            LC6_Platoon[23] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 100 * RecruitSizeModifier
+            LC6_RecruitTimer1 = create timer for 240 * RecruitModifier seconds
+            enable platoon LC6_Platoon[23] respond to town JapaneseCapital attack
+            wait until not LC6_Platoon[23] recruiting
+
         elsif LC6_WallArcher[0] not exists and Wall[1] exists and PLAYER of Wall[1] == 1 and HEALTH of Wall[1] == 1.0 and not town JapaneseCapital is under takeover from player 0 and get LC6_RecruitTimer1 time remaining <= 0
             LC6_WallArcher[0] = recruit ARMY_UNIT_TYPE_RANGED_2 town JapaneseCapital platoon of size 15 * RecruitSizeModifier
             LC6_RecruitTimer1 = create timer for 60 * RecruitModifier seconds
@@ -2870,7 +2884,6 @@ begin loop
             AttackingPositionFallBack = marker at {AttackPos[1]}
             run background script LC6_ArmyBehaivours(LC6_Platoon[18],Melee,Attacker,0,AttackingPosition,AttackingPositionFallBack,0,0)
 
-
         elsif LC6_Platoon[19] not exists and PLAYER of JapaneseCapital == 1 and get LC6_RecruitTimer1 time remaining <= 0 and TownsConverted >= 4 and not town JapaneseCapital is under takeover from player 0
             LC6_Platoon[19] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 25 * RecruitSizeModifier
             LC6_RecruitTimer1 = create timer for 160 * RecruitModifier seconds
@@ -2923,6 +2936,64 @@ begin loop
             enable platoon LC6_Platoon[17] respond to town MinorJapaneseTown2 attack
             wait until not LC6_Platoon[17] recruiting
             run background script LC6_StaticPlatoonsActions(PlatoonPos[7],Melee,LC6_Platoon[17])
+        end if
+
+        if LC6_Platoon[27] not exists and PLAYER of MinorTown5 == 1 and get LC6_RecruitTimer4 time remaining <= 0 and HardMode == 1 and not town MinorTown5 is under takeover from player 0
+            LC6_Platoon[27] = recruit ARMY_UNIT_TYPE_MELEE_3 town MinorTown5 platoon of size 30 * RecruitSizeModifier
+            LC6_RecruitTimer4 = create timer for 180 * RecruitModifier seconds
+            enable platoon LC6_Platoon[27] respond to town MinorTown5 attack
+            wait until not LC6_Platoon[27] recruiting
+            run background script LC6_StaticPlatoonsActions(PlatoonPos[8],Melee,LC6_Platoon[27])
+
+        elsif LC6_Platoon[28] not exists and PLAYER of MinorTown5 == 1 and get LC6_RecruitTimer4 time remaining <= 0 and HardMode == 1 and not town MinorTown5 is under takeover from player 0
+            LC6_Platoon[28] = recruit ARMY_UNIT_TYPE_MELEE_3 town MinorTown5 platoon of size 30 * RecruitSizeModifier
+            LC6_RecruitTimer4 = create timer for 180 * RecruitModifier seconds
+            enable platoon LC6_Platoon[28] respond to town MinorTown5 attack
+            wait until not LC6_Platoon[28] recruiting
+            run background script LC6_StaticPlatoonsActions(PlatoonPos[9],Melee,LC6_Platoon[28])
+
+        elsif LC6_Platoon[29] not exists and PLAYER of MinorTown5 == 1 and get LC6_RecruitTimer4 time remaining <= 0 and HardMode == 1 and not town MinorTown5 is under takeover from player 0
+            LC6_Platoon[29] = recruit ARMY_UNIT_TYPE_RANGED_3 town MinorTown5 platoon of size 30 * RecruitSizeModifier
+            LC6_RecruitTimer4 = create timer for 180 * RecruitModifier seconds
+            enable platoon LC6_Platoon[29] respond to town MinorTown5 attack
+            wait until not LC6_Platoon[29] recruiting
+            run background script LC6_StaticPlatoonsActions(PlatoonPos[10],Ranged,LC6_Platoon[29])
+
+        //Attack PlayerTown
+        elsif LC6_Platoon[30] not exists and PLAYER of MinorTown5 == 1 and get LC6_RecruitTimer1 time remaining <= 0 and HardMode == 1 and not town MinorTown5 is under takeover from player 0
+            LC6_Platoon[30] = recruit ARMY_UNIT_TYPE_MELEE_3 town MinorTown5 platoon of size 40 * RecruitSizeModifier
+            LC6_RecruitTimer1 = create timer for 160 * RecruitModifier seconds
+            enable platoon LC6_Platoon[30] respond to town MinorTown5 attack
+            wait until not LC6_Platoon[30] recruiting
+            AttackingPosition = marker at {AttackPos[0]}+{60,0,60}
+            AttackingPositionFallBack = marker at {AttackPos[1]}+{60,0,60}
+            run background script LC6_ArmyBehaivours(LC6_Platoon[30],Melee,Attacker,0,AttackingPosition,AttackingPositionFallBack,0,0)
+
+        elsif LC6_SiegeCatapult[6] not exists and PLAYER of MinorTown5 == 1 and get LC6_RecruitTimer1 time remaining <= 0 and HardMode == 1 and not town MinorTown5 is under takeover from player 0
+            LC6_SiegeCatapult[6] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town MinorTown5 siege weapon
+            LC6_RecruitTimer1 = create timer for 100 * RecruitModifier seconds
+            SiegeWaypoint1 = marker at {SiegeRoute6[0]}
+            SiegeWaypoint2 = marker at {SiegeRoute6[1]} + {0,0}
+            SiegeWaypoint3 = marker at {SiegeRoute6[2]} + {0,0}
+            run background script LC6_MoveCatapultThenAttack(LC6_SiegeCatapult[6],0,SiegeWaypoint1,SiegeWaypoint2,SiegeWaypoint3,0)
+
+        elsif LC6_Platoon[31] not exists and PLAYER of MinorTown5 == 1 and get LC6_RecruitTimer1 time remaining <= 0 and HardMode == 1 and not town MinorTown5 is under takeover from player 0
+            LC6_Platoon[31] = recruit ARMY_UNIT_TYPE_MELEE_3 town MinorTown5 platoon of size 40 * RecruitSizeModifier
+            LC6_RecruitTimer1 = create timer for 160 * RecruitModifier seconds
+            enable platoon LC6_Platoon[31] respond to town MinorTown5 attack
+            wait until not LC6_Platoon[31] recruiting
+            AttackingPosition = marker at {AttackPos[0]}+{-60,0,-60}
+            AttackingPositionFallBack = marker at {AttackPos[1]}+{-60,0,-60}
+            run background script LC6_ArmyBehaivours(LC6_Platoon[31],Melee,Attacker,0,AttackingPosition,AttackingPositionFallBack,0,0)
+
+        elsif LC6_SiegeCatapult[7] not exists and PLAYER of MinorTown5 == 1 and get LC6_RecruitTimer1 time remaining <= 0 and HardMode == 1 and not town MinorTown5 is under takeover from player 0
+            LC6_SiegeCatapult[7] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town MinorTown5 siege weapon
+            LC6_RecruitTimer1 = create timer for 100 * RecruitModifier seconds
+            SiegeWaypoint1 = marker at {SiegeRoute6[0]}
+            SiegeWaypoint2 = marker at {SiegeRoute6[1]} + {40,0}
+            SiegeWaypoint3 = marker at {SiegeRoute6[2]} + {40,0}
+            run background script LC6_MoveCatapultThenAttack(LC6_SiegeCatapult[7],0,SiegeWaypoint1,SiegeWaypoint2,SiegeWaypoint3,0)
+
         end if
 
     //end if
@@ -3055,6 +3126,7 @@ begin script LC6_DefendPlatoons
     DefendRecruitTimer1 = create timer for 0 seconds
     DefendRecruitTimer2 = create timer for 0 seconds
     DefendRecruitTimer3 = create timer for 0 seconds
+    DefendRecruitTimer4 = create timer for 0 seconds
 
 start
 
@@ -3097,6 +3169,19 @@ begin loop
         wait until not LC6_Platoon[13] recruiting
         
         DefendRecruitTimer3 = create timer for 240 * RecruitModifier seconds
+    end if
+
+    PlayerPlatoon = get platoon of player 0 nearest {MinorTown5} radius 300
+    if PlayerPlatoon exists and LC6_Platoon[25] not exists and LC6_Platoon[26] not exists and get DefendRecruitTimer4 time remaining <= 0 and HardMode == 1 and PLAYER of MinorTown5 == 1 //Makes a couple of defend platoons
+        LC6_Platoon[25] = recruit ARMY_UNIT_TYPE_MELEE_2 town MinorTown5 platoon of size number from 25 to 25 * RecruitSizeModifier
+        enable platoon LC6_Platoon[25] respond to town MinorTown5 attack
+        wait until not LC6_Platoon[25] recruiting
+        
+        LC6_Platoon[26] = recruit ARMY_UNIT_TYPE_MELEE_2 town MinorTown5 platoon of size number from 25 to 25 * RecruitSizeModifier
+        enable platoon LC6_Platoon[26] respond to town MinorTown5 attack
+        wait until not LC6_Platoon[26] recruiting
+        
+        DefendRecruitTimer4 = create timer for 240 * RecruitModifier seconds
     end if
 
 end loop
@@ -3198,6 +3283,13 @@ start
     
     run background script LC6_Platoon0Actions
     run background script LC6_Platoon1Actions
+
+    if HardMode == 1
+        LC6_Platoon[23] = create platoon PLATOON_INFO_JAPANESE_MELEE_4 at {JapaneseCapital} + {20,20} with 75 * RecruitSizeModifier men and 0 women
+        attach LC6_Platoon[23] to JapaneseCapital
+        enable platoon LC6_Platoon[23] respond to town JapaneseCapital attack
+        run background script LC6_Platoon23Actions
+    end if
 
 end script SpawnJapaneseTroops
 
@@ -3451,6 +3543,115 @@ begin loop
 end loop    
 
 end script LC6_MinorJapaneseTown2RessourceManager
+
+begin script LC6_JapaneseMinorTown5VillagerManager
+
+    Counter = 0
+    Villager = 0
+    HousesBuilt = 0
+
+start
+
+begin loop
+
+    wait 1450 * BuilderModifier seconds
+    Counter = 0
+
+    if PLAYER of MinorTown5 == 1
+        if HousesBuilt == 0
+            HousesBuilt = 1
+            build all town MinorTown5 buildings in group 10
+        end if
+        begin loop
+            Villager = create random villager of tribe TRIBE_TYPE_JAPANESE at {MinorTown5} + {number from -12 to 12, 0, number from -12 to 12}//create VILLAGER VILLAGER_INFO_JAPANESE_FORESTER_MALE at {1013.581, 132.333, 2002.798} + {number from -3 to 3, 0, number from -3 to 3}
+            attach Villager to MinorTown5
+            release Villager
+            
+            wait number from 6 to 10 seconds
+            Counter++
+            until Counter >= 15 or PLAYER of MinorTown5 != 1
+        end loop
+    end if
+
+end loop
+
+end script LC6_JapaneseMinorTown5VillagerManager
+
+begin script LC6_JapaneseMinorTown5RessourceManager
+
+start
+
+begin loop
+
+    wait 5 seconds
+
+    if PLAYER of MinorTown5 == 1
+        if (get town MinorTown5 RESOURCE_TYPE_ORE total < 5000)
+            add resource RESOURCE_TYPE_ORE number from 100 to 500 to MinorTown5
+        elsif (get town MinorTown5 RESOURCE_TYPE_WOOD total < 7500)
+            add resource RESOURCE_TYPE_WOOD number from 500 to 1000 to MinorTown5
+        elsif (get town MinorTown5 RESOURCE_TYPE_FOOD total < 7500)
+            add resource RESOURCE_TYPE_FOOD number from 500 to 1500 to MinorTown5
+        end if
+    end if
+    
+end loop    
+
+end script LC6_JapaneseMinorTown5RessourceManager
+
+begin script LC6_JapaneseMinorTown5TownBuilding
+
+    RoadPosHM = 0
+    Road = 0
+
+    PlannedWall3[9]
+    PlannedWall3Pos[9]
+    Wall3 = 0
+
+    WallCounter3 = 0
+
+start
+
+    RoadPosHM = marker at {857.75,23.23,1550.10}//Group 6 Road 5
+
+    PlannedWall3Pos[0] = marker at {857.75,23.23,1550.10}
+    PlannedWall3Pos[1] = marker at {949.48,23.26,1540.91}
+    PlannedWall3Pos[2] = marker at {918.86,24.78,1532.64}
+    PlannedWall3Pos[3] = marker at {871.89,26.03,1506.81}
+    PlannedWall3Pos[4] = marker at {851.09,23.64,1493.00}
+    PlannedWall3Pos[5] = marker at {797.44,32.00,1488.41}
+    PlannedWall3Pos[6] = marker at {682.62,23.93,1660.74}
+    PlannedWall3Pos[7] = marker at {645.52,22.11,1685.80}
+    PlannedWall3Pos[8] = marker at {620.91,23.49,1732.36}
+
+    wait until PLAYER of MinorTown5 == 1
+
+    wait 60 * BuilderModifier seconds
+    if PLAYER of MinorTown5 == 1
+        build all town MinorTown5 buildings in group 1
+    end if
+
+    //Build Walls and Road
+    while WallCounter3 < 9
+        PlannedWall3[WallCounter3] = build building at {PlannedWall3Pos[WallCounter3]} desire 1.0
+        add resource RESOURCE_TYPE_ORE number from 8000 to 8500 to PlannedWall3[WallCounter3]
+        WallCounter3++
+    end while
+
+    wait 300 * BuilderModifier seconds
+    if PLAYER of MinorTown5 == 1
+        build all town MinorTown5 buildings in group 2
+    end if
+
+    Road = build building at {RoadPosHM} desire 1
+    release Road
+
+    wait 420 * BuilderModifier seconds
+    if PLAYER of MinorTown5 == 1
+        build all town MinorTown5 buildings in group 3
+    end if
+
+end script LC6_JapaneseMinorTown5TownBuilding
 
 begin script SirenResourceManager
 
