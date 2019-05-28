@@ -1240,11 +1240,12 @@ end script LC6_Tribute
 
 begin script LC6_GatehouseManager
 
-    GatehousePos[7]
+    GatehousePos[8]
     GateHouseT11 = 0
     GateHouseT12 = 0
     GateHouseT13 = 0
     GateHouseT14 = 0
+    GateHouseT21 = 0
     Counter = 0
     Cnt = 0
 
@@ -1262,10 +1263,14 @@ begin script LC6_GatehouseManager
     PlayerPlatoonT14 = 0
     CatapultT14 = 0
     TestCreatureT14 = 0
+    PlayerPlatoonT21 = 0
+    CatapultT21 = 0
+    TestCreatureT21 = 0
     EnemyNearDoorT11 = 0
     EnemyNearDoorT12 = 0
     EnemyNearDoorT13 = 0
     EnemyNearDoorT14 = 0
+    EnemyNearDoorT21 = 0
 
 start
 
@@ -1369,6 +1374,33 @@ begin loop
         
     end if
     
+    GateHouseT21 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {891.06,26.34,1516.13} radius 15
+    if HardMode == 1 and PLAYER of MinorTown5 == 1
+        if not town MinorTown5 is under takeover from player 0
+            PlayerPlatoonT21 = get platoon of player 0 nearest {GateHouseT21} radius 100
+            CatapultT21 = get siege weapon of player 0 nearest {GateHouseT21} radius 100
+            TestCreatureT21 = get distance from {GateHouseT21} to {oCreature}
+            
+            if PlayerPlatoonT21 exists
+                EnemyNearDoorT21 = 1
+            elsif CatapultT21 exists
+                EnemyNearDoorT21 = 1
+            elsif TestCreatureT21 < 200 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+                EnemyNearDoorT21 = 1
+            else
+                EnemyNearDoorT21 = 0
+            end if
+            
+            if EnemyNearDoorT21 == 1 and get number of platoon of player 1 at {GateHouseT21} radius 100 < 4
+                set gate GateHouseT21 close
+            else
+                set gate GateHouseT21 open
+            end if
+        else
+            set gate GateHouseT21 open
+        end if
+    end if
+
 end loop
 
 end script LC6_GatehouseManager
@@ -2940,21 +2972,21 @@ begin loop
 
         if LC6_Platoon[27] not exists and PLAYER of MinorTown5 == 1 and get LC6_RecruitTimer4 time remaining <= 0 and HardMode == 1 and not town MinorTown5 is under takeover from player 0
             LC6_Platoon[27] = recruit ARMY_UNIT_TYPE_MELEE_3 town MinorTown5 platoon of size 30 * RecruitSizeModifier
-            LC6_RecruitTimer4 = create timer for 180 * RecruitModifier seconds
+            LC6_RecruitTimer4 = create timer for 120 * RecruitModifier seconds
             enable platoon LC6_Platoon[27] respond to town MinorTown5 attack
             wait until not LC6_Platoon[27] recruiting
             run background script LC6_StaticPlatoonsActions(PlatoonPos[8],Melee,LC6_Platoon[27])
 
         elsif LC6_Platoon[28] not exists and PLAYER of MinorTown5 == 1 and get LC6_RecruitTimer4 time remaining <= 0 and HardMode == 1 and not town MinorTown5 is under takeover from player 0
             LC6_Platoon[28] = recruit ARMY_UNIT_TYPE_MELEE_3 town MinorTown5 platoon of size 30 * RecruitSizeModifier
-            LC6_RecruitTimer4 = create timer for 180 * RecruitModifier seconds
+            LC6_RecruitTimer4 = create timer for 120 * RecruitModifier seconds
             enable platoon LC6_Platoon[28] respond to town MinorTown5 attack
             wait until not LC6_Platoon[28] recruiting
             run background script LC6_StaticPlatoonsActions(PlatoonPos[9],Melee,LC6_Platoon[28])
 
         elsif LC6_Platoon[29] not exists and PLAYER of MinorTown5 == 1 and get LC6_RecruitTimer4 time remaining <= 0 and HardMode == 1 and not town MinorTown5 is under takeover from player 0
             LC6_Platoon[29] = recruit ARMY_UNIT_TYPE_RANGED_3 town MinorTown5 platoon of size 30 * RecruitSizeModifier
-            LC6_RecruitTimer4 = create timer for 180 * RecruitModifier seconds
+            LC6_RecruitTimer4 = create timer for 120 * RecruitModifier seconds
             enable platoon LC6_Platoon[29] respond to town MinorTown5 attack
             wait until not LC6_Platoon[29] recruiting
             run background script LC6_StaticPlatoonsActions(PlatoonPos[10],Ranged,LC6_Platoon[29])
@@ -2962,7 +2994,7 @@ begin loop
         //Attack PlayerTown
         elsif LC6_Platoon[30] not exists and PLAYER of MinorTown5 == 1 and get LC6_RecruitTimer1 time remaining <= 0 and HardMode == 1 and not town MinorTown5 is under takeover from player 0
             LC6_Platoon[30] = recruit ARMY_UNIT_TYPE_MELEE_3 town MinorTown5 platoon of size 40 * RecruitSizeModifier
-            LC6_RecruitTimer1 = create timer for 160 * RecruitModifier seconds
+            LC6_RecruitTimer1 = create timer for 100 * RecruitModifier seconds
             enable platoon LC6_Platoon[30] respond to town MinorTown5 attack
             wait until not LC6_Platoon[30] recruiting
             AttackingPosition = marker at {AttackPos[0]}+{60,0,60}
@@ -2971,7 +3003,7 @@ begin loop
 
         elsif LC6_SiegeCatapult[6] not exists and PLAYER of MinorTown5 == 1 and get LC6_RecruitTimer1 time remaining <= 0 and HardMode == 1 and not town MinorTown5 is under takeover from player 0
             LC6_SiegeCatapult[6] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town MinorTown5 siege weapon
-            LC6_RecruitTimer1 = create timer for 100 * RecruitModifier seconds
+            LC6_RecruitTimer1 = create timer for 80 * RecruitModifier seconds
             SiegeWaypoint1 = marker at {SiegeRoute6[0]}
             SiegeWaypoint2 = marker at {SiegeRoute6[1]} + {0,0}
             SiegeWaypoint3 = marker at {SiegeRoute6[2]} + {0,0}
@@ -2979,7 +3011,7 @@ begin loop
 
         elsif LC6_Platoon[31] not exists and PLAYER of MinorTown5 == 1 and get LC6_RecruitTimer1 time remaining <= 0 and HardMode == 1 and not town MinorTown5 is under takeover from player 0
             LC6_Platoon[31] = recruit ARMY_UNIT_TYPE_MELEE_3 town MinorTown5 platoon of size 40 * RecruitSizeModifier
-            LC6_RecruitTimer1 = create timer for 160 * RecruitModifier seconds
+            LC6_RecruitTimer1 = create timer for 100 * RecruitModifier seconds
             enable platoon LC6_Platoon[31] respond to town MinorTown5 attack
             wait until not LC6_Platoon[31] recruiting
             AttackingPosition = marker at {AttackPos[0]}+{-60,0,-60}
@@ -2988,7 +3020,7 @@ begin loop
 
         elsif LC6_SiegeCatapult[7] not exists and PLAYER of MinorTown5 == 1 and get LC6_RecruitTimer1 time remaining <= 0 and HardMode == 1 and not town MinorTown5 is under takeover from player 0
             LC6_SiegeCatapult[7] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town MinorTown5 siege weapon
-            LC6_RecruitTimer1 = create timer for 100 * RecruitModifier seconds
+            LC6_RecruitTimer1 = create timer for 80 * RecruitModifier seconds
             SiegeWaypoint1 = marker at {SiegeRoute6[0]}
             SiegeWaypoint2 = marker at {SiegeRoute6[1]} + {40,0}
             SiegeWaypoint3 = marker at {SiegeRoute6[2]} + {40,0}
@@ -3025,7 +3057,7 @@ begin loop
         end while
     end if
 
-    if PLAYER of MinorJapaneseTown1 == 0 or PLAYER of MinorJapaneseTown2 == 0 or PLAYER of MinorTown5 == 0 or PLAYER of MinorTown4 == 0 or PLAYER of MinorTown3 == 0 or PLAYER of MinorTown9 == 0 or PLAYER of JapaneseCapital != 1
+    if PLAYER of MinorJapaneseTown1 == 0 or PLAYER of MinorJapaneseTown2 == 0 or PLAYER of MinorTown5 == 0 or PLAYER of MinorTown4 == 0 or PLAYER of MinorTown3 == 0 or PLAYER of MinorTown9 == 0 or PLAYER of JapaneseCapital != 1 or HardMode == 1
         //Take over a town and start attacking the player a lot    
         if NearestSettlement != 0 and PLAYER of NearestSettlement == 0
             AttackingPlatoons = 1
@@ -3626,10 +3658,12 @@ start
 
     wait until PLAYER of MinorTown5 == 1
 
-    wait 60 * BuilderModifier seconds
+    wait 30 * BuilderModifier seconds
     if PLAYER of MinorTown5 == 1
         build all town MinorTown5 buildings in group 1
     end if
+
+    wait 30 * BuilderModifier seconds
 
     //Build Walls and Road
     while WallCounter3 < 9

@@ -845,126 +845,78 @@ begin script LC6_Platoon23Actions
     
 start
 
-begin loop
-    a = 1
+begin loop //Attack
     wait until LC6_Platoon[23] exists
-    begin loop
-        TestCreature2 = get distance from {LC6_Platoon[23]} to {oCreature}
-        if TestCreature2 <= 75 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00 and LC6_Platoon[23] can navigate to {oCreature}
-            clear LC6_Platoon[23] action queue
-            begin loop
-                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_MOVING_OBJECT using oCreature to LC6_Platoon[23] action queue
-                NumPat5 = get number of villagers in platoon LC6_Platoon[23]
-                TestCreature2 = get distance from {LC6_Platoon[23]} to {oCreature}
-                until NumPat5 == 0 or SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature == 0.00 or not LC6_Platoon[23] can navigate to {oCreature} or TestCreature2 > 75
-            end loop
-        end if
-        PlayerPlatoon1 = get platoon of player 0 nearest {LC6_Platoon[23]} radius 75
-        PlayerCatapult1 = get siege weapon of player 0 nearest {LC6_Platoon[23]} radius 75
-        if PlayerPlatoon1 exists and LC6_Platoon[23] can navigate to {PlayerPlatoon1}
-            clear LC6_Platoon[23] action queue
-            begin loop
-                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_PLATOON using PlayerPlatoon1 to LC6_Platoon[23] action queue
-                NumPat5 = get number of villagers in platoon LC6_Platoon[23]
-                HeTeste3 = get number of villagers in platoon PlayerPlatoon1
-                until NumPat5 == 0 or HeTeste3 == 0 or not LC6_Platoon[23] can navigate to {PlayerPlatoon1}
-            end loop
-        elsif PlayerCatapult1 exists and LC6_Platoon[23] can navigate to {PlayerCatapult1}
-            clear LC6_Platoon[23] action queue
-            begin loop
-                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using PlayerCatapult1 to LC6_Platoon[23] action queue
-                NumPat5 = get number of villagers in platoon LC6_Platoon[23]
-                PlayerPlatoon1 = get platoon of player 0 nearest {LC6_Platoon[23]} radius 75
-                if PlayerPlatoon1 exists and LC6_Platoon[23] can navigate to {PlayerPlatoon1}
-                    PlayerPlatoonInRange = 1
-                end if
-                until NumPat5 == 0 or PlayerCatapult1 not exists or not LC6_Platoon[23] can navigate to {PlayerCatapult1} or PlayerPlatoonInRange == 1
-            end loop
-            PlayerPlatoonInRange = 0
-        end if
-        if LC6_Platoon[23] can navigate to {AttackPos[5]} and get size of LC6_Platoon[23] action queue < 1
-            clear LC6_Platoon[23] action queue
-            add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackPos[5]} to LC6_Platoon[23] action queue
-        end if
-        until LC6_Platoon[23] not exists or {LC6_Platoon[23]} near {AttackPos[5]} radius 80
-    end loop
-    
-    begin loop //Attack
-        TestCreature2 = get distance from {LC6_Platoon[23]} to {oCreature}
-        if TestCreature2 <= 75 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00 and LC6_Platoon[23] can navigate to {oCreature}
-            clear LC6_Platoon[23] action queue
-            begin loop
-                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_MOVING_OBJECT using oCreature to LC6_Platoon[23] action queue
-                NumPat5 = get number of villagers in platoon LC6_Platoon[23]
-                TestCreature2 = get distance from {LC6_Platoon[23]} to {oCreature}
-                until NumPat5 == 0 or SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature == 0.00 or not LC6_Platoon[23] can navigate to {oCreature} or TestCreature2 > 75
-            end loop
-        end if
-        PlayerPlatoon1 = get platoon of player 0 nearest {LC6_Platoon[23]} radius 75
-        PlayerCatapult1 = get siege weapon of player 0 nearest {LC6_Platoon[23]} radius 75
-        if PlayerPlatoon1 exists and LC6_Platoon[23] can navigate to {PlayerPlatoon1}
-            clear LC6_Platoon[23] action queue
-            begin loop
-                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_PLATOON using PlayerPlatoon1 to LC6_Platoon[23] action queue
-                NumPat5 = get number of villagers in platoon LC6_Platoon[23]
-                HeTeste3 = get number of villagers in platoon PlayerPlatoon1
-                until NumPat5 == 0 or HeTeste3 == 0 or not LC6_Platoon[23] can navigate to {PlayerPlatoon1}
-            end loop
-        elsif PlayerCatapult1 exists and LC6_Platoon[23] can navigate to {PlayerCatapult1}
-            clear LC6_Platoon[23] action queue
-            begin loop
-                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using PlayerCatapult1 to LC6_Platoon[23] action queue
-                NumPat5 = get number of villagers in platoon LC6_Platoon[23]
-                PlayerPlatoon1 = get platoon of player 0 nearest {LC6_Platoon[23]} radius 75
-                if PlayerPlatoon1 exists and LC6_Platoon[23] can navigate to {PlayerPlatoon1}
-                    PlayerPlatoonInRange = 1
-                end if
-                until NumPat5 == 0 or PlayerCatapult1 not exists or not LC6_Platoon[23] can navigate to {PlayerCatapult1} or PlayerPlatoonInRange == 1
-            end loop
-            PlayerPlatoonInRange = 0
-        end if
-        JapaneseTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in MinorTown5 min built 1.0
-        if LC6_Platoon[23] can navigate to object JapaneseTownCentre and PLAYER of MinorTown5 != 1 and TownCaptured == 0
-            //wait number from 5 to 25 seconds
-            a = 1
-            clear LC6_Platoon[23] action queue
-            wait 1 seconds
-            if LC6_Platoon[23] can navigate to object JapaneseTownCentre and PLAYER of MinorTown5 != 1 and TownCaptured == 0
-                begin loop
-                    PlayerPlatoon1 = get platoon of player 0 nearest {LC6_Platoon[23]} radius 75
-                    TestCreature2 = get distance from {LC6_Platoon[23]} to {oCreature}
-                    set LC6_Platoon[23] attack MinorTown5 with severity 0.7 for takeover
-                    //if PlayerPlatoon1 exists or TestCreature2 <= 75 or not LC6_Platoon[23] can navigate to object JapaneseTownCentre
-                        if PlayerPlatoon1 exists
-                            a = 0
-                        elsif TestCreature2 <= 75 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
-                            a = 0
-                        elsif not LC6_Platoon[23] can navigate to object JapaneseTownCentre
-                            a = 0
-                        elsif LC6_Platoon[23] not exists
-                            a = 0
-                        elsif PLAYER of MinorTown5 == 1
-                            a = 0
-                        end if
-                    //end if
-                    until a == 0 or LC6_Platoon[23] not exists or PLAYER of MinorTown5 == 1
-                end loop
-            end if
-            clear LC6_Platoon[23] action queue
-        end if
 
-        if LC6_Platoon[23] can navigate to {877.46,26.59,1536.59} and PLAYER of MinorTown5 == 1 and not {LC6_Platoon[23]} near {877.46,26.59,1536.59} radius 15
-            TownCaptured = 1
-            clear LC6_Platoon[23] action queue
-            add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {877.46,26.59,1536.59} to LC6_Platoon[23] action queue
-        end if
-
-        until LC6_Platoon[23] not exists
-    end loop
-    if LC6_Platoon[23] not exists
-        //PlatoonKilled = 1
-        wait until LC6_Platoon[23] exists
+    TestCreature2 = get distance from {LC6_Platoon[23]} to {oCreature}
+    if TestCreature2 <= 75 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00 and LC6_Platoon[23] can navigate to {oCreature}
+        clear LC6_Platoon[23] action queue
+        begin loop
+            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_MOVING_OBJECT using oCreature to LC6_Platoon[23] action queue
+            NumPat5 = get number of villagers in platoon LC6_Platoon[23]
+            TestCreature2 = get distance from {LC6_Platoon[23]} to {oCreature}
+            until NumPat5 == 0 or SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature == 0.00 or not LC6_Platoon[23] can navigate to {oCreature} or TestCreature2 > 75
+        end loop
     end if
+    PlayerPlatoon1 = get platoon of player 0 nearest {LC6_Platoon[23]} radius 75
+    PlayerCatapult1 = get siege weapon of player 0 nearest {LC6_Platoon[23]} radius 75
+    if PlayerPlatoon1 exists and LC6_Platoon[23] can navigate to {PlayerPlatoon1}
+        clear LC6_Platoon[23] action queue
+        begin loop
+            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_PLATOON using PlayerPlatoon1 to LC6_Platoon[23] action queue
+            NumPat5 = get number of villagers in platoon LC6_Platoon[23]
+            HeTeste3 = get number of villagers in platoon PlayerPlatoon1
+            until NumPat5 == 0 or HeTeste3 == 0 or not LC6_Platoon[23] can navigate to {PlayerPlatoon1}
+        end loop
+    elsif PlayerCatapult1 exists and LC6_Platoon[23] can navigate to {PlayerCatapult1}
+        clear LC6_Platoon[23] action queue
+        begin loop
+            add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using PlayerCatapult1 to LC6_Platoon[23] action queue
+            NumPat5 = get number of villagers in platoon LC6_Platoon[23]
+            PlayerPlatoon1 = get platoon of player 0 nearest {LC6_Platoon[23]} radius 75
+            if PlayerPlatoon1 exists and LC6_Platoon[23] can navigate to {PlayerPlatoon1}
+                PlayerPlatoonInRange = 1
+            end if
+            until NumPat5 == 0 or PlayerCatapult1 not exists or not LC6_Platoon[23] can navigate to {PlayerCatapult1} or PlayerPlatoonInRange == 1
+        end loop
+        PlayerPlatoonInRange = 0
+    end if
+    JapaneseTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in MinorTown5 min built 1.0
+    if LC6_Platoon[23] can navigate to object JapaneseTownCentre and PLAYER of MinorTown5 != 1 and TownCaptured == 0
+        //wait number from 5 to 25 seconds
+        a = 1
+        clear LC6_Platoon[23] action queue
+        wait 1 seconds
+        if LC6_Platoon[23] can navigate to object JapaneseTownCentre and PLAYER of MinorTown5 != 1 and TownCaptured == 0
+            begin loop
+                PlayerPlatoon1 = get platoon of player 0 nearest {LC6_Platoon[23]} radius 75
+                TestCreature2 = get distance from {LC6_Platoon[23]} to {oCreature}
+                set LC6_Platoon[23] attack MinorTown5 with severity 0.7 for takeover
+                //if PlayerPlatoon1 exists or TestCreature2 <= 75 or not LC6_Platoon[23] can navigate to object JapaneseTownCentre
+                    if PlayerPlatoon1 exists
+                        a = 0
+                    elsif TestCreature2 <= 75 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+                        a = 0
+                    elsif not LC6_Platoon[23] can navigate to object JapaneseTownCentre
+                        a = 0
+                    elsif LC6_Platoon[23] not exists
+                        a = 0
+                    elsif PLAYER of MinorTown5 == 1
+                        a = 0
+                    end if
+                //end if
+                until a == 0 or LC6_Platoon[23] not exists or PLAYER of MinorTown5 == 1
+            end loop
+        end if
+        clear LC6_Platoon[23] action queue
+    end if
+
+    if LC6_Platoon[23] can navigate to {877.46,26.59,1536.59} and PLAYER of MinorTown5 == 1 and not {LC6_Platoon[23]} near {877.46,26.59,1536.59} radius 15
+        TownCaptured = 1
+        clear LC6_Platoon[23] action queue
+        add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {877.46,26.59,1536.59} to LC6_Platoon[23] action queue
+    end if
+
 end loop
 
 end script LC6_Platoon23Actions
