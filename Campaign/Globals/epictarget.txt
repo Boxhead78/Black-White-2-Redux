@@ -25,7 +25,7 @@ begin loop
             if InfluencePos < 1
                 ET_FireEpicLocation = marker at {EpicPos}
             else
-                Building = get random home in town whichTown
+                Building = get random abode in town whichTown
                 if Building not exists
                     ET_FireEpicLocation = marker at {whichTown} + {number from minNumber to maxNumber, number from minNumber to maxNumber}
                 else
@@ -39,7 +39,7 @@ begin loop
         Influence = get player 0 influence at {ET_FireEpicLocation}
         Villager = create VILLAGER NORSE_HOUSEWIFE at {ET_FireEpicLocation} + {number from -5 to 5, number from -5 to 5}
         if Influence < 1 and not {ET_FireEpicLocation} under water
-            if whichEpic == 2 or whichEpic == 4
+            if whichEpic == 3
                 if Villager can navigate to {ET_FireEpicLocation}
                     ExitLoop = 1
                 end if
@@ -51,8 +51,12 @@ begin loop
         
         CounterEpic++
     end while
-    minNumber -= 4
-    maxNumber += 4
+    minNumber -= 25
+    maxNumber += 25
+    if minNumber > 999 and maxNumber > 999
+        minNumber = 25
+        maxNumber = 25
+    end if
     until ExitLoop == 1
 end loop
 
