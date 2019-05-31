@@ -1798,7 +1798,7 @@ begin script LC7_Japanese_Capital
 
 start
 
-    AttackNearestTownTimer = create timer for 0 seconds
+    AttackNearestTownTimer = create timer for 300 seconds
     AttackPlatoonTimer[0] = create timer for 0 seconds
     AttackPlatoonTimer[1] = create timer for 0 seconds
 
@@ -2114,6 +2114,12 @@ start
     run background script LC7_Platoon15Actions
     run background script LC7_Catapult5Actions
     run background script LC7_Platoon16Actions
+    if HardMode == 1
+        run background script LC7_Platoon33Actions
+        run background script LC7_Platoon34Actions
+        run background script LC7_Platoon35Actions
+        run background script LC7_Platoon36Actions
+    end if 
 
     begin loop
 
@@ -2378,7 +2384,7 @@ start
             end if
         //end if
 
-        if PLAYER of JapaneseTown1 == 0 or PLAYER of JapaneseTown2 == 0 or PLAYER of MinorTown5 == 0 or PLAYER of MinorTown6 == 0 or PLAYER of JapaneseCapital != 1
+        if PLAYER of JapaneseTown1 == 0 or PLAYER of JapaneseTown2 == 0 or PLAYER of MinorTown5 == 0 or PLAYER of MinorTown6 == 0 or PLAYER of JapaneseCapital != 1 or HardMode == 1
             //Take over a town and start attacking the player a lot    
             if NearestSettlement != 0 and PLAYER of NearestSettlement == 0
                 AttackingPlatoons = 1
@@ -2388,7 +2394,7 @@ start
             AttackingPlatoons = 0
         end if
 
-        if TownsAggressiveConverted >= 1 or TownsConverted >= 3 or 1 == 1
+        if TownsAggressiveConverted >= 1 or TownsConverted >= 3
             if HurricaneBuilding == 0
                 HurricaneBuilding = 1
                 build all town JapaneseCapital buildings in group 1
@@ -2396,7 +2402,7 @@ start
             end if
         end if
 
-        if Difficulty >= 4
+        if Difficulty >= 4 or HardMode == 1
             if TownsConverted >= 4 or get army size in town PlayerTown > 60 or size of PlayerTown > 325
                 if TownsConverted >= 2 //If player has a large army, start siege earlier
                     if PLAYER of JapaneseTown1 == 1 and not town JapaneseTown1 is under takeover from player 0 and LC7_LargeSiegeIsRunning == 0 and SiegeCheck == 0
@@ -2450,6 +2456,33 @@ start
                 HurricaneTimer = create timer for HURRICANEDELAY * EpicModifier seconds
                 HURRICANEDELAY += 500
 
+            end if
+        end if
+
+        if HardMode == 1
+            //Take over MinorTown4
+            if LC7_Platoon[33] not exists and size of PlayerTown > 100 and PLAYER of JapaneseTown2 == 1 and not town JapaneseTown2 is under takeover from player 0 and get LC7_RecruitTimer3 time remaining <= 0
+                LC7_Platoon[33] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown2 platoon of size 50 * RecruitSizeModifier
+                LC7_RecruitTimer3 = create timer for 120 * RecruitModifier seconds
+                enable platoon LC7_Platoon[33] respond to town JapaneseTown2 attack
+                wait until not LC7_Platoon[33] recruiting
+            elsif LC7_Platoon[34] not exists and size of PlayerTown > 100 and PLAYER of JapaneseTown2 == 1 and not town JapaneseTown2 is under takeover from player 0 and get LC7_RecruitTimer3 time remaining <= 0
+                LC7_Platoon[34] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown2 platoon of size 50 * RecruitSizeModifier
+                LC7_RecruitTimer3 = create timer for 120 * RecruitModifier seconds
+                enable platoon LC7_Platoon[34] respond to town JapaneseTown2 attack
+                wait until not LC7_Platoon[34] recruiting
+
+            //Take over MinorTown6
+            elsif LC7_Platoon[35] not exists and size of PlayerTown > 175 and PLAYER of JapaneseTown2 == 1 and not town JapaneseTown2 is under takeover from player 0 and get LC7_RecruitTimer3 time remaining <= 0
+                LC7_Platoon[35] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown2 platoon of size 50 * RecruitSizeModifier
+                LC7_RecruitTimer3 = create timer for 120 * RecruitModifier seconds
+                enable platoon LC7_Platoon[35] respond to town JapaneseTown2 attack
+                wait until not LC7_Platoon[35] recruiting
+            elsif LC7_Platoon[36] not exists and size of PlayerTown > 175 and PLAYER of JapaneseTown2 == 1 and not town JapaneseTown2 is under takeover from player 0 and get LC7_RecruitTimer3 time remaining <= 0
+                LC7_Platoon[36] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown2 platoon of size 50 * RecruitSizeModifier
+                LC7_RecruitTimer3 = create timer for 120 * RecruitModifier seconds
+                enable platoon LC7_Platoon[36] respond to town JapaneseTown2 attack
+                wait until not LC7_Platoon[36] recruiting
             end if
         end if
     end loop
