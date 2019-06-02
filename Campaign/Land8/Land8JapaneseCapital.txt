@@ -1494,6 +1494,8 @@ begin script LC8_Japanese_Capital
     PortalsActivated = 0
 
     SecondPlaythrough = 0
+
+    NearestAttackersAllowed = 0
     
 start
 
@@ -1823,6 +1825,24 @@ start
     run background script LC8_SiegeCatapult19Actions
     run background script LC8_SiegeCatapult20Actions
 
+    if HardMode == 1
+        run background script LC8_Platoon43Actions
+
+        LC8_Platoon[44] = create platoon PLATOON_INFO_JAPANESE_MELEE_4 at {PlatoonPos[14]} with 45 * RecruitSizeModifier men and 0 women
+        attach LC8_Platoon[44] to JapaneseTown2
+        PLAYER of LC8_Platoon[44] = 1
+        run background script LC8_StaticPlatoonsActions(PlatoonPos[14],Melee,LC8_Platoon[44])
+        enable platoon LC8_Platoon[44] respond to town JapaneseTown2 attack
+        set LC8_Platoon[44] focus to {PlayerTown}
+
+        LC8_Platoon[45] = create platoon PLATOON_INFO_JAPANESE_MELEE_4 at {PlatoonPos[15]} with 45 * RecruitSizeModifier men and 0 women
+        attach LC8_Platoon[45] to JapaneseTown2
+        PLAYER of LC8_Platoon[45] = 1
+        run background script LC8_StaticPlatoonsActions(PlatoonPos[15],Melee,LC8_Platoon[45])
+        enable platoon LC8_Platoon[45] respond to town JapaneseTown2 attack
+        set LC8_Platoon[45] focus to {PlayerTown}
+    end if
+
     wait until IntroFinished == 1
 
     begin loop
@@ -1962,23 +1982,23 @@ start
                 LC8_RecruitTimer1 = create timer for 200 * RecruitModifier seconds
 
             //Attack PlayerTown
-            elsif LC8_Platoon[32] not exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get LC8_RecruitTimer1 time remaining <= 0 and LC8_LargeSiegeIsRunning == 0 and LC8_LargeSiegeLaunchAttack == 1
+            elsif LC8_Platoon[32] not exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get LC8_RecruitTimer1 time remaining <= 0 and LC8_LargeSiegeIsRunning == 0 and (LC8_LargeSiegeLaunchAttack == 1 or HardMode == 1)
                 LC8_Platoon[32] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 70 * RecruitSizeModifier
                 LC8_RecruitTimer1 = create timer for 240 * RecruitModifier seconds
                 enable platoon LC8_Platoon[32] respond to town JapaneseCapital attack
                 wait until not LC8_Platoon[32] recruiting
 
-            elsif LC8_Platoon[33] not exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get LC8_RecruitTimer1 time remaining <= 0 and LC8_LargeSiegeIsRunning == 0 and LC8_LargeSiegeLaunchAttack == 1
+            elsif LC8_Platoon[33] not exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get LC8_RecruitTimer1 time remaining <= 0 and LC8_LargeSiegeIsRunning == 0 and (LC8_LargeSiegeLaunchAttack == 1 or HardMode == 1)
                 LC8_Platoon[33] = recruit ARMY_UNIT_TYPE_RANGED_4 town JapaneseCapital platoon of size 60 * RecruitSizeModifier
                 LC8_RecruitTimer1 = create timer for 240 * RecruitModifier seconds
                 enable platoon LC8_Platoon[33] respond to town JapaneseCapital attack
                 wait until not LC8_Platoon[33] recruiting
 
-            elsif LC8_SiegeCatapult[15] not exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get LC8_RecruitTimer1 time remaining <= 0 and LC8_LargeSiegeIsRunning == 0 and LC8_LargeSiegeLaunchAttack == 1
+            elsif LC8_SiegeCatapult[15] not exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get LC8_RecruitTimer1 time remaining <= 0 and LC8_LargeSiegeIsRunning == 0 and (LC8_LargeSiegeLaunchAttack == 1 or HardMode == 1)
                 LC8_SiegeCatapult[15] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_4 town JapaneseCapital siege weapon
                 LC8_RecruitTimer1 = create timer for 100 * RecruitModifier seconds
 
-            elsif LC8_SiegeCatapult[16] not exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get LC8_RecruitTimer1 time remaining <= 0 and LC8_LargeSiegeIsRunning == 0 and LC8_LargeSiegeLaunchAttack == 1
+            elsif LC8_SiegeCatapult[16] not exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get LC8_RecruitTimer1 time remaining <= 0 and LC8_LargeSiegeIsRunning == 0 and (LC8_LargeSiegeLaunchAttack == 1 or HardMode == 1)
                 LC8_SiegeCatapult[16] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_4 town JapaneseCapital siege weapon
                 LC8_RecruitTimer1 = create timer for 100 * RecruitModifier seconds
 
@@ -2140,7 +2160,7 @@ start
             end if
         //end if
 
-        if PLAYER of JapaneseCapital == 0 or PLAYER of JapaneseTown1 == 0 or PLAYER of JapaneseTown2 == 0 or PLAYER of MinorTown3 == 0 or PLAYER of MinorTown2 == 0 or PLAYER of JapaneseCapital != 1
+        if PLAYER of JapaneseCapital == 0 or PLAYER of JapaneseTown1 == 0 or PLAYER of JapaneseTown2 == 0 or PLAYER of MinorTown3 == 0 or PLAYER of MinorTown2 == 0 or PLAYER of JapaneseCapital != 1 or NearestAttackersAllowed == 1
             //Take over a town and start attacking the player a lot    
             if NearestSettlement != 0 and PLAYER of NearestSettlement == 0
                 AttackingPlatoons = 1
@@ -2148,6 +2168,10 @@ start
 
         elsif PLAYER of NearestSettlement == 1
             AttackingPlatoons = 0
+        end if
+
+        if TownsConverted >= 3 and HardMode == 1
+            NearestAttackersAllowed = 1
         end if
 
         if get player 0 alignment > 0.25
@@ -2170,7 +2194,7 @@ start
 
         //Start Large Siege
         if TownsConverted >= 2 or get army size in town PlayerTown > 60 or size of PlayerTown > 375
-            if TownsConverted >= 1 //If player has a large army, start siege earlier
+            if TownsConverted >= 1 and size of PlayerTown > 175 //If player has a large army, start siege earlier
                 if PLAYER of JapaneseTown2 == 1 and not town JapaneseTown2 is under takeover from player 0 and LC8_LargeSiegeIsRunning == 0 and SiegeCheck == 0
                     SiegeCheck = 1
                     wait number from 5 to 10 seconds
@@ -2304,6 +2328,20 @@ start
                 EarthquakeTimer = create timer for EARTHQUAKEDELAY * EpicModifier seconds
                 EARTHQUAKEDELAY += 500
 
+            end if
+        end if
+
+        if HardMode == 1
+            //Capture neutral towns
+            if LC8_Platoon[43] not exists and PLAYER of JapaneseTown1 == 1 and not town JapaneseTown1 is under takeover from player 0 and get LC8_RecruitTimer3 time remaining <= 0
+                LC8_Platoon[43] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown1 platoon of size 140 * RecruitSizeModifier
+                LC8_RecruitTimer3 = create timer for 300 * RecruitModifier seconds
+                enable platoon LC8_Platoon[43] respond to town MinorTown2 attack
+                enable platoon LC8_Platoon[43] respond to town MinorTown3 attack
+                enable platoon LC8_Platoon[43] respond to town JapaneseTown1 attack
+                enable platoon LC8_Platoon[43] respond to town JapaneseTown1 attack
+                enable platoon LC8_Platoon[43] respond to town JapaneseCapital attack
+                wait until not LC8_Platoon[43] recruiting
             end if
         end if
 
