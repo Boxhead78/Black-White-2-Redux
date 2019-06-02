@@ -2118,7 +2118,7 @@ begin script LC9_Aztec_Capital
 
 start
 
-    AttackNearestTownTimer = create timer for 0 seconds
+    AttackNearestTownTimer = create timer for 300 * RecruitModifier seconds
 
     WonderTemple = get building BATHHOUSE in AztecTown1 min built 1.0
     AIEarthquake = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_EARTHQUAKE at {1359.12,83.50,811.24} radius 150
@@ -2360,22 +2360,39 @@ start
     run background script LC9_StaticPlatoonsActions(PlatoonPos[19],Ranged,LC9_Platoon[19])
 
     //Epic Guards
+    if HardMode == 0
+        LC9_Platoon[22] = create platoon PLATOON_INFO_AZTEC_MELEE_4 at {PlatoonPos[20]} with 30 * RecruitSizeModifier men and 0 women
+        attach LC9_Platoon[22] to AztecCapital
+        PLAYER of LC9_Platoon[22] = 1
+        enable platoon LC9_Platoon[22] respond to town AztecCapital attack
+        enable platoon LC9_Platoon[22] camp
+        set LC9_Platoon[22] focus to {PlayerTown}
+        run background script LC9_StaticPlatoonsActions(PlatoonPos[20],Melee,LC9_Platoon[22])
 
-    LC9_Platoon[22] = create platoon PLATOON_INFO_AZTEC_MELEE_4 at {PlatoonPos[20]} with 30 * RecruitSizeModifier men and 0 women
-    attach LC9_Platoon[22] to AztecCapital
-    PLAYER of LC9_Platoon[22] = 1
-    enable platoon LC9_Platoon[22] respond to town AztecCapital attack
-    enable platoon LC9_Platoon[22] camp
-    set LC9_Platoon[22] focus to {PlayerTown}
-    run background script LC9_StaticPlatoonsActions(PlatoonPos[20],Melee,LC9_Platoon[22])
+        LC9_Platoon[23] = create platoon PLATOON_INFO_AZTEC_RANGED_4 at {PlatoonPos[21]} with 30 * RecruitSizeModifier men and 0 women
+        attach LC9_Platoon[23] to AztecCapital
+        PLAYER of LC9_Platoon[23] = 1
+        enable platoon LC9_Platoon[23] respond to town AztecCapital attack
+        enable platoon LC9_Platoon[23] camp
+        set LC9_Platoon[23] focus to {PlayerTown}
+        run background script LC9_StaticPlatoonsActions(PlatoonPos[21],Ranged,LC9_Platoon[23])
+    else
+        LC9_Platoon[22] = create platoon PLATOON_INFO_AZTEC_MELEE_4 at {PlatoonPos[20]} with 60 * RecruitSizeModifier men and 0 women
+        attach LC9_Platoon[22] to AztecCapital
+        PLAYER of LC9_Platoon[22] = 1
+        enable platoon LC9_Platoon[22] respond to town AztecCapital attack
+        enable platoon LC9_Platoon[22] camp
+        set LC9_Platoon[22] focus to {PlayerTown}
+        run background script LC9_StaticPlatoonsActions(PlatoonPos[20],Melee,LC9_Platoon[22])
 
-    LC9_Platoon[23] = create platoon PLATOON_INFO_AZTEC_RANGED_4 at {PlatoonPos[21]} with 30 * RecruitSizeModifier men and 0 women
-    attach LC9_Platoon[23] to AztecCapital
-    PLAYER of LC9_Platoon[23] = 1
-    enable platoon LC9_Platoon[23] respond to town AztecCapital attack
-    enable platoon LC9_Platoon[23] camp
-    set LC9_Platoon[23] focus to {PlayerTown}
-    run background script LC9_StaticPlatoonsActions(PlatoonPos[21],Ranged,LC9_Platoon[23])
+        LC9_Platoon[23] = create platoon PLATOON_INFO_AZTEC_RANGED_4 at {PlatoonPos[21]} with 60 * RecruitSizeModifier men and 0 women
+        attach LC9_Platoon[23] to AztecCapital
+        PLAYER of LC9_Platoon[23] = 1
+        enable platoon LC9_Platoon[23] respond to town AztecCapital attack
+        enable platoon LC9_Platoon[23] camp
+        set LC9_Platoon[23] focus to {PlayerTown}
+        run background script LC9_StaticPlatoonsActions(PlatoonPos[21],Ranged,LC9_Platoon[23])
+    end if
 
     //----Create patrol platoons----//
     LC9_Platoon[20] = create platoon PLATOON_INFO_AZTEC_MELEE_4 at {PatrolRouteA[0]} with 25 * RecruitSizeModifier men and 0 women
@@ -2651,11 +2668,19 @@ start
             add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[5] to LC9_WallArcher[5] action queue
 
         elsif LC9_Platoon[41] not exists and TownsConverted >= 6 and MohcBuilt == 0 and PLAYER of AztecCapital == 1 and not town AztecCapital is under takeover from player 0 and get LC9_RecruitTimer1 time remaining <= 0 and ALLOWED_TO_ATTACK == 0
-            MohcBuilt = 1 //Only build this super, super large platoon once
-            LC9_Platoon[41] = recruit ARMY_UNIT_TYPE_RANGED_4 town AztecCapital platoon of size 150 * RecruitSizeModifier
-            LC9_RecruitTimer1 = create timer for 300 * RecruitModifier seconds
-            enable platoon LC9_Platoon[41] respond to town AztecCapital attack
-            wait until not LC9_Platoon[41] recruiting
+            if HardMode == 0
+                MohcBuilt = 1 //Only build this super, super large platoon once
+                LC9_Platoon[41] = recruit ARMY_UNIT_TYPE_RANGED_4 town AztecCapital platoon of size 150 * RecruitSizeModifier
+                LC9_RecruitTimer1 = create timer for 300 * RecruitModifier seconds
+                enable platoon LC9_Platoon[41] respond to town AztecCapital attack
+                wait until not LC9_Platoon[41] recruiting
+            else
+                MohcBuilt = 1 //Only build this super, super large platoon once
+                LC9_Platoon[41] = recruit ARMY_UNIT_TYPE_RANGED_4 town AztecCapital platoon of size 250 * RecruitSizeModifier
+                LC9_RecruitTimer1 = create timer for 300 * RecruitModifier seconds
+                enable platoon LC9_Platoon[41] respond to town AztecCapital attack
+                wait until not LC9_Platoon[41] recruiting
+            end if
 
         //Attack Nearest Settlement
         elsif LC9_Platoon[42] not exists and PLAYER of AztecCapital == 1 and not town AztecCapital is under takeover from player 0 and get AttackNearestTownTimer time remaining <= 0 and AttackingPlatoons == 1
@@ -3020,7 +3045,7 @@ start
             end if
         end if
 
-        if PLAYER of AztecCapital == 0 or PLAYER of AztecTown1 == 0 or PLAYER of AztecTown2 == 0 or PLAYER of AztecTown3 == 0 or PLAYER of MinorTown8 == 0 or PLAYER of MinorTown4 == 0 or PLAYER of AztecCapital != 1
+        if PLAYER of AztecCapital == 0 or PLAYER of AztecTown1 == 0 or PLAYER of AztecTown2 == 0 or PLAYER of AztecTown3 == 0 or PLAYER of MinorTown8 == 0 or PLAYER of MinorTown4 == 0 or PLAYER of AztecCapital != 1 or HardMode == 1
             //Take over a town and start attacking the player a lot    
             if NearestSettlement != 0 and PLAYER of NearestSettlement == 0
                 AttackingPlatoons = 1
