@@ -138,7 +138,7 @@ begin loop
     end if
     
     if isConverted1 != 0
-        if PLAYER of AztecCapital == 1
+        if PLAYER of AztecCapital != 0
             disable migration from AztecTown1 to AztecTown2
             disable migration from AztecTown1 to AztecTown3
             disable migration from AztecTown1 to AztecCapital
@@ -164,7 +164,7 @@ begin loop
     end if
 
     if isConverted2 != 0
-        if PLAYER of AztecCapital == 1
+        if PLAYER of AztecCapital != 0
             disable migration from AztecTown2 to AztecTown1
             disable migration from AztecTown2 to AztecTown3
             disable migration from AztecTown2 to AztecCapital
@@ -216,7 +216,7 @@ begin loop
     end if    
     
     if isConverted4 != 0
-        if PLAYER of AztecCapital == 1
+        if PLAYER of AztecCapital != 0
             disable migration from AztecCapital to AztecTown1
             disable migration from AztecCapital to AztecTown2
             disable migration from AztecCapital to AztecTown3
@@ -1161,6 +1161,10 @@ begin loop
             GB_DialogueIsRunning = 0
             StoryDialogueTimer = create timer for 200 seconds
         end if
+    end if
+
+    if Language == Spanish
+
     end if
 
     if StartDialogue == 0
@@ -3845,6 +3849,8 @@ begin script LC14_DeathSpell(PlayerID,SpellPosition,GodPosition)
     AttackingPosition = 0
     AttackingPositionFallBack = 0
     SacrificePoint = marker at {977.41,279.34,1748.11}
+    myPlatoon1 = 0
+    myPlatoon2 = 0
 
 start
 
@@ -3863,6 +3869,21 @@ start
     SCALE of myWonder = 2.5
 
     //Spawn Skeletons here
+    //Platoon1
+    myPlatoon1 = create platoon ARMY_UNIT_TYPE_MELEE_8 at {SacrificePoint} + {-20,0,0} with 1 men and 0 women
+    PLAYER of myPlatoon1 = 1
+    enable platoon myPlatoon1 respond to town AztecCapital attack
+    enable platoon myPlatoon1 respond to town AztecTown1 attack
+    enable platoon myPlatoon1 respond to town AztecTown2 attack
+    run background script LC14_CreateUndeadPlatoon(myPlatoon1,1,40 * RecruitSizeModifier,s_skeletonadultland2)
+
+    //Platoon2
+    myPlatoon2 = create platoon ARMY_UNIT_TYPE_MELEE_8 at {SacrificePoint} + {20,0,0} with 1 men and 0 women
+    PLAYER of myPlatoon2 = 1
+    enable platoon myPlatoon1 respond to town AztecCapital attack
+    enable platoon myPlatoon1 respond to town AztecTown1 attack
+    enable platoon myPlatoon1 respond to town AztecTown2 attack
+    run background script LC14_CreateUndeadPlatoon(myPlatoon2,1,40 * RecruitSizeModifier,s_skeletonadultland2)
 
 end script LC14_DeathSpell
 
