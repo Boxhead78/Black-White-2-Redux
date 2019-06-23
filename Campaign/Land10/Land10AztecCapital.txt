@@ -1474,8 +1474,13 @@ start
             CHARGE of AIEpic = 1.0
         end if
 
-        Platoon = get platoon of player 0 nearest {AztecCapital} radius 500
-        NumberofPlatoons = get number of platoon of player 0 at {AztecCapital} radius 500
+        if HardMode == 0
+            Platoon = get platoon of player 0 nearest {AztecCapital} radius 500
+            NumberofPlatoons = get number of platoon of player 0 at {AztecCapital} radius 500
+        elsif HardMode == 1
+            Platoon = get platoon of player 0 nearest hand position radius 500
+            NumberofPlatoons = get number of platoon of player 0 at hand position radius 500
+        end if
         if CinemaIsRunning == 0
             if get number of villagers in platoon Platoon > 79 or NumberofPlatoons >= 3 or town AztecTown1 is under takeover from player 0 or town AztecTown2 is under takeover from player 0 or {Platoon} near {AztecCapital} radius 200
                 if HEALTH of AIEpic == 1.0 and get SirenTimer time remaining <= 0 and PLAYER of AztecCapital == 1
@@ -1502,15 +1507,28 @@ start
             end if
         end if
 
-        if PLAYER of AztecCapital == 0 or PLAYER of AztecTown1 == 0 or PLAYER of AztecTown2 == 0 or PLAYER of MinorTown1 == 0 or PLAYER of AztecCapital != 1
-            //Take over a town and start attacking the player a lot    
-            if NearestSettlement != 0 and PLAYER of NearestSettlement == 0
-                AttackingPlatoons = 1
-            end if
+        if HardMode == 0
+            if PLAYER of AztecCapital == 0 or PLAYER of AztecTown1 == 0 or PLAYER of AztecTown2 == 0 or PLAYER of MinorTown1 == 0 or PLAYER of AztecCapital != 1
+                //Take over a town and start attacking the player a lot    
+                if NearestSettlement != 0 and PLAYER of NearestSettlement == 0
+                    AttackingPlatoons = 1
+                end if
 
-        elsif PLAYER of NearestSettlement == 1 and AttackingPlatoons == 1
-            //Attack PlayerTown with remaining troops
-            AttackingPlatoons = 0
+            elsif PLAYER of NearestSettlement == 1 and AttackingPlatoons == 1
+                //Attack PlayerTown with remaining troops
+                AttackingPlatoons = 0
+            end if
+        elsif HardMode == 1
+            if PLAYER of AztecCapital == 0 or PLAYER of AztecTown1 == 0 or PLAYER of AztecTown2 == 0 or PLAYER of MinorTown1 == 0 or PLAYER of AztecCapital != 1 or HardMode == 1
+                //Take over a town and start attacking the player a lot    
+                if NearestSettlement != 0 and PLAYER of NearestSettlement != 1
+                    AttackingPlatoons = 1
+                end if
+
+            elsif PLAYER of NearestSettlement == 1 and AttackingPlatoons == 1
+                //Attack PlayerTown with remaining troops
+                AttackingPlatoons = 0
+            end if
         end if
 
     end loop
@@ -1830,21 +1848,40 @@ begin script LC10_GetNearestSettlement
 start
 
 begin loop
-    if PLAYER of AztecCapital == 0
-        NearestTown = AztecCapital
+    if HardMode == 0
+        if PLAYER of AztecCapital == 0
+            NearestTown = AztecCapital
 
-    elsif PLAYER of AztecTown1 == 0
-        NearestTown = AztecTown1
+        elsif PLAYER of AztecTown1 == 0
+            NearestTown = AztecTown1
 
-    elsif PLAYER of AztecTown2 == 0
-        NearestTown = AztecTown2
+        elsif PLAYER of AztecTown2 == 0
+            NearestTown = AztecTown2
 
-    elsif PLAYER of MinorTown1 == 0
-        NearestTown = MinorTown1
+        elsif PLAYER of MinorTown1 == 0
+            NearestTown = MinorTown1
 
-    else
-        NearestTown = PlayerTown
+        else
+            NearestTown = PlayerTown
 
+        end if
+    elsif HardMode == 1
+        if PLAYER of AztecCapital != 1
+            NearestTown = AztecCapital
+
+        elsif PLAYER of AztecTown1 != 1
+            NearestTown = AztecTown1
+
+        elsif PLAYER of AztecTown2 != 1
+            NearestTown = AztecTown2
+
+        elsif PLAYER of MinorTown1 != 1
+            NearestTown = MinorTown1
+
+        else
+            NearestTown = PlayerTown
+
+        end if
     end if
 
     NearestSettlement = NearestTown
