@@ -896,7 +896,7 @@ begin script LC11_Aztec_Capital
     AttackingPosition = 0
     AttackingPositionFallBack = 0
 
-    LargeSiegeTimer = 0
+    LargeSiegeTimer = create timer for 240 seconds
     LargeSiegeStarted = 0
 
     EpicVolc = 0
@@ -916,12 +916,6 @@ begin script LC11_Aztec_Capital
     HugeAttack = 0
 
 start
-
-    if HardMode == 0
-        LargeSiegeTimer = create timer for 300 seconds
-    else
-        LargeSiegeTimer = create timer for 60 seconds
-    end if
 
     AttackNearestTownTimer = create timer for 0 seconds
     LC11_AttackPlayerTownTimer = create timer for 1200 seconds
@@ -1539,16 +1533,6 @@ start
             AttackingPositionFallBack = marker at {AttackPos[1]} + {-100,0,50}
             run background script LC11_ArmyBehaivours(LC11_Platoon[37],Ranged,Attacker,0,AttackingPosition,AttackingPositionFallBack,0,0)
 
-        //Attack PlayerTown 1 Gigantic Platoon + 3 Siege Weapons (Siege Weapons further below) || Only HardMode
-        elsif LC11_Platoon[51] not exists and PLAYER of AztecCapital == 1 and not town AztecCapital is under takeover from player 0 and get LC11_RecruitTimer1 time remaining <= 0 and LC11_LargeSiegeOver == 1 and TownsConverted >= 2 and HugeAttack == 1 and HardMode == 1
-            LC11_Platoon[51] = recruit ARMY_UNIT_TYPE_MELEE_7 town AztecCapital platoon of size 450 * RecruitSizeModifier
-            LC11_RecruitTimer1 = create timer for 600 * RecruitModifier seconds
-            enable platoon LC11_Platoon[51] respond to town AztecCapital attack
-            wait until not LC11_Platoon[51] recruiting
-            AttackingPosition = marker at {AttackPos[0]} + {-100,0,50}
-            AttackingPositionFallBack = marker at {AttackPos[1]} + {-100,0,50}
-            run background script LC11_ArmyBehaivours(LC11_Platoon[51],Melee,Attacker,0,AttackingPosition,AttackingPositionFallBack,0,0)
-
         //Attack PlayerTown
         elsif LC11_Platoon[31] not exists and PLAYER of AztecCapital == 1 and not town AztecCapital is under takeover from player 0 and get LC11_RecruitTimer1 time remaining <= 0 and LC11_LargeSiegeOver == 1
             LC11_Platoon[31] = recruit ARMY_UNIT_TYPE_MELEE_5 town AztecCapital platoon of size 60 * RecruitSizeModifier
@@ -1837,19 +1821,6 @@ start
             HugeAttack = 1
         end if
 
-        if LC11_Platoon[51] exists and HugeAttack == 1 and HardMode == 1
-            HugeAttack = 2
-        
-            LC11_SiegeCatapult[27] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_7 town AztecCapital siege weapon
-            run background script LC11_MoveCatapultThenAttack(LC11_SiegeCatapult[27],0,SiegeRoute1[0],SiegeRoute1[1],SiegeRoute1[2])
-
-            LC11_SiegeCatapult[28] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_7 town AztecCapital siege weapon
-            run background script LC11_MoveCatapultThenAttack(LC11_SiegeCatapult[28],0,SiegeRoute2[0],SiegeRoute2[1],SiegeRoute2[2])
-
-            LC11_SiegeCatapult[29] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_7 town AztecCapital siege weapon
-            run background script LC11_MoveCatapultThenAttack(LC11_SiegeCatapult[29],0,SiegeRoute3[0],SiegeRoute3[1],SiegeRoute3[2])
-        end if
-
         if AztecCapitalLargeAttack == 1
             AztecCapitalLargeAttack = 0
             //Create a couple of attackers here
@@ -2122,10 +2093,6 @@ start
         wait 210 seconds
     end if
 
-    if HardMode == 1
-        wait 120 seconds
-    end if
-
     begin dialogue
         // AG: Ha. This will only end one way. Nothing can stop my Aztec nation!
         say "BW2T_SCRIPT_10FINAL_STORYLINE_8"
@@ -2145,10 +2112,6 @@ start
         wait 150 seconds
     else
         wait 180 seconds
-    end if
-
-    if HardMode == 1
-        wait 120 seconds
     end if
 
     wait until not town PlayerTown is under takeover from player 1 and PLAYER of PlayerTown == 0
@@ -2215,8 +2178,8 @@ start
     LC11_LargeSiegeIsRunning = 0
 
     //Send Norse Reinforcements
-    //Don't trigger this while playertown is being captured or patrol platoon is near teleport
-    wait until not town PlayerTown is under takeover from player 1 and not {LC11_Platoon[16]} near {TeleportCentre} radius 500
+    // don't trigger this while a city is being taken over
+    wait until not town PlayerTown is under takeover from player 1 and not {LC11_Platoon[16]} near {TeleportCentre} radius 400
 
     begin cinema
         set fade red 0 green 0 blue 0 time 3
@@ -2535,25 +2498,6 @@ start
         EpicVolc = create volcano at {ET_FireEpicLocation} player 1
         VolcanoFired = 1
         run background script LC11_Volcano(AIVolcano, EpicVolc)
-    end if
-
-    wait 180 seconds
-
-    if HardMode == 1
-        //Trigger another large attack + volcano loop
-        AztecCapitalLargeAttack = 1
-        begin loop
-            wait until CHARGE of AIVolcano == 1.0
-            wait 300 seconds
-            wait until HEALTH of AIVolcano == 1.0
-            enable predefined sky "VOLCANO" time 10
-            CastEpicPos = marker at {1270.59,307.26,1014.82}
-            run script EpicTargeter(PlayerTown,marker at {CastEpicPos},0,4)
-            EpicWarning = create visual effect VISUAL_EFFECT_EPIC_TARGET_WARNING at {ET_FireEpicLocation} time 15 target {ET_FireEpicLocation}
-            EpicVolc = create volcano at {ET_FireEpicLocation} player 1
-            run background script LC11_Volcano(AIVolcano, EpicVolc)
-            until PLAYER of AztecCapital != 1
-        end loop
     end if
     //Finally end this script
 
