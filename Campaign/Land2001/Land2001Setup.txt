@@ -205,6 +205,8 @@ start
     add resource RESOURCE_TYPE_WOOD 2500 to Town5
     add resource RESOURCE_TYPE_FOOD 4000 to Town5
 
+    wait 5 seconds
+
     if Intro == 0
         disable load screen
         set fade red 0 green 0 blue 0 time 0
@@ -223,6 +225,8 @@ start
         else
             PD_ForcedSaving = 1
             wait until PD_ForcedSaving == 0 or 10 seconds
+            stop script "SavePersistentDataSetData"
+            run script SavePersistentDataGetData
             begin cinema
                 set camera position to {1198.61,215.00,1145.66}
                 set camera focus to {1288.42,170.00,1129.34}
@@ -247,9 +251,9 @@ start
     run background script MapLoader
     run background script SkirmishLoader
     run background script MaintainVillagers(0)
-    if SecondPlaythrough == 1
+    //if SecondPlaythrough == 1
         run background script InitiateHardMode
-    end if
+    //end if
 
 end script LC2001_ScriptManager
 
