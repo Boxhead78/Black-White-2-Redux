@@ -2203,17 +2203,20 @@ start
         end if
 
         //Start Large Siege
-        if TownsConverted >= 2 or get army size in town PlayerTown > 60 or size of PlayerTown > 300
+        if TownsConverted >= 2 or get army size in town PlayerTown > 60 or size of PlayerTown > 250
             if TownsConverted >= 1 and size of PlayerTown > 175 //If player has a large army, start siege earlier
-                if PLAYER of JapaneseTown2 == 1 and not town JapaneseTown2 is under takeover from player 0 and LC8_LargeSiegeIsRunning == 0 and SiegeCheck == 0
-                    SiegeCheck = 1
-                    wait number from 5 to 10 seconds
-                    LC8_LargeSiegeIsRunning = 1
-                elsif not PLAYER of JapaneseTown2 == 1 and SiegeCheck == 0
-                    SiegeCheck = 1
-                    FireHurricane = 1
-                    LC8_LargeSiegeLaunchAttack = 1
-                    LC8_LargeSiegeIsRunning = 0
+                if SiegeCheck == 0
+                    wait 2.5 seconds
+                    if PLAYER of JapaneseTown2 == 1 and not town JapaneseTown2 is under takeover from player 0 and LC8_LargeSiegeIsRunning == 0
+                        SiegeCheck = 1
+                        wait number from 5 to 10 seconds
+                        LC8_LargeSiegeIsRunning = 1
+                    elsif not PLAYER of JapaneseTown2 == 1
+                        SiegeCheck = 1
+                        FireHurricane = 1
+                        LC8_LargeSiegeLaunchAttack = 1
+                        LC8_LargeSiegeIsRunning = 0
+                    end if
                 end if
             end if
         end if
