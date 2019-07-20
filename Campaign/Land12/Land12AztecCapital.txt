@@ -29,6 +29,7 @@ define TalusCatapult = 0
 
 global AttackReady = 0
 global ThrowMiracleTimer = 0
+global ThrowMeteorTimer = 0
 global FireRainTimer = 0
 global MiracleTimerStarted = 0
 global MiracleFireRainStarted = 0
@@ -2319,8 +2320,13 @@ start
 
     AttackNearestTownTimer = create timer for 0 seconds
     ThrowMiracleTimer = create timer for 999999 seconds
+    ThrowMeteorTimer = create timer for 1200 * EpicModifier seconds //Only hard mode
 
     FireRainTimer = create timer for 2400 * EpicModifier seconds
+
+    if HardMode == 1
+        FireRainTimer = create timer for 600 * EpicModifier seconds
+    end if
 
     LC12_RecruitTimer1 = create timer for 60 seconds
     LC12_RecruitTimer2 = create timer for 60 seconds
@@ -2723,6 +2729,31 @@ start
     disable platoon LC12_Platoon[32] respond to town AztecPrison attack
     disable platoon LC12_Platoon[32] camp
     set LC12_Platoon[32] focus to {AztecPrison}
+
+    //----Create early attackers | Hardmode----//
+    if HardMode == 1
+        LC12_Platoon[45] = create platoon ARMY_UNIT_TYPE_MELEE_7 at {marker at {1786.16,20.30,1049.38}} with 20 * RecruitSizeModifier men and 0 women
+        run background script LC12_CreateUndeadPlatoon(LC12_Platoon[45],20 * RecruitSizeModifier,s_skeletonadultland2)
+        attach LC12_Platoon[45] to AztecCapital
+        PLAYER of LC12_Platoon[45] = 1
+        run background script LC12_ArmyBehaivours(LC12_Platoon[45],Melee,Conqueror,0,0,0,0,0)
+        run background script LC12_GenericTalusSpeeches(LC12_Platoon[45],1)
+        enable platoon LC12_Platoon[45] respond to town AztecCapital attack
+        enable platoon LC12_Platoon[45] respond to town AztecTown1 attack
+        enable platoon LC12_Platoon[45] respond to town AztecTown2 attack
+        disable platoon LC12_Platoon[45] camp
+
+        LC12_Platoon[46] = create platoon ARMY_UNIT_TYPE_MELEE_7 at {marker at {1786.16,20.30,1049.38} + {20,20}} with 20 * RecruitSizeModifier men and 0 women
+        run background script LC12_CreateUndeadPlatoon(LC12_Platoon[46],20 * RecruitSizeModifier,s_skeletonadultland2)
+        attach LC12_Platoon[46] to AztecCapital
+        PLAYER of LC12_Platoon[46] = 1
+        run background script LC12_ArmyBehaivours(LC12_Platoon[46],Melee,Conqueror,0,0,0,0,0)
+        run background script LC12_GenericTalusSpeeches(LC12_Platoon[46],1)
+        enable platoon LC12_Platoon[46] respond to town AztecCapital attack
+        enable platoon LC12_Platoon[46] respond to town AztecTown1 attack
+        enable platoon LC12_Platoon[46] respond to town AztecTown2 attack
+        disable platoon LC12_Platoon[46] camp
+    end if
 
     begin loop
 
@@ -3276,7 +3307,7 @@ start
             LC12_LargeSiegeLaunchAttack = 1
         end if
 
-        if TownsConverted >= 2 or size of PlayerTown > 125
+        if TownsConverted >= 2 or size of PlayerTown > 100
             if MiracleTimerStarted == 0
                 MiracleTimerStarted = 1
                 ThrowMiracleTimer = create timer for 120 seconds

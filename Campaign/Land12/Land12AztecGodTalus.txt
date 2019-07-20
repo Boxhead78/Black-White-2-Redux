@@ -262,6 +262,52 @@ start
             ge_Busy[godHandle] = 0
         end if
 
+        if ge_Busy[godHandle] == 0 and get ThrowMeteorTimer time remaining <= 0 and get player ge_Player[godHandle] mana > 18000 and PLAYER of PlayerTown == 0 and PLAYER of AztecCapital == 1 and GB_DialogueIsRunning == 0 and ge_EmergencyMode[godHandle] == 0 and ge_Altar[godHandle] == 1
+            ge_Busy[godHandle] = 1
+            GB_DialogueIsRunning = 1
+            begin dialogue
+                myRand = number from 1 to 4
+                if myRand == 1
+                    say "BW2XT_LAND02_TALUS_FIRE_20"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND02_TALUS_FIRE_20 + 1 seconds
+                    say "BW2XT_LAND02_TALUS_FIRE_50"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND02_TALUS_FIRE_50 + 1 seconds
+                elsif myRand == 2
+                    say "BW2XT_LAND05_TALUS_MIRACLE_ATTACK_40"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND05_TALUS_MIRACLE_ATTACK_40 + 1 seconds
+                elsif myRand == 3
+                    say "BW2XT_LAND02_PLAYER_ACCEPTS_MIGRATION_10"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND02_PLAYER_ACCEPTS_MIGRATION_10 + 1 seconds
+                elsif myRand == 4
+                    say "BW2XT_LAND02_PLAYER_ACCEPTS_MIGRATION_20"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND02_PLAYER_ACCEPTS_MIGRATION_20 + 1 seconds
+                end if
+            end dialogue
+            GB_DialogueIsRunning = 0
+
+            ClosestPosInfluenceRing = marker at get nearest position at AztecCapital influence ring from {PlayerTown}
+            run script ge_MoveToRadiusAltitude(godHandle,marker at {ClosestPosInfluenceRing},geGodThrowRadius / 2,geGodThrowAltitude)
+            
+            wait until GB_DialogueIsRunning == 0
+            run script ge_ThrowMiracle(godHandle, GE_MIRACLE_TYPE_METEOR, marker at {1277.97,60.64,1466.99} + {0,26,0} + {number from -18 to 18,0,number from -18 to 18}, 1)
+            wait number from 2 to 4 seconds
+            run script ge_ThrowMiracle(godHandle, GE_MIRACLE_TYPE_METEOR, marker at {1277.97,60.64,1466.99} + {0,26,0} + {number from -18 to 18,0,number from -18 to 18}, 1)
+            wait number from 2 to 4 seconds
+
+            ge_Busy[godHandle] = 0
+            ThrowMiracleTimer = create timer for number from 360 * EpicModifier to 720 * EpicModifier seconds
+        end if
+
         if townCounter >= 15 or PLAYER of ge_HomeTown[godHandle] != ge_Player[godHandle]
             townCounter = 0
             geChangeTown[godHandle] = 1
