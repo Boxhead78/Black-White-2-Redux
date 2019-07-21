@@ -2210,19 +2210,22 @@ start
     ThrowMiracleTimer = create timer for 999999 seconds
     ThunderstormTimer = create timer for 999999 seconds
     SendStonehengeTroops = create timer for 1500 * RecruitModifier seconds
+    if HardMode == 1
+        SendStonehengeTroops = create timer for 750 * RecruitModifier seconds
+    end if
 
     LC13_RecruitTimer1 = create timer for 60 seconds
     LC13_RecruitTimer2 = create timer for 60 seconds
     LC13_RecruitTimer3 = create timer for 60 seconds
 
+    //Build the Volcano
+    if Difficulty > 3 or HardMode == 1
+        build all town AztecCapital buildings in group 11
+    end if
+
     AIVolcano = get SCRIPT_OBJECT_TYPE_WONDER EPIC_WONDER_NUMBER_VOLCANO at {AztecCapital} radius 150
     disable AIVolcano hurt by fire
     CHARGE of AIVolcano = 1.0
-
-    //Build the Volcano
-    if Difficulty > 3
-        build all town AztecCapital buildings in group 11
-    end if
 
     if Difficulty >= 4
         add resource WOOD 3000 to PlayerTown
@@ -2988,7 +2991,7 @@ start
         end if
 
         if HEALTH of AIVolcano >= 1.0 and get VolcanoTimer time remaining <= 0 and PLAYER of AztecCapital == 1 and CinemaIsRunning == 0 and not town PlayerTown is under takeover from player 1 and PLAYER of PlayerTown == 0
-            if PLAYER of AztecTown2 != 1 or size of PlayerTown > 425
+            if PLAYER of AztecTown2 != 1 or size of PlayerTown > 400
                 enable predefined sky "VOLCANO" time 9
 
                 if VolcanoFired == 0
@@ -3018,14 +3021,14 @@ start
         end if
 
         if MiracleThunderstormStarted == 0
-            if PLAYER of AztecTown2 != 1 or size of PlayerTown > 375
+            if PLAYER of AztecTown2 != 1 or size of PlayerTown > 350
                 MiracleThunderstormStarted = 1
-                ThunderstormTimer = create timer for 540 seconds
+                ThunderstormTimer = create timer for 540 * EpicModifier seconds
             end if
         end if
 
         if CaptureAztecTown1 == 0
-            if TownsConverted >= 3 or TownsAggressiveConverted >= 1 or size of PlayerTown > 200
+            if TownsConverted >= 3 or TownsAggressiveConverted >= 1 or size of PlayerTown > 200 or HardMode == 1
                 CaptureAztecTown1 = 1
             end if
         end if
@@ -3057,7 +3060,7 @@ start
         end if
 
         //Attack AztecTown1
-        if TownsConverted >= 3 or TownsAggressiveConverted >= 1
+        if TownsConverted >= 3 or TownsAggressiveConverted >= 1 or HardMode == 1
             if PLAYER of AztecTown1 != 1 and CaptureAztecTown1 == 1 and not town AztecTown1 is under takeover from player 1 and get AttackAztecTown1Timer time remaining <= 0
                 if LC13_Platoon[22] not exists and PLAYER of AztecCapital == 1 and not town AztecCapital is under takeover from player 0
                     LC13_Platoon[22] = recruit ARMY_UNIT_TYPE_MELEE_5 town AztecCapital platoon of size 25 * RecruitSizeModifier

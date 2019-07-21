@@ -2448,6 +2448,8 @@ start
     //AztecTown2
     //IN LOOP
 
+    wait 0.5 seconds
+
     //----Create static defenders platoons----//
     LC12_Platoon[8] = create platoon ARMY_UNIT_TYPE_MELEE_7 at {PlatoonPos[8]} with 50 * RecruitSizeModifier men and 0 women
     run background script LC12_CreateUndeadPlatoon(LC12_Platoon[8],50 * RecruitSizeModifier,s_skeletonadultland2)
@@ -2593,6 +2595,8 @@ start
     LC12_SiegeCatapult[3] = create siege weapon SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_7 belonging to AztecCapital at {StaticSiegePos[3]}
     set LC12_SiegeCatapult[3] focus to {PlayerTown}
     add action SIEGEWEAPON_AGENDA_ACTION_DEFEND_POSITION using {StaticSiegePos[3]} to siege weapon LC12_SiegeCatapult[3] action queue
+
+    wait 0.5 seconds
 
     //----Create skeleton army----//
     LC12_Platoon[10] = create platoon ARMY_UNIT_TYPE_MELEE_7 at {PlatoonPos[10]} with 35 * RecruitSizeModifier men and 0 women
@@ -3278,10 +3282,12 @@ start
 
         end if
 
-        if PLAYER of AztecCapital == 0 or PLAYER of AztecTown1 == 0 or PLAYER of AztecTown2 == 0 or PLAYER of MinorTown1 == 0 or PLAYER of MinorTown2 == 0 or PLAYER of MinorTown3 == 0 or PLAYER of MinorTown4 == 0 or PLAYER of AztecCapital != 1
+        if PLAYER of AztecCapital == 0 or PLAYER of AztecTown1 == 0 or PLAYER of AztecTown2 == 0 or PLAYER of MinorTown1 == 0 or PLAYER of MinorTown2 == 0 or PLAYER of MinorTown3 == 0 or PLAYER of MinorTown4 == 0 or PLAYER of AztecCapital != 1 or HardMode == 1
             //Take over a town and start attacking the player a lot    
-            if NearestSettlement != 0 and PLAYER of NearestSettlement == 0
-                AttackingPlatoons = 1
+            if TownsConverted >= 3 or TownsAggressiveConverted >= 1 or size of PlayerTown > 200
+                if NearestSettlement != 0 and PLAYER of NearestSettlement == 0
+                    AttackingPlatoons = 1
+                end if
             end if
 
         elsif PLAYER of NearestSettlement == 1 and AttackingPlatoons == 1
