@@ -15,11 +15,13 @@ begin script LC14_Outro
     CSMixer = create mixer
     myEffect = 0
     PlayerAlignment = 0
+    SecondPlaythrough = 0
 
 start
 
 wait until PLAYER of AztecTown1 != 1 and PLAYER of AztecTown2 != 1 and PLAYER of AztecCapital != 1 and PLAYER of PlayerTown != 1 and TempleDestroyed[0] == 1 and TempleDestroyed[1] == 1 and TempleDestroyed[2] == 1
 
+SecondPlaythrough = persistent data "SECOND_PLAYTHROUGH"
 PD_ForcedSaving = 1
 wait until PD_ForcedSaving == 0 or 10 seconds
 stop script "SavePersistentDataSetData"
@@ -183,6 +185,23 @@ begin cinema
     wait 5 seconds
 
 end cinema
+
+if SecondPlaythrough == 0
+    begin dialogue
+        if Language == English
+            say "Unlocked extended mode for campaign. Available at gods playground."
+        elsif Language == German
+            say "Erweiterter Kampagnen-Modus freigeschaltet. Verfuegbar auf dem Spielplatz der Goetter."
+        elsif Language == Spanish
+            say "Desbloqueado el modo campaña extendida. Disponible en el campo de juego de los dioses."
+        elsif Language == Russian
+            say "TRANSLATION"
+        elsif Language == TEMPLATE_LANGUAGE
+            say "TRANSLATION"
+        end if
+        wait 5 seconds
+    end dialogue
+end if
 
 end script LC14_Outro
 
