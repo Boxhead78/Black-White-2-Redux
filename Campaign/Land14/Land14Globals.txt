@@ -55,6 +55,7 @@ global MusicIsRunning = 0
 global VolcanoFired = 0
 global LC14_AltarCounter = 0
 global HardMode = 0
+global LandWon = 0
 
 global PlayerTown = 0
 global AztecTown1 = 0
@@ -206,7 +207,7 @@ begin script LC14_GhostScript(myGhost,whichMesh)
 
 start
 
-    while myGhost exists and HEALTH of myGhost > 0.00
+    while myGhost exists and HEALTH of myGhost > 0.00 and LandWon == 0
         wait until HEALTH of myGhost == 0 or 5 seconds
         if whichMesh == s_aztecwarrior_ghost
             //set anim speed of myGhost to 0.75
@@ -231,31 +232,36 @@ start
     set myEffect color red 148 green 0 blue 211
     SCALE of myEffect = 0.1
     HEALTH of myGhost = 0.00
+    if LandWon == 0
+        PlayerAlignment = get player 0 alignment
+        PlayerAlignment = PlayerAlignment + 0.00015
+        set player 0 alignment PlayerAlignment
+    end if
 
-    while myGhost exists
-        wait until HEALTH of myGhost == 0 or 5 seconds
-        if whichMesh == s_aztecwarrior_ghost
-            //set anim speed of myGhost to 0.75
-            set myGhost carrying CARRIED_OBJECT_NONE
-            override mesh for myGhost with "..\skins\s_aztecwarrior_ghost"
-            set myGhost carrying CARRIED_OBJECT_NORSE_SWORD
-            disable myGhost can be fisted
-        elsif whichMesh == s_skeletonadultland2
-            //set anim speed of myGhost to 0.5
-            override mesh for myGhost with "..\skins\s_skeletonadultland2"
-            set myGhost carrying CARRIED_OBJECT_NONE
-            set myGhost carrying CARRIED_OBJECT_NORSE_SWORD
+    begin loop
+        if LandWon == 0
+            if whichMesh == s_aztecwarrior_ghost
+                //set anim speed of myGhost to 0.75
+                override mesh for myGhost with "..\skins\s_aztecwarrior_ghost"
+                set myGhost carrying CARRIED_OBJECT_NONE
+                set myGhost carrying CARRIED_OBJECT_NORSE_SWORD
+                disable myGhost can be fisted
+            elsif whichMesh == s_skeletonadultland2
+                //set anim speed of myGhost to 0.5
+                override mesh for myGhost with "..\skins\s_skeletonadultland2"
+                set myGhost carrying CARRIED_OBJECT_NONE
+                set myGhost carrying CARRIED_OBJECT_NORSE_SWORD
+            else
+                //set anim speed of myGhost to 0.6
+                override mesh for myGhost with "..\skins\s_undeadwarrior_noghost"
+                set myGhost carrying CARRIED_OBJECT_NONE
+                set myGhost carrying CARRIED_OBJECT_AZTEC_CLUB
+            end if
         else
-            //set anim speed of myGhost to 0.6
-            override mesh for myGhost with "..\skins\s_undeadwarrior_noghost"
-            set myGhost carrying CARRIED_OBJECT_NONE
-            set myGhost carrying CARRIED_OBJECT_AZTEC_CLUB
+            delete myGhost
         end if
-    end while
-
-    PlayerAlignment = get player 0 alignment
-    PlayerAlignment = PlayerAlignment + 0.00015
-    set player 0 alignment PlayerAlignment
+        until not myGhost exists
+    end loop
 
 end script LC14_GhostScript
 
