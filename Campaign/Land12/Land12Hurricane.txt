@@ -1,4 +1,5 @@
 define script LC12_Hurricane
+define script LC12_CheckHurricane
 
 begin script LC12_Hurricane
 
@@ -81,6 +82,8 @@ begin loop
     until HEALTH of AIHurricane < 1.0
 end loop
 
+run background script LC12_CheckHurricane
+
 invoke Hurricane EPIC_EXIT_TORNADO
 wait 4 seconds//wait until get MusicEventTimer time since set >= MusicEvent9
 invoke Hurricane EPIC_STOP_TORNADO
@@ -98,3 +101,13 @@ wait 3 seconds
 enable influence
 
 end script LC12_Hurricane
+
+
+begin script LC12_CheckHurricane
+
+start
+
+    wait until HEALTH of AIHurricane == 0.00
+    delete AIHurricane
+
+end script LC12_CheckHurricane
