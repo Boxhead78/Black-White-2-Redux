@@ -10,6 +10,7 @@
 define oCreature = 0
 define LC7_NUM_OF_SETTLEMENTS = 5
 define script Globals
+define script LC7_DynamicDifficulty
 
 // Debug switch
 global DEBUG = 0
@@ -123,3 +124,22 @@ start
     LC7_CreatureAttackTimer = create timer for 9999999 seconds
 
 end script Globals
+
+
+begin script LC7_DynamicDifficulty
+
+    DifficultyTimer = create timer for 1500 seconds
+
+start
+
+begin loop
+    wait 2.5 seconds
+    if get DifficultyTimer time remaining <= 0
+        RecruitModifier += 0.75
+        EpicModifier += 0.25
+        BuilderModifier += 0.33
+        DifficultyTimer = create timer for 600 * Difficulty seconds
+    end if
+end loop
+
+end script LC7_DynamicDifficulty

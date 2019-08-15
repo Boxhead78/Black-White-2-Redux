@@ -10,6 +10,7 @@ define script Globals
 define script LC13_CreateUndeadPlatoon(whichPlatoon,howManyVillagersToDelete,howManyVillagersToSpawn,whichMesh)
 define script LC13_GhostScript(myGhost,whichMesh)
 define script LC13_AIAltarCounter(whichBuilding)
+define script LC13_DynamicDifficulty
 
 define s_aztecwarrior_ghost = 0
 define s_skeletonadultland2 = 1
@@ -293,3 +294,22 @@ begin loop
 end loop
 
 end script LC13_AIAltarCounter
+
+
+begin script LC13_DynamicDifficulty
+
+    DifficultyTimer = create timer for 1500 seconds
+
+start
+
+begin loop
+    wait 2.5 seconds
+    if get DifficultyTimer time remaining <= 0
+        RecruitModifier += 0.75
+        EpicModifier += 0.25
+        BuilderModifier += 0.33
+        DifficultyTimer = create timer for 600 * Difficulty seconds
+    end if
+end loop
+
+end script LC13_DynamicDifficulty

@@ -11,6 +11,7 @@ define DEBUG = 0
 define oCreature = 0
 
 define script Globals
+define script LC4_DynamicDifficulty
 
 global TestModeOn = 0
 global MigrationsAccepted = 0
@@ -105,3 +106,22 @@ start
     MissionaryTown = get town with id 8
 
 end script Globals
+
+
+begin script LC4_DynamicDifficulty
+
+    DifficultyTimer = create timer for 1500 seconds
+
+start
+
+begin loop
+    wait 2.5 seconds
+    if get DifficultyTimer time remaining <= 0
+        RecruitModifier += 0.75
+        EpicModifier += 0.25
+        BuilderModifier += 0.33
+        DifficultyTimer = create timer for 600 * Difficulty seconds
+    end if
+end loop
+
+end script LC4_DynamicDifficulty

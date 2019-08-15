@@ -9,6 +9,7 @@
 // Other Defines
 define oCreature = 0
 define script Globals
+define script LC6_DynamicDifficulty
 
 // Debug switch
 global DEBUG = 0
@@ -138,3 +139,22 @@ start
     JapaneseCapital = get town with id 13
     
 end script Globals
+
+
+begin script LC6_DynamicDifficulty
+
+    DifficultyTimer = create timer for 1500 seconds
+
+start
+
+begin loop
+    wait 2.5 seconds
+    if get DifficultyTimer time remaining <= 0
+        RecruitModifier += 0.75
+        EpicModifier += 0.25
+        BuilderModifier += 0.33
+        DifficultyTimer = create timer for 600 * Difficulty seconds
+    end if
+end loop
+
+end script LC6_DynamicDifficulty
