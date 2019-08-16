@@ -40,6 +40,7 @@ start
 
 begin loop
     if variable get town MigrationTown status == variable TOWN_STATUS_MIGRATION_STARTED
+        wait 10 seconds
         while not myMigration exists
             myMigrationTarget = get town MigrationTown is migrating to
             myMigration = get migration from MigrationTown to myMigrationTarget
@@ -47,7 +48,7 @@ begin loop
         while 0 < myArmySize and myMigration exists
             myPlatoon = get platoon nearest {myMigration} radius 25
             myVillager = get VILLAGER at {myMigration} radius 25
-            if myVillager exists and not myPlatoon exists 
+            if myVillager exists and not myPlatoon exists and not {myVillager} viewed
                 delete myVillager
                 myArmySize--
             end if
