@@ -1,0 +1,189 @@
+///////////////////////////////////////////////////////////////////////////////
+//           Undead Armies Script
+//    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+///////////////////////////////////////////////////////////////////////////////
+
+define script UA_GraveyardCheck(PlayerID)
+define script UA_SpawnUndeadPlatoonCheck(PlayerID,Graveyard,Flag,Foundation)
+define script UA_CreateUndeadPlatoon(PlayerID,Graveyard,howManyVillagers)
+define script UA_GhostScript(PlayerID,myGhost)
+
+global UA_myTempDeath[9]
+global UA_myUsedUndead[9]
+
+begin script UA_GraveyardCheck(PlayerID)
+
+    FlagObject = 0
+    myCounter = 0
+    myGraveyard = 0
+    myDeadPeople = 0
+    myFlag = 0
+    myFoundation = 0
+    myTown[22]
+    Tooltip[2]
+    Counter = 0
+
+start
+
+begin loop
+    if Counter > 20
+        Counter = 0
+    end if
+    
+    if UA_myTempDeath[PlayerID] >= 30
+        if hand position near {myFlag} radius 4 and Tooltip[0] not exists
+            Tooltip[0] = create tooltip on myFlag with text "HELP_TEXT_MULTIPLAYER_SETUP_SPELL_10"
+        end if
+    else
+        if hand position near {myFlag} radius 4 and Tooltip[1] not exists
+            Tooltip[1] = create tooltip on myFlag with text "HELP_TEXT_MULTIPLAYER_SETUP_SPELL_11"
+        end if
+    end if
+    if hand position not near {myFlag} radius 4 + 1 and Tooltip[0] exists
+        delete Tooltip[0]
+    end if
+    if hand position not near {myFlag} radius 4 + 1 and Tooltip[1] exists
+        delete Tooltip[1]
+    end if
+
+    myDeadPeople = get total of stat STATS_EVT_SACRIFICES
+    myTown[Counter] = get town with id Counter
+    myGraveyard = get random abode of type ABODE_NUMBER_GRAVEYARD in town myTown[Counter]
+    UA_myTempDeath[PlayerID] = (myDeadPeople * 2.5) - UA_myUsedUndead[PlayerID]
+    FlagObject = get FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myGraveyard} radius 5
+    if HEALTH of myGraveyard >= 1.0 and FlagObject not exists and PLAYER of myGraveyard == PlayerID and get player PlayerID alignment < -0.5
+        myFlag = create ROCK_OBJECT ARMY_FLAG_INFO_GREEK_MELEE at {myGraveyard}
+        override mesh for myFlag with "..\models\m_bannerundead"
+        ALTITUDE of myFlag = 1.0
+        ANGLE of myFlag = ANGLE of myGraveyard + 180
+        SCALE of myFlag = 3.0
+        disable myFlag pickup
+        disable myFlag moveable
+        enable myFlag indestructible
+        myFoundation = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myGraveyard}
+        SCALE of myFoundation = 0.01
+        disable myFoundation pickup
+        disable myFoundation moveable
+        enable myFoundation indestructible
+        run background script UA_SpawnUndeadPlatoonCheck(PlayerID,myGraveyard,myFlag,myFoundation)
+    end if
+    Counter++
+end loop
+
+end script UA_GraveyardCheck
+
+
+begin script UA_SpawnUndeadPlatoonCheck(PlayerID,Graveyard,Flag,Foundation)
+
+start
+
+while HEALTH of Graveyard >= 1.0 and Graveyard exists and Flag exists
+    if UA_myTempDeath[PlayerID] >= 30
+        if bindable action BINDABLE_ACTION_TYPE_ACTION performed and hand position near {Flag} radius 4
+            run background script UA_CreateUndeadPlatoon(PlayerID,Graveyard,30)
+        end if
+    end if
+end while
+
+delete Flag
+delete Foundation
+
+end script UA_SpawnUndeadPlatoonCheck
+
+
+begin script UA_CreateUndeadPlatoon(PlayerID,Graveyard,howManyVillagers)
+
+    ArmyFlag = 0
+    Ghost[999]
+    counter = 0
+    myEffect = 0
+    myArmy = 0
+    RelativePos = 0
+    Villager = 0
+    VillagerTemp = 0
+
+start
+
+    UA_myUsedUndead[PlayerID] += 30
+    RelativePos = marker at get world position from Graveyard to {4,0,4}
+
+    myEffect = create visual effect VISUAL_EFFECT_TOWN_TAKEOVER_DEFENDER at {RelativePos} + {0,2,0} time 10
+    set myEffect color red 148 green 0 blue 211
+    SCALE of myEffect = 2
+
+    myEffect = create visual effect VISUAL_EFFECT_TOWN_TAKEOVER_DEFENDER at {RelativePos} + {0,2,0} time 10
+    set myEffect color red 148 green 0 blue 211
+    SCALE of myEffect = 1.0
+
+    myEffect = create visual effect VISUAL_MIRACLE_HEAL_GROUND at {RelativePos} + {0,2,0} time 20
+    set myEffect color red 148 green 0 blue 211
+    SCALE of myEffect = 2
+
+    wait 3.33 seconds
+    myArmy = create platoon PLATOON_INFO_GREEK_MELEE_7 at {RelativePos} with 1 men and 0 women
+    PLAYER of myArmy = PlayerID
+    attach atmos "ghost_legion" to myArmy range 40
+
+    set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_MASS of myArmy to 1.0
+    set platoon movement value FORMATION_MOVEMENT_STAT_ACCELERATION_MAX of myArmy to 30.0
+    set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_SPEED_MAX of myArmy to 13.0
+    set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_SPEED_MIN of myArmy to 8.0
+    set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_CHARGE_SPEED of myArmy to 10.0
+    set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_FIGHTER_SPEED of myArmy to 8.0
+    set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_SPEED of myArmy to 8.0
+    set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_CHARGE_SPEED of myArmy to 10.0
+
+    ArmyFlag = get SCRIPT_OBJECT_TYPE_ARMY_FLAG at {myArmy} radius 50
+    override mesh for ArmyFlag with "..\models\m_bannerundead"
+
+    Villager = get villager from platoon myArmy nearest {myArmy}
+    while counter < howManyVillagers
+        //Create ghosts
+        Ghost[counter] = create VILLAGER AZTEC_FORESTER at {myArmy} + {number from -10 to 10,number from -10 to 10}
+        run background script UA_GhostScript(PlayerID,Ghost[counter])
+        myEffect = create visual effect VISUAL_EFFECT_WEATHER_LIGHTNING_EXPLOSION at {Ghost[counter]} + {0,1,0} time 1.5
+        set myEffect color red 148 green 0 blue 211
+        SCALE of myEffect = 0.1
+        add villager Ghost[counter] to platoon myArmy
+        disable Ghost[counter] hurt by fire
+        disable Ghost[counter] set on fire
+        counter++
+    end while
+
+    myEffect = create visual effect VISUAL_EFFECT_WEATHER_LIGHTNING_EXPLOSION at {Villager} + {0,1,0} time 1.5
+    set myEffect color red 148 green 0 blue 211
+    SCALE of myEffect = 0.1
+    delete Villager
+
+end script UA_CreateUndeadPlatoon
+
+
+begin script UA_GhostScript(PlayerID,myGhost)
+
+    myEffect = 0
+    PlayerAlignment = 0
+
+start
+
+    while myGhost exists and HEALTH of myGhost > 0.00 and PLAYER of myGhost == PlayerID
+        //set anim speed of myGhost to 0.5
+        override mesh for myGhost with "..\skins\s_skeletonadultland2"
+        set myGhost carrying CARRIED_OBJECT_NONE
+        set myGhost carrying CARRIED_OBJECT_NORSE_SWORD
+    end while
+
+    myEffect = create visual effect VISUAL_EFFECT_WEATHER_LIGHTNING_EXPLOSION at {myGhost} + {0,1,0} time 1.5
+    set myEffect color red 148 green 0 blue 211
+    SCALE of myEffect = 0.1
+    HEALTH of myGhost = 0.00
+
+    begin loop
+        //set anim speed of myGhost to 0.5
+        override mesh for myGhost with "..\skins\s_skeletonadultland2"
+        set myGhost carrying CARRIED_OBJECT_NONE
+        set myGhost carrying CARRIED_OBJECT_NORSE_SWORD
+        until not myGhost exists
+    end loop
+
+end script UA_GhostScript
