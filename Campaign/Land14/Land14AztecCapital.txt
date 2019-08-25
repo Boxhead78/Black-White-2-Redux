@@ -2697,14 +2697,25 @@ start
     enable migration from AztecTown2 to PlayerTown
 
     wait until PLAYER of AztecTown1 != 1
+    wait 0.5 seconds
 
     if HEALTH of AIVolcano == 1.0 and VolcanoFired == 0
-        enable predefined sky "VOLCANO" time 10
-        ET_FireEpicLocation = marker at {1583.71,143.96,1841.69}
-        VolcanoWarning = create visual effect VISUAL_EFFECT_EPIC_TARGET_WARNING at {ET_FireEpicLocation} time 15 target {ET_FireEpicLocation}
-        EpicVolc = create volcano at {ET_FireEpicLocation} player 1
-        VolcanoFired = 1
-        run background script LC14_Volcano(AIVolcano, EpicVolc)
+        if PLAYER of AztecTown1 != 0
+            enable predefined sky "VOLCANO" time 10
+            ET_FireEpicLocation = marker at {1583.71,143.96,1841.69}
+            VolcanoWarning = create visual effect VISUAL_EFFECT_EPIC_TARGET_WARNING at {ET_FireEpicLocation} time 15 target {ET_FireEpicLocation}
+            EpicVolc = create volcano at {ET_FireEpicLocation} player 1
+            VolcanoFired = 1
+            run background script LC14_Volcano(AIVolcano, EpicVolc)
+        else
+            enable predefined sky "VOLCANO" time 10
+            CastEpicPos = marker at {AztecTown1}
+            run script EpicTargeter(PlayerTown,marker at {CastEpicPos},1,4)
+            EpicWarning = create visual effect VISUAL_EFFECT_EPIC_TARGET_WARNING at {ET_FireEpicLocation} time 15 target {ET_FireEpicLocation}
+            EpicVolc = create volcano at {ET_FireEpicLocation} player 1
+            VolcanoFired = 1
+            run background script LC14_Volcano(AIVolcano, EpicVolc)
+        end if
     end if
 
     if VolcanoFired == 1
