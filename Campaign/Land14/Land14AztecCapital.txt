@@ -2743,17 +2743,126 @@ start
 
     SmallAttacksAllowed = 1
 
-    //Spawn undead armies
-    begin cinema
-        set fade red 0 green 0 blue 0 time 2
-        store camera details
-        wait 2 seconds
-        start music "exintro1" loop 1
-        UndeadSpawn = marker at {1571.54,146.92,1849.28}
-        set camera position to {1441.67,210.78,1695.04}
-        set camera focus to {AztecTown1}
-        set fade in time 2
-        wait 3 seconds
+    if PLAYER of AztecTown1 != 0
+        //Spawn undead armies
+        begin cinema
+            set fade red 0 green 0 blue 0 time 2
+            store camera details
+            wait 2 seconds
+            start music "exintro1" loop 1
+            UndeadSpawn = marker at {1571.54,146.92,1849.28}
+            set camera position to {1441.67,210.78,1695.04}
+            set camera focus to {AztecTown1}
+            set fade in time 2
+            wait 3 seconds
+
+            enemyPlatoon[0] = create platoon ARMY_UNIT_TYPE_MELEE_7 at {UndeadSpawn} + {number from -20 to 20,number from -20 to 20} with 1 men and 0 women
+            PLAYER of enemyPlatoon[0] = 1
+            AttackingPosition = marker at {AttackPos[0]}
+            AttackingPositionFallBack = marker at {AttackPos[1]}
+            run background script LC14_ArmyBehaivours(enemyPlatoon[0],Melee,Attacker,0,AttackingPosition,AttackingPositionFallBack,0,0)
+            run background script LC14_GenericTalusSpeeches(enemyPlatoon[0],1)
+            run background script LC14_CreateUndeadPlatoon(enemyPlatoon[0],1,40 * RecruitSizeModifier,s_skeletonadultland2)
+            disable platoon enemyPlatoon[0] respond to town AztecCapital attack
+            disable platoon enemyPlatoon[0] camp
+
+            enemyPlatoon[1] = create platoon ARMY_UNIT_TYPE_MELEE_7 at {UndeadSpawn} + {number from -20 to 20,number from -20 to 20} with 1 men and 0 women
+            PLAYER of enemyPlatoon[1] = 1
+            AttackingPosition = marker at {AttackPos[0]} + {30,0,30}
+            AttackingPositionFallBack = marker at {AttackPos[1]} + {30,0,30}
+            run background script LC14_ArmyBehaivours(enemyPlatoon[1],Melee,Attacker,0,AttackingPosition,AttackingPositionFallBack,0,0)
+            run background script LC14_GenericTalusSpeeches(enemyPlatoon[1],1)
+            run background script LC14_CreateUndeadPlatoon(enemyPlatoon[1],1,40 * RecruitSizeModifier,s_skeletonadultland2)
+            disable platoon enemyPlatoon[1] respond to town AztecCapital attack
+            disable platoon enemyPlatoon[1] camp
+
+            set camera position to {1533.88,168.00,1841.87}
+            set camera focus to {enemyPlatoon[1]}
+
+            wait 6 seconds
+            set fade red 0 green 0 blue 0 time 3
+            wait 3 seconds
+            restore camera details
+            set fade in time 3
+            wait 3 seconds
+        end cinema
+
+        enemyPlatoon[2] = create platoon ARMY_UNIT_TYPE_MELEE_7 at {UndeadSpawn} + {number from -20 to 20,number from -20 to 20} with 1 men and 0 women
+        PLAYER of enemyPlatoon[2] = 1
+        AttackingPosition = marker at {AttackPos[0]} + {-30,0,-30}
+        AttackingPositionFallBack = marker at {AttackPos[1]} + {-30,0,-30}
+        run background script LC14_ArmyBehaivours(enemyPlatoon[2],Melee,Attacker,0,AttackingPosition,AttackingPositionFallBack,0,0)
+        run background script LC14_GenericTalusSpeeches(enemyPlatoon[2],1)
+        run background script LC14_CreateUndeadPlatoon(enemyPlatoon[2],1,40 * RecruitSizeModifier,s_skeletonadultland2)
+        disable platoon enemyPlatoon[2] respond to town AztecCapital attack
+        disable platoon enemyPlatoon[2] camp
+
+        enemyPlatoon[3] = create platoon ARMY_UNIT_TYPE_MELEE_7 at {UndeadSpawn} + {number from -20 to 20,number from -20 to 20} with 1 men and 0 women
+        PLAYER of enemyPlatoon[3] = 1
+        AttackingPosition = marker at {AttackPos[0]} + {-30,0,0}
+        AttackingPositionFallBack = marker at {AttackPos[1]} + {-30,0,0}
+        run background script LC14_ArmyBehaivours(enemyPlatoon[3],Melee,Attacker,0,AttackingPosition,AttackingPositionFallBack,0,0)
+        run background script LC14_GenericTalusSpeeches(enemyPlatoon[3],1)
+        run background script LC14_CreateUndeadPlatoon(enemyPlatoon[3],1,40 * RecruitSizeModifier,s_skeletonadultland2)
+        disable platoon enemyPlatoon[3] respond to town AztecCapital attack
+        disable platoon enemyPlatoon[3] camp
+
+        enemyPlatoon[4] = create platoon ARMY_UNIT_TYPE_MELEE_7 at {UndeadSpawn} + {number from -20 to 20,number from -20 to 20} with 1 men and 0 women
+        PLAYER of enemyPlatoon[4] = 1
+        AttackingPosition = marker at {AttackPos[0]} + {-15,0,15}
+        AttackingPositionFallBack = marker at {AttackPos[1]} + {-15,0,15}
+        run background script LC14_ArmyBehaivours(enemyPlatoon[4],Melee,Attacker,0,AttackingPosition,AttackingPositionFallBack,0,0)
+        run background script LC14_GenericTalusSpeeches(enemyPlatoon[4],1)
+        run background script LC14_CreateUndeadPlatoon(enemyPlatoon[4],1,40 * RecruitSizeModifier,s_skeletonadultland2)
+        disable platoon enemyPlatoon[4] respond to town AztecCapital attack
+        disable platoon enemyPlatoon[4] camp
+
+        enemyPlatoon[5] = create siege weapon SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_7 belonging to AztecCapital at {UndeadSpawn} + {number from -20 to 20,number from -20 to 20}
+        attach enemyPlatoon[5] to AztecCapital
+        PLAYER of enemyPlatoon[5] = 1
+        disable siege weapon enemyPlatoon[5] auto attack
+        SiegeWaypoint1 = marker at {SiegeRoute1[0]}
+        SiegeWaypoint2 = marker at {SiegeRoute1[1]} + {0,0}
+        SiegeWaypoint3 = marker at {SiegeRoute1[2]} + {0,0}
+        run background script LC14_MoveCatapultThenAttack(enemyPlatoon[5],0,SiegeWaypoint1,SiegeWaypoint2,SiegeWaypoint3)
+
+        enemyPlatoon[6] = create siege weapon SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_7 belonging to AztecCapital at {UndeadSpawn} + {number from -20 to 20,number from -20 to 20}
+        attach enemyPlatoon[6] to AztecCapital
+        PLAYER of enemyPlatoon[6] = 1
+        disable siege weapon enemyPlatoon[6] auto attack
+        SiegeWaypoint1 = marker at {SiegeRoute1[0]}
+        SiegeWaypoint2 = marker at {SiegeRoute1[1]} + {20,20}
+        SiegeWaypoint3 = marker at {SiegeRoute1[2]} + {20,20}
+        run background script LC14_MoveCatapultThenAttack(enemyPlatoon[6],0,SiegeWaypoint1,SiegeWaypoint2,SiegeWaypoint3)
+
+        enemyPlatoon[7] = create siege weapon SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_7 belonging to AztecCapital at {UndeadSpawn} + {number from -20 to 20,number from -20 to 20}
+        attach enemyPlatoon[7] to AztecCapital
+        PLAYER of enemyPlatoon[7] = 1
+        disable siege weapon enemyPlatoon[7] auto attack
+        SiegeWaypoint1 = marker at {SiegeRoute1[0]}
+        SiegeWaypoint2 = marker at {SiegeRoute1[1]} + {-20,-20}
+        SiegeWaypoint3 = marker at {SiegeRoute1[2]} + {-20,-20}
+        run background script LC14_MoveCatapultThenAttack(enemyPlatoon[7],0,SiegeWaypoint1,SiegeWaypoint2,SiegeWaypoint3)
+
+        enemyPlatoon[8] = create siege weapon SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_7 belonging to AztecCapital at {UndeadSpawn} + {number from -20 to 20,number from -20 to 20}
+        attach enemyPlatoon[8] to AztecCapital
+        PLAYER of enemyPlatoon[8] = 1
+        disable siege weapon enemyPlatoon[8] auto attack
+        SiegeWaypoint1 = marker at {SiegeRoute1[0]}
+        SiegeWaypoint2 = marker at {SiegeRoute1[1]} + {45,0}
+        SiegeWaypoint3 = marker at {SiegeRoute1[2]} + {45,0}
+        run background script LC14_MoveCatapultThenAttack(enemyPlatoon[8],0,SiegeWaypoint1,SiegeWaypoint2,SiegeWaypoint3)
+
+        enemyPlatoon[9] = create siege weapon SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_7 belonging to AztecCapital at {UndeadSpawn} + {number from -20 to 20,number from -20 to 20}
+        attach enemyPlatoon[9] to AztecCapital
+        PLAYER of enemyPlatoon[9] = 1
+        disable siege weapon enemyPlatoon[9] auto attack
+        SiegeWaypoint1 = marker at {SiegeRoute1[0]}
+        SiegeWaypoint2 = marker at {SiegeRoute1[1]} + {0,45}
+        SiegeWaypoint3 = marker at {SiegeRoute1[2]} + {0,45}
+        run background script LC14_MoveCatapultThenAttack(enemyPlatoon[9],0,SiegeWaypoint1,SiegeWaypoint2,SiegeWaypoint3)
+
+        wait 30 seconds
 
         enemyPlatoon[0] = create platoon ARMY_UNIT_TYPE_MELEE_7 at {UndeadSpawn} + {number from -20 to 20,number from -20 to 20} with 1 men and 0 women
         PLAYER of enemyPlatoon[0] = 1
@@ -2761,117 +2870,10 @@ start
         AttackingPositionFallBack = marker at {AttackPos[1]}
         run background script LC14_ArmyBehaivours(enemyPlatoon[0],Melee,Attacker,0,AttackingPosition,AttackingPositionFallBack,0,0)
         run background script LC14_GenericTalusSpeeches(enemyPlatoon[0],1)
-        run background script LC14_CreateUndeadPlatoon(enemyPlatoon[0],1,40 * RecruitSizeModifier,s_skeletonadultland2)
+        run background script LC14_CreateUndeadPlatoon(enemyPlatoon[0],1,225 * RecruitSizeModifier,s_skeletonadultland2)
         disable platoon enemyPlatoon[0] respond to town AztecCapital attack
         disable platoon enemyPlatoon[0] camp
-
-        enemyPlatoon[1] = create platoon ARMY_UNIT_TYPE_MELEE_7 at {UndeadSpawn} + {number from -20 to 20,number from -20 to 20} with 1 men and 0 women
-        PLAYER of enemyPlatoon[1] = 1
-        AttackingPosition = marker at {AttackPos[0]} + {30,0,30}
-        AttackingPositionFallBack = marker at {AttackPos[1]} + {30,0,30}
-        run background script LC14_ArmyBehaivours(enemyPlatoon[1],Melee,Attacker,0,AttackingPosition,AttackingPositionFallBack,0,0)
-        run background script LC14_GenericTalusSpeeches(enemyPlatoon[1],1)
-        run background script LC14_CreateUndeadPlatoon(enemyPlatoon[1],1,40 * RecruitSizeModifier,s_skeletonadultland2)
-        disable platoon enemyPlatoon[1] respond to town AztecCapital attack
-        disable platoon enemyPlatoon[1] camp
-
-        set camera position to {1533.88,168.00,1841.87}
-        set camera focus to {enemyPlatoon[1]}
-
-        wait 6 seconds
-        set fade red 0 green 0 blue 0 time 3
-        wait 3 seconds
-        restore camera details
-        set fade in time 3
-        wait 3 seconds
-    end cinema
-
-    enemyPlatoon[2] = create platoon ARMY_UNIT_TYPE_MELEE_7 at {UndeadSpawn} + {number from -20 to 20,number from -20 to 20} with 1 men and 0 women
-    PLAYER of enemyPlatoon[2] = 1
-    AttackingPosition = marker at {AttackPos[0]} + {-30,0,-30}
-    AttackingPositionFallBack = marker at {AttackPos[1]} + {-30,0,-30}
-    run background script LC14_ArmyBehaivours(enemyPlatoon[2],Melee,Attacker,0,AttackingPosition,AttackingPositionFallBack,0,0)
-    run background script LC14_GenericTalusSpeeches(enemyPlatoon[2],1)
-    run background script LC14_CreateUndeadPlatoon(enemyPlatoon[2],1,40 * RecruitSizeModifier,s_skeletonadultland2)
-    disable platoon enemyPlatoon[2] respond to town AztecCapital attack
-    disable platoon enemyPlatoon[2] camp
-
-    enemyPlatoon[3] = create platoon ARMY_UNIT_TYPE_MELEE_7 at {UndeadSpawn} + {number from -20 to 20,number from -20 to 20} with 1 men and 0 women
-    PLAYER of enemyPlatoon[3] = 1
-    AttackingPosition = marker at {AttackPos[0]} + {-30,0,0}
-    AttackingPositionFallBack = marker at {AttackPos[1]} + {-30,0,0}
-    run background script LC14_ArmyBehaivours(enemyPlatoon[3],Melee,Attacker,0,AttackingPosition,AttackingPositionFallBack,0,0)
-    run background script LC14_GenericTalusSpeeches(enemyPlatoon[3],1)
-    run background script LC14_CreateUndeadPlatoon(enemyPlatoon[3],1,40 * RecruitSizeModifier,s_skeletonadultland2)
-    disable platoon enemyPlatoon[3] respond to town AztecCapital attack
-    disable platoon enemyPlatoon[3] camp
-
-    enemyPlatoon[4] = create platoon ARMY_UNIT_TYPE_MELEE_7 at {UndeadSpawn} + {number from -20 to 20,number from -20 to 20} with 1 men and 0 women
-    PLAYER of enemyPlatoon[4] = 1
-    AttackingPosition = marker at {AttackPos[0]} + {-15,0,15}
-    AttackingPositionFallBack = marker at {AttackPos[1]} + {-15,0,15}
-    run background script LC14_ArmyBehaivours(enemyPlatoon[4],Melee,Attacker,0,AttackingPosition,AttackingPositionFallBack,0,0)
-    run background script LC14_GenericTalusSpeeches(enemyPlatoon[4],1)
-    run background script LC14_CreateUndeadPlatoon(enemyPlatoon[4],1,40 * RecruitSizeModifier,s_skeletonadultland2)
-    disable platoon enemyPlatoon[4] respond to town AztecCapital attack
-    disable platoon enemyPlatoon[4] camp
-
-    enemyPlatoon[5] = create siege weapon SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_7 belonging to AztecCapital at {UndeadSpawn} + {number from -20 to 20,number from -20 to 20}
-    attach enemyPlatoon[5] to AztecCapital
-    PLAYER of enemyPlatoon[5] = 1
-    disable siege weapon enemyPlatoon[5] auto attack
-    SiegeWaypoint1 = marker at {SiegeRoute1[0]}
-    SiegeWaypoint2 = marker at {SiegeRoute1[1]} + {0,0}
-    SiegeWaypoint3 = marker at {SiegeRoute1[2]} + {0,0}
-    run background script LC14_MoveCatapultThenAttack(enemyPlatoon[5],0,SiegeWaypoint1,SiegeWaypoint2,SiegeWaypoint3)
-
-    enemyPlatoon[6] = create siege weapon SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_7 belonging to AztecCapital at {UndeadSpawn} + {number from -20 to 20,number from -20 to 20}
-    attach enemyPlatoon[6] to AztecCapital
-    PLAYER of enemyPlatoon[6] = 1
-    disable siege weapon enemyPlatoon[6] auto attack
-    SiegeWaypoint1 = marker at {SiegeRoute1[0]}
-    SiegeWaypoint2 = marker at {SiegeRoute1[1]} + {20,20}
-    SiegeWaypoint3 = marker at {SiegeRoute1[2]} + {20,20}
-    run background script LC14_MoveCatapultThenAttack(enemyPlatoon[6],0,SiegeWaypoint1,SiegeWaypoint2,SiegeWaypoint3)
-
-    enemyPlatoon[7] = create siege weapon SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_7 belonging to AztecCapital at {UndeadSpawn} + {number from -20 to 20,number from -20 to 20}
-    attach enemyPlatoon[7] to AztecCapital
-    PLAYER of enemyPlatoon[7] = 1
-    disable siege weapon enemyPlatoon[7] auto attack
-    SiegeWaypoint1 = marker at {SiegeRoute1[0]}
-    SiegeWaypoint2 = marker at {SiegeRoute1[1]} + {-20,-20}
-    SiegeWaypoint3 = marker at {SiegeRoute1[2]} + {-20,-20}
-    run background script LC14_MoveCatapultThenAttack(enemyPlatoon[7],0,SiegeWaypoint1,SiegeWaypoint2,SiegeWaypoint3)
-
-    enemyPlatoon[8] = create siege weapon SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_7 belonging to AztecCapital at {UndeadSpawn} + {number from -20 to 20,number from -20 to 20}
-    attach enemyPlatoon[8] to AztecCapital
-    PLAYER of enemyPlatoon[8] = 1
-    disable siege weapon enemyPlatoon[8] auto attack
-    SiegeWaypoint1 = marker at {SiegeRoute1[0]}
-    SiegeWaypoint2 = marker at {SiegeRoute1[1]} + {45,0}
-    SiegeWaypoint3 = marker at {SiegeRoute1[2]} + {45,0}
-    run background script LC14_MoveCatapultThenAttack(enemyPlatoon[8],0,SiegeWaypoint1,SiegeWaypoint2,SiegeWaypoint3)
-
-    enemyPlatoon[9] = create siege weapon SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_7 belonging to AztecCapital at {UndeadSpawn} + {number from -20 to 20,number from -20 to 20}
-    attach enemyPlatoon[9] to AztecCapital
-    PLAYER of enemyPlatoon[9] = 1
-    disable siege weapon enemyPlatoon[9] auto attack
-    SiegeWaypoint1 = marker at {SiegeRoute1[0]}
-    SiegeWaypoint2 = marker at {SiegeRoute1[1]} + {0,45}
-    SiegeWaypoint3 = marker at {SiegeRoute1[2]} + {0,45}
-    run background script LC14_MoveCatapultThenAttack(enemyPlatoon[9],0,SiegeWaypoint1,SiegeWaypoint2,SiegeWaypoint3)
-
-    wait 30 seconds
-
-    enemyPlatoon[0] = create platoon ARMY_UNIT_TYPE_MELEE_7 at {UndeadSpawn} + {number from -20 to 20,number from -20 to 20} with 1 men and 0 women
-    PLAYER of enemyPlatoon[0] = 1
-    AttackingPosition = marker at {AttackPos[0]}
-    AttackingPositionFallBack = marker at {AttackPos[1]}
-    run background script LC14_ArmyBehaivours(enemyPlatoon[0],Melee,Attacker,0,AttackingPosition,AttackingPositionFallBack,0,0)
-    run background script LC14_GenericTalusSpeeches(enemyPlatoon[0],1)
-    run background script LC14_CreateUndeadPlatoon(enemyPlatoon[0],1,225 * RecruitSizeModifier,s_skeletonadultland2)
-    disable platoon enemyPlatoon[0] respond to town AztecCapital attack
-    disable platoon enemyPlatoon[0] camp
+    end if
 
     //End script and release control to AI
     myAttackTimer = create timer for 600 seconds
