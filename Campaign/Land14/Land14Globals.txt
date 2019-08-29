@@ -127,6 +127,7 @@ end script Globals
 //Only works with global platoons
 begin script LC14_CreateUndeadPlatoon(whichPlatoon,howManyVillagersToDelete,howManyVillagersToSpawn,whichMesh)
 
+    ArmyFlag = 0
     Ghost[999]
     counter = 0
     myEffect = 0
@@ -150,7 +151,7 @@ start
     SCALE of myEffect = 2
 
     //Remove old villagers
-    while counter < howManyVillagersToDelete - 1 and size of whichPlatoon > 1
+    force while counter < howManyVillagersToDelete - 1 and size of whichPlatoon > 1
         if counter < howManyVillagersToDelete
             Villager = get villager from platoon whichPlatoon nearest {whichPlatoon}
             myEffect = create visual effect VISUAL_EFFECT_WEATHER_LIGHTNING_EXPLOSION at {Villager} + {0,1,0} time 1.5
@@ -160,11 +161,23 @@ start
         end if
         counter++
     end while
-
     Villager = get villager from platoon whichPlatoon nearest {whichPlatoon}
+    SCALE of Villager = 0.01
     counter = 0
-    while counter < howManyVillagersToSpawn
 
+    set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_MASS of whichPlatoon to 1.0
+    set platoon movement value FORMATION_MOVEMENT_STAT_ACCELERATION_MAX of whichPlatoon to 30.0
+    set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_SPEED_MAX of whichPlatoon to 13.0
+    set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_SPEED_MIN of whichPlatoon to 8.0
+    set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_CHARGE_SPEED of whichPlatoon to 10.0
+    set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_FIGHTER_SPEED of whichPlatoon to 8.0
+    set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_SPEED of whichPlatoon to 8.0
+    set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_CHARGE_SPEED of whichPlatoon to 10.0
+
+    ArmyFlag = get SCRIPT_OBJECT_TYPE_ARMY_FLAG at {whichPlatoon} radius 50
+    override mesh for ArmyFlag with "..\models\m_bannerundead"
+
+    force while counter < howManyVillagersToSpawn
         //Create ghosts
         Ghost[counter] = create VILLAGER AZTEC_FORESTER at {whichPlatoon} + {number from -10 to 10,number from -10 to 10}
         myEffect = create visual effect VISUAL_EFFECT_WEATHER_LIGHTNING_EXPLOSION at {Ghost[counter]} + {0,1,0} time 1.5

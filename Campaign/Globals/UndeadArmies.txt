@@ -52,9 +52,9 @@ begin loop
     myGraveyard = get random abode of type ABODE_NUMBER_GRAVEYARD in town myTown[Counter]
     UA_myTempDeath[PlayerID] = (myDeadPeople * 2.5) - UA_myUsedUndead[PlayerID]
     FlagObject = get FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myGraveyard} radius 5
-    if HEALTH of myGraveyard >= 1.0 and FlagObject not exists and PLAYER of myGraveyard == PlayerID// and get player PlayerID alignment < -0.33
+    if HEALTH of myGraveyard >= 1.0 and FlagObject not exists and PLAYER of myGraveyard == PlayerID// and get player PlayerID alignment < -0.5
         myFlag = create ROCK_OBJECT ARMY_FLAG_INFO_GREEK_MELEE at {myGraveyard}
-        override mesh for myFlag with "..\models\m_bannergreekmelee_heavy"
+        override mesh for myFlag with "..\models\m_bannerundead"
         ALTITUDE of myFlag = 1.0
         ANGLE of myFlag = ANGLE of myGraveyard + 180
         SCALE of myFlag = 3.0
@@ -94,6 +94,7 @@ end script UA_SpawnUndeadPlatoonCheck
 
 begin script UA_CreateUndeadPlatoon(PlayerID,Graveyard,howManyVillagers)
 
+    ArmyFlag = 0
     Ghost[999]
     counter = 0
     myEffect = 0
@@ -124,8 +125,21 @@ start
     PLAYER of myArmy = PlayerID
     attach atmos "ghost_legion" to myArmy range 40
 
+    set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_MASS of myArmy to 1.0
+    set platoon movement value FORMATION_MOVEMENT_STAT_ACCELERATION_MAX of myArmy to 30.0
+    set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_SPEED_MAX of myArmy to 13.0
+    set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_SPEED_MIN of myArmy to 8.0
+    set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_CHARGE_SPEED of myArmy to 10.0
+    set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_FIGHTER_SPEED of myArmy to 8.0
+    set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_SPEED of myArmy to 8.0
+    set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_CHARGE_SPEED of myArmy to 10.0
+
+    ArmyFlag = get SCRIPT_OBJECT_TYPE_ARMY_FLAG at {myArmy} radius 50
+    override mesh for ArmyFlag with "..\models\m_bannerundead"
+
     Villager = get villager from platoon myArmy nearest {myArmy}
-    while counter < howManyVillagers
+    SCALE of Villager = 0.01
+    force while counter < howManyVillagers
         //Create ghosts
         Ghost[counter] = create VILLAGER AZTEC_FORESTER at {myArmy} + {number from -10 to 10,number from -10 to 10}
         run background script UA_GhostScript(PlayerID,Ghost[counter])

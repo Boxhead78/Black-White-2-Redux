@@ -52,7 +52,7 @@ begin loop
     myGraveyard = get random abode of type ABODE_NUMBER_GRAVEYARD in town myTown[Counter]
     UA_myTempDeath[PlayerID] = (myDeadPeople * 2.5) - UA_myUsedUndead[PlayerID]
     FlagObject = get FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myGraveyard} radius 5
-    if HEALTH of myGraveyard >= 1.0 and FlagObject not exists and PLAYER of myGraveyard == PlayerID and get player PlayerID alignment < -0.5
+    if HEALTH of myGraveyard >= 1.0 and FlagObject not exists and PLAYER of myGraveyard == PlayerID// and get player PlayerID alignment < -0.5
         myFlag = create ROCK_OBJECT ARMY_FLAG_INFO_GREEK_MELEE at {myGraveyard}
         override mesh for myFlag with "..\models\m_bannerundead"
         ALTITUDE of myFlag = 1.0
@@ -138,7 +138,8 @@ start
     override mesh for ArmyFlag with "..\models\m_bannerundead"
 
     Villager = get villager from platoon myArmy nearest {myArmy}
-    while counter < howManyVillagers
+    SCALE of Villager = 0.01
+    force while counter < howManyVillagers
         //Create ghosts
         Ghost[counter] = create VILLAGER AZTEC_FORESTER at {myArmy} + {number from -10 to 10,number from -10 to 10}
         run background script UA_GhostScript(PlayerID,Ghost[counter])
