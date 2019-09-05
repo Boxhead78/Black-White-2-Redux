@@ -155,7 +155,7 @@ start
 
     PatrolRouteA[0] = marker at {1356.79,108.25,1978.64}
     PatrolRouteA[1] = marker at {1499.70,97.81,1912.74}
-    PatrolRouteA[2] = marker at {11604.90,93.43,1911.42}
+    PatrolRouteA[2] = marker at {1164.90,93.43,1911.42}
     PatrolRouteA[3] = marker at {1761.94,98.98,1966.80}
 
     StaticSiegePos[0] = marker at {429.74,222.68,1854.82}
@@ -320,6 +320,7 @@ begin script LC10_Platoon2Actions
     oTown = get town with id 0
     oTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in oTown min built 1.0
     PlayerSettlement = 0
+    myTimer = 0
     
 start
 
@@ -370,9 +371,24 @@ begin loop
         clear LC10_Platoon[2] action queue
         a = 0
     end if
-        
-    if get size of LC10_Platoon[2] action queue < 1
-        move LC10_Platoon[2] along WaypointsA with patrol WAYPOINTROUTE_TRAVERSAL_TYPE_CIRCULAR
+
+    if {LC10_Platoon[2]} near {PatrolRouteA[0]} radius 10 or get size of LC10_Platoon[2] action queue < 1 or get myTimer time remaining <= 0
+        myTimer = create timer for 120 seconds
+        clear LC10_Platoon[2] action queue
+        add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {PatrolRouteA[1]} to LC10_Platoon[2] action queue
+        wait 5 seconds
+    elsif {LC10_Platoon[2]} near {PatrolRouteA[1]} radius 10
+        clear LC10_Platoon[2] action queue
+        add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {PatrolRouteA[2]} to LC10_Platoon[2] action queue
+        wait 5 seconds
+    elsif {LC10_Platoon[2]} near {PatrolRouteA[2]} radius 10
+        clear LC10_Platoon[2] action queue
+        add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {PatrolRouteA[3]} to LC10_Platoon[2] action queue
+        wait 5 seconds
+    elsif {LC10_Platoon[2]} near {PatrolRouteA[3]} radius 10
+        clear LC10_Platoon[2] action queue
+        add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {PatrolRouteA[0]} to LC10_Platoon[2] action queue
+        wait 5 seconds
     end if
         
 end loop
@@ -405,6 +421,7 @@ begin script LC10_Platoon29Actions
     oTown = get town with id 0
     oTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in oTown min built 1.0
     PlayerSettlement = 0
+    myTimer = 0
     
 start
 
@@ -461,8 +478,23 @@ begin loop
             add action PLATOON_AGENDA_ACTION_LINK_TO_ARMY_MEMBER using LC10_Platoon[2] to LC10_Platoon[29] action queue
         end if
     else
-        if get size of LC10_Platoon[29] action queue < 1
-            move LC10_Platoon[29] along WaypointsA with patrol WAYPOINTROUTE_TRAVERSAL_TYPE_CIRCULAR
+        if {LC10_Platoon[29]} near {PatrolRouteA[0]} radius 10 or get size of LC10_Platoon[29] action queue < 1 or get myTimer time remaining <= 0
+            myTimer = create timer for 120 seconds
+            clear LC10_Platoon[29] action queue
+            add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {PatrolRouteA[1]} to LC10_Platoon[29] action queue
+            wait 5 seconds
+        elsif {LC10_Platoon[29]} near {PatrolRouteA[1]} radius 10
+            clear LC10_Platoon[29] action queue
+            add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {PatrolRouteA[2]} to LC10_Platoon[29] action queue
+            wait 5 seconds
+        elsif {LC10_Platoon[29]} near {PatrolRouteA[2]} radius 10
+            clear LC10_Platoon[29] action queue
+            add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {PatrolRouteA[3]} to LC10_Platoon[29] action queue
+            wait 5 seconds
+        elsif {LC10_Platoon[29]} near {PatrolRouteA[3]} radius 10
+            clear LC10_Platoon[29] action queue
+            add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {PatrolRouteA[0]} to LC10_Platoon[29] action queue
+            wait 5 seconds
         end if
     end if
         

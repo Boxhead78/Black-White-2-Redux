@@ -201,6 +201,7 @@ start
     disable platoon DT_Platoon[0] camp
     disable platoon DT_Platoon[0] respond to local platoon attack
     set DT_Platoon[0] focus to {DT_Temple}
+    run background script PT_CreateHeavyAztecPlatoon(DT_Platoon[0],1)
 
     DT_Platoon[1] = create platoon PLATOON_INFO_AZTEC_MELEE_5 at {DTPlatoon3Pos} with 40 * RecruitSizeModifier men and 0 women
     attach DT_Platoon[1] to DisbelieverTown
@@ -208,22 +209,32 @@ start
     disable platoon DT_Platoon[1] camp
     disable platoon DT_Platoon[1] respond to local platoon attack
     set DT_Platoon[1] focus to {DT_Temple}
+    run background script PT_CreateHeavyAztecPlatoon(DT_Platoon[1],1)
 
 begin loop
 
     if DT_Platoon[0] not exists and get DT_RecruitTimer time remaining <= 0
         DT_RecruitTimer = create timer for 240 * RecruitModifier seconds
-        if DTDone == 0 DT_Platoon[0] = recruit PLATOON_INFO_AZTEC_MELEE_6 town DisbelieverTown platoon of size 40 * RecruitSizeModifier end if
+        if DTDone == 0 
+            DT_Platoon[0] = recruit PLATOON_INFO_AZTEC_MELEE_6 town DisbelieverTown platoon of size 40 * RecruitSizeModifier
+            run background script PT_CreateHeavyAztecPlatoon(DT_Platoon[0],1)
+        end if
     end if
     
     if DT_Platoon[1] not exists and get DT_RecruitTimer time remaining <= 0
         DT_RecruitTimer = create timer for 240 * RecruitModifier seconds
-        if DTDone == 0 DT_Platoon[1] = recruit PLATOON_INFO_AZTEC_MELEE_6 town DisbelieverTown platoon of size 40 * RecruitSizeModifier end if
+        if DTDone == 0 
+            DT_Platoon[1] = recruit PLATOON_INFO_AZTEC_MELEE_6 town DisbelieverTown platoon of size 40 * RecruitSizeModifier
+            run background script PT_CreateHeavyAztecPlatoon(DT_Platoon[1],1)
+        end if
     end if
 
     if DT_Platoon[2] not exists and get DT_RecruitTimer time remaining <= 0
         DT_RecruitTimer = create timer for 240 * RecruitModifier seconds
-        if DTDone == 0 DT_Platoon[2] = recruit PLATOON_INFO_AZTEC_MELEE_6 town DisbelieverTown platoon of size 80 * RecruitSizeModifier end if
+        if DTDone == 0 
+            DT_Platoon[2] = recruit PLATOON_INFO_AZTEC_MELEE_6 town DisbelieverTown platoon of size 80 * RecruitSizeModifier
+            run background script PT_CreateHeavyAztecPlatoon(DT_Platoon[2],1)
+        end if
     end if
 
     until DTDone == 1

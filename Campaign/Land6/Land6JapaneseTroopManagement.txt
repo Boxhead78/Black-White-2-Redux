@@ -1375,6 +1375,7 @@ begin script LC6_ArmyBehaivours(Platoon,Type,Task,DefendObject,AttackingPoint,At
     RecalculateTimer = create timer for 0 seconds
     FirstAttack = 1
     Ready = 0
+    myTimer = 0
 
 start
 
@@ -1861,8 +1862,25 @@ begin loop
         //end if
 
     elsif Task == Patrol
-        if get size of Platoon action queue < 1
-            move Platoon along PatrolRoute with patrol WAYPOINTROUTE_TRAVERSAL_TYPE_CIRCULAR
+        if Platoon == LC6_Platoon[7]
+            if {Platoon} near {PatrolRouteD[0]} radius 10 or get size of Platoon action queue < 1 or get myTimer time remaining <= 0
+                myTimer = create timer for 120 seconds
+                clear Platoon action queue
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {PatrolRouteD[1]} to Platoon action queue
+                wait 5 seconds
+            elsif {Platoon} near {PatrolRouteD[1]} radius 10
+                clear Platoon action queue
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {PatrolRouteD[2]} to Platoon action queue
+                wait 5 seconds
+            elsif {Platoon} near {PatrolRouteD[2]} radius 10
+                clear Platoon action queue
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {PatrolRouteD[0]} to Platoon action queue
+                wait 5 seconds
+            end if
+        else
+            if get size of Platoon action queue < 1
+                move Platoon along PatrolRoute with patrol WAYPOINTROUTE_TRAVERSAL_TYPE_CIRCULAR
+            end if
         end if
 
     end if

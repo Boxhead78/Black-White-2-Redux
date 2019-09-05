@@ -2237,6 +2237,7 @@ begin script LC7_ArmyBehaivours(Platoon,Type,Task,DefendObject,AttackingPoint,At
     FirstAttack = 1
     Ready = 0
     FirstSiege = 1
+    myTimer = 0
 
 start
 
@@ -2714,8 +2715,48 @@ begin loop
         //end if
 
     elsif Task == Patrol
-        if get size of Platoon action queue < 1
-            move Platoon along PatrolRoute with patrol WAYPOINTROUTE_TRAVERSAL_TYPE_CIRCULAR
+        if Platoon == LC7_Platoon[9]
+            if {Platoon} near {PatrolRouteA[0]} radius 10 or get size of Platoon action queue < 1 or get myTimer time remaining <= 0
+                myTimer = create timer for 120 seconds
+                clear Platoon action queue
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {PatrolRouteA[1]} to Platoon action queue
+                wait 5 seconds
+            elsif {Platoon} near {PatrolRouteA[1]} radius 10
+                clear Platoon action queue
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {PatrolRouteA[2]} to Platoon action queue
+                wait 5 seconds
+            elsif {Platoon} near {PatrolRouteA[2]} radius 10
+                clear Platoon action queue
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {PatrolRouteA[3]} to Platoon action queue
+                wait 5 seconds
+            elsif {Platoon} near {PatrolRouteA[3]} radius 10
+                clear Platoon action queue
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {PatrolRouteA[4]} to Platoon action queue
+                wait 5 seconds
+            elsif {Platoon} near {PatrolRouteA[4]} radius 10
+                clear Platoon action queue
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {PatrolRouteA[0]} to Platoon action queue
+                wait 5 seconds
+            end if
+        elsif Platoon == LC7_Platoon[10]
+            if {Platoon} near {PatrolRouteB[0]} radius 10 or get size of Platoon action queue < 1 or get myTimer time remaining <= 0
+                myTimer = create timer for 120 seconds
+                clear Platoon action queue
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {PatrolRouteB[1]} to Platoon action queue
+                wait 5 seconds
+            elsif {Platoon} near {PatrolRouteB[1]} radius 10
+                clear Platoon action queue
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {PatrolRouteB[2]} to Platoon action queue
+                wait 5 seconds
+            elsif {Platoon} near {PatrolRouteB[2]} radius 10
+                clear Platoon action queue
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {PatrolRouteB[0]} to Platoon action queue
+                wait 5 seconds
+            end if
+        else
+            if get size of Platoon action queue < 1
+                move Platoon along PatrolRoute with patrol WAYPOINTROUTE_TRAVERSAL_TYPE_CIRCULAR
+            end if
         end if
 
     elsif Task == PatrolLinked
@@ -2724,8 +2765,29 @@ begin loop
                 add action PLATOON_AGENDA_ACTION_LINK_TO_ARMY_MEMBER using DefendObject to Platoon action queue
             end if
         else
-            if get size of Platoon action queue < 1
-                move Platoon along PatrolRoute with patrol WAYPOINTROUTE_TRAVERSAL_TYPE_CIRCULAR
+            if Platoon == LC7_Platoon[32]
+                if {Platoon} near {PatrolRouteA[0]} radius 10 or get size of Platoon action queue < 1 or get myTimer time remaining <= 0
+                    myTimer = create timer for 120 seconds
+                    clear Platoon action queue
+                    add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {PatrolRouteA[1]} to Platoon action queue
+                    wait 5 seconds
+                elsif {Platoon} near {PatrolRouteA[1]} radius 10
+                    clear Platoon action queue
+                    add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {PatrolRouteA[2]} to Platoon action queue
+                    wait 5 seconds
+                elsif {Platoon} near {PatrolRouteA[2]} radius 10
+                    clear Platoon action queue
+                    add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {PatrolRouteA[3]} to Platoon action queue
+                    wait 5 seconds
+                elsif {Platoon} near {PatrolRouteA[3]} radius 10
+                    clear Platoon action queue
+                    add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {PatrolRouteA[4]} to Platoon action queue
+                    wait 5 seconds
+                elsif {Platoon} near {PatrolRouteA[4]} radius 10
+                    clear Platoon action queue
+                    add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {PatrolRouteA[0]} to Platoon action queue
+                    wait 5 seconds
+                end if
             end if
         end if
 
