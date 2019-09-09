@@ -2115,6 +2115,39 @@ start
             add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[1] to LC14_WallArcher[1] action queue
             run background script LC14_GenericTalusSpeeches(LC14_WallArcher[1],1)
 
+        //Attack PlayerTown 2 Huge Platoons
+        elsif LC14_Platoon[40] not exists and AIAttacksAllowed == 1 and LargeAttackDone == 0 and PLAYER of AztecCapital == 1 and not town AztecCapital is under takeover from player 0 and get LC14_RecruitTimer1 time remaining <= 0
+            LC14_Platoon[40] = recruit ARMY_UNIT_TYPE_MELEE_5 town AztecCapital platoon of size 250 * RecruitSizeModifier
+            LC14_RecruitTimer1 = create timer for 240 * RecruitModifier seconds
+            enable platoon LC14_Platoon[40] respond to town AztecCapital attack
+            run background script PT_CreateHeavyAztecPlatoon(LC14_Platoon[40],1)
+            wait until not LC14_Platoon[40] recruiting
+            if PLAYER of AztecTown1 != 0
+                AttackingPosition = marker at {AttackPos[0]} + {0,0,0}
+                AttackingPositionFallBack = marker at {AttackPos[1]} + {0,0,0}
+            else
+                AttackingPosition = marker at {AttackPos[2]} + {0,0,0}
+                AttackingPositionFallBack = marker at {AttackPos[3]} + {0,0,0}
+            end if
+            run background script LC14_GenericTalusSpeeches(LC14_Platoon[40],1)
+            run background script LC14_ArmyBehaivours(LC14_Platoon[40],Melee,Attacker,0,AttackingPosition,AttackingPositionFallBack,0,0)
+
+        elsif LC14_Platoon[41] not exists and AIAttacksAllowed == 1 and LargeAttackDone == 0 and PLAYER of AztecCapital == 1 and not town AztecCapital is under takeover from player 0 and get LC14_RecruitTimer1 time remaining <= 0
+            LC14_Platoon[41] = recruit ARMY_UNIT_TYPE_RANGED_5 town AztecCapital platoon of size 250 * RecruitSizeModifier
+            LC14_RecruitTimer1 = create timer for 240 * RecruitModifier seconds
+            enable platoon LC14_Platoon[41] respond to town AztecCapital attack
+            run background script PT_CreateArtyAztecPlatoonRanged(LC14_Platoon[41],1)
+            wait until not LC14_Platoon[41] recruiting
+            if PLAYER of AztecTown1 != 0
+                AttackingPosition = marker at {AttackPos[0]} + {45,0,45}
+                AttackingPositionFallBack = marker at {AttackPos[1]} + {45,0,45}
+            else
+                AttackingPosition = marker at {AttackPos[2]} + {45,0,45}
+                AttackingPositionFallBack = marker at {AttackPos[3]} + {45,0,45}
+            end if
+            run background script LC14_GenericTalusSpeeches(LC14_Platoon[41],1)
+            run background script LC14_ArmyBehaivours(LC14_Platoon[41],Ranged,Attacker,0,AttackingPosition,AttackingPositionFallBack,0,0)
+
         //Attack PlayerTown with AIAttacksAllowed
         elsif LC14_Platoon[33] not exists and AIAttacksAllowed == 1 and PLAYER of AztecCapital == 1 and not town AztecCapital is under takeover from player 0 and get LC14_RecruitTimer1 time remaining <= 0
             LC14_Platoon[33] = recruit ARMY_UNIT_TYPE_MELEE_5 town AztecCapital platoon of size 50 * RecruitSizeModifier
