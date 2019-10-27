@@ -265,9 +265,51 @@ start
     MyCreature = get player 0 creature
 
     if not MyCreature exists
-        MyCreature = create CREATURE CREATURE_TYPE_TIGER at {CreaturePos}
+        //Load the creature and get it into global
+        MyCreature = persistent data "PLAYER_CREATURE_TYPE"
+        if MyCreature == variable CREATURE_TYPE_LION
+            MyCreature = create CREATURE CREATURE_TYPE_LION at {CreaturePos}
+            set player 0 creature to MyCreature
+
+        elsif MyCreature == variable CREATURE_TYPE_APE
+            MyCreature = create CREATURE CREATURE_TYPE_APE at {CreaturePos}
+            set player 0 creature to MyCreature
+
+        elsif MyCreature == variable CREATURE_TYPE_GORILLA
+            MyCreature = create CREATURE CREATURE_TYPE_GORILLA at {CreaturePos}
+            set player 0 creature to MyCreature
+
+        elsif MyCreature == variable CREATURE_TYPE_WOLF
+            MyCreature = create CREATURE CREATURE_TYPE_WOLF at {CreaturePos}
+            set player 0 creature to MyCreature
+
+        elsif MyCreature == variable CREATURE_TYPE_COW
+            MyCreature = create CREATURE CREATURE_TYPE_COW at {CreaturePos}
+            set player 0 creature to MyCreature
+
+        else// L2PlayersCreatureCheck == variable CREATURE_TYPE_TIGER
+            MyCreature = create CREATURE CREATURE_TYPE_TIGER at {CreaturePos}
+            set player 0 creature to MyCreature
+
+        end if
+
+        set creature MyCreature happiness to maximum
+
+        AGE of MyCreature = persistent data "CREATURE_AGE"
+        HEIGHT of MyCreature = persistent data "CREATURE_SIZE"
+        STRENGTH of MyCreature = persistent data "CREATURE_STRENGTH"
+        ALIGNMENT of MyCreature = persistent data "CREATURE_ALIGNMENT"
+        FATNESS of MyCreature = persistent data "CREATURE_FATNESS"
+
+        release MyCreature
+    end if
+
+    MyCreature = get player 0 creature
+    if not MyCreature exists
+        MyCreature = create CREATURE CREATURE_TYPE_APE at {CreaturePos}
         set player 0 creature to MyCreature
     end if
+
     wait 50 seconds
     release MyCreature
 
