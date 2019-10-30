@@ -112,12 +112,18 @@ begin script LC10_DynamicDifficulty
     Counter = 0
     DifficultyTimer = create timer for 3600 seconds
 
+    RecruitSizeModifierTemp = 0
+    RecruitModifierTemp = 0
+    EpicModifierTemp = 0
+    BuilderModifierTemp = 0
+
 start
 
+//Game gets constantly easier
 begin loop
     wait 2.5 seconds
     if get DifficultyTimer time remaining <= 0
-        RecruitModifier *= 1.5
+        RecruitModifier *= 1.25
         EpicModifier *= 1.25
         BuilderModifier *= 1.25
         DifficultyTimer = create timer for 1800 seconds
@@ -125,5 +131,25 @@ begin loop
     end if
     until Counter >= 3
 end loop
+
+//Store old values
+RecruitSizeModifierTemp = RecruitSizeModifier
+RecruitModifierTemp = RecruitModifier
+EpicModifierTemp = EpicModifier
+BuilderModifierTemp = BuilderModifier
+
+//Give the AI a comeback for 30 minutes
+RecruitSizeModifier = 1.5
+RecruitModifier = 1.25
+BuilderModifier = 1.25
+EpicModifier = 1.0
+
+wait 1800 seconds
+
+//Now restore old values
+RecruitSizeModifier = RecruitSizeModifierTemp
+RecruitModifier = RecruitModifierTemp
+EpicModifier = EpicModifierTemp
+BuilderModifier = BuilderModifierTemp
 
 end script LC10_DynamicDifficulty
