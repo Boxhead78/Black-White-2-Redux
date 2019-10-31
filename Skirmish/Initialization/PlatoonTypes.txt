@@ -68,7 +68,7 @@ begin loop
     myArmory = 0
     FlagObject = 0
     myArmory = get random abode of type ABODE_NUMBER_MELEE_ARMOURY in town myTown[Counter]
-    FlagObject = get FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myArmory} radius 5
+    FlagObject = get FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myArmory} radius 10
     if HEALTH of myArmory >= 1.0 and FlagObject not exists and PLAYER of myArmory == PlayerID
         myFoundation = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myArmory}
         SCALE of myFoundation = 0.01
@@ -82,7 +82,7 @@ begin loop
     myArmory = 0
     FlagObject = 0
     myArmory = get random abode of type ABODE_NUMBER_RANGED_ARMOURY in town myTown[Counter]
-    FlagObject = get FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myArmory} radius 5
+    FlagObject = get FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myArmory} radius 10
     if HEALTH of myArmory >= 1.0 and FlagObject not exists and PLAYER of myArmory == PlayerID
         myFoundation = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myArmory}
         SCALE of myFoundation = 0.01
@@ -97,7 +97,7 @@ begin loop
     myArmory = 0
     FlagObject = 0
     myArmory = get random abode of type ABODE_NUMBER_WORKSHOP in town myTown[Counter]
-    FlagObject = get FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myArmory} radius 5
+    FlagObject = get FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myArmory} radius 10
     if HEALTH of myArmory >= 1.0 and FlagObject not exists and PLAYER of myArmory == PlayerID
         myFoundation = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myArmory}
         SCALE of myFoundation = 0.01
@@ -152,7 +152,7 @@ while HEALTH of Armory >= 1.0 and Armory exists and PLAYER of Armory == PlayerID
         end if
 
         myPlatoon = get platoon of type constant from ARMY_UNIT_TYPE_MELEE_1 to ARMY_UNIT_TYPE_MELEE_10 of player 0 nearest hand position radius 50 excluding scripted
-        PlatoonFlag = get FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myPlatoon} radius 5
+        PlatoonFlag = get FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myPlatoon} radius 10
         if myPlatoon exists and myPlatoon recruiting and not PlatoonFlag exists
             if ArmoryType == 2
                 run background script PT_CreateHeavyGreekPlatoon(myPlatoon,PlayerID)
@@ -184,7 +184,7 @@ while HEALTH of Armory >= 1.0 and Armory exists and PLAYER of Armory == PlayerID
         end if
 
         myPlatoon = get platoon of type constant from ARMY_UNIT_TYPE_RANGED_1 to ARMY_UNIT_TYPE_RANGED_10 of player 0 nearest hand position radius 50 excluding scripted
-        PlatoonFlag = get FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myPlatoon} radius 5
+        PlatoonFlag = get FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myPlatoon} radius 10
         if myPlatoon exists and myPlatoon recruiting and not PlatoonFlag exists
             if ArmoryTypeRanged == 1
                 run background script PT_CreateArtyGreekPlatoonRanged(myPlatoon,PlayerID)
@@ -200,7 +200,7 @@ while HEALTH of Armory >= 1.0 and Armory exists and PLAYER of Armory == PlayerID
         end if
 
         myPlatoon = get siege weapon constant from SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_1 to SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_10 of player 0 at hand position radius 50 excluding scripted
-        PlatoonFlag = get FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myPlatoon} radius 5
+        PlatoonFlag = get FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myPlatoon} radius 10
         if myPlatoon exists and myPlatoon recruiting and not PlatoonFlag exists
             if ArmoryTypeSiege == 0
                 run background script PT_CreateSiegeWeaponGreek(myPlatoon,PlayerID)
@@ -240,9 +240,11 @@ begin script PT_CreateBasicGreekPlatoon(whichPlatoon,PlayerID)
 
 start
 
+    wait until get number of villagers in platoon whichPlatoon > 0
+
     begin loop
-        ArmyFlag = get SCRIPT_OBJECT_TYPE_ARMY_FLAG at {whichPlatoon} radius 50
-        until ArmyFlag exists
+        ArmyFlag = get SCRIPT_OBJECT_TYPE_ARMY_FLAG at {whichPlatoon} radius 5
+        until ArmyFlag exists and PLAYER of ArmyFlag == PlayerID
     end loop
     override mesh for ArmyFlag with "..\models\m_bannergreekmelee_base"
 
@@ -255,7 +257,7 @@ start
     set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_SPEED of whichPlatoon to 10.0
     set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_CHARGE_SPEED of whichPlatoon to 10.0
 
-    //wait until not whichPlatoon recruiting
+    wait until not whichPlatoon recruiting
 
 end script PT_CreateBasicGreekPlatoon
 
@@ -266,9 +268,11 @@ begin script PT_CreateChargerGreekPlatoon(whichPlatoon,PlayerID)
 
 start
 
+    wait until get number of villagers in platoon whichPlatoon > 0
+
     begin loop
-        ArmyFlag = get SCRIPT_OBJECT_TYPE_ARMY_FLAG at {whichPlatoon} radius 50
-        until ArmyFlag exists
+        ArmyFlag = get SCRIPT_OBJECT_TYPE_ARMY_FLAG at {whichPlatoon} radius 5
+        until ArmyFlag exists and PLAYER of ArmyFlag == PlayerID
     end loop
     override mesh for ArmyFlag with "..\models\m_bannergreekmelee_charger"
 
@@ -281,7 +285,7 @@ start
     set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_SPEED of whichPlatoon to 12.0
     set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_CHARGE_SPEED of whichPlatoon to 16.0
 
-    //wait until not whichPlatoon recruiting
+    wait until not whichPlatoon recruiting
 
     run background script PT_ChargerPlatoonBalance(whichPlatoon,PlayerID)
 
@@ -294,9 +298,11 @@ begin script PT_CreateHeavyGreekPlatoon(whichPlatoon,PlayerID)
 
 start
 
+    wait until get number of villagers in platoon whichPlatoon > 0
+
     begin loop
-        ArmyFlag = get SCRIPT_OBJECT_TYPE_ARMY_FLAG at {whichPlatoon} radius 50
-        until ArmyFlag exists
+        ArmyFlag = get SCRIPT_OBJECT_TYPE_ARMY_FLAG at {whichPlatoon} radius 5
+        until ArmyFlag exists and PLAYER of ArmyFlag == PlayerID
     end loop
     override mesh for ArmyFlag with "..\models\m_bannergreekmelee_heavy"
 
@@ -309,7 +315,7 @@ start
     set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_SPEED of whichPlatoon to 7.0
     set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_CHARGE_SPEED of whichPlatoon to 7.0
 
-    //wait until not whichPlatoon recruiting
+    wait until not whichPlatoon recruiting
 
     run background script PT_HeavyPlatoonBalance(whichPlatoon,PlayerID)
 
@@ -322,9 +328,11 @@ begin script PT_CreateBasicGreekPlatoonRanged(whichPlatoon,PlayerID)
 
 start
 
+    wait until get number of villagers in platoon whichPlatoon > 0
+
     begin loop
-        ArmyFlag = get SCRIPT_OBJECT_TYPE_ARMY_FLAG at {whichPlatoon} radius 50
-        until ArmyFlag exists
+        ArmyFlag = get SCRIPT_OBJECT_TYPE_ARMY_FLAG at {whichPlatoon} radius 5
+        until ArmyFlag exists and PLAYER of ArmyFlag == PlayerID
     end loop
     override mesh for ArmyFlag with "..\models\m_bannergreekranged_base"
 
@@ -337,7 +345,7 @@ start
     set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_SPEED of whichPlatoon to 8.0
     set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_CHARGE_SPEED of whichPlatoon to 8.0
 
-    //wait until not whichPlatoon recruiting
+    wait until not whichPlatoon recruiting
 
     run background script PT_BasicRangedPlatoonBalance(whichPlatoon,PlayerID)
 
@@ -350,9 +358,11 @@ begin script PT_CreateArtyGreekPlatoonRanged(whichPlatoon,PlayerID)
 
 start
 
+    wait until get number of villagers in platoon whichPlatoon > 0
+
     begin loop
-        ArmyFlag = get SCRIPT_OBJECT_TYPE_ARMY_FLAG at {whichPlatoon} radius 50
-        until ArmyFlag exists
+        ArmyFlag = get SCRIPT_OBJECT_TYPE_ARMY_FLAG at {whichPlatoon} radius 5
+        until ArmyFlag exists and PLAYER of ArmyFlag == PlayerID
     end loop
     override mesh for ArmyFlag with "..\models\m_bannergreekranged_arty"
 
@@ -365,7 +375,7 @@ start
     set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_SPEED of whichPlatoon to 6.0
     set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_CHARGE_SPEED of whichPlatoon to 6.0
 
-    //wait until not whichPlatoon recruiting
+    wait until not whichPlatoon recruiting
 
     run background script PT_ArtyRangedPlatoonBalance(whichPlatoon,PlayerID)
 
@@ -378,9 +388,11 @@ begin script PT_CreateSiegeWeaponGreek(whichSiege,PlayerID)
 
 start
 
+    wait 5 seconds
+
     begin loop
         ArmyFlag = get SCRIPT_OBJECT_TYPE_ARMY_FLAG at {whichSiege} radius 50
-        until ArmyFlag exists
+        until ArmyFlag exists and PLAYER of ArmyFlag == PlayerID
     end loop
     override mesh for ArmyFlag with "..\models\m_bannergreeksiege_base"
 
@@ -396,6 +408,8 @@ begin script PT_CreateBasicNorsePlatoon(whichPlatoon,PlayerID)
 
 start
 
+    wait until get number of villagers in platoon whichPlatoon > 0
+
     //set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_MASS of whichPlatoon to 1.0
     set platoon movement value FORMATION_MOVEMENT_STAT_ACCELERATION_MAX of whichPlatoon to 30.0
     set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_SPEED_MAX of whichPlatoon to 15.0
@@ -405,7 +419,7 @@ start
     set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_SPEED of whichPlatoon to 10.0
     set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_CHARGE_SPEED of whichPlatoon to 10.0
 
-    //wait until not whichPlatoon recruiting
+    wait until not whichPlatoon recruiting
 
 end script PT_CreateBasicNorsePlatoon
 
@@ -416,9 +430,11 @@ begin script PT_CreateChargerNorsePlatoon(whichPlatoon,PlayerID)
 
 start
 
+    wait until get number of villagers in platoon whichPlatoon > 0
+
     begin loop
-        ArmyFlag = get SCRIPT_OBJECT_TYPE_ARMY_FLAG at {whichPlatoon} radius 50
-        until ArmyFlag exists
+        ArmyFlag = get SCRIPT_OBJECT_TYPE_ARMY_FLAG at {whichPlatoon} radius 5
+        until ArmyFlag exists and PLAYER of ArmyFlag == PlayerID
     end loop
     override mesh for ArmyFlag with "..\models\m_bannernorsemelee_charger"
 
@@ -431,7 +447,7 @@ start
     set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_SPEED of whichPlatoon to 12.0
     set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_CHARGE_SPEED of whichPlatoon to 16.0
 
-    //wait until not whichPlatoon recruiting
+    wait until not whichPlatoon recruiting
 
     run background script PT_ChargerPlatoonBalance(whichPlatoon,PlayerID)
 
@@ -444,9 +460,11 @@ begin script PT_CreateHeavyNorsePlatoon(whichPlatoon,PlayerID)
 
 start
 
+    wait until get number of villagers in platoon whichPlatoon > 0
+
     begin loop
-        ArmyFlag = get SCRIPT_OBJECT_TYPE_ARMY_FLAG at {whichPlatoon} radius 50
-        until ArmyFlag exists
+        ArmyFlag = get SCRIPT_OBJECT_TYPE_ARMY_FLAG at {whichPlatoon} radius 5
+        until ArmyFlag exists and PLAYER of ArmyFlag == PlayerID
     end loop
     override mesh for ArmyFlag with "..\models\m_bannernorsemelee_heavy"
 
@@ -459,7 +477,7 @@ start
     set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_SPEED of whichPlatoon to 7.0
     set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_CHARGE_SPEED of whichPlatoon to 7.0
 
-    //wait until not whichPlatoon recruiting
+    wait until not whichPlatoon recruiting
 
     run background script PT_HeavyPlatoonBalance(whichPlatoon,PlayerID)
 
@@ -472,6 +490,8 @@ begin script PT_CreateBasicNorsePlatoonRanged(whichPlatoon,PlayerID)
 
 start
 
+    wait until get number of villagers in platoon whichPlatoon > 0
+
     //set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_MASS of whichPlatoon to 1.0
     set platoon movement value FORMATION_MOVEMENT_STAT_ACCELERATION_MAX of whichPlatoon to 30.0
     set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_SPEED_MAX of whichPlatoon to 15.0
@@ -481,7 +501,7 @@ start
     set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_SPEED of whichPlatoon to 8.0
     set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_CHARGE_SPEED of whichPlatoon to 8.0
 
-    //wait until not whichPlatoon recruiting
+    wait until not whichPlatoon recruiting
 
     run background script PT_BasicRangedPlatoonBalance(whichPlatoon,PlayerID)
 
@@ -494,9 +514,11 @@ begin script PT_CreateArtyNorsePlatoonRanged(whichPlatoon,PlayerID)
 
 start
 
+    wait until get number of villagers in platoon whichPlatoon > 0
+
     begin loop
-        ArmyFlag = get SCRIPT_OBJECT_TYPE_ARMY_FLAG at {whichPlatoon} radius 50
-        until ArmyFlag exists
+        ArmyFlag = get SCRIPT_OBJECT_TYPE_ARMY_FLAG at {whichPlatoon} radius 5
+        until ArmyFlag exists and PLAYER of ArmyFlag == PlayerID
     end loop
     override mesh for ArmyFlag with "..\models\m_bannernorseranged_arty"
 
@@ -509,7 +531,7 @@ start
     set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_SPEED of whichPlatoon to 6.0
     set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_CHARGE_SPEED of whichPlatoon to 6.0
 
-    //wait until not whichPlatoon recruiting
+    wait until not whichPlatoon recruiting
 
     run background script PT_ArtyRangedPlatoonBalance(whichPlatoon,PlayerID)
 
@@ -523,6 +545,8 @@ begin script PT_CreateBasicJapanesePlatoon(whichPlatoon,PlayerID)
 
 start
 
+    wait until get number of villagers in platoon whichPlatoon > 0
+
     //set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_MASS of whichPlatoon to 1.0
     set platoon movement value FORMATION_MOVEMENT_STAT_ACCELERATION_MAX of whichPlatoon to 30.0
     set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_SPEED_MAX of whichPlatoon to 15.0
@@ -532,7 +556,7 @@ start
     set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_SPEED of whichPlatoon to 10.0
     set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_CHARGE_SPEED of whichPlatoon to 10.0
 
-    //wait until not whichPlatoon recruiting
+    wait until not whichPlatoon recruiting
 
 end script PT_CreateBasicJapanesePlatoon
 
@@ -543,9 +567,11 @@ begin script PT_CreateChargerJapanesePlatoon(whichPlatoon,PlayerID)
 
 start
 
+    wait until get number of villagers in platoon whichPlatoon > 0
+
     begin loop
-        ArmyFlag = get SCRIPT_OBJECT_TYPE_ARMY_FLAG at {whichPlatoon} radius 50
-        until ArmyFlag exists
+        ArmyFlag = get SCRIPT_OBJECT_TYPE_ARMY_FLAG at {whichPlatoon} radius 5
+        until ArmyFlag exists and PLAYER of ArmyFlag == PlayerID
     end loop
     override mesh for ArmyFlag with "..\models\m_bannerjapanesemelee_charger"
 
@@ -571,9 +597,11 @@ begin script PT_CreateHeavyJapanesePlatoon(whichPlatoon,PlayerID)
 
 start
 
+    wait until get number of villagers in platoon whichPlatoon > 0
+
     begin loop
-        ArmyFlag = get SCRIPT_OBJECT_TYPE_ARMY_FLAG at {whichPlatoon} radius 50
-        until ArmyFlag exists
+        ArmyFlag = get SCRIPT_OBJECT_TYPE_ARMY_FLAG at {whichPlatoon} radius 5
+        until ArmyFlag exists and PLAYER of ArmyFlag == PlayerID
     end loop
     override mesh for ArmyFlag with "..\models\m_bannerjapanesemelee_heavy"
 
@@ -586,7 +614,7 @@ start
     set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_SPEED of whichPlatoon to 7.0
     set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_CHARGE_SPEED of whichPlatoon to 7.0
 
-    //wait until not whichPlatoon recruiting
+    wait until not whichPlatoon recruiting
 
     run background script PT_HeavyPlatoonBalance(whichPlatoon,PlayerID)
 
@@ -599,6 +627,8 @@ begin script PT_CreateBasicJapanesePlatoonRanged(whichPlatoon,PlayerID)
 
 start
 
+    wait until get number of villagers in platoon whichPlatoon > 0
+
     //set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_MASS of whichPlatoon to 1.0
     set platoon movement value FORMATION_MOVEMENT_STAT_ACCELERATION_MAX of whichPlatoon to 30.0
     set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_SPEED_MAX of whichPlatoon to 15.0
@@ -608,7 +638,7 @@ start
     set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_SPEED of whichPlatoon to 8.0
     set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_CHARGE_SPEED of whichPlatoon to 8.0
 
-    //wait until not whichPlatoon recruiting
+    wait until not whichPlatoon recruiting
 
     run background script PT_BasicRangedPlatoonBalance(whichPlatoon,PlayerID)
 
@@ -621,9 +651,11 @@ begin script PT_CreateArtyJapanesePlatoonRanged(whichPlatoon,PlayerID)
 
 start
 
+    wait until get number of villagers in platoon whichPlatoon > 0
+
     begin loop
-        ArmyFlag = get SCRIPT_OBJECT_TYPE_ARMY_FLAG at {whichPlatoon} radius 50
-        until ArmyFlag exists
+        ArmyFlag = get SCRIPT_OBJECT_TYPE_ARMY_FLAG at {whichPlatoon} radius 5
+        until ArmyFlag exists and PLAYER of ArmyFlag == PlayerID
     end loop
     override mesh for ArmyFlag with "..\models\m_bannerjapaneseranged_arty"
 
@@ -636,7 +668,7 @@ start
     set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_SPEED of whichPlatoon to 6.0
     set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_CHARGE_SPEED of whichPlatoon to 6.0
 
-    //wait until not whichPlatoon recruiting
+    wait until not whichPlatoon recruiting
 
     run background script PT_ArtyRangedPlatoonBalance(whichPlatoon,PlayerID)
 
@@ -650,6 +682,8 @@ begin script PT_CreateBasicAztecPlatoon(whichPlatoon,PlayerID)
 
 start
 
+    wait until get number of villagers in platoon whichPlatoon > 0
+
     //set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_MASS of whichPlatoon to 1.0
     set platoon movement value FORMATION_MOVEMENT_STAT_ACCELERATION_MAX of whichPlatoon to 30.0
     set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_SPEED_MAX of whichPlatoon to 15.0
@@ -659,7 +693,7 @@ start
     set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_SPEED of whichPlatoon to 10.0
     set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_CHARGE_SPEED of whichPlatoon to 10.0
 
-    //wait until not whichPlatoon recruiting
+    wait until not whichPlatoon recruiting
 
 end script PT_CreateBasicAztecPlatoon
 
@@ -670,9 +704,11 @@ begin script PT_CreateChargerAztecPlatoon(whichPlatoon,PlayerID)
 
 start
 
+    wait until get number of villagers in platoon whichPlatoon > 0
+
     begin loop
-        ArmyFlag = get SCRIPT_OBJECT_TYPE_ARMY_FLAG at {whichPlatoon} radius 50
-        until ArmyFlag exists
+        ArmyFlag = get SCRIPT_OBJECT_TYPE_ARMY_FLAG at {whichPlatoon} radius 5
+        until ArmyFlag exists and PLAYER of ArmyFlag == PlayerID
     end loop
     override mesh for ArmyFlag with "..\models\m_banneraztecmelee_charger"
 
@@ -685,7 +721,7 @@ start
     set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_SPEED of whichPlatoon to 12.0
     set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_CHARGE_SPEED of whichPlatoon to 16.0
 
-    //wait until not whichPlatoon recruiting
+    wait until not whichPlatoon recruiting
 
     run background script PT_ChargerPlatoonBalance(whichPlatoon,PlayerID)
 
@@ -698,9 +734,11 @@ begin script PT_CreateHeavyAztecPlatoon(whichPlatoon,PlayerID)
 
 start
 
+    wait until get number of villagers in platoon whichPlatoon > 0
+
     begin loop
-        ArmyFlag = get SCRIPT_OBJECT_TYPE_ARMY_FLAG at {whichPlatoon} radius 50
-        until ArmyFlag exists
+        ArmyFlag = get SCRIPT_OBJECT_TYPE_ARMY_FLAG at {whichPlatoon} radius 5
+        until ArmyFlag exists and PLAYER of ArmyFlag == PlayerID
     end loop
     override mesh for ArmyFlag with "..\models\m_banneraztecmelee_heavy"
 
@@ -713,7 +751,7 @@ start
     set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_SPEED of whichPlatoon to 7.0
     set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_CHARGE_SPEED of whichPlatoon to 7.0
 
-    //wait until not whichPlatoon recruiting
+    wait until not whichPlatoon recruiting
 
     run background script PT_HeavyPlatoonBalance(whichPlatoon,PlayerID)
 
@@ -726,6 +764,8 @@ begin script PT_CreateBasicAztecPlatoonRanged(whichPlatoon,PlayerID)
 
 start
 
+    wait until get number of villagers in platoon whichPlatoon > 0
+
     //set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_MASS of whichPlatoon to 1.0
     set platoon movement value FORMATION_MOVEMENT_STAT_ACCELERATION_MAX of whichPlatoon to 30.0
     set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_SPEED_MAX of whichPlatoon to 15.0
@@ -735,7 +775,7 @@ start
     set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_SPEED of whichPlatoon to 8.0
     set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_CHARGE_SPEED of whichPlatoon to 8.0
 
-    //wait until not whichPlatoon recruiting
+    wait until not whichPlatoon recruiting
 
     run background script PT_BasicRangedPlatoonBalance(whichPlatoon,PlayerID)
 
@@ -748,9 +788,11 @@ begin script PT_CreateArtyAztecPlatoonRanged(whichPlatoon,PlayerID)
 
 start
 
+    wait until get number of villagers in platoon whichPlatoon > 0
+
     begin loop
-        ArmyFlag = get SCRIPT_OBJECT_TYPE_ARMY_FLAG at {whichPlatoon} radius 50
-        until ArmyFlag exists
+        ArmyFlag = get SCRIPT_OBJECT_TYPE_ARMY_FLAG at {whichPlatoon} radius 5
+        until ArmyFlag exists and PLAYER of ArmyFlag == PlayerID
     end loop
     override mesh for ArmyFlag with "..\models\m_banneraztecranged_arty"
 
@@ -763,7 +805,7 @@ start
     set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_SPEED of whichPlatoon to 6.0
     set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_CHARGE_SPEED of whichPlatoon to 6.0
 
-    //wait until not whichPlatoon recruiting
+    wait until not whichPlatoon recruiting
 
     run background script PT_ArtyRangedPlatoonBalance(whichPlatoon,PlayerID)
 
@@ -900,29 +942,43 @@ while whichPlatoon exists
         FriendlyPlatoon = get platoon of player PlayerID nearest {Target} radius 20.0
         if not FriendlyPlatoon exists
             if xp < 3
-                while Counter < xp * (PlatoonSize / 4) and whichPlatoon exists and get distance from {whichPlatoon} to {Target} > 20
-                    wait 2.0 seconds
+                while Counter < xp * (PlatoonSize / 4) and whichPlatoon exists and get distance from {whichPlatoon} to {Target} > 20 and FriendlyPlatoon not exists and HEALTH of Target > 0
+                    FriendlyPlatoon = get platoon of player PlayerID nearest {Target} radius 20.0
                     Villager = get random villager from platoon whichPlatoon
                     if Target == EnemyCreature
-                        Arrows = create missiles MISSILE_ARROW launch MISSILE_LAUNCH_LOB size xp from {Villager} + {0,3.5,0} to {Target} + {0,number from 6 to 8,0} speed 2.0
+                        Arrows = create missiles MISSILE_ARROW launch MISSILE_LAUNCH_LOB size xp from {Villager} + {0,5.0,0} to {Target} + {0,number from 6 to 8,0} speed 2.0
+                        if HEALTH of Target > 0.005
+                            HEALTH of Target -= 0.001
+                        end if
                     elsif Target == EnemyCatapult
-                        Arrows = create missiles MISSILE_ARROW launch MISSILE_LAUNCH_LOB size xp from {Villager} + {0,3.5,0} to {Target} + {0,3.5,0} speed 2.0
+                        Arrows = create missiles MISSILE_ARROW launch MISSILE_LAUNCH_LOB size xp from {Villager} + {0,5.0,0} to {Target} + {0,3.5,0} speed 2.0
+                        if HEALTH of Target > 0.04
+                            HEALTH of Target -= 0.01
+                        end if
                     else
-                        Arrows = create missiles MISSILE_ARROW launch MISSILE_LAUNCH_LOB size xp from {Villager} + {0,3.5,0} to {Target} speed 2.0
+                        Arrows = create missiles MISSILE_ARROW launch MISSILE_LAUNCH_LOB size xp from {Villager} + {0,5.0,0} to {Target} speed 2.0
                     end if
+                    wait 2.0 seconds
                     Counter++
                 end while
             else
-                while Counter < xp * (PlatoonSize / 3) and whichPlatoon exists and get distance from {whichPlatoon} to {Target} > 20
-                    wait 2.0 seconds
+                while Counter < xp * (PlatoonSize / 3) and whichPlatoon exists and get distance from {whichPlatoon} to {Target} > 20 and FriendlyPlatoon not exists and HEALTH of Target > 0
+                    FriendlyPlatoon = get platoon of player PlayerID nearest {Target} radius 20.0
                     Villager = get random villager from platoon whichPlatoon
                     if Target == EnemyCreature
-                        Arrows = create missiles MISSILE_ARROW_FLAMING launch MISSILE_LAUNCH_LOB size xp from {Villager} + {0,3.5,0} to {Target} + {0,number from 6 to 8,0} speed 2.0
+                        Arrows = create missiles MISSILE_ARROW_FLAMING launch MISSILE_LAUNCH_LOB size xp from {Villager} + {0,5.0,0} to {Target} + {0,number from 6 to 8,0} speed 2.0
+                        if HEALTH of Target > 0.005
+                            HEALTH of Target -= 0.001
+                        end if
                     elsif Target == EnemyCatapult
-                        Arrows = create missiles MISSILE_ARROW_FLAMING launch MISSILE_LAUNCH_LOB size xp from {Villager} + {0,3.5,0} to {Target} + {0,3.5,0} speed 2.0
+                        Arrows = create missiles MISSILE_ARROW_FLAMING launch MISSILE_LAUNCH_LOB size xp from {Villager} + {0,5.0,0} to {Target} + {0,3.5,0} speed 2.0
+                        if HEALTH of Target > 0.04
+                            HEALTH of Target -= 0.01
+                        end if
                     else
-                        Arrows = create missiles MISSILE_ARROW_FLAMING launch MISSILE_LAUNCH_LOB size xp from {Villager} + {0,3.5,0} to {Target} speed 2.0
+                        Arrows = create missiles MISSILE_ARROW_FLAMING launch MISSILE_LAUNCH_LOB size xp from {Villager} + {0,5.0,0} to {Target} speed 2.0
                     end if
+                    wait 2.0 seconds
                     Counter++
                 end while
             end if
@@ -977,29 +1033,43 @@ while whichPlatoon exists
         FriendlyPlatoon = get platoon of player PlayerID nearest {Target} radius 20.0
         if FriendlyPlatoon not exists
             if xp < 3
-                while Counter < xp * (PlatoonSize / 3) and whichPlatoon exists and get distance from {whichPlatoon} to {Target} > 20
-                    wait 0.25 seconds
+                while Counter < xp * (PlatoonSize / 3) and whichPlatoon exists and get distance from {whichPlatoon} to {Target} > 20 and FriendlyPlatoon not exists and HEALTH of Target > 0
+                    FriendlyPlatoon = get platoon of player PlayerID nearest {Target} radius 20.0
                     Villager = get random villager from platoon whichPlatoon
                     if Target == EnemyCreature
-                        Arrows = create missiles MISSILE_ARROW launch MISSILE_LAUNCH_LOB size xp from {Villager} + {0,3.5,0} to {Target} + {0,number from 6 to 8,0} speed 2.0
+                        Arrows = create missiles MISSILE_ARROW launch MISSILE_LAUNCH_LOB size xp from {Villager} + {0,5.0,0} to {Target} + {0,number from 6 to 8,0} speed 2.0
+                        if HEALTH of Target > 0.005
+                            HEALTH of Target -= 0.001
+                        end if
                     elsif Target == EnemyCatapult
-                        Arrows = create missiles MISSILE_ARROW launch MISSILE_LAUNCH_LOB size xp from {Villager} + {0,3.5,0} to {Target} + {0,3.5,0} speed 2.0
+                        Arrows = create missiles MISSILE_ARROW launch MISSILE_LAUNCH_LOB size xp from {Villager} + {0,5.0,0} to {Target} + {0,3.5,0} speed 2.0
+                        if HEALTH of Target > 0.04
+                            HEALTH of Target -= 0.01
+                        end if
                     else
-                        Arrows = create missiles MISSILE_ARROW launch MISSILE_LAUNCH_LOB size xp from {Villager} + {0,3.5,0} to {Target} speed 2.0
+                        Arrows = create missiles MISSILE_ARROW launch MISSILE_LAUNCH_LOB size xp from {Villager} + {0,5.0,0} to {Target} speed 2.0
                     end if
+                    wait 0.25 seconds
                     Counter++
                 end while
             else
-                while Counter < xp * (PlatoonSize / 2) and whichPlatoon exists and get distance from {whichPlatoon} to {Target} > 20
-                    wait 0.25 seconds
+                while Counter < xp * (PlatoonSize / 2) and whichPlatoon exists and get distance from {whichPlatoon} to {Target} > 20 and FriendlyPlatoon not exists and HEALTH of Target > 0
+                    FriendlyPlatoon = get platoon of player PlayerID nearest {Target} radius 20.0
                     Villager = get random villager from platoon whichPlatoon
                     if Target == EnemyCreature
-                        Arrows = create missiles MISSILE_ARROW_FLAMING launch MISSILE_LAUNCH_LOB size xp from {Villager} + {0,3.5,0} to {Target} + {0,number from 6 to 8,0} speed 2.0
+                        Arrows = create missiles MISSILE_ARROW_FLAMING launch MISSILE_LAUNCH_LOB size xp from {Villager} + {0,5.0,0} to {Target} + {0,number from 6 to 8,0} speed 2.0
+                        if HEALTH of Target > 0.005
+                            HEALTH of Target -= 0.001
+                        end if
                     elsif Target == EnemyCatapult
-                        Arrows = create missiles MISSILE_ARROW_FLAMING launch MISSILE_LAUNCH_LOB size xp from {Villager} + {0,3.5,0} to {Target} + {0,3.5,0} speed 2.0
+                        Arrows = create missiles MISSILE_ARROW_FLAMING launch MISSILE_LAUNCH_LOB size xp from {Villager} + {0,5.0,0} to {Target} + {0,3.5,0} speed 2.0
+                        if HEALTH of Target > 0.04
+                            HEALTH of Target -= 0.01
+                        end if
                     else
-                        Arrows = create missiles MISSILE_ARROW_FLAMING launch MISSILE_LAUNCH_LOB size xp from {Villager} + {0,3.5,0} to {Target} speed 2.0
+                        Arrows = create missiles MISSILE_ARROW_FLAMING launch MISSILE_LAUNCH_LOB size xp from {Villager} + {0,5.0,0} to {Target} speed 2.0
                     end if
+                    wait 0.25 seconds
                     Counter++
                 end while
             end if
