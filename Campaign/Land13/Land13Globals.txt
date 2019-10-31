@@ -136,7 +136,7 @@ end script Globals
 begin script LC13_CreateUndeadPlatoon(whichPlatoon,howManyVillagersToDelete,howManyVillagersToSpawn,whichMesh)
 
     ArmyFlag = 0
-    Ghost[999]
+    Ghost[350]
     counter = 0
     myEffect = 0
     Villager = 0
@@ -159,7 +159,7 @@ start
     SCALE of myEffect = 2
 
     //Remove old villagers
-    force while counter < howManyVillagersToDelete - 1 and size of whichPlatoon > 1
+    while counter < howManyVillagersToDelete - 1 and size of whichPlatoon > 1
         if counter < howManyVillagersToDelete
             Villager = get villager from platoon whichPlatoon nearest {whichPlatoon}
             myEffect = create visual effect VISUAL_EFFECT_WEATHER_LIGHTNING_EXPLOSION at {Villager} + {0,1,0} time 1.5
@@ -187,7 +187,7 @@ start
     override mesh for ArmyFlag with "..\models\m_bannerundead"
     disable platoon whichPlatoon camp
 
-    force while counter < howManyVillagersToSpawn
+    while counter < howManyVillagersToSpawn
         //Create ghosts
         Ghost[counter] = create VILLAGER AZTEC_FORESTER at {whichPlatoon} + {number from -10 to 10,number from -10 to 10}
         myEffect = create visual effect VISUAL_EFFECT_WEATHER_LIGHTNING_EXPLOSION at {Ghost[counter]} + {0,1,0} time 1.5
@@ -255,11 +255,6 @@ start
     set myEffect color red 148 green 0 blue 211
     SCALE of myEffect = 0.1
     HEALTH of myGhost = 0.00
-    if LandWon == 0
-        PlayerAlignment = get player 0 alignment
-        PlayerAlignment = PlayerAlignment + 0.00015
-        set player 0 alignment PlayerAlignment
-    end if
 
     begin loop
         if LandWon == 0
