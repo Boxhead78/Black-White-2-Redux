@@ -1,0 +1,96 @@
+//***********************************************************************
+//
+//    Platoon types tutorial
+//
+//***********************************************************************
+
+define script LC4_PlatoonTypesCheckForArmory
+define script LC4_PlatoonTypesTutorial(Armory)
+
+run script LC4_PlatoonTypesCheckForArmory
+
+begin script LC4_PlatoonTypesCheckForArmory
+
+    Armory = 0
+    RangedArmory = 0
+    TutorialDone = 0
+
+start
+
+begin loop
+    Armory = get building ABODE_NUMBER_MELEE_ARMOURY in PlayerTown min built 1.0
+    RangedArmory = get building ABODE_NUMBER_MELEE_ARMOURY in PlayerTown min built 1.0
+    if TutorialDone == 0
+        if Armory exists
+            run background script LC4_PlatoonTypesTutorial(Armory)
+            TutorialDone = 1
+        elsif RangedArmory exists
+            run background script LC4_PlatoonTypesTutorial(RangedArmory)
+            TutorialDone = 1
+        end if
+    end if
+    until TutorialDone == 1
+end loop
+
+end script LC4_PlatoonTypesCheckForArmory
+
+
+begin script LC4_PlatoonTypesTutorial(Armory)
+
+    TutorialScroll = 0
+
+start
+
+begin loop
+    TutorialScroll = create highlight BRONZE name "BW2_TEXT_CREATURE_LEARNING_LESSON_1310" remind "BW2_TEXT_CREATURE_LEARNING_LESSON_1310" at get world position from Armory to {-12.007, 0.322, 10.228}
+    ALTITUDE of TutorialScroll = 8
+        
+    wait until TutorialScroll right clicked
+    clear right clicked object
+    delete TutorialScroll
+
+    begin interruptible cinema
+        if Language == German
+            wait 2 seconds
+            say "Jede Armee hat verschiedene Spezialisierungen."
+            wait 6 seconds
+            clear dialogue
+            wait 1 seconds
+            say "Die Nahkampftruppen teilen sich in 3 Unterarten auf, die Fernkaempfer in 2."
+            wait 8 seconds
+            clear dialogue
+            wait 1 seconds
+            say "Die verschiedenen Truppen koennen mit einem Klick der rechten Maustaste auf eine Waffenkammer rekrutiert werden."
+            wait 12 seconds
+            clear dialogue
+        elsif Language == English
+            wait 2 seconds
+            say "Every army has its own specialized skills."
+            wait 6 seconds
+            clear dialogue
+            wait 1 seconds
+            say "Melee platoons have 3 different specializations, ranged have 2."
+            wait 8 seconds
+            clear dialogue
+            wait 1 seconds
+            say "With a right click on any armory, you can recruit the different specializations."
+            wait 12 seconds
+            clear dialogue
+        elsif Language == Spanish
+            wait 2 seconds
+            say "Cada pelotón tiene sus propias habilidades especializadas."
+            wait 6 seconds
+            clear dialogue
+            wait 1 seconds
+            say "Los pelotones cuerpo a cuerpo tienen 3 especializaciones diferentes, a distancia tienen 2."
+            wait 8 seconds
+            clear dialogue
+            wait 1 seconds
+            say "Con un clic derecho en cualquier arsenal, puedes reclutar las diferentes especializaciones."
+            wait 12 seconds
+            clear dialogue
+        end if
+    end cinema
+end loop
+
+end script LC4_PlatoonTypesTutorial
