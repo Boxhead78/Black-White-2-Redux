@@ -1095,44 +1095,46 @@ start
     if rGodInstance[godHandle] exists
         currentMana = get player ge_Player[godHandle] mana
         if Target exists and not Target on fire
-            if currentMana >= geManaCostMeteor + 20000 and PLAYER of Target != ge_Player[godHandle] and get ge_MiracleDelay[godHandle] time remaining <= 0 and ge_Altar[godHandle] == 1
-                myNumber = number from 1 to 7
-                if myNumber == 1
-                    run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_METEOR,Target, 0)
-                elsif myNumber == 2 or myNumber == 3
-                    run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_FIRE,Target, 0)
-                elsif myNumber == 4 or myNumber == 5
-                    run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_DEATH,Target, 0)
+            if get ge_MiracleDelay[godHandle] time remaining <= 0
+                if currentMana >= geManaCostMeteor + 20000 and PLAYER of Target != ge_Player[godHandle] and ge_Altar[godHandle] == 1
+                    myNumber = number from 1 to 7
+                    if myNumber == 1
+                        run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_METEOR,Target, 0)
+                    elsif myNumber == 2 or myNumber == 3
+                        run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_FIRE,Target, 0)
+                    elsif myNumber == 4 or myNumber == 5
+                        run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_DEATH,Target, 0)
+                    else
+                        if TargetType == 1
+                            run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_STORM,Target, 0)
+                        end if
+                    end if
+                
+                elsif currentMana >= geManaCostStorm and PLAYER of Target != ge_Player[godHandle] and ge_Altar[godHandle] == 1
+                    myNumber = number from 1 to 3
+                    if myNumber == 1
+                        if TargetType == 1
+                            run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_STORM,Target, 0)
+                        end if
+                    elsif myNumber == 2 or myNumber == 3
+                        run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_FIRE,Target, 0)
+                    end if
+
+                elsif myRock exists and PLAYER of Target != ge_Player[godHandle]
+                    //run script geThrowObjectAtObject(godHandle, myRock, myPlatoon)
+
+                end if
+                if Difficulty == 1
+                    ge_MiracleDelay[godHandle] = create timer for 50 seconds
+                elsif Difficulty == 2
+                    ge_MiracleDelay[godHandle] = create timer for 36 seconds
+                elsif Difficulty == 3
+                    ge_MiracleDelay[godHandle] = create timer for 24 seconds
+                elsif Difficulty == 4
+                    ge_MiracleDelay[godHandle] = create timer for 15 seconds
                 else
-                    if TargetType == 1
-                        run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_STORM,Target, 0)
-                    end if
+                    ge_MiracleDelay[godHandle] = create timer for 12 seconds
                 end if
-            
-            elsif currentMana >= geManaCostStorm and PLAYER of Target != ge_Player[godHandle] and get ge_MiracleDelay[godHandle] time remaining <= 0 and ge_Altar[godHandle] == 1
-                myNumber = number from 1 to 3
-                if myNumber == 1
-                    if TargetType == 1
-                        run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_STORM,Target, 0)
-                    end if
-                elsif myNumber == 2 or myNumber == 3
-                    run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_FIRE,Target, 0)
-                end if
-
-            elsif myRock exists and PLAYER of Target != ge_Player[godHandle]
-                //run script geThrowObjectAtObject(godHandle, myRock, myPlatoon)
-
-            end if
-            if Difficulty == 1
-                ge_MiracleDelay[godHandle] = create timer for 50 seconds
-            elsif Difficulty == 2
-                ge_MiracleDelay[godHandle] = create timer for 36 seconds
-            elsif Difficulty == 3
-                ge_MiracleDelay[godHandle] = create timer for 24 seconds
-            elsif Difficulty == 4
-                ge_MiracleDelay[godHandle] = create timer for 15 seconds
-            else
-                ge_MiracleDelay[godHandle] = create timer for 12 seconds
             end if
         end if
     end if
