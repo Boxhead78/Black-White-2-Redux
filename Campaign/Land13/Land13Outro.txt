@@ -9,6 +9,7 @@ define script LC13_Departure
 
 begin script LC13_Outro
 
+    AtmosMixer = create mixer
     PlayerAlignment = 0
 
 start
@@ -45,7 +46,9 @@ begin cinema
     stop script "LC13_CreatureLogic"
 
     disable atmos sound
-    set atmos volume 0
+    //set atmos volume 0
+    set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_MAP to 0.0
+    set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_POSITIONAL to 0.0
 
     //24 seconds
     reset camera path
@@ -88,6 +91,10 @@ begin cinema
     wait BW2XT_LAND03_NEW_OUTRO_40 + 1 seconds
 
     wait until camera ready
+
+    //set atmos volume 0.45
+    set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_MAP to 0.45
+    set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_POSITIONAL to 0.45
 
     stop music with fadetime 5
 
