@@ -33,6 +33,8 @@ define script LC11_AttackNearestTownTimer
 define script LC11_AttackPlayerTownTimer
 define script LC11_PlatoonBehaivors
 define script DisableLocalPlatoonResponse
+define script LC11_VolcanoWorkaround
+define script LC11_EarthquakeWorkaround
 
 begin script LC11_Aztec_Capital_Impressiveness
 
@@ -2653,6 +2655,7 @@ start
             EpicWarning = create visual effect VISUAL_EFFECT_EPIC_TARGET_WARNING at {ET_FireEpicLocation} time 15 target {ET_FireEpicLocation}
             EpicVolc = create volcano at {ET_FireEpicLocation} player 1
             run background script LC11_Volcano(AIVolcano, EpicVolc)
+            wait 120 seconds
             until PLAYER of AztecCapital != 1
         end loop
     end if
@@ -3464,3 +3467,45 @@ begin loop
 end loop
 
 end script DisableLocalPlatoonResponse
+
+begin script LC11_VolcanoWorkaround
+
+    Tree = 0
+
+start
+
+//Damage the epic if it is just slightly damaged so that villagers start building it up again
+begin loop
+    wait 120 seconds
+    if HEALTH of AIVolcano < 1.0 and HEALTH of AIVolcano > 0.9
+        wait 300 seconds
+        wait until get distance from camera position to {AIVolcano} > 300 and not {AIVolcano} viewed
+        Tree = create ROCK_OBJECT ROUND_ROCK_LARGE at {AIVolcano} + {0,15,0}
+        set physics at position {Tree} with strength {1.0,1.0,1.0} radius 10 random 1
+        wait 5 seconds
+        delete Tree
+    end if
+end loop
+
+end script LC11_VolcanoWorkaround
+
+begin script LC11_EarthquakeWorkaround
+
+    Tree = 0
+
+start
+
+//Damage the epic if it is just slightly damaged so that villagers start building it up again
+begin loop
+    wait 120 seconds
+    if HEALTH of AIEarthquake < 1.0 and HEALTH of AIEarthquake > 0.9
+        wait 300 seconds
+        wait until get distance from camera position to {AIEarthquake} > 300 and not {AIEarthquake} viewed
+        Tree = create ROCK_OBJECT ROUND_ROCK_LARGE at {AIEarthquake} + {0,15,0}
+        set physics at position {Tree} with strength {1.0,1.0,1.0} radius 10 random 1
+        wait 5 seconds
+        delete Tree
+    end if
+end loop
+
+end script LC11_EarthquakeWorkaround
