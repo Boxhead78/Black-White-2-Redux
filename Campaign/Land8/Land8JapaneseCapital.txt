@@ -2887,6 +2887,8 @@ end script LC8_PlatoonPortalCutsceneStopMusic
 
 begin script LC8_HurricaneRessourceManager
 
+    Angle = 0
+    Pos = 0
     Counter = 0
     Tree = 0
 
@@ -2922,17 +2924,19 @@ wait until HEALTH of AIHurricane >= 1.0
 
 JAPANESE_TOWN1_IMPRESSIVENESS = JAPANESE_TOWN1_IMPRESSIVENESS + 2275
 
-//Damage the epic if it is just slightly damaged so that villagers start building it up again
+//Rebuild the epic
 begin loop
-    wait 120 seconds
+    wait until HEALTH of AIHurricane < 1.0 and HEALTH of AIHurricane > 0.8
+    wait 600 seconds
     if HEALTH of AIHurricane < 1.0 and HEALTH of AIHurricane > 0.8
-        wait 300 seconds
         wait until get distance from camera position to {AIHurricane} > 300 and not {AIHurricane} viewed
-        Tree = create ROCK_OBJECT ROUND_ROCK_LARGE at {AIHurricane} + {0,25,0}
-        SCALE of Tree = 3.0
-        set Tree velocity heading {AIHurricane} speed 5
-        wait 5 seconds
-        delete Tree
+        Angle = ANGLE of AIHurricane
+        Pos = marker at {AIHurricane}
+        delete AIHurricane
+        AIHurricane = create with angle Angle and scale 0 WONDER EPIC_WONDER_NUMBER_HURRICANE at {Pos}
+        PLAYER of AIHurricane = 1
+        attach AIHurricane to JapaneseTown1
+        BUILT of AIHurricane = 0.75
     end if
 end loop
 
@@ -2940,8 +2944,11 @@ end script LC8_HurricaneRessourceManager
 
 begin script LC8_EarthquakeRessourceManager
 
+    Angle = 0
+    Pos = 0
     Counter = 0
     Tree = 0
+
 
 start
 
@@ -2977,17 +2984,19 @@ wait until HEALTH of AIEarthquake >= 1.0
 
 JAPANESE_CAPITAL_IMPRESSIVENESS = JAPANESE_CAPITAL_IMPRESSIVENESS + 2275
 
-//Damage the epic if it is just slightly damaged so that villagers start building it up again
+//Rebuild the epic
 begin loop
-    wait 120 seconds
+    wait until HEALTH of AIEarthquake < 1.0 and HEALTH of AIEarthquake > 0.8
+    wait 600 seconds
     if HEALTH of AIEarthquake < 1.0 and HEALTH of AIEarthquake > 0.8
-        wait 300 seconds
         wait until get distance from camera position to {AIEarthquake} > 300 and not {AIEarthquake} viewed
-        Tree = create ROCK_OBJECT ROUND_ROCK_LARGE at {AIEarthquake} + {0,25,0}
-        SCALE of Tree = 3.0
-        set Tree velocity heading {AIEarthquake} speed 5
-        wait 5 seconds
-        delete Tree
+        Angle = ANGLE of AIEarthquake
+        Pos = marker at {AIEarthquake}
+        delete AIEarthquake
+        AIEarthquake = create with angle Angle and scale 0 WONDER EPIC_WONDER_NUMBER_EARTHQUAKE at {Pos}
+        PLAYER of AIEarthquake = 1
+        attach AIEarthquake to JapaneseCapital
+        BUILT of AIEarthquake = 0.75
     end if
 end loop
 

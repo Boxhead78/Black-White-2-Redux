@@ -3738,6 +3738,8 @@ end script LC6_JapaneseMinorTown5TownBuilding
 
 begin script SirenResourceManager
 
+    Angle = 0
+    Pos = 0
     Counter = 0
     Tree = 0
 
@@ -3769,17 +3771,19 @@ wait until HEALTH of AIEpic >= 1.0
 
 MINOR_JAPCAPITAL_IMPRESSIVENESS = MINOR_JAPCAPITAL_IMPRESSIVENESS + 2275
 
-//Damage the epic if it is just slightly damaged so that villagers start building it up again
+//Rebuild the epic
 begin loop
-    wait 120 seconds
-    if HEALTH of AIEpic < 1.0 and HEALTH of AIEpic > 0.9
-        wait 300 seconds
+    wait until HEALTH of AIEpic < 1.0 and HEALTH of AIEpic > 0.8
+    wait 600 seconds
+    if HEALTH of AIEpic < 1.0 and HEALTH of AIEpic > 0.8
         wait until get distance from camera position to {AIEpic} > 300 and not {AIEpic} viewed
-        Tree = create ROCK_OBJECT ROUND_ROCK_LARGE at {AIEpic} + {0,25,0}
-        SCALE of Tree = 3.0
-        set Tree velocity heading {AIEpic} speed 5
-        wait 5 seconds
-        delete Tree
+        Angle = ANGLE of AIEpic
+        Pos = marker at {AIEpic}
+        delete AIEpic
+        AIEpic = create with angle Angle and scale 0 WONDER EPIC_WONDER_NUMBER_SIREN at {Pos}
+        PLAYER of AIEpic = 1
+        attach AIEpic to JapaneseCapital
+        BUILT of AIEpic = 0.75
     end if
 end loop
 

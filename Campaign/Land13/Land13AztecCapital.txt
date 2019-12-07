@@ -3796,21 +3796,26 @@ end script LC13_CheckStonehenge
 
 begin script LC13_VolcanoWorkaround
 
+    Angle = 0
+    Pos = 0
+    Counter = 0
     Tree = 0
 
 start
 
-//Damage the epic if it is just slightly damaged so that villagers start building it up again
+//Rebuild the epic
 begin loop
-    wait 120 seconds
+    wait until HEALTH of AIVolcano < 1.0 and HEALTH of AIVolcano > 0.8
+    wait 600 seconds
     if HEALTH of AIVolcano < 1.0 and HEALTH of AIVolcano > 0.8
-        wait 300 seconds
         wait until get distance from camera position to {AIVolcano} > 300 and not {AIVolcano} viewed
-        Tree = create ROCK_OBJECT ROUND_ROCK_LARGE at {AIVolcano} + {0,25,0}
-        SCALE of Tree = 3.0
-        set Tree velocity heading {AIVolcano} speed 5
-        wait 5 seconds
-        delete Tree
+        Angle = ANGLE of AIVolcano
+        Pos = marker at {AIVolcano}
+        delete AIVolcano
+        AIVolcano = create with angle Angle and scale 0 WONDER EPIC_WONDER_NUMBER_VOLCANO at {Pos}
+        PLAYER of AIVolcano = 1
+        attach AIVolcano to AztecCapital
+        BUILT of AIVolcano = 0.75
     end if
 end loop
 
