@@ -2260,7 +2260,7 @@ start
                 run background script LC8_EarthquakeRessourceManager
             end if
         else
-            if get player 0 impressiveness >= 1500 and EpicWondersBuilt == 0
+            if (get player 0 impressiveness >= 1500 or 1 == 1) and EpicWondersBuilt == 0
                 EpicWondersBuilt = 1
                 if Difficulty >= 4
                     run background script LC8_HurricaneRessourceManager
@@ -2909,15 +2909,15 @@ disable AIHurricane hurt by fire
 begin loop
     
     while Counter < 100 and not {AIHurricane} viewed
-        add resource ORE number from 40 to 50 to AIHurricane
-        add resource WOOD number from 90 to 100 to AIHurricane
+        add resource ORE number from 50 to 60 to AIHurricane
+        add resource WOOD number from 100 to 110 to AIHurricane
         
         wait number from 2 to 6 seconds
         
         Counter++
     end while
     
-    until Counter == 120
+    until Counter == 100
 end loop
 
 wait until HEALTH of AIHurricane >= 1.0
@@ -2933,10 +2933,13 @@ begin loop
         Angle = ANGLE of AIHurricane
         Pos = marker at {AIHurricane}
         delete AIHurricane
-        AIHurricane = create with angle Angle and scale 0 WONDER EPIC_WONDER_NUMBER_HURRICANE at {Pos}
+        AIHurricane = create WONDER EPIC_WONDER_NUMBER_HURRICANE at {Pos}
+        ANGLE of AIHurricane = Angle
         PLAYER of AIHurricane = 1
         attach AIHurricane to JapaneseTown1
         BUILT of AIHurricane = 0.75
+        disable AIHurricane hurt by fire
+        wait until HEALTH of AIHurricane == 1.0
     end if
 end loop
 
@@ -2967,17 +2970,17 @@ end loop
 disable AIEarthquake hurt by fire
 
 begin loop
-    
+
     while Counter < 100 and not {AIEarthquake} viewed
-        add resource ORE number from 40 to 50 to AIEarthquake
-        add resource WOOD number from 90 to 100 to AIEarthquake
+        add resource ORE number from 50 to 60 to AIEarthquake
+        add resource WOOD number from 100 to 110 to AIEarthquake
         
         wait number from 2 to 6 seconds
         
         Counter++
     end while
-    
-    until Counter == 120
+
+    until Counter == 100
 end loop
 
 wait until HEALTH of AIEarthquake >= 1.0
@@ -2993,10 +2996,13 @@ begin loop
         Angle = ANGLE of AIEarthquake
         Pos = marker at {AIEarthquake}
         delete AIEarthquake
-        AIEarthquake = create with angle Angle and scale 0 WONDER EPIC_WONDER_NUMBER_EARTHQUAKE at {Pos}
+        AIEarthquake = create WONDER EPIC_WONDER_NUMBER_EARTHQUAKE at {Pos}
+        ANGLE of AIEarthquake = Angle
         PLAYER of AIEarthquake = 1
         attach AIEarthquake to JapaneseCapital
         BUILT of AIEarthquake = 0.75
+        disable AIEarthquake hurt by fire
+        wait until HEALTH of AIEarthquake == 1.0
     end if
 end loop
 
