@@ -55,6 +55,7 @@ begin script Land4Marauders
 	Influence = 0
 	CurrFood = 0
 	TempSize = 0
+	FoodToolTip = 0
 
 start
 	
@@ -89,7 +90,8 @@ start
 
 		//Marauder Check
 		while Marauders exists and MaraudersNear == 0
-			if DayChanged >= 3 and Moved == 0 //get MarauderTimer time remaining == 0
+			if (DayChanged >= 3 or CurrFood > 5000) and Moved == 0 //get MarauderTimer time remaining == 0
+				wait 10 seconds
 				clear Marauders action queue
 				add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {FoodDropPos} + {10,10} to Marauders action queue
 				Moved = 1
@@ -111,6 +113,7 @@ start
  
 			if FoodDrop not exists
 				FoodDrop = create STORE FOOD at {FoodDropPos}
+				enable villagers ignore FoodDrop resource
 			end if
 			CurrFood = get resource RESOURCE_TYPE_FOOD in FoodDrop
 			if CurrFood > 5000 and FoodAdded < 1
@@ -130,6 +133,12 @@ start
 				GB_DialogueIsRunning = 0
 				//set MarauderTimer time to 5 seconds
 				FoodAdded++
+			elsif FoodDrop exists
+				if hand position near {FoodDrop} radius 15 and FoodToolTip not exists and CurrFood < 5000
+					FoodToolTip = create tooltip on FoodDrop with text "HELP_TEXT_BANTER_SET_06_TEXT_04"
+				elsif FoodToolTip exists
+					delete FoodToolTip
+				end if
 			end if	
 		end while
 
@@ -142,7 +151,7 @@ start
 			wait 2.5 seconds
 			set player 0 objective TRIBUTE_OBJECTIVE_LAND_7 status to TRIBUTE_OBJECTIVE_STATE_COMPLETE_HIDDEN
 		
-		elsif {Marauders} near {FoodDropPos} radius 30
+		else
 		
 			TempSize = get number of villagers in platoon Marauders
 			wait until GB_DialogueIsRunning == 0
