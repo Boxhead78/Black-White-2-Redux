@@ -1836,31 +1836,10 @@ start
     set LC8_SiegeCatapult[6] focus to {PlayerTown}
     add action SIEGEWEAPON_AGENDA_ACTION_DEFEND_POSITION using {StaticSiegePos[6]} to siege weapon LC8_SiegeCatapult[6] action queue
 
-    run background script LC8_Platoon18Actions
-    run background script LC8_Platoon19Actions
-    run background script LC8_Platoon20Actions
-    run background script LC8_Platoon21Actions
-    run background script LC8_Platoon22Actions
-    run background script LC8_Platoon23Actions
-    run background script LC8_Platoon24Actions
-    run background script LC8_Platoon32Actions
-    run background script LC8_Platoon33Actions
-    run background script LC8_Platoon34Actions
-    run background script LC8_Platoon35Actions
-    run background script LC8_Platoon36Actions
-    run background script LC8_Platoon37Actions
-    run background script LC8_Platoon38Actions
+    ///** Portal Platoons use old code **///
     run background script LC8_Platoon39Actions
     run background script LC8_Platoon40Actions
     run background script LC8_Platoon41Actions
-    run background script LC8_SiegeCatapult7Actions
-    run background script LC8_SiegeCatapult8Actions
-    run background script LC8_SiegeCatapult15Actions
-    run background script LC8_SiegeCatapult16Actions
-    run background script LC8_SiegeCatapult17Actions
-    run background script LC8_SiegeCatapult18Actions
-    run background script LC8_SiegeCatapult19Actions
-    run background script LC8_SiegeCatapult20Actions
 
     if HardMode == 1
         run background script LC8_Platoon43Actions
@@ -2020,6 +1999,7 @@ start
                 enable platoon LC8_Platoon[36] respond to town JapaneseCapital attack
                 run background script PT_CreateBasicJapanesePlatoonRanged(LC8_Platoon[36],1)
                 wait until not LC8_Platoon[36] recruiting
+                run background script LC8_ArmyBehaivours(LC8_Platoon[36],Ranged,Conqueror,0,0,0,0,0)
 
             elsif LC8_Platoon[37] not exists and LC8_Platoon[36] exists and {LC8_Platoon[36]} near {JapaneseCapital} radius 550 and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get AttackNearestTownTimer time remaining <= 0 and AttackingPlatoons == 1
                 LC8_Platoon[37] = recruit ARMY_UNIT_TYPE_MELEE_4 town JapaneseCapital platoon of size 80 * RecruitSizeModifier
@@ -2027,14 +2007,17 @@ start
                 enable platoon LC8_Platoon[37] respond to town JapaneseCapital attack
                 run background script PT_CreateBasicJapanesePlatoon(LC8_Platoon[37],1)
                 wait until not LC8_Platoon[37] recruiting
+                run background script LC8_ArmyBehaivours(LC8_Platoon[37],Melee,Conqueror,0,0,0,0,0)
 
             elsif LC8_SiegeCatapult[19] not exists and LC8_Platoon[36] exists and {LC8_Platoon[36]} near {JapaneseCapital} radius 550 and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get AttackNearestTownTimer time remaining <= 0 and AttackingPlatoons == 1
                 LC8_SiegeCatapult[19] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_4 town JapaneseCapital siege weapon
                 LC8_RecruitTimer1 = create timer for 200 * RecruitModifier seconds
+                run background script LC8_MoveCatapultThenAttack(LC8_SiegeCatapult[19],Conqueror,0,0,0)
 
             elsif LC8_SiegeCatapult[20] not exists and LC8_Platoon[36] exists and {LC8_Platoon[36]} near {JapaneseCapital} radius 550 and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get AttackNearestTownTimer time remaining <= 0 and AttackingPlatoons == 1
                 LC8_SiegeCatapult[20] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_4 town JapaneseCapital siege weapon
                 LC8_RecruitTimer1 = create timer for 200 * RecruitModifier seconds
+                run background script LC8_MoveCatapultThenAttack(LC8_SiegeCatapult[20],Conqueror,0,0,0)
 
             //Attack PlayerTown
             elsif LC8_Platoon[32] not exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get LC8_RecruitTimer1 time remaining <= 0 and LC8_LargeSiegeIsRunning == 0 and (LC8_LargeSiegeLaunchAttack == 1 or HardMode == 1)
@@ -2043,6 +2026,7 @@ start
                 enable platoon LC8_Platoon[32] respond to town JapaneseCapital attack
                 run background script PT_CreateBasicJapanesePlatoon(LC8_Platoon[32],1)
                 wait until not LC8_Platoon[32] recruiting
+                run background script LC8_ArmyBehaivours(LC8_Platoon[32],Melee,Attacker,0,marker at {AttackPos[2]},marker at {AttackPos[3]},0,0)
 
             elsif LC8_Platoon[33] not exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get LC8_RecruitTimer1 time remaining <= 0 and LC8_LargeSiegeIsRunning == 0 and (LC8_LargeSiegeLaunchAttack == 1 or HardMode == 1)
                 LC8_Platoon[33] = recruit ARMY_UNIT_TYPE_RANGED_4 town JapaneseCapital platoon of size 60 * RecruitSizeModifier
@@ -2050,14 +2034,17 @@ start
                 enable platoon LC8_Platoon[33] respond to town JapaneseCapital attack
                 run background script PT_CreateBasicJapanesePlatoon(LC8_Platoon[33],1)
                 wait until not LC8_Platoon[33] recruiting
+                run background script LC8_ArmyBehaivours(LC8_Platoon[33],Ranged,Attacker,0,marker at {AttackPos[2]} + {20,0,20},marker at {AttackPos[3]} + {20,0,20},0,0)
 
             elsif LC8_SiegeCatapult[15] not exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get LC8_RecruitTimer1 time remaining <= 0 and LC8_LargeSiegeIsRunning == 0 and (LC8_LargeSiegeLaunchAttack == 1 or HardMode == 1)
                 LC8_SiegeCatapult[15] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_4 town JapaneseCapital siege weapon
                 LC8_RecruitTimer1 = create timer for 100 * RecruitModifier seconds
+                run background script LC8_MoveCatapultThenAttack(LC8_SiegeCatapult[15],0,marker at {SiegeRoute2[0]},marker at {SiegeRoute2[1]},marker at {SiegeRoute2[2]})
 
             elsif LC8_SiegeCatapult[16] not exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get LC8_RecruitTimer1 time remaining <= 0 and LC8_LargeSiegeIsRunning == 0 and (LC8_LargeSiegeLaunchAttack == 1 or HardMode == 1)
                 LC8_SiegeCatapult[16] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_4 town JapaneseCapital siege weapon
                 LC8_RecruitTimer1 = create timer for 100 * RecruitModifier seconds
+                run background script LC8_MoveCatapultThenAttack(LC8_SiegeCatapult[16],0,marker at {SiegeRoute2[0]} + {-10,0,10},marker at {SiegeRoute2[1]} + {-20,0,10},marker at {SiegeRoute2[2]} + {-30,0,10})
 
             //JapaneseTown1
             elsif LC8_Platoon[5] not exists and PLAYER of JapaneseTown1 == 1 and not town JapaneseTown1 is under takeover from player 0 and get LC8_RecruitTimer2 time remaining <= 0
@@ -2123,6 +2110,7 @@ start
                 enable platoon LC8_Platoon[38] respond to town JapaneseTown1 attack
                 run background script PT_CreateBasicJapanesePlatoon(LC8_Platoon[38],1)
                 wait until not LC8_Platoon[38] recruiting
+                run background script LC8_ArmyBehaivours(LC8_Platoon[38],Melee,Conqueror,0,0,0,0,0)
 
             //Attack PlayerTown //Merge with Creature
             elsif LC8_Platoon[34] not exists and PLAYER of JapaneseTown1 == 1 and not town JapaneseTown1 is under takeover from player 0 and get LC8_RecruitTimer2 time remaining <= 0 and LC8_LargeSiegeIsRunning == 0 and PLAYER of JapaneseTown2 != 1
@@ -2131,6 +2119,7 @@ start
                 enable platoon LC8_Platoon[34] respond to town JapaneseTown1 attack
                 run background script PT_CreateHeavyJapanesePlatoon(LC8_Platoon[34],1)
                 wait until not LC8_Platoon[34] recruiting
+                run background script LC8_ArmyBehaivours(LC8_Platoon[34],Melee,Attacker,0,marker at {AttackPos[0]},marker at {AttackPos[1]},0,0)
 
             elsif LC8_Platoon[35] not exists and PLAYER of JapaneseTown1 == 1 and not town JapaneseTown1 is under takeover from player 0 and get LC8_RecruitTimer2 time remaining <= 0 and LC8_LargeSiegeIsRunning == 0 and PLAYER of JapaneseTown2 != 1
                 LC8_Platoon[35] = recruit ARMY_UNIT_TYPE_RANGED_4 town JapaneseTown1 platoon of size 40 * RecruitSizeModifier
@@ -2138,14 +2127,17 @@ start
                 enable platoon LC8_Platoon[35] respond to town JapaneseTown1 attack
                 run background script PT_CreateArtyJapanesePlatoonRanged(LC8_Platoon[35],1)
                 wait until not LC8_Platoon[35] recruiting
+                run background script LC8_ArmyBehaivours(LC8_Platoon[35],Ranged,Attacker,0,marker at {AttackPos[0]} + {20,0,20},marker at {AttackPos[1]} + {20,0,20},0,0)
 
             elsif LC8_SiegeCatapult[17] not exists and PLAYER of JapaneseTown1 == 1 and not town JapaneseTown1 is under takeover from player 0 and get LC8_RecruitTimer2 time remaining <= 0 and LC8_LargeSiegeIsRunning == 0 and PLAYER of JapaneseTown2 != 1
                 LC8_SiegeCatapult[17] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_4 town JapaneseTown1 siege weapon
                 LC8_RecruitTimer2 = create timer for 100 * RecruitModifier seconds
+                run background script LC8_MoveCatapultThenAttack(LC8_SiegeCatapult[17],0,marker at {SiegeRoute3[0]},marker at {SiegeRoute3[1]},marker at {SiegeRoute3[2]})
 
             elsif LC8_SiegeCatapult[18] not exists and PLAYER of JapaneseTown1 == 1 and not town JapaneseTown1 is under takeover from player 0 and get LC8_RecruitTimer2 time remaining <= 0 and LC8_LargeSiegeIsRunning == 0 and PLAYER of JapaneseTown2 != 1
                 LC8_SiegeCatapult[18] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_4 town JapaneseTown1 siege weapon
                 LC8_RecruitTimer2 = create timer for 100 * RecruitModifier seconds
+                run background script LC8_MoveCatapultThenAttack(LC8_SiegeCatapult[18],0,marker at {SiegeRoute5[0]},marker at {SiegeRoute5[1]},marker at {SiegeRoute5[2]})
 
             //JapaneseTown2
             elsif LC8_Platoon[8] not exists and PLAYER of JapaneseTown2 == 1 and not town JapaneseTown2 is under takeover from player 0 and get LC8_RecruitTimer3 time remaining <= 0
@@ -2211,6 +2203,7 @@ start
                 run background script PT_CreateChargerJapanesePlatoon(LC8_Platoon[22],1)
                 enable platoon LC8_Platoon[22] respond to town JapaneseTown2 attack
                 wait until not LC8_Platoon[22] recruiting
+                run background script LC8_ArmyBehaivours(LC8_Platoon[22],Melee,Escort,LC8_SiegeCatapult[7],marker at {AttackPos[0]},marker at {AttackPos[1]},0,0)
 
             elsif LC8_Platoon[23] not exists and PLAYER of JapaneseTown2 == 1 and not town JapaneseTown2 is under takeover from player 0 and get LC8_RecruitTimer3 time remaining <= 0 and LC8_LargeSiegeIsRunning == 0
                 LC8_Platoon[23] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown2 platoon of size 25 * RecruitSizeModifier
@@ -2218,6 +2211,7 @@ start
                 run background script PT_CreateChargerJapanesePlatoon(LC8_Platoon[23],1)
                 enable platoon LC8_Platoon[23] respond to town JapaneseTown2 attack
                 wait until not LC8_Platoon[23] recruiting
+                run background script LC8_ArmyBehaivours(LC8_Platoon[23],Melee,Escort,LC8_SiegeCatapult[8],marker at {AttackPos[0]} + {-30,0,10},marker at {AttackPos[1]} + {-30,0,10},0,0)
 
             elsif LC8_Platoon[24] not exists and PLAYER of JapaneseTown2 == 1 and not town JapaneseTown2 is under takeover from player 0 and get LC8_RecruitTimer3 time remaining <= 0 and LC8_LargeSiegeIsRunning == 0
                 LC8_Platoon[24] = recruit ARMY_UNIT_TYPE_RANGED_4 town JapaneseTown2 platoon of size 30 * RecruitSizeModifier
@@ -2225,14 +2219,17 @@ start
                 run background script PT_CreateBasicJapanesePlatoonRanged(LC8_Platoon[24],1)
                 enable platoon LC8_Platoon[24] respond to town JapaneseTown2 attack
                 wait until not LC8_Platoon[24] recruiting
+                run background script LC8_ArmyBehaivours(LC8_Platoon[24],Ranged,Attacker,0,marker at {AttackPos[0]} + {20,0,-15},marker at {AttackPos[1]} + {20,0,-15},0,0)
 
             elsif LC8_SiegeCatapult[7] not exists and PLAYER of JapaneseTown2 == 1 and not town JapaneseTown2 is under takeover from player 0 and get LC8_RecruitTimer3 time remaining <= 0 and LC8_LargeSiegeIsRunning == 0
                 LC8_SiegeCatapult[7] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseTown2 siege weapon
                 LC8_RecruitTimer3 = create timer for 100 * RecruitModifier seconds
+                run background script LC8_MoveCatapultThenAttack(LC8_SiegeCatapult[7],0,marker at {SiegeRoute1[0]},marker at {SiegeRoute1[1]},marker at {SiegeRoute1[2]})
 
             elsif LC8_SiegeCatapult[8] not exists and PLAYER of JapaneseTown2 == 1 and not town JapaneseTown2 is under takeover from player 0 and get LC8_RecruitTimer3 time remaining <= 0 and LC8_LargeSiegeIsRunning == 0
                 LC8_SiegeCatapult[8] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseTown2 siege weapon
                 LC8_RecruitTimer3 = create timer for 100 * RecruitModifier seconds
+                run background script LC8_MoveCatapultThenAttack(LC8_SiegeCatapult[8],0,marker at {SiegeRoute1[1]} + {-10,0,10},marker at {SiegeRoute1[1]} + {-20,0,10},marker at {SiegeRoute1[1]} + {-30,0,10})
 
             end if
         //end if
@@ -2507,12 +2504,14 @@ start
             //enable platoon LC8_Platoon[18] respond to town MinorTown3 attack
             run background script PT_CreateHeavyJapanesePlatoon(LC8_Platoon[18],1)
             wait until not LC8_Platoon[18] recruiting
-            
+            run background script LC8_StaticPlatoonsActions(marker at {MinorTown3} + {-20,-20},Melee,LC8_Platoon[18])
+
             LC8_Platoon[19] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown2 platoon of size number from 15 to 15 * RecruitSizeModifier
             enable platoon LC8_Platoon[19] respond to town JapaneseTown2 attack
             //enable platoon LC8_Platoon[19] respond to town MinorTown3 attack
             run background script PT_CreateHeavyJapanesePlatoon(LC8_Platoon[19],1)
             wait until not LC8_Platoon[19] recruiting
+            run background script LC8_StaticPlatoonsActions(marker at {MinorTown3} + {20,20},Melee,LC8_Platoon[19])
             
             DefendRecruitTimer3 = create timer for 240 * RecruitModifier seconds
         end if
@@ -2523,12 +2522,14 @@ start
             //enable platoon LC8_Platoon[20] respond to town MinorTown2 attack
             run background script PT_CreateHeavyJapanesePlatoon(LC8_Platoon[20],1)
             wait until not LC8_Platoon[20] recruiting
+            run background script LC8_StaticPlatoonsActions(marker at {MinorTown2} + {-20,-20},Melee,LC8_Platoon[20])
             
             LC8_Platoon[21] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown2 platoon of size number from 15 to 15 * RecruitSizeModifier
             enable platoon LC8_Platoon[21] respond to town JapaneseTown2 attack
             //enable platoon LC8_Platoon[21] respond to town MinorTown2 attack
             run background script PT_CreateHeavyJapanesePlatoon(LC8_Platoon[21],1)
             wait until not LC8_Platoon[21] recruiting
+            run background script LC8_StaticPlatoonsActions(marker at {MinorTown2} + {20,20},Melee,LC8_Platoon[21])
             
             DefendRecruitTimer3 = create timer for 240 * RecruitModifier seconds
         end if
@@ -3056,20 +3057,6 @@ begin script LC8_LargeSiegePlatoonManager
 
 start
 
-run background script LC8_Platoon25Actions
-run background script LC8_Platoon26Actions
-run background script LC8_Platoon27Actions
-run background script LC8_Platoon28Actions
-run background script LC8_Platoon29Actions
-run background script LC8_Platoon30Actions
-run background script LC8_Platoon31Actions
-run background script LC8_SiegeCatapult9Actions
-run background script LC8_SiegeCatapult10Actions
-run background script LC8_SiegeCatapult11Actions
-run background script LC8_SiegeCatapult12Actions
-run background script LC8_SiegeCatapult13Actions
-run background script LC8_SiegeCatapult14Actions
-
 begin loop
 
     if PLAYER of JapaneseTown2 == 1
@@ -3078,6 +3065,7 @@ begin loop
             LC8_Platoon[25] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown2 platoon of size 30 * RecruitSizeModifier
             run background script PT_CreateBasicJapanesePlatoon(LC8_Platoon[25],1)
             wait until not LC8_Platoon[25] recruiting
+            run background script LC8_ArmyBehaivours(LC8_Platoon[25],Melee,Attacker,0,marker at {LS_PrePos[0]},marker at {LS_AttackPos[0]},0,0)
         end if
 
         if LC8_Platoon[26] not exists and PLAYER of JapaneseTown2 == 1 and LC8_LargeSiegeIsRunning == 1
@@ -3085,6 +3073,7 @@ begin loop
             LC8_Platoon[26] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown2 platoon of size 30 * RecruitSizeModifier
             run background script PT_CreateBasicJapanesePlatoon(LC8_Platoon[26],1)
             wait until not LC8_Platoon[26] recruiting
+            run background script LC8_ArmyBehaivours(LC8_Platoon[26],Melee,Attacker,0,marker at {LS_PrePos[1]},marker at {LS_AttackPos[1]},0,0)
         end if
 
         if LC8_Platoon[27] not exists and PLAYER of JapaneseTown2 == 1 and LC8_LargeSiegeIsRunning == 1 and Difficulty >= 3
@@ -3092,6 +3081,7 @@ begin loop
             LC8_Platoon[27] = recruit ARMY_UNIT_TYPE_RANGED_4 town JapaneseTown2 platoon of size 30 * RecruitSizeModifier
             run background script PT_CreateArtyJapanesePlatoonRanged(LC8_Platoon[27],1)
             wait until not LC8_Platoon[27] recruiting
+            run background script LC8_ArmyBehaivours(LC8_Platoon[27],Ranged,Attacker,0,marker at {LS_PrePos[2]},marker at {LS_AttackPos[2]},0,0)
         end if
 
         if LC8_Platoon[28] not exists and PLAYER of JapaneseTown2 == 1 and LC8_LargeSiegeIsRunning == 1 and Difficulty >= 4
@@ -3099,24 +3089,28 @@ begin loop
             LC8_Platoon[28] = recruit ARMY_UNIT_TYPE_RANGED_4 town JapaneseTown2 platoon of size 30 * RecruitSizeModifier
             run background script PT_CreateArtyJapanesePlatoonRanged(LC8_Platoon[28],1)
             wait until not LC8_Platoon[28] recruiting
+            run background script LC8_ArmyBehaivours(LC8_Platoon[28],Ranged,Attacker,0,marker at {LS_PrePos[3]},marker at {LS_AttackPos[3]},0,0)
         end if
 
         if LC8_SiegeCatapult[9] not exists and PLAYER of JapaneseTown2 == 1 and LC8_LargeSiegeIsRunning == 1
             wait number from 1 to 3 seconds
             LC8_SiegeCatapult[9] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseTown2 siege weapon
             disable siege weapon LC8_SiegeCatapult[9] auto attack
+            run background script LC8_MoveCatapultThenAttack(LC8_SiegeCatapult[9],0,marker at {LS_SiegeRoute1[0]},marker at {LS_SiegeRoute1[1]},marker at {LS_SiegeRoute1[2]})
         end if
 
         if LC8_SiegeCatapult[10] not exists and PLAYER of JapaneseTown2 == 1 and LC8_LargeSiegeIsRunning == 1 and Difficulty >= 3
             wait number from 1 to 3 seconds
             LC8_SiegeCatapult[10] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseTown2 siege weapon
             disable siege weapon LC8_SiegeCatapult[10] auto attack
+            run background script LC8_MoveCatapultThenAttack(LC8_SiegeCatapult[10],0,marker at {LS_SiegeRoute2[0]},marker at {LS_SiegeRoute2[1]},marker at {LS_SiegeRoute2[2]})
         end if
 
         if LC8_SiegeCatapult[11] not exists and PLAYER of JapaneseTown2 == 1 and LC8_LargeSiegeIsRunning == 1 and Difficulty >= 4
             wait number from 1 to 3 seconds
             LC8_SiegeCatapult[11] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseTown2 siege weapon
             disable siege weapon LC8_SiegeCatapult[11] auto attack
+            run background script LC8_MoveCatapultThenAttack(LC8_SiegeCatapult[11],0,marker at {LS_SiegeRoute3[0]},marker at {LS_SiegeRoute3[1]},marker at {LS_SiegeRoute3[2]})
         end if
     end if
 
@@ -3126,16 +3120,19 @@ begin loop
             LC8_Platoon[29] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown1 platoon of size 30 * RecruitSizeModifier
             run background script PT_CreateChargerJapanesePlatoon(LC8_Platoon[29],1)
             wait until not LC8_Platoon[29] recruiting
+            run background script LC8_ArmyBehaivours(LC8_Platoon[29],Melee,Attacker,0,marker at {LS_PrePos[4]},marker at {LS_AttackPos[4]},0,0)
         end if
         if LC8_SiegeCatapult[12] not exists and PLAYER of JapaneseTown1 == 1 and LC8_LargeSiegeIsRunning == 1 and Difficulty >= 3
             wait number from 1 to 3 seconds
             LC8_SiegeCatapult[12] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseTown1 siege weapon
             disable siege weapon LC8_SiegeCatapult[12] auto attack
+            run background script LC8_MoveCatapultThenAttack(LC8_SiegeCatapult[12],0,marker at {LS_SiegeRoute4[0]},marker at {LS_SiegeRoute4[1]},marker at {LS_SiegeRoute4[2]})
         end if
         if LC8_SiegeCatapult[13] not exists and PLAYER of JapaneseTown1 == 1 and LC8_LargeSiegeIsRunning == 1 and Difficulty >= 4
             wait number from 1 to 3 seconds
             LC8_SiegeCatapult[13] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseTown1 siege weapon
             disable siege weapon LC8_SiegeCatapult[13] auto attack
+            run background script LC8_MoveCatapultThenAttack(LC8_SiegeCatapult[13],0,marker at {LS_SiegeRoute5[0]},marker at {LS_SiegeRoute5[1]},marker at {LS_SiegeRoute5[2]})
         end if
     end if
 
@@ -3145,16 +3142,19 @@ begin loop
             LC8_Platoon[30] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 30 * RecruitSizeModifier
             run background script PT_CreateChargerJapanesePlatoon(LC8_Platoon[30],1)
             wait until not LC8_Platoon[30] recruiting
+            run background script LC8_ArmyBehaivours(LC8_Platoon[30],Melee,Attacker,0,marker at {LS_PrePos[5]},marker at {LS_AttackPos[5]},0,0)
         end if
         if LC8_Platoon[31] not exists and PLAYER of JapaneseCapital == 1 and LC8_LargeSiegeIsRunning == 1 and Difficulty >= 3
             wait number from 2 to 4 seconds
             LC8_Platoon[31] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 30 * RecruitSizeModifier
             wait until not LC8_Platoon[31] recruiting
+            run background script LC8_ArmyBehaivours(LC8_Platoon[31],Melee,Attacker,0,marker at {LS_PrePos[6]},marker at {LS_AttackPos[6]},0,0)
         end if
         if LC8_SiegeCatapult[14] not exists and PLAYER of JapaneseCapital == 1 and LC8_LargeSiegeIsRunning == 1
             wait number from 1 to 3 seconds
             LC8_SiegeCatapult[14] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseCapital siege weapon
             disable siege weapon LC8_SiegeCatapult[14] auto attack
+            run background script LC8_MoveCatapultThenAttack(LC8_SiegeCatapult[14],0,marker at {LS_SiegeRoute6[0]},marker at {LS_SiegeRoute6[1]},marker at {LS_SiegeRoute6[2]})
         end if
     end if
 
