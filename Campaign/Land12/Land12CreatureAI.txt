@@ -36,37 +36,53 @@ start
     CreatureGathererPos[2] = marker at {1026.14,26.25,923.02}//AztecTown2
 
     PlayerCreatureType = persistent data "PLAYER_CREATURE_TYPE"
-    wait until LC12_EnemyCreature == 1
+    if PlayerCreatureType == variable CREATURE_TYPE_LION
+        LC12_EnemyCreature = create CREATURE CREATURE_TYPE_LION at {0,0,0}
+
+    elsif PlayerCreatureType == variable CREATURE_TYPE_APE 
+        LC12_EnemyCreature = create CREATURE CREATURE_TYPE_APE at {0,0,0}
+
+    elsif PlayerCreatureType == variable CREATURE_TYPE_GORILLA
+        LC12_EnemyCreature = create CREATURE CREATURE_TYPE_GORILLA at {0,0,0}
+
+    elsif PlayerCreatureType == variable CREATURE_TYPE_WOLF
+        LC12_EnemyCreature = create CREATURE CREATURE_TYPE_WOLF at {0,0,0}
+
+    elsif PlayerCreatureType == variable CREATURE_TYPE_COW
+        LC12_EnemyCreature = create CREATURE CREATURE_TYPE_COW at {0,0,0}
+
+    else// PlayerCreature == variable CREATURE_TYPE_TIGER
+        LC12_EnemyCreature = create CREATURE CREATURE_TYPE_TIGER at {0,0,0}
+        
+    end if
+
+    begin loop
+        wait 2.5 seconds
+
+        set LC12_EnemyCreature position to {0,0,0}
+        set creature LC12_EnemyCreature CREATURE_SIZE 1.0
+        CREATURE_STRENGTH of LC12_EnemyCreature = 1.0
+        CREATURE_ALIGNMENT of LC12_EnemyCreature = -0.85
+        CREATURE_FATNESS of LC12_EnemyCreature = 0.5
+        HEALTH of LC12_EnemyCreature = 1.0
+
+        until LC12_EnemyCreature == 1
+    end loop
     
     CinemaIsRunning = 1
     begin cinema
         store camera details
         set fade red 0 green 0 blue 0 time 4
         wait 4.1 seconds
-        if PlayerCreatureType == variable CREATURE_TYPE_LION
-            LC12_EnemyCreature = create CREATURE CREATURE_TYPE_LION at {CreaturePos}
 
-        elsif PlayerCreatureType == variable CREATURE_TYPE_APE 
-            LC12_EnemyCreature = create CREATURE CREATURE_TYPE_APE at {CreaturePos}
-
-        elsif PlayerCreatureType == variable CREATURE_TYPE_GORILLA
-            LC12_EnemyCreature = create CREATURE CREATURE_TYPE_GORILLA at {CreaturePos}
-
-        elsif PlayerCreatureType == variable CREATURE_TYPE_WOLF
-            LC12_EnemyCreature = create CREATURE CREATURE_TYPE_WOLF at {CreaturePos}
-
-        elsif PlayerCreatureType == variable CREATURE_TYPE_COW
-            LC12_EnemyCreature = create CREATURE CREATURE_TYPE_COW at {CreaturePos}
-
-        else// PlayerCreature == variable CREATURE_TYPE_TIGER
-            LC12_EnemyCreature = create CREATURE CREATURE_TYPE_TIGER at {CreaturePos}
-            
-        end if
-
-        ALIGNMENT of LC12_EnemyCreature = -1.0
-        set creature LC12_EnemyCreature happiness to maximum
-
+        set LC12_EnemyCreature position to {CreaturePos}
         snap creature LC12_EnemyCreature focus to {AztecCapital}
+
+        set creature LC12_EnemyCreature CREATURE_SIZE 1.0
+        CREATURE_STRENGTH of LC12_EnemyCreature = 1.0
+        CREATURE_ALIGNMENT of LC12_EnemyCreature = -0.85
+        CREATURE_FATNESS of LC12_EnemyCreature = 0.5
+        HEALTH of LC12_EnemyCreature = 1.0
 
         set camera position to {927.76,94.68,665.49}
         set camera focus to {AztecCapital} + {0,15,0}
@@ -102,11 +118,6 @@ start
     set research ARTEFACT_CREATURE_ROLE_BUILDER_3 available to RESEARCH_AVAILABILITY_RESEARCHED player 1
     set research ARTEFACT_CREATURE_ROLE_GATHERER_3 available to RESEARCH_AVAILABILITY_RESEARCHED player 1
     set research ARTEFACT_CREATURE_ROLE_SOLDIER_3 available to RESEARCH_AVAILABILITY_RESEARCHED player 1
-
-    set creature LC12_EnemyCreature CREATURE_SCRIPT_TRANSITIONAL_ATTRIBUTE_TYPE_SIZE 1.0
-    STRENGTH of LC12_EnemyCreature = 1.0
-    ALIGNMENT of LC12_EnemyCreature = -0.85
-    FATNESS of LC12_EnemyCreature = 0.5
 
     disable LC12_EnemyCreature action availability LA_EAT with LO_PLAYER_VILLAGER
     disable LC12_EnemyCreature action availability LA_EAT with LO_PLAYER_PLATOON
