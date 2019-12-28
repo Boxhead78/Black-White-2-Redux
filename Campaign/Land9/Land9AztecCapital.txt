@@ -3078,6 +3078,7 @@ start
         if PLAYER of AztecCapital == 1 and HEALTH of AIEarthquake >= 1.0 and get EarthquakeTimer time remaining <= 0 and CinemaIsRunning == 0 and not town PlayerTown is under takeover from player 1 and PLAYER of PlayerTown == 0
             if TownsConverted >= 3 or TownsAggressiveConverted >= 1
 
+                WT_SkyTransitionAllowed = 0
                 enable predefined sky "EARTHQUAKE" time 9
 
                 EarthquakeFired = 1
@@ -3098,7 +3099,6 @@ start
                 play sound "SCRIPT2_EEPIC_SYNTH3" at {AIEarthquake}
                 invoke AIEarthquake EPIC_WONDER_STAGE_2
                 wait 1 second
-                enable predefined sky "EARTHQUAKE" time 5
                 wait 2 seconds
                 invoke AIEarthquake EPIC_WONDER_STAGE_3
                 invoke AIEarthquake EPIC_WONDER_STAGE_4
@@ -3309,6 +3309,7 @@ start
     wait until EpicRunning == 0
     EpicRunning = 1
 
+    WT_SkyTransitionAllowed = 0
     enable predefined sky "VOLCANO" time 15
     Weather[0] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {MinorTown3} + {0, 0, 0}
     set cloud for Weather[0] above {MinorTown3} + {0, 30, 0}
@@ -3419,6 +3420,7 @@ start
 
     //if PLAYER of AztecTown1 == 1 and HEALTH of WonderTemple == 1.0
 
+        WT_SkyTransitionAllowed = 0
         enable predefined sky "VOLCANO" time 15
         Weather[0] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {PlayerTown} + {0, 0, 0}
         set cloud for Weather[0] above {PlayerTown} + {0, 30, 0}
@@ -3501,6 +3503,8 @@ start
         delete Weather[5]
 
         enable predefined sky "DEFAULT" time 10
+        wait 10 seconds
+        WT_SkyTransitionAllowed = 1
     //end if
 
 end script LC9_FireRain
