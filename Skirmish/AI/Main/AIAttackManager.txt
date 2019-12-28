@@ -639,7 +639,7 @@ begin loop
                         add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_MOVING_OBJECT using EnemyCreature to Platoon action queue
                     end if
                     PlatoonSize = get number of villagers in platoon Platoon
-                    until PlatoonSize == 0 or SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of EnemyCreature == 0.00 or not Platoon can navigate to {EnemyCreature} or EnemyCreatureDist > AttackRadius
+                    until PlatoonSize == 0 or SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of EnemyCreature == 0.00 or not Platoon can navigate to {EnemyCreature} or EnemyCreatureDist > AttackRadius * 1.25
                 end loop
                 clear Platoon action queue
             end if
@@ -649,7 +649,7 @@ begin loop
             if EnemyPlatoon exists and Platoon can navigate to {EnemyPlatoon}
                 clear Platoon action queue
                 begin loop
-                    EnemyPlatoon = get platoon of player Counter nearest {Platoon} radius AttackRadius
+                    EnemyPlatoon = get platoon of player Counter nearest {Platoon} radius AttackRadius * 1.25
                     if get size of Platoon action queue < 1
                         add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_PLATOON using EnemyPlatoon to Platoon action queue
                     end if
@@ -663,7 +663,7 @@ begin loop
                 clear Platoon action queue
                 VariableA = 0
                 begin loop
-                    EnemyCatapult = get siege weapon of player Counter nearest {Platoon} radius AttackRadius
+                    EnemyCatapult = get siege weapon of player Counter nearest {Platoon} radius AttackRadius * 1.25
                     if get size of Platoon action queue < 1
                         add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using EnemyCatapult to Platoon action queue
                     end if
@@ -693,7 +693,7 @@ begin loop
                         end if
                     end if
                     PlatoonSize = get number of villagers in platoon Platoon
-                    until PlatoonSize == 0 or SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of EnemyCreature == 0.00 or not Platoon can navigate to {EnemyCreature} or EnemyCreatureDist > AttackRadius
+                    until PlatoonSize == 0 or SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of EnemyCreature == 0.00 or not Platoon can navigate to {EnemyCreature} or EnemyCreatureDist > AttackRadius * 1.25
                 end loop
                 clear Platoon action queue
             end if
@@ -703,7 +703,7 @@ begin loop
             if EnemyPlatoon exists and Platoon can navigate to {EnemyPlatoon}
                 clear Platoon action queue
                 begin loop
-                    EnemyPlatoon = get platoon of player Counter nearest {Platoon} radius AttackRadius
+                    EnemyPlatoon = get platoon of player Counter nearest {Platoon} radius AttackRadius * 1.25
                     if get size of Platoon action queue < 1
                         if SK_AIDifficulty[PlayerID] < 66
                             add action PLATOON_AGENDA_ACTION_RANGED_ATTACK using EnemyPlatoon to Platoon action queue
@@ -721,7 +721,7 @@ begin loop
                 clear Platoon action queue
                 VariableA = 0
                 begin loop
-                    EnemyCatapult = get siege weapon of player Counter nearest {Platoon} radius AttackRadius
+                    EnemyCatapult = get siege weapon of player Counter nearest {Platoon} radius AttackRadius * 1.25
                     if get size of Platoon action queue < 1
                         if SK_AIDifficulty[PlayerID] < 66
                             add action PLATOON_AGENDA_ACTION_RANGED_ATTACK using EnemyCatapult to Platoon action queue
@@ -2128,8 +2128,8 @@ begin loop
     end if
 
     if PlayerID != Counter
-        EnemyPlatoon = get platoon of player Counter nearest {SiegeWeapon} radius AttackRadius
-        /*if EnemyPlatoon exists and get distance from {EnemyPlatoon} to {SiegeWeapon} < 50 and SiegeWeapon can navigate to {EnemyPlatoon} and PLAYER of EnemyPlatoon != PlayerID
+        /*EnemyPlatoon = get platoon of player Counter nearest {SiegeWeapon} radius AttackRadius
+        if EnemyPlatoon exists and get distance from {EnemyPlatoon} to {SiegeWeapon} < 50 and SiegeWeapon can navigate to {EnemyPlatoon} and PLAYER of EnemyPlatoon != PlayerID
             clear siege weapon SiegeWeapon action queue
             enable siege weapon SiegeWeapon auto attack
             begin loop
