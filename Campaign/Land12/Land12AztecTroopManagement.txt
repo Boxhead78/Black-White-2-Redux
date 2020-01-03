@@ -22,7 +22,8 @@ define Conqueror                        = 2 //Nearest Settlement Attacker
 define Patrol                            = 3
 define Special                            = 4
 
-define script LC12_StaticPlatoonsActions(Pos,Type,Platoon)
+define script LC12_StaticPlatoonsController
+define script LC12_StaticPlatoonsActions(Pos,Type,Platoon,OriginTown)
 define script LC12_ArmyBehaivours(Platoon,Type,Task,DefendObject,AttackingPoint,AttackingPointFallBack,PatrolRoute,Town)
 define script LC12_MoveCatapultThenAttack(Catapult,Type,Waypoint1,Waypoint2,Waypoint3)
 define script Waypoints
@@ -31,6 +32,7 @@ global LC12_Defender[LC12_NUM_OF_DEFENDERS]
 global LC12_Platoon[LC12_NUM_OF_PLATOONS]
 global LC12_SiegeCatapult[LC12_NUM_OF_SIEGE_CATAPULTS]
 global LC12_WallArcher[LC12_NUM_OF_WALL_ARCHERS]
+global LC12_StaticPlatoonCounter = 0
 
 global PlatoonPos[30]
 global StaticSiegePos[6]
@@ -44,6 +46,10 @@ global SiegeRoute5[3]
 global SiegeWeaponPos[1]
 global Script1WP[2]
 global PlayerWallPos = 0
+global StaticPlatoonGoodPos[4]
+global StaticPlatoonGoodWaypoint = 0
+global StaticPlatoonEvilPos[3]
+global StaticPlatoonEvilWaypoint = 0
 
 global PatrolRouteA[4]
 global WaypointsA = 0
@@ -150,12 +156,42 @@ start
     add {PatrolRouteB[1]} to waypoint list WaypointsB
     add {PatrolRouteB[2]} to waypoint list WaypointsB
 
+    //Waypoints nearby own towns
+    StaticPlatoonGoodPos[0] = marker at {602.76,133.35,1211.84}
+    StaticPlatoonGoodPos[1] = marker at {1193.46,20.22,1163.83}
+    StaticPlatoonGoodPos[2] = marker at {1801.36,23.30,1078.58}
+    StaticPlatoonGoodPos[3] = marker at {797.43,43.54,1368.34}
+    //Waypoints nearby neutral towns which is likely to be taken by player
+    StaticPlatoonEvilPos[0] = marker at {605.56,128.26,1133.87}
+    StaticPlatoonEvilPos[1] = marker at {1983.57,14.50,1168.45}
+    StaticPlatoonEvilPos[2] = marker at {1352.28,46.64,1757.00}
+
 end script Waypoints
 
 //-----------------------------------------------------------------------------
 
-begin script LC12_StaticPlatoonsActions(Pos,Type,Platoon)
+begin script LC12_StaticPlatoonsController
 
+start
+
+begin loop
+    wait 15 seconds
+    if get StaticPlatoonsActionTimer time remaining <= 0
+        StaticPlatoonGoodWaypoint = StaticPlatoonGoodPos[number from 0 to 3]
+        StaticPlatoonEvilWaypoint = StaticPlatoonEvilPos[number from 0 to 2]
+        wait 60 seconds //Give platoons 60 seconds to react to new orders
+        StaticPlatoonsActionTimer = create timer for number from 300 to 1200 seconds
+    end if
+end loop
+
+end script LC12_StaticPlatoonsController
+
+begin script LC12_StaticPlatoonsActions(Pos,Type,Platoon,OriginTown)
+
+    ThisStaticPlatoonActionTimer = create timer for 0 seconds
+    ThisStaticPlatoonActive = 0
+    ThisStaticPlatoonWaypoint = 0
+    ThisOriginTownEmergency = 0
     PlayerCreature = 0
     PlayerPlatoon1 = 0
     oCreature = get player 0 creature
@@ -168,6 +204,8 @@ begin script LC12_StaticPlatoonsActions(Pos,Type,Platoon)
     PlayerSettlement = 0
 
 start
+
+LC12_StaticPlatoonCounter++
 
 begin loop
 
@@ -256,12 +294,79 @@ begin loop
         end if
     end if
 
-    if get size of Platoon action queue < 1 and {Platoon} not near {Pos} radius 15
+    if get ThisStaticPlatoonActionTimer time remaining <= 0
+        ThisStaticPlatoonActionTimer = create timer for number from 25 to 35 seconds
+        //If emergency in OriginTown go defend it
+        PlayerPlatoon1 = get platoon of player 0 nearest {OriginTown} radius 500
+        Catapult = get siege weapon of player 0 nearest {OriginTown} radius 500
+        PlayerCreature = get distance from {OriginTown} to {oCreature}
+        if PlayerPlatoon1 exists or Catapult exists or (PlayerCreature <= 500 and HEALTH of oCreature > 0.00)
+            ThisOriginTownEmergency = 1
+        else
+            ThisOriginTownEmergency = 0
+        end if
+        if ThisOriginTownEmergency == 1
+            if ThisStaticPlatoonActive == 1
+                StaticPlatoonsActive--
+                ThisStaticPlatoonActive = 0
+            end if
+        end if
+    end if
+
+    if get StaticPlatoonsActionTimer time remaining <= 0
+        //say "DEBUG: StaticPlatoonsActive = $d" with number StaticPlatoonsActive
+        if get ThisStaticPlatoonActionTimer time remaining <= 5
+            wait 5 seconds
+            if number from 1 to 4 == 4
+                ThisStaticPlatoonActionTimer = create timer for 60 seconds
+                if ThisStaticPlatoonActive == 0 and StaticPlatoonsActive <= LC12_StaticPlatoonCounter * 0.2 //20% of all static platoons max
+                    StaticPlatoonsActive++
+                    ThisStaticPlatoonActive = 1
+                end if
+            else
+                ThisStaticPlatoonActionTimer = create timer for 60 seconds
+                if ThisStaticPlatoonActive == 1
+                    StaticPlatoonsActive--
+                    ThisStaticPlatoonActive = 0
+                end if
+            end if
+        end if
+    end if
+
+    if ThisStaticPlatoonActive == 0 and get size of Platoon action queue < 1 and {Platoon} not near {Pos} radius 25
         add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {Pos} to Platoon action queue
+    elsif ThisStaticPlatoonActive == 1 and get size of Platoon action queue < 1 and ({Platoon} not near {ThisStaticPlatoonWaypoint} radius 25 or ThisStaticPlatoonWaypoint == 0)
+        if PlayerAlignmentFinal < 0.0
+            a = 0
+            begin loop
+                ThisStaticPlatoonWaypoint = marker at {StaticPlatoonEvilWaypoint} + {number from -75 to 75,number from -75 to 75}
+                a++
+                until (Platoon can navigate to {ThisStaticPlatoonWaypoint} and not get platoon of player 1 nearest {ThisStaticPlatoonWaypoint} radius 25 exists) or a > 50
+            end loop
+            if a > 50
+                wait 15 seconds
+            end if
+            a = 0
+            add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {ThisStaticPlatoonWaypoint} to Platoon action queue
+        elsif PlayerAlignmentFinal >= 0.0
+            a = 0
+            begin loop
+                ThisStaticPlatoonWaypoint = marker at {StaticPlatoonEvilWaypoint} + {number from -75 to 75,number from -75 to 75}
+                a++
+                until (Platoon can navigate to {ThisStaticPlatoonWaypoint} and not get platoon of player 1 nearest {ThisStaticPlatoonWaypoint} radius 25 exists) or a > 50
+            end loop
+            if a > 50
+                wait 15 seconds
+            end if
+            a = 0
+            add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {ThisStaticPlatoonWaypoint} to Platoon action queue
+        end if
     end if
 
     until Platoon not exists
 end loop
+
+LC12_StaticPlatoonCounter--
 
 end script LC12_StaticPlatoonsActions
 
