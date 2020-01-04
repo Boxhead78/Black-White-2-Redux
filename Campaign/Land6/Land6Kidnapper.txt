@@ -44,7 +44,7 @@ start
 
     Creche = get building CRECHE in PlayerTown min built 1.0
     CrechePos = marker at {Creche}
-    KidnapperHousePos = marker at {950.77,41.99,1018.56}
+    KidnapperHousePos = marker at {1041.29,26.27,1052.57}
     RelPos = marker at get world position from Creche to {9,0,9}
 
     wait until not {KidnapperHousePos} viewed
@@ -55,17 +55,12 @@ start
         Scroll_Kidnapper = create highlight SILVER name "HELP_TEXT_MULTIPLAYER_SETUP_FIELDS_ALLOWED_01" remind "HELP_TEXT_INFLUENCE_ADVICE_06" at {CrechePos} + {0.00,5.00,0.00}
     end if
 
-    //TODO: ADD OBJECTIVE
-
     LC6_KidnapperWoman = create VILLAGER VILLAGER_INFO_GREEK_HOUSEWIFE_FEMALE at {RelPos}
-    KidnapperHouse = create HOUSE ABODE_INFO_NORSE_HOUSE_B at {KidnapperHousePos}
+    KidnapperHouse = get HOUSE at {KidnapperHousePos} radius 15 //Mine
 
     enable LC6_KidnapperWoman indestructible
     disable LC6_KidnapperWoman pickup
     disable LC6_KidnapperWoman moveable
-    enable KidnapperHouse indestructible
-    disable KidnapperHouse pickup
-    disable KidnapperHouse moveable
     attach LC6_KidnapperWoman to PlayerTown
 
     run background script LC6_KidnapperBeforeIntro
@@ -153,6 +148,7 @@ begin loop
     if get distance from camera position to {KidnapperHouse} > 100 and get KidnapperTimer time remaining <= 0
         LC6_Child = create CHILD GREEK_TRADER at {CrechePos} + {number from -10 to 10,0,number from -10 to 10}
         LC6_Napper = create VILLAGER VILLAGER_INFO_NORSE_FORESTER_MALE at {KidnapperHouse}
+        attach music "piper_tune" to LC6_Napper
         attach LC6_Child to PlayerTown
         enable LC6_Napper indestructible
         detach reaction LC6_Child
@@ -209,6 +205,7 @@ begin loop
         KidnapperIsInHouse = 0
         LC6_Child = create CHILD GREEK_TRADER at {CrechePos} + {number from -10 to 10,0,number from -10 to 10}
         LC6_Napper = create VILLAGER VILLAGER_INFO_NORSE_FORESTER_MALE at {KidnapperHouse}
+        attach music "piper_tune" to LC6_Napper
         detach reaction LC6_Child
         detach reaction LC6_Napper
         attach LC6_Child to PlayerTown
@@ -273,7 +270,7 @@ begin loop
             start music "lc6_kidnapper_house_4" loop 1
         end if
     elsif get distance from camera position to {LC6_Napper} < 30 and get KidnapperTimer time remaining <= 0
-        KidnapperTimer = create timer for 10 seconds
+        KidnapperTimer = create timer for 30 seconds
         Number = number from 1 to 5
         if Number == 1
             start music "lc6_kidnapper_kill_me_1" loop 1
