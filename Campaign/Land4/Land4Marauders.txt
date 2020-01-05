@@ -91,6 +91,9 @@ start
 		//Marauder Check
 		while Marauders exists and MaraudersNear == 0
 			if (DayChanged >= 3 or CurrFood > 5000) and Moved == 0 //get MarauderTimer time remaining == 0
+				if FoodToolTip exists
+					delete FoodToolTip
+				end if
 				wait 10 seconds
 				clear Marauders action queue
 				add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {FoodDropPos} + {10,10} to Marauders action queue
@@ -134,9 +137,9 @@ start
 				//set MarauderTimer time to 5 seconds
 				FoodAdded++
 			elsif FoodDrop exists
-				if hand position near {FoodDrop} radius 15 and FoodToolTip not exists and CurrFood < 5000
+				if hand position near {FoodDrop} radius 20 and not FoodToolTip exists and CurrFood < 5000
 					FoodToolTip = create tooltip on FoodDrop with text "HELP_TEXT_BANTER_SET_06_TEXT_04"
-				elsif FoodToolTip exists
+				elsif (not hand position near {FoodDrop} radius 25 or CurrFood >= 5000) and FoodToolTip exists
 					delete FoodToolTip
 				end if
 			end if	
