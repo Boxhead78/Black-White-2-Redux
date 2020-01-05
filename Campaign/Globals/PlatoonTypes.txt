@@ -107,6 +107,21 @@ begin loop
         run background script PT_RecruitPlatoon(PlayerID,myArmory,myFoundation,2)
     end if
     */
+
+    //Check town centres
+    myArmory = 0
+    FlagObject = 0
+    myArmory = get random abode of type ABODE_NUMBER_TOWN_CENTRE in town myTown[Counter]
+    FlagObject = get FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myArmory} radius 10
+    if HEALTH of myArmory >= 1.0 and FlagObject not exists and PLAYER of myArmory == PlayerID
+        myFoundation = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myArmory}
+        SCALE of myFoundation = 0.01
+        disable myFoundation pickup
+        disable myFoundation moveable
+        enable myFoundation indestructible
+        run background script PT_RecruitPlatoon(PlayerID,myArmory,myFoundation,3)
+    end if
+
     Counter++
 end loop
 
@@ -207,6 +222,20 @@ while HEALTH of Armory >= 1.0 and Armory exists and PLAYER of Armory == PlayerID
             end if
             run background script PT_RecruitCheck(myPlatoon)
         end if
+    elsif Type == 3 //Town centre
+        myPlatoon = get platoon of player 0 nearest {Armory} + {number from -25 to 25,number from -25 to 25} radius 50 excluding scripted
+        if myPlatoon exists and get number of villagers in platoon myPlatoon == 100 and get platoon myPlatoon experience == persistent data "MELEE_EXPERIENCE"
+            if platoon myPlatoon melee
+                run background script PT_CreateBasicGreekPlatoon(myPlatoon,PlayerID)
+            end if
+        end if
+
+        myPlatoon = get platoon of player 0 nearest {Armory} + {number from -25 to 25,number from -25 to 25} radius 50 excluding scripted
+        if myPlatoon exists and get number of villagers in platoon myPlatoon == 100 and get platoon myPlatoon experience == persistent data "RANGED_EXPERIENCE"
+            if platoon myPlatoon ranged
+                run background script PT_CreateBasicGreekPlatoonRanged(myPlatoon,PlayerID)
+            end if
+        end if 
     end if
 end while
 
