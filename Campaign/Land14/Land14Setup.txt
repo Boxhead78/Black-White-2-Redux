@@ -7,6 +7,7 @@
 define script Land14Script
 define script Land14ScriptManager
 define script LC14_SetupCreature
+define script LC14_DisableSkyTransition
 define script LC14_SetupGodReq
 
 run script Land14Script
@@ -198,6 +199,7 @@ start
     run background script PlayerMana(1)
     run background script UA_GraveyardCheck(0)
     run background script PT_FlagCheck(0)
+    run background script LC14_DisableSkyTransition
     run background script LC14_Outro
     run background script LC14_SetupGodReq
     run background script LC14_SetupCreature
@@ -323,6 +325,21 @@ start
     release MyCreature
 
 end script LC14_SetupCreature
+
+
+begin script LC14_DisableSkyTransition
+
+start
+
+begin loop
+    if WT_SkyTransitionAllowed == 1
+        WT_SkyTransitionAllowed = 0
+    end if
+    until LandWon == 1
+end loop
+WT_SkyTransitionAllowed = 1
+
+end script LC14_DisableSkyTransition
 
 
 begin script LC14_SetupGodReq
