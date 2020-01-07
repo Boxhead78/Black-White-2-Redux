@@ -18,6 +18,7 @@ define script WeatherSkyTransitions
 define script WeatherVisuals
 
 global WT_SkyTransitionAllowed = 1
+global WT_SkyTransitionGlobalInfluence = 0
 
 run script Weather
 
@@ -626,14 +627,17 @@ begin loop
         PlayerID = 0
     end if
     if WT_SkyTransitionAllowed == 1 //Skytransition is disabled during epic or scripted predefined sky
-        if get player 0 influence at camera position == 0 and get player 1 influence at camera position == 0 and get player 2 influence at camera position == 0 and get player 3 influence at camera position == 0 and SkySettingsActive != 0
+        if WT_SkyTransitionGlobalInfluence == 0 and get player 0 influence at camera position == 0 and get player 1 influence at camera position == 0 and get player 2 influence at camera position == 0 and get player 3 influence at camera position == 0 and SkySettingsActive != 0
             //say "DEFAULT"
             SkySettingsActive = 0
             enable predefined sky "DEFAULT" time 0.75
             wait 0.75 seconds
         else
+            if WT_SkyTransitionGlobalInfluence == 1 //If player has won only use him as a base
+                PlayerID = 0
+            end if
             PInfluence = get player PlayerID influence at camera position
-            if PInfluence > 0
+            if PInfluence > 0 or WT_SkyTransitionGlobalInfluence == 1
                 PAlignment = get player PlayerID alignment
                 if get game time <= 20 and get game time >= 6
                     if PAlignment >= 0.9 and PAlignment <= 1.0
