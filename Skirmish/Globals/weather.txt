@@ -43,571 +43,569 @@ run background script WeatherSkyTransitions
 run background script WeatherVisuals
 
 //No weather in land 9
-if get land number == 9
-    stop script "Weather"
+if get land number != 9
+    begin loop
+        wait number from minWeatherDelay to maxWeatherDelay seconds
+
+        if get player 0 alignment > -0.5 and get player 0 alignment < 0.5 //Neutral weather
+            Counter = 0
+            WeatherMode = number from 1 to 6
+            if WeatherMode == 1 //Rainy weather
+                WeatherAmount = number from 1 to 50
+                WeatherGroup = number from 3 to 11
+                while Counter < WeatherAmount and Counter < 255
+                    WeatherNumber = number from 1 to 3
+                    if WeatherNumber == 1
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    elsif WeatherNumber == 2
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    else
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    end if
+                    set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
+                    set Weather[Counter] properties rainfall 1 snowfall 0 overcast 0.9
+                    SCALE of Weather[Counter] = 5
+                    enable Weather[Counter] affected by wind
+                    Counter++
+                    while Counter < WeatherGroup and Counter < 255
+                        WeatherNumber = number from 1 to 3
+                        if WeatherNumber == 1
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        elsif WeatherNumber == 2
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        else
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        end if
+                        set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
+                        set Weather[Counter] properties rainfall 1 snowfall 0 overcast 0.9
+                        SCALE of Weather[Counter] = 5
+                        enable Weather[Counter] affected by wind
+                        Counter++
+                    end while
+                end while
+
+            elsif WeatherMode == 2 //Light rainy weather
+                WeatherAmount = number from 1 to 33
+                WeatherGroup = number from 3 to 8
+                while Counter < WeatherAmount and Counter < 255
+                    WeatherNumber = number from 1 to 3
+                    if WeatherNumber == 1
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    elsif WeatherNumber == 2
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    else
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    end if
+                    set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
+                    set Weather[Counter] properties rainfall 0.5 snowfall 0 overcast 0.9
+                    SCALE of Weather[Counter] = 5
+                    enable Weather[Counter] affected by wind
+                    Counter++
+                    while Counter < WeatherGroup and Counter < 255
+                        WeatherNumber = number from 1 to 3
+                        if WeatherNumber == 1
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        elsif WeatherNumber == 2
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        else
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        end if
+                        set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
+                        set Weather[Counter] properties rainfall 0.5 snowfall 0 overcast 0.9
+                        SCALE of Weather[Counter] = 5
+                        enable Weather[Counter] affected by wind
+                        Counter++
+                    end while
+                end while
+
+            elsif WeatherMode == 3 //Cloudy
+                WeatherAmount = number from 1 to 45
+                WeatherGroup = number from 3 to 11
+                while Counter < WeatherAmount and Counter < 255
+                    WeatherNumber = number from 1 to 3
+                    if WeatherNumber == 1
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    elsif WeatherNumber == 2
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    else
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    end if
+                    set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
+                    set Weather[Counter] properties rainfall 0 snowfall 0 overcast 0.9
+                    SCALE of Weather[Counter] = 5
+                    enable Weather[Counter] affected by wind
+                    Counter++
+                    while Counter < WeatherGroup and Counter < 255
+                        WeatherNumber = number from 1 to 3
+                        if WeatherNumber == 1
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        elsif WeatherNumber == 2
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        else
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        end if
+                        set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
+                        set Weather[Counter] properties rainfall 0 snowfall 0 overcast 0.9
+                        SCALE of Weather[Counter] = 5
+                        enable Weather[Counter] affected by wind
+                        Counter++
+                    end while
+                end while
+
+            elsif WeatherMode == 4 //Light clouds
+                WeatherAmount = number from 1 to 15
+                WeatherGroup = number from 2 to 5
+                while Counter < WeatherAmount and Counter < 255
+                    WeatherNumber = number from 1 to 3
+                    if WeatherNumber == 1
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    elsif WeatherNumber == 2
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    else
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    end if
+                    set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
+                    set Weather[Counter] properties rainfall 0 snowfall 0 overcast 0.4
+                    SCALE of Weather[Counter] = 5
+                    enable Weather[Counter] affected by wind
+                    Counter++
+                    while Counter < WeatherGroup and Counter < 255
+                        WeatherNumber = number from 1 to 3
+                        if WeatherNumber == 1
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        elsif WeatherNumber == 2
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        else
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        end if
+                        set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
+                        set Weather[Counter] properties rainfall 0 snowfall 0 overcast 0.4
+                        SCALE of Weather[Counter] = 5
+                        enable Weather[Counter] affected by wind
+                        Counter++
+                    end while
+                end while
+            end if
+        elsif get player 0 alignment >= 0.5 //Good weather
+            Counter = 0
+            WeatherMode = number from 1 to 6
+            if WeatherMode == 1 //Rainy weather
+                WeatherAmount = number from 1 to 33
+                WeatherGroup = number from 3 to 7
+                while Counter < WeatherAmount and Counter < 255
+                    WeatherNumber = number from 1 to 3
+                    if WeatherNumber == 1
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    elsif WeatherNumber == 2
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    else
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    end if
+                    set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
+                    set Weather[Counter] properties rainfall 1 snowfall 0 overcast 0.9
+                    SCALE of Weather[Counter] = 5
+                    enable Weather[Counter] affected by wind
+                    Counter++
+                    while Counter < WeatherGroup and Counter < 255
+                        WeatherNumber = number from 1 to 3
+                        if WeatherNumber == 1
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        elsif WeatherNumber == 2
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        else
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        end if
+                        set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
+                        set Weather[Counter] properties rainfall 1 snowfall 0 overcast 0.9
+                        SCALE of Weather[Counter] = 5
+                        enable Weather[Counter] affected by wind
+                        Counter++
+                    end while
+                end while
+
+            elsif WeatherMode == 2 //Light rainy weather
+                WeatherAmount = number from 1 to 15
+                WeatherGroup = number from 3 to 5
+                while Counter < WeatherAmount and Counter < 255
+                    WeatherNumber = number from 1 to 3
+                    if WeatherNumber == 1
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    elsif WeatherNumber == 2
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    else
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    end if
+                    set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
+                    set Weather[Counter] properties rainfall 0.5 snowfall 0 overcast 0.9
+                    SCALE of Weather[Counter] = 5
+                    enable Weather[Counter] affected by wind
+                    Counter++
+                    while Counter < WeatherGroup and Counter < 255
+                        WeatherNumber = number from 1 to 3
+                        if WeatherNumber == 1
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        elsif WeatherNumber == 2
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        else
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        end if
+                        set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
+                        set Weather[Counter] properties rainfall 0.5 snowfall 0 overcast 0.9
+                        SCALE of Weather[Counter] = 5
+                        enable Weather[Counter] affected by wind
+                        Counter++
+                    end while
+                end while
+
+            elsif WeatherMode == 3 //Cloudy
+                WeatherAmount = number from 1 to 25
+                WeatherGroup = number from 3 to 7
+                while Counter < WeatherAmount and Counter < 255
+                    WeatherNumber = number from 1 to 3
+                    if WeatherNumber == 1
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    elsif WeatherNumber == 2
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    else
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    end if
+                    set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
+                    set Weather[Counter] properties rainfall 0 snowfall 0 overcast 0.9
+                    SCALE of Weather[Counter] = 5
+                    enable Weather[Counter] affected by wind
+                    Counter++
+                    while Counter < WeatherGroup and Counter < 255
+                        WeatherNumber = number from 1 to 3
+                        if WeatherNumber == 1
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        elsif WeatherNumber == 2
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        else
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        end if
+                        set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
+                        set Weather[Counter] properties rainfall 0 snowfall 0 overcast 0.9
+                        SCALE of Weather[Counter] = 5
+                        enable Weather[Counter] affected by wind
+                        Counter++
+                    end while
+                end while
+
+            elsif WeatherMode == 4 //Light clouds
+                WeatherAmount = number from 1 to 7
+                WeatherGroup = number from 2 to 3
+                while Counter < WeatherAmount and Counter < 255
+                    WeatherNumber = number from 1 to 3
+                    if WeatherNumber == 1
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    elsif WeatherNumber == 2
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    else
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    end if
+                    set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
+                    set Weather[Counter] properties rainfall 0 snowfall 0 overcast 0.4
+                    SCALE of Weather[Counter] = 5
+                    enable Weather[Counter] affected by wind
+                    Counter++
+                    while Counter < WeatherGroup and Counter < 255
+                        WeatherNumber = number from 1 to 3
+                        if WeatherNumber == 1
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        elsif WeatherNumber == 2
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        else
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        end if
+                        set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
+                        set Weather[Counter] properties rainfall 0 snowfall 0 overcast 0.4
+                        SCALE of Weather[Counter] = 5
+                        enable Weather[Counter] affected by wind
+                        Counter++
+                    end while
+                end while
+
+            elsif WeatherMode == 5 //Rainy and lightning
+                WeatherAmount = number from 1 to 27
+                WeatherGroup = number from 2 to 7
+                while Counter < WeatherAmount and Counter < 255
+                    WeatherNumber = number from 1 to 3
+                    if WeatherNumber == 1
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    elsif WeatherNumber == 2
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    else
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    end if
+                    set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
+                    set Weather[Counter] properties rainfall 1 snowfall 0 overcast 0.9
+                    SCALE of Weather[Counter] = 5
+                    enable Weather[Counter] affected by wind
+                    Counter++
+                    while Counter < WeatherGroup and Counter < 255
+                        WeatherNumber = number from 1 to 3
+                        if WeatherNumber == 1
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        elsif WeatherNumber == 2
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        else
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        end if
+                        set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
+                        set Weather[Counter] properties rainfall 1 snowfall 0 overcast 0.9
+                        SCALE of Weather[Counter] = 5
+                        enable Weather[Counter] affected by wind
+                        Counter++
+                    end while
+                end while
+            end if
+
+        elsif get player 0 alignment <= -0.5 //Evil weather
+            Counter = 0
+            WeatherMode = number from 1 to 7
+            if WeatherMode == 1 //Rainy weather
+                WeatherAmount = number from 1 to 33
+                WeatherGroup = number from 3 to 7
+                while Counter < WeatherAmount and Counter < 255
+                    WeatherNumber = number from 1 to 3
+                    if WeatherNumber == 1
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    elsif WeatherNumber == 2
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    else
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    end if
+                    set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
+                    set Weather[Counter] properties rainfall 1 snowfall 0 overcast 0.9
+                    SCALE of Weather[Counter] = 5
+                    enable Weather[Counter] affected by wind
+                    Counter++
+                    while Counter < WeatherGroup and Counter < 255
+                        WeatherNumber = number from 1 to 3
+                        if WeatherNumber == 1
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        elsif WeatherNumber == 2
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        else
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        end if
+                        set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
+                        set Weather[Counter] properties rainfall 1 snowfall 0 overcast 0.9
+                        SCALE of Weather[Counter] = 5
+                        enable Weather[Counter] affected by wind
+                        Counter++
+                    end while
+                end while
+
+            elsif WeatherMode == 2 //Light rainy weather
+                WeatherAmount = number from 1 to 15
+                WeatherGroup = number from 3 to 5
+                while Counter < WeatherAmount and Counter < 255
+                    WeatherNumber = number from 1 to 3
+                    if WeatherNumber == 1
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    elsif WeatherNumber == 2
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    else
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    end if
+                    set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
+                    set Weather[Counter] properties rainfall 0.5 snowfall 0 overcast 0.9
+                    SCALE of Weather[Counter] = 5
+                    enable Weather[Counter] affected by wind
+                    Counter++
+                    while Counter < WeatherGroup and Counter < 255
+                        WeatherNumber = number from 1 to 3
+                        if WeatherNumber == 1
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        elsif WeatherNumber == 2
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        else
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        end if
+                        set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
+                        set Weather[Counter] properties rainfall 0.5 snowfall 0 overcast 0.9
+                        SCALE of Weather[Counter] = 5
+                        enable Weather[Counter] affected by wind
+                        Counter++
+                    end while
+                end while
+
+            elsif WeatherMode == 3 //Cloudy
+                WeatherAmount = number from 1 to 25
+                WeatherGroup = number from 3 to 7
+                while Counter < WeatherAmount and Counter < 255
+                    WeatherNumber = number from 1 to 3
+                    if WeatherNumber == 1
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    elsif WeatherNumber == 2
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    else
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    end if
+                    set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
+                    set Weather[Counter] properties rainfall 0 snowfall 0 overcast 0.9
+                    SCALE of Weather[Counter] = 5
+                    enable Weather[Counter] affected by wind
+                    Counter++
+                    while Counter < WeatherGroup and Counter < 255
+                        WeatherNumber = number from 1 to 3
+                        if WeatherNumber == 1
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        elsif WeatherNumber == 2
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        else
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        end if
+                        set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
+                        set Weather[Counter] properties rainfall 0 snowfall 0 overcast 0.9
+                        SCALE of Weather[Counter] = 5
+                        enable Weather[Counter] affected by wind
+                        Counter++
+                    end while
+                end while
+
+            elsif WeatherMode == 4 //Light clouds
+                WeatherAmount = number from 1 to 7
+                WeatherGroup = number from 2 to 3
+                while Counter < WeatherAmount and Counter < 255
+                    WeatherNumber = number from 1 to 3
+                    if WeatherNumber == 1
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    elsif WeatherNumber == 2
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    else
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    end if
+                    set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
+                    set Weather[Counter] properties rainfall 0 snowfall 0 overcast 0.4
+                    SCALE of Weather[Counter] = 5
+                    enable Weather[Counter] affected by wind
+                    Counter++
+                    while Counter < WeatherGroup and Counter < 255
+                        WeatherNumber = number from 1 to 3
+                        if WeatherNumber == 1
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        elsif WeatherNumber == 2
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        else
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        end if
+                        set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
+                        set Weather[Counter] properties rainfall 0 snowfall 0 overcast 0.4
+                        SCALE of Weather[Counter] = 5
+                        enable Weather[Counter] affected by wind
+                        Counter++
+                    end while
+                end while
+
+            elsif WeatherMode == 5 //Rainy and lightning
+                WeatherAmount = number from 1 to 37
+                WeatherGroup = number from 4 to 7
+                while Counter < WeatherAmount and Counter < 255
+                    WeatherNumber = number from 1 to 3
+                    if WeatherNumber == 1
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    elsif WeatherNumber == 2
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    else
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    end if
+                    set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
+                    set Weather[Counter] properties rainfall 1 snowfall 0 overcast 0.9
+                    SCALE of Weather[Counter] = 5
+                    enable Weather[Counter] affected by wind
+                    Counter++
+                    while Counter < WeatherGroup and Counter < 255
+                        WeatherNumber = number from 1 to 3
+                        if WeatherNumber == 1
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        elsif WeatherNumber == 2
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        else
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        end if
+                        set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
+                        set Weather[Counter] properties rainfall 1 snowfall 0 overcast 0.9
+                        SCALE of Weather[Counter] = 5
+                        enable Weather[Counter] affected by wind
+                        Counter++
+                    end while
+                end while
+
+            elsif WeatherMode == 6 //Rainy and more lightning
+                WeatherAmount = number from 1 to 37
+                WeatherGroup = number from 4 to 7
+                while Counter < WeatherAmount and Counter < 255
+                    WeatherNumber = number from 1 to 3
+                    if WeatherNumber == 1
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    elsif WeatherNumber == 2
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    else
+                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
+                    end if
+                    set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
+                    set Weather[Counter] properties rainfall 1 snowfall 0 overcast 0.9
+                    SCALE of Weather[Counter] = 5
+                    enable Weather[Counter] affected by wind
+                    Counter++
+                    while Counter < WeatherGroup and Counter < 255
+                        WeatherNumber = number from 1 to 3
+                        if WeatherNumber == 1
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        elsif WeatherNumber == 2
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        else
+                            Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
+                        end if
+                        set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
+                        set Weather[Counter] properties rainfall 1 snowfall 0 overcast 0.9
+                        SCALE of Weather[Counter] = 5
+                        enable Weather[Counter] affected by wind
+                        Counter++
+                    end while
+                end while
+            end if
+        end if
+
+        WeatherEndTimer = create timer for number from minActive to maxActive seconds
+        while get WeatherEndTimer time remaining > 0
+            wait number from minLightningDelay to maxLightningDelay seconds
+            LightningCounter = 0
+            if WeatherMode == 5
+                LightningAmount = number from 1 to 4
+                while LightningCounter <= LightningAmount
+                    Number = number from 0 to 254
+                    if Weather[Number] exists
+                        set lightning strike at {Weather[Number]} + {number from -80 to 80,0,number from -80 to 80} from Weather[Number] scale 1
+                        wait number from 2 to 6 seconds
+                        LightningCounter++
+                    end if
+                end while
+            elsif WeatherMode == 6
+                LightningAmount = number from 2 to 16
+                while LightningCounter <= LightningAmount
+                    Number = number from 0 to 254
+                    if Weather[Number] exists
+                        set lightning strike at {Weather[Number]} + {number from -80 to 80,0,number from -80 to 80} from Weather[Number] scale 1
+                        wait number from 0 to 4 seconds
+                        LightningCounter++
+                    end if
+                end while
+            end if
+        end while
+
+        Counter = 0
+        while Counter < WeatherAmount
+            if Weather[Counter] exists
+                wait until not {Weather[Counter]} viewed
+                delete Weather[Counter]
+            end if
+            Counter++
+        end while
+    end loop
 end if
-
-begin loop
-    wait number from minWeatherDelay to maxWeatherDelay seconds
-
-    if get player 0 alignment > -0.5 and get player 0 alignment < 0.5 //Neutral weather
-        Counter = 0
-        WeatherMode = number from 1 to 6
-        if WeatherMode == 1 //Rainy weather
-            WeatherAmount = number from 1 to 50
-            WeatherGroup = number from 3 to 11
-            while Counter < WeatherAmount and Counter < 255
-                WeatherNumber = number from 1 to 3
-                if WeatherNumber == 1
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                elsif WeatherNumber == 2
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                else
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                end if
-                set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
-                set Weather[Counter] properties rainfall 1 snowfall 0 overcast 0.9
-                SCALE of Weather[Counter] = 5
-                enable Weather[Counter] affected by wind
-                Counter++
-                while Counter < WeatherGroup and Counter < 255
-                    WeatherNumber = number from 1 to 3
-                    if WeatherNumber == 1
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    elsif WeatherNumber == 2
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    else
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    end if
-                    set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
-                    set Weather[Counter] properties rainfall 1 snowfall 0 overcast 0.9
-                    SCALE of Weather[Counter] = 5
-                    enable Weather[Counter] affected by wind
-                    Counter++
-                end while
-            end while
-
-        elsif WeatherMode == 2 //Light rainy weather
-            WeatherAmount = number from 1 to 33
-            WeatherGroup = number from 3 to 8
-            while Counter < WeatherAmount and Counter < 255
-                WeatherNumber = number from 1 to 3
-                if WeatherNumber == 1
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                elsif WeatherNumber == 2
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                else
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                end if
-                set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
-                set Weather[Counter] properties rainfall 0.5 snowfall 0 overcast 0.9
-                SCALE of Weather[Counter] = 5
-                enable Weather[Counter] affected by wind
-                Counter++
-                while Counter < WeatherGroup and Counter < 255
-                    WeatherNumber = number from 1 to 3
-                    if WeatherNumber == 1
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    elsif WeatherNumber == 2
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    else
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    end if
-                    set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
-                    set Weather[Counter] properties rainfall 0.5 snowfall 0 overcast 0.9
-                    SCALE of Weather[Counter] = 5
-                    enable Weather[Counter] affected by wind
-                    Counter++
-                end while
-            end while
-
-        elsif WeatherMode == 3 //Cloudy
-            WeatherAmount = number from 1 to 45
-            WeatherGroup = number from 3 to 11
-            while Counter < WeatherAmount and Counter < 255
-                WeatherNumber = number from 1 to 3
-                if WeatherNumber == 1
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                elsif WeatherNumber == 2
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                else
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                end if
-                set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
-                set Weather[Counter] properties rainfall 0 snowfall 0 overcast 0.9
-                SCALE of Weather[Counter] = 5
-                enable Weather[Counter] affected by wind
-                Counter++
-                while Counter < WeatherGroup and Counter < 255
-                    WeatherNumber = number from 1 to 3
-                    if WeatherNumber == 1
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    elsif WeatherNumber == 2
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    else
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    end if
-                    set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
-                    set Weather[Counter] properties rainfall 0 snowfall 0 overcast 0.9
-                    SCALE of Weather[Counter] = 5
-                    enable Weather[Counter] affected by wind
-                    Counter++
-                end while
-            end while
-
-        elsif WeatherMode == 4 //Light clouds
-            WeatherAmount = number from 1 to 15
-            WeatherGroup = number from 2 to 5
-            while Counter < WeatherAmount and Counter < 255
-                WeatherNumber = number from 1 to 3
-                if WeatherNumber == 1
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                elsif WeatherNumber == 2
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                else
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                end if
-                set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
-                set Weather[Counter] properties rainfall 0 snowfall 0 overcast 0.4
-                SCALE of Weather[Counter] = 5
-                enable Weather[Counter] affected by wind
-                Counter++
-                while Counter < WeatherGroup and Counter < 255
-                    WeatherNumber = number from 1 to 3
-                    if WeatherNumber == 1
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    elsif WeatherNumber == 2
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    else
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    end if
-                    set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
-                    set Weather[Counter] properties rainfall 0 snowfall 0 overcast 0.4
-                    SCALE of Weather[Counter] = 5
-                    enable Weather[Counter] affected by wind
-                    Counter++
-                end while
-            end while
-        end if
-    elsif get player 0 alignment >= 0.5 //Good weather
-        Counter = 0
-        WeatherMode = number from 1 to 6
-        if WeatherMode == 1 //Rainy weather
-            WeatherAmount = number from 1 to 33
-            WeatherGroup = number from 3 to 7
-            while Counter < WeatherAmount and Counter < 255
-                WeatherNumber = number from 1 to 3
-                if WeatherNumber == 1
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                elsif WeatherNumber == 2
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                else
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                end if
-                set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
-                set Weather[Counter] properties rainfall 1 snowfall 0 overcast 0.9
-                SCALE of Weather[Counter] = 5
-                enable Weather[Counter] affected by wind
-                Counter++
-                while Counter < WeatherGroup and Counter < 255
-                    WeatherNumber = number from 1 to 3
-                    if WeatherNumber == 1
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    elsif WeatherNumber == 2
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    else
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    end if
-                    set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
-                    set Weather[Counter] properties rainfall 1 snowfall 0 overcast 0.9
-                    SCALE of Weather[Counter] = 5
-                    enable Weather[Counter] affected by wind
-                    Counter++
-                end while
-            end while
-
-        elsif WeatherMode == 2 //Light rainy weather
-            WeatherAmount = number from 1 to 15
-            WeatherGroup = number from 3 to 5
-            while Counter < WeatherAmount and Counter < 255
-                WeatherNumber = number from 1 to 3
-                if WeatherNumber == 1
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                elsif WeatherNumber == 2
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                else
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                end if
-                set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
-                set Weather[Counter] properties rainfall 0.5 snowfall 0 overcast 0.9
-                SCALE of Weather[Counter] = 5
-                enable Weather[Counter] affected by wind
-                Counter++
-                while Counter < WeatherGroup and Counter < 255
-                    WeatherNumber = number from 1 to 3
-                    if WeatherNumber == 1
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    elsif WeatherNumber == 2
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    else
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    end if
-                    set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
-                    set Weather[Counter] properties rainfall 0.5 snowfall 0 overcast 0.9
-                    SCALE of Weather[Counter] = 5
-                    enable Weather[Counter] affected by wind
-                    Counter++
-                end while
-            end while
-
-        elsif WeatherMode == 3 //Cloudy
-            WeatherAmount = number from 1 to 25
-            WeatherGroup = number from 3 to 7
-            while Counter < WeatherAmount and Counter < 255
-                WeatherNumber = number from 1 to 3
-                if WeatherNumber == 1
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                elsif WeatherNumber == 2
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                else
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                end if
-                set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
-                set Weather[Counter] properties rainfall 0 snowfall 0 overcast 0.9
-                SCALE of Weather[Counter] = 5
-                enable Weather[Counter] affected by wind
-                Counter++
-                while Counter < WeatherGroup and Counter < 255
-                    WeatherNumber = number from 1 to 3
-                    if WeatherNumber == 1
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    elsif WeatherNumber == 2
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    else
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    end if
-                    set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
-                    set Weather[Counter] properties rainfall 0 snowfall 0 overcast 0.9
-                    SCALE of Weather[Counter] = 5
-                    enable Weather[Counter] affected by wind
-                    Counter++
-                end while
-            end while
-
-        elsif WeatherMode == 4 //Light clouds
-            WeatherAmount = number from 1 to 7
-            WeatherGroup = number from 2 to 3
-            while Counter < WeatherAmount and Counter < 255
-                WeatherNumber = number from 1 to 3
-                if WeatherNumber == 1
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                elsif WeatherNumber == 2
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                else
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                end if
-                set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
-                set Weather[Counter] properties rainfall 0 snowfall 0 overcast 0.4
-                SCALE of Weather[Counter] = 5
-                enable Weather[Counter] affected by wind
-                Counter++
-                while Counter < WeatherGroup and Counter < 255
-                    WeatherNumber = number from 1 to 3
-                    if WeatherNumber == 1
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    elsif WeatherNumber == 2
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    else
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    end if
-                    set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
-                    set Weather[Counter] properties rainfall 0 snowfall 0 overcast 0.4
-                    SCALE of Weather[Counter] = 5
-                    enable Weather[Counter] affected by wind
-                    Counter++
-                end while
-            end while
-
-        elsif WeatherMode == 5 //Rainy and lightning
-            WeatherAmount = number from 1 to 27
-            WeatherGroup = number from 2 to 7
-            while Counter < WeatherAmount and Counter < 255
-                WeatherNumber = number from 1 to 3
-                if WeatherNumber == 1
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                elsif WeatherNumber == 2
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                else
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                end if
-                set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
-                set Weather[Counter] properties rainfall 1 snowfall 0 overcast 0.9
-                SCALE of Weather[Counter] = 5
-                enable Weather[Counter] affected by wind
-                Counter++
-                while Counter < WeatherGroup and Counter < 255
-                    WeatherNumber = number from 1 to 3
-                    if WeatherNumber == 1
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    elsif WeatherNumber == 2
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    else
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    end if
-                    set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
-                    set Weather[Counter] properties rainfall 1 snowfall 0 overcast 0.9
-                    SCALE of Weather[Counter] = 5
-                    enable Weather[Counter] affected by wind
-                    Counter++
-                end while
-            end while
-        end if
-
-    elsif get player 0 alignment <= -0.5 //Evil weather
-        Counter = 0
-        WeatherMode = number from 1 to 7
-        if WeatherMode == 1 //Rainy weather
-            WeatherAmount = number from 1 to 33
-            WeatherGroup = number from 3 to 7
-            while Counter < WeatherAmount and Counter < 255
-                WeatherNumber = number from 1 to 3
-                if WeatherNumber == 1
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                elsif WeatherNumber == 2
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                else
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                end if
-                set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
-                set Weather[Counter] properties rainfall 1 snowfall 0 overcast 0.9
-                SCALE of Weather[Counter] = 5
-                enable Weather[Counter] affected by wind
-                Counter++
-                while Counter < WeatherGroup and Counter < 255
-                    WeatherNumber = number from 1 to 3
-                    if WeatherNumber == 1
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    elsif WeatherNumber == 2
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    else
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    end if
-                    set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
-                    set Weather[Counter] properties rainfall 1 snowfall 0 overcast 0.9
-                    SCALE of Weather[Counter] = 5
-                    enable Weather[Counter] affected by wind
-                    Counter++
-                end while
-            end while
-
-        elsif WeatherMode == 2 //Light rainy weather
-            WeatherAmount = number from 1 to 15
-            WeatherGroup = number from 3 to 5
-            while Counter < WeatherAmount and Counter < 255
-                WeatherNumber = number from 1 to 3
-                if WeatherNumber == 1
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                elsif WeatherNumber == 2
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                else
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                end if
-                set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
-                set Weather[Counter] properties rainfall 0.5 snowfall 0 overcast 0.9
-                SCALE of Weather[Counter] = 5
-                enable Weather[Counter] affected by wind
-                Counter++
-                while Counter < WeatherGroup and Counter < 255
-                    WeatherNumber = number from 1 to 3
-                    if WeatherNumber == 1
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    elsif WeatherNumber == 2
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    else
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    end if
-                    set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
-                    set Weather[Counter] properties rainfall 0.5 snowfall 0 overcast 0.9
-                    SCALE of Weather[Counter] = 5
-                    enable Weather[Counter] affected by wind
-                    Counter++
-                end while
-            end while
-
-        elsif WeatherMode == 3 //Cloudy
-            WeatherAmount = number from 1 to 25
-            WeatherGroup = number from 3 to 7
-            while Counter < WeatherAmount and Counter < 255
-                WeatherNumber = number from 1 to 3
-                if WeatherNumber == 1
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                elsif WeatherNumber == 2
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                else
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                end if
-                set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
-                set Weather[Counter] properties rainfall 0 snowfall 0 overcast 0.9
-                SCALE of Weather[Counter] = 5
-                enable Weather[Counter] affected by wind
-                Counter++
-                while Counter < WeatherGroup and Counter < 255
-                    WeatherNumber = number from 1 to 3
-                    if WeatherNumber == 1
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    elsif WeatherNumber == 2
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    else
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    end if
-                    set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
-                    set Weather[Counter] properties rainfall 0 snowfall 0 overcast 0.9
-                    SCALE of Weather[Counter] = 5
-                    enable Weather[Counter] affected by wind
-                    Counter++
-                end while
-            end while
-
-        elsif WeatherMode == 4 //Light clouds
-            WeatherAmount = number from 1 to 7
-            WeatherGroup = number from 2 to 3
-            while Counter < WeatherAmount and Counter < 255
-                WeatherNumber = number from 1 to 3
-                if WeatherNumber == 1
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                elsif WeatherNumber == 2
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                else
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                end if
-                set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
-                set Weather[Counter] properties rainfall 0 snowfall 0 overcast 0.4
-                SCALE of Weather[Counter] = 5
-                enable Weather[Counter] affected by wind
-                Counter++
-                while Counter < WeatherGroup and Counter < 255
-                    WeatherNumber = number from 1 to 3
-                    if WeatherNumber == 1
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    elsif WeatherNumber == 2
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    else
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    end if
-                    set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
-                    set Weather[Counter] properties rainfall 0 snowfall 0 overcast 0.4
-                    SCALE of Weather[Counter] = 5
-                    enable Weather[Counter] affected by wind
-                    Counter++
-                end while
-            end while
-
-        elsif WeatherMode == 5 //Rainy and lightning
-            WeatherAmount = number from 1 to 37
-            WeatherGroup = number from 4 to 7
-            while Counter < WeatherAmount and Counter < 255
-                WeatherNumber = number from 1 to 3
-                if WeatherNumber == 1
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                elsif WeatherNumber == 2
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                else
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                end if
-                set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
-                set Weather[Counter] properties rainfall 1 snowfall 0 overcast 0.9
-                SCALE of Weather[Counter] = 5
-                enable Weather[Counter] affected by wind
-                Counter++
-                while Counter < WeatherGroup and Counter < 255
-                    WeatherNumber = number from 1 to 3
-                    if WeatherNumber == 1
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    elsif WeatherNumber == 2
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    else
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    end if
-                    set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
-                    set Weather[Counter] properties rainfall 1 snowfall 0 overcast 0.9
-                    SCALE of Weather[Counter] = 5
-                    enable Weather[Counter] affected by wind
-                    Counter++
-                end while
-            end while
-
-        elsif WeatherMode == 6 //Rainy and more lightning
-            WeatherAmount = number from 1 to 37
-            WeatherGroup = number from 4 to 7
-            while Counter < WeatherAmount and Counter < 255
-                WeatherNumber = number from 1 to 3
-                if WeatherNumber == 1
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                elsif WeatherNumber == 2
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                else
-                    Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {0,number from 300 to 500,0} + {number from 0 to 2500,0,number from 0 to 2500}
-                end if
-                set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
-                set Weather[Counter] properties rainfall 1 snowfall 0 overcast 0.9
-                SCALE of Weather[Counter] = 5
-                enable Weather[Counter] affected by wind
-                Counter++
-                while Counter < WeatherGroup and Counter < 255
-                    WeatherNumber = number from 1 to 3
-                    if WeatherNumber == 1
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    elsif WeatherNumber == 2
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_LARGE_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    else
-                        Weather[Counter] = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_DISTANT_CLOUD at {Weather[Counter]} + {number from -100 to 100,0,number from -100 to 100}
-                    end if
-                    set cloud for Weather[Counter] above {Weather[Counter]} + {0, 30, 0}
-                    set Weather[Counter] properties rainfall 1 snowfall 0 overcast 0.9
-                    SCALE of Weather[Counter] = 5
-                    enable Weather[Counter] affected by wind
-                    Counter++
-                end while
-            end while
-        end if
-    end if
-
-    WeatherEndTimer = create timer for number from minActive to maxActive seconds
-    while get WeatherEndTimer time remaining > 0
-        wait number from minLightningDelay to maxLightningDelay seconds
-        LightningCounter = 0
-        if WeatherMode == 5
-            LightningAmount = number from 1 to 4
-            while LightningCounter <= LightningAmount
-                Number = number from 0 to 254
-                if Weather[Number] exists
-                    set lightning strike at {Weather[Number]} + {number from -80 to 80,0,number from -80 to 80} from Weather[Number] scale 1
-                    wait number from 2 to 6 seconds
-                    LightningCounter++
-                end if
-            end while
-        elsif WeatherMode == 6
-            LightningAmount = number from 2 to 16
-            while LightningCounter <= LightningAmount
-                Number = number from 0 to 254
-                if Weather[Number] exists
-                    set lightning strike at {Weather[Number]} + {number from -80 to 80,0,number from -80 to 80} from Weather[Number] scale 1
-                    wait number from 0 to 4 seconds
-                    LightningCounter++
-                end if
-            end while
-        end if
-    end while
-
-    Counter = 0
-    while Counter < WeatherAmount
-        if Weather[Counter] exists
-            wait until not {Weather[Counter]} viewed
-            delete Weather[Counter]
-        end if
-        Counter++
-    end while
-end loop
 
 end script Weather
 
