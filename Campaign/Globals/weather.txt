@@ -617,6 +617,7 @@ begin script WeatherSkyTransitions
     PlayerID = 0
     PTown = 0
     SkySettingsActive = 0
+    ChangeSkyTimer = create timer for 0 seconds
 
 start
 
@@ -628,8 +629,8 @@ begin loop
         if WT_SkyTransitionGlobalInfluence == 0 and get player 0 influence at camera position == 0 and get player 1 influence at camera position == 0 and get player 2 influence at camera position == 0 and get player 3 influence at camera position == 0 and SkySettingsActive != 0
             //say "DEFAULT"
             SkySettingsActive = 0
-            enable predefined sky "DEFAULT" time 0.75
-            wait 0.75 seconds
+            enable predefined sky "DEFAULT" time 1.25
+            wait 1.25 seconds
         else
             if WT_SkyTransitionGlobalInfluence == 1 //If player has won only use him as a base
                 PlayerID = 0
@@ -637,116 +638,184 @@ begin loop
             PInfluence = get player PlayerID influence at camera position
             if PInfluence > 0 or WT_SkyTransitionGlobalInfluence == 1
                 PAlignment = get player PlayerID alignment
-                if get game time <= 20 and get game time >= 6
+                if (get game time >= 17.5 and get game time <= 20.5) or (get game time >= 6 and get game time <= 9) //Sunrise, Sunset
                     if PAlignment >= 0.9 and PAlignment <= 1.0
-                        if SkySettingsActive != 3
-                            //say "ALIGNMENTG3"
-                            SkySettingsActive = 3
+                        if SkySettingsActive != 1
+                            //say "ALIGN-GS3"
+                            SkySettingsActive = 1
                             if get land number != 9
-                                enable predefined sky "ALIGNMENTG3" time 0.75
+                                enable predefined sky "ALIGN-GS3" time 1.25
                             else
-                                enable predefined sky "ALIGNMENTG3L9" time 0.75
+                                enable predefined sky "ALIGN-GS3L9" time 1.25
                             end if
-                            wait 0.75 seconds
+                            wait 1.25 seconds
                         end if
                     elsif PAlignment >= 0.65 and PAlignment < 0.9
                         if SkySettingsActive != 2
-                            //say "ALIGNMENTG2"
+                            //say "ALIGN-GS2"
                             SkySettingsActive = 2
                             if get land number != 9
-                                enable predefined sky "ALIGNMENTG2" time 0.75
+                                enable predefined sky "ALIGN-GS2" time 1.25
                             else
-                                enable predefined sky "ALIGNMENTG2L9" time 0.75
+                                enable predefined sky "ALIGN-GS2L9" time 1.25
                             end if
-                            wait 0.75 seconds
+                            wait 1.25 seconds
                         end if
                     elsif PAlignment >= 0.3 and PAlignment < 0.65
-                        if SkySettingsActive != 1
-                            //say "ALIGNMENTG1"
-                            SkySettingsActive = 1
+                        if SkySettingsActive != 3
+                            //say "ALIGN-GS1"
+                            SkySettingsActive = 3
                             if get land number != 9
-                                enable predefined sky "ALIGNMENTG1" time 0.75
+                                enable predefined sky "ALIGN-GS1" time 1.25
                             else
-                                enable predefined sky "ALIGNMENTG1L9" time 0.75
+                                enable predefined sky "ALIGN-GS1L9" time 1.25
                             end if
-                            wait 0.75 seconds
+                            wait 1.25 seconds
                         end if
                     elsif PAlignment <= -0.3 and PAlignment > -0.65
-                        if SkySettingsActive != -1
-                            //say "ALIGNMENTE1"
-                            SkySettingsActive = -1
+                        if SkySettingsActive != 4
+                            //say "ALIGN-ES1"
+                            SkySettingsActive = 4
                             if get land number != 9
-                                enable predefined sky "ALIGNMENTE1" time 0.75
+                                enable predefined sky "ALIGN-ES1" time 1.25
                             else
-                                enable predefined sky "ALIGNMENTE1L9" time 0.75
+                                enable predefined sky "ALIGN-ES1L9" time 1.25
                             end if
-                            wait 0.75 seconds
+                            wait 1.25 seconds
                         end if
                     elsif PAlignment <= -0.65 and PAlignment > -0.9
-                        if SkySettingsActive != -2
-                            //say "ALIGNMENTE2"
-                            SkySettingsActive = -2
+                        if SkySettingsActive != 5
+                            //say "ALIGN-ES2"
+                            SkySettingsActive = 5
                             if get land number != 9
-                                enable predefined sky "ALIGNMENTE2" time 0.75
+                                enable predefined sky "ALIGN-ES2" time 1.25
                             else
-                                enable predefined sky "ALIGNMENTE2L9" time 0.75
+                                enable predefined sky "ALIGN-ES2L9" time 1.25
                             end if
-                            wait 0.75 seconds
+                            wait 1.25 seconds
                         end if
                     elsif PAlignment <= -0.9 and PAlignment >= -1.0
-                        if SkySettingsActive != -3
-                            //say "ALIGNMENTE3"
-                            SkySettingsActive = -3
+                        if SkySettingsActive != 6
+                            //say "ALIGN-ES3"
+                            SkySettingsActive = 6
                             if get land number != 9
-                                enable predefined sky "ALIGNMENTE3" time 0.75
+                                enable predefined sky "ALIGN-ES3" time 1.25
                             else
-                                enable predefined sky "ALIGNMENTE3L9" time 0.75
+                                enable predefined sky "ALIGN-ES3L9" time 1.25
                             end if
-                            wait 0.75 seconds
+                            wait 1.25 seconds
                         end if
                     end if
-                elsif get game time > 20 or get game time < 6
+                elsif get game time < 17.5 and get game time > 9 //Day
                     if PAlignment >= 0.9 and PAlignment <= 1.0
-                        if SkySettingsActive != 6
-                            //say "ALIGNMENTGN3"
-                            SkySettingsActive = 6
-                            enable predefined sky "ALIGNMENTGN3" time 0.75
-                            wait 0.75 seconds
+                        if SkySettingsActive != 7
+                            //say "ALIGN-G3"
+                            SkySettingsActive = 7
+                            if get land number != 9
+                                enable predefined sky "ALIGN-G3" time 1.25
+                            else
+                                enable predefined sky "ALIGN-G3L9" time 1.25
+                            end if
+                            wait 1.25 seconds
                         end if
                     elsif PAlignment >= 0.65 and PAlignment < 0.9
-                        if SkySettingsActive != 5
-                            //say "ALIGNMENTGN2"
-                            SkySettingsActive = 5
-                            enable predefined sky "ALIGNMENTGN2" time 0.75
-                            wait 0.75 seconds
+                        if SkySettingsActive != 8
+                            //say "ALIGN-G2"
+                            SkySettingsActive = 8
+                            if get land number != 9
+                                enable predefined sky "ALIGN-G2" time 1.25
+                            else
+                                enable predefined sky "ALIGN-G2L9" time 1.25
+                            end if
+                            wait 1.25 seconds
                         end if
                     elsif PAlignment >= 0.3 and PAlignment < 0.65
-                        if SkySettingsActive != 4
-                            //say "ALIGNMENTGN1"
-                            SkySettingsActive = 4
-                            enable predefined sky "ALIGNMENTGN1" time 0.75
-                            wait 0.75 seconds
+                        if SkySettingsActive != 9
+                            //say "ALIGN-G1"
+                            SkySettingsActive = 9
+                            if get land number != 9
+                                enable predefined sky "ALIGN-G1" time 1.25
+                            else
+                                enable predefined sky "ALIGN-G1L9" time 1.25
+                            end if
+                            wait 1.25 seconds
                         end if
                     elsif PAlignment <= -0.3 and PAlignment > -0.65
-                        if SkySettingsActive != -4
-                            //say "ALIGNMENTEN1"
-                            SkySettingsActive = -4
-                            enable predefined sky "ALIGNMENTEN1" time 0.75
-                            wait 0.75 seconds
+                        if SkySettingsActive != 10
+                            //say "ALIGN-E1"
+                            SkySettingsActive = 10
+                            if get land number != 9
+                                enable predefined sky "ALIGN-E1" time 1.25
+                            else
+                                enable predefined sky "ALIGN-E1L9" time 1.25
+                            end if
+                            wait 1.25 seconds
                         end if
                     elsif PAlignment <= -0.65 and PAlignment > -0.9
-                        if SkySettingsActive != -5
-                            //say "ALIGNMENTEN2"
-                            SkySettingsActive = -5
-                            enable predefined sky "ALIGNMENTEN2" time 0.75
-                            wait 0.75 seconds
+                        if SkySettingsActive != 11
+                            //say "ALIGN-E2"
+                            SkySettingsActive = 11
+                            if get land number != 9
+                                enable predefined sky "ALIGN-E2" time 1.25
+                            else
+                                enable predefined sky "ALIGN-E2L9" time 1.25
+                            end if
+                            wait 1.25 seconds
                         end if
                     elsif PAlignment <= -0.9 and PAlignment >= -1.0
-                        if SkySettingsActive != -6
-                            //say "ALIGNMENTEN3"
-                            SkySettingsActive = -6
-                            enable predefined sky "ALIGNMENTEN3" time 0.75
-                            wait 0.75 seconds
+                        if SkySettingsActive != 12
+                            //say "ALIGN-E3"
+                            SkySettingsActive = 12
+                            if get land number != 9
+                                enable predefined sky "ALIGN-E3" time 1.25
+                            else
+                                enable predefined sky "ALIGN-E3L9" time 1.25
+                            end if
+                            wait 1.25 seconds
+                        end if
+                    end if
+                elsif get game time > 20.5 or get game time < 6 //Night
+                    if PAlignment >= 0.9 and PAlignment <= 1.0
+                        if SkySettingsActive != 13
+                            //say "ALIGN-GN3"
+                            SkySettingsActive = 13
+                            enable predefined sky "ALIGN-GN3" time 1.25
+                            wait 1.25 seconds
+                        end if
+                    elsif PAlignment >= 0.65 and PAlignment < 0.9
+                        if SkySettingsActive != 14
+                            //say "ALIGN-GN2"
+                            SkySettingsActive = 14
+                            enable predefined sky "ALIGN-GN2" time 1.25
+                            wait 1.25 seconds
+                        end if
+                    elsif PAlignment >= 0.3 and PAlignment < 0.65
+                        if SkySettingsActive != 15
+                            //say "ALIGN-GN1"
+                            SkySettingsActive = 15
+                            enable predefined sky "ALIGN-GN1" time 1.25
+                            wait 1.25 seconds
+                        end if
+                    elsif PAlignment <= -0.3 and PAlignment > -0.65
+                        if SkySettingsActive != 16
+                            //say "ALIGN-EN1"
+                            SkySettingsActive = 16
+                            enable predefined sky "ALIGN-EN1" time 1.25
+                            wait 1.25 seconds
+                        end if
+                    elsif PAlignment <= -0.65 and PAlignment > -0.9
+                        if SkySettingsActive != 17
+                            //say "ALIGN-EN2"
+                            SkySettingsActive = 17
+                            enable predefined sky "ALIGN-EN2" time 1.25
+                            wait 1.25 seconds
+                        end if
+                    elsif PAlignment <= -0.9 and PAlignment >= -1.0
+                        if SkySettingsActive != 18
+                            //say "ALIGN-EN3"
+                            SkySettingsActive = 18
+                            enable predefined sky "ALIGN-EN3" time 1.25
+                            wait 1.25 seconds
                         end if
                     end if
                 end if
