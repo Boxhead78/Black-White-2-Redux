@@ -176,6 +176,7 @@ begin script LC13_StaticPlatoonsActions(Pos,Type,Platoon,OriginTown)
     PlayerCatapultDistance = 0
     a = 0
     PlayerSettlement = 0
+    ThresholdStatic = 0
 
 start
 
@@ -307,32 +308,38 @@ begin loop
         end if
     end if
 
-    if ThisStaticPlatoonActive == 0 and get size of Platoon action queue < 1 and {Platoon} not near {Pos} radius 25
-        add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {Pos} to Platoon action queue
-    elsif ThisStaticPlatoonActive == 1 and get size of Platoon action queue < 1 and ({Platoon} not near {ThisStaticPlatoonWaypoint} radius 25 or ThisStaticPlatoonWaypoint == 0)
-        if PlayerAlignmentFinal < 0.0
-            a = 0
+    if ThisStaticPlatoonActive == 0 and get size of Platoon action queue < 1 and ({Platoon} not near {Pos} radius 25 or get player 0 influence at {Pos} > 0)
+        if get player 0 influence at {Pos} > 0
+            ThresholdStatic = 10
             begin loop
-                ThisStaticPlatoonWaypoint = marker at {StaticPlatoonEvilWaypoint} + {number from -75 to 75,number from -75 to 75}
-                a++
-                until (Platoon can navigate to {ThisStaticPlatoonWaypoint} and not get platoon of player 1 nearest {ThisStaticPlatoonWaypoint} radius 25 exists) or a > 50
+                Pos = marker at {Pos} + {number from -ThresholdStatic to ThresholdStatic,number from -ThresholdStatic to ThresholdStatic}
+                ThresholdStatic += 5
+                until (Platoon can navigate to {Pos} and get player 0 influence at {Pos} == 0) or ThresholdStatic > 999
             end loop
-            if a > 50
+        end if
+        add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {Pos} to Platoon action queue
+    elsif ThisStaticPlatoonActive == 1 and get size of Platoon action queue < 1 and ({Platoon} not near {ThisStaticPlatoonWaypoint} radius 25 or ThisStaticPlatoonWaypoint == 0 or get player 0 influence at {Pos} > 0)
+        if PlayerAlignmentFinal < 0.0
+            ThresholdStatic = 75
+            begin loop
+                ThisStaticPlatoonWaypoint = marker at {StaticPlatoonEvilWaypoint} + {number from -ThresholdStatic to ThresholdStatic,number from -ThresholdStatic to ThresholdStatic}
+                ThresholdStatic += 5
+                until (Platoon can navigate to {ThisStaticPlatoonWaypoint} and not get platoon of player 1 nearest {ThisStaticPlatoonWaypoint} radius 25 exists and get player 0 influence at {ThisStaticPlatoonWaypoint} == 0) or a > 50
+            end loop
+            if ThresholdStatic > 999
                 wait 15 seconds
             end if
-            a = 0
             add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {ThisStaticPlatoonWaypoint} to Platoon action queue
         elsif PlayerAlignmentFinal >= 0.0
-            a = 0
+            ThresholdStatic = 75
             begin loop
-                ThisStaticPlatoonWaypoint = marker at {StaticPlatoonEvilWaypoint} + {number from -75 to 75,number from -75 to 75}
-                a++
-                until (Platoon can navigate to {ThisStaticPlatoonWaypoint} and not get platoon of player 1 nearest {ThisStaticPlatoonWaypoint} radius 25 exists) or a > 50
+                ThisStaticPlatoonWaypoint = marker at {StaticPlatoonGoodWaypoint} + {number from -ThresholdStatic to ThresholdStatic,number from -ThresholdStatic to ThresholdStatic}
+                ThresholdStatic += 5
+                until (Platoon can navigate to {ThisStaticPlatoonWaypoint} and not get platoon of player 1 nearest {ThisStaticPlatoonWaypoint} radius 25 exists and get player 0 influence at {ThisStaticPlatoonWaypoint} == 0) or a > 50
             end loop
-            if a > 50
+            if ThresholdStatic > 999
                 wait 15 seconds
             end if
-            a = 0
             add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {ThisStaticPlatoonWaypoint} to Platoon action queue
         end if
     end if
@@ -368,6 +375,7 @@ begin script LC13_ArmyBehaivours(Platoon,Type,Task,DefendObject,AttackingPoint,A
     RecalculateTimer = create timer for 0 seconds
     Ready = 0
     myTimer = create timer for 0 seconds
+    Threshold = 0
 
 start
 
@@ -599,11 +607,19 @@ begin loop
                     TownCapturePlatoons[0]--
                 end if
                 clear Platoon action queue
-            elsif Platoon can navigate to {AttackingPoint}
+            elsif Platoon can navigate to {AttackingPoint} and get player 0 influence at {AttackingPoint} == 0
                 clear Platoon action queue
                 add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPoint} to Platoon action queue
             else
                 clear Platoon action queue
+                if get player 0 influence at {AttackingPointFallBack} > 0
+                    begin loop
+                        AttackingPointFallBack = marker at {AttackingPointFallBack} + {number from -Threshold to Threshold,number from -Threshold to Threshold}
+                        Threshold += 5
+                        until (Platoon can navigate to {AttackingPointFallBack} and get player 0 influence at {AttackingPointFallBack} == 0) or Threshold > 999
+                    end loop
+                    Threshold = 1
+                end if
                 add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPointFallBack} to Platoon action queue
             end if
         //end if
@@ -692,11 +708,19 @@ begin loop
                     end if
                 end if
                 clear Platoon action queue
-            elsif Platoon can navigate to {AttackingPoint}
+            elsif Platoon can navigate to {AttackingPoint} and get player 0 influence at {AttackingPoint} == 0
                 clear Platoon action queue
                 add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPoint} to Platoon action queue
             else
                 clear Platoon action queue
+                if get player 0 influence at {AttackingPointFallBack} > 0
+                    begin loop
+                        AttackingPointFallBack = marker at {AttackingPointFallBack} + {number from -Threshold to Threshold,number from -Threshold to Threshold}
+                        Threshold += 5
+                        until (Platoon can navigate to {AttackingPointFallBack} and get player 0 influence at {AttackingPointFallBack} == 0) or Threshold > 999
+                    end loop
+                    Threshold = 1
+                end if
                 add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPointFallBack} to Platoon action queue
             end if
         end if
@@ -962,11 +986,19 @@ begin loop
                 TownCapturePlatoons[0]--
             end if
             clear Platoon action queue
-        elsif Platoon can navigate to {AttackingPoint}
+        elsif Platoon can navigate to {AttackingPoint} and get player 0 influence at {AttackingPoint} == 0
             clear Platoon action queue
             add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPoint} to Platoon action queue
         else
             clear Platoon action queue
+            if get player 0 influence at {AttackingPointFallBack} > 0
+                begin loop
+                    AttackingPointFallBack = marker at {AttackingPointFallBack} + {number from -Threshold to Threshold,number from -Threshold to Threshold}
+                    Threshold += 5
+                    until (Platoon can navigate to {AttackingPointFallBack} and get player 0 influence at {AttackingPointFallBack} == 0) or Threshold > 999
+                end loop
+                Threshold = 1
+            end if
             add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPointFallBack} to Platoon action queue
         end if
 
@@ -1155,11 +1187,19 @@ begin loop
                 TownCapturePlatoons[2]--
             end if
             clear Platoon action queue
-        elsif Platoon can navigate to {AttackingPoint}
+        elsif Platoon can navigate to {AttackingPoint} and get player 0 influence at {AttackingPoint} == 0
             clear Platoon action queue
             add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPoint} to Platoon action queue
         else
             clear Platoon action queue
+            if get player 0 influence at {AttackingPointFallBack} > 0
+                begin loop
+                    AttackingPointFallBack = marker at {AttackingPointFallBack} + {number from -Threshold to Threshold,number from -Threshold to Threshold}
+                    Threshold += 5
+                    until (Platoon can navigate to {AttackingPointFallBack} and get player 0 influence at {AttackingPointFallBack} == 0) or Threshold > 999
+                end loop
+                Threshold = 1
+            end if
             add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPointFallBack} to Platoon action queue
         end if
         
