@@ -13,8 +13,43 @@ define maxActive = 600
 define minLightningDelay = 5
 define maxLightningDelay = 50
 
+define SK_DEFAULT = 0
+//Evil skies
+define ALIGNE1 = 1
+define ALIGNE1L9 = 2
+define ALIGNE2 = 3
+define ALIGNE2L9 = 4
+define ALIGNE3 = 5
+define ALIGNE3L9 = 6
+define ALIGNEN1 = 7
+define ALIGNEN2 = 8
+define ALIGNEN3 = 9
+define ALIGNES1 = 10
+define ALIGNES1L9 = 11
+define ALIGNES2 = 12
+define ALIGNES2L9 = 13
+define ALIGNES3 = 14
+define ALIGNES3L9 = 15
+//Good skies
+define ALIGNG1 = 16
+define ALIGNG1L9 = 17
+define ALIGNG2 = 18
+define ALIGNG2L9 = 19
+define ALIGNG3 = 20
+define ALIGNG3L9 = 21
+define ALIGNGN1 = 22
+define ALIGNGN2 = 23
+define ALIGNGN3 = 24
+define ALIGNGS1 = 25
+define ALIGNGS1L9 = 26
+define ALIGNGS2 = 27
+define ALIGNGS2L9 = 28
+define ALIGNGS3 = 29
+define ALIGNGS3L9 = 30
+
 define script Weather
 define script WeatherSkyTransitions
+define script WeatherSetSkySetting(PlayerID,whichSkySetting)
 define script WeatherVisuals
 
 global WT_SkyTransitionAllowed = 1
@@ -629,8 +664,9 @@ begin loop
         if WT_SkyTransitionGlobalInfluence == 0 and get player 0 influence at camera position == 0 and get player 1 influence at camera position == 0 and get player 2 influence at camera position == 0 and get player 3 influence at camera position == 0 and SkySettingsActive != 0
             //say "DEFAULT"
             SkySettingsActive = 0
-            enable predefined sky "DEFAULT" time 1.25
-            wait 1.25 seconds
+            stop script "WeatherSetSkySetting"
+            run background script WeatherSetSkySetting(PlayerID,SK_DEFAULT)
+            wait 2.5 seconds
         else
             if WT_SkyTransitionGlobalInfluence == 1 //If player has won only use him as a base
                 PlayerID = 0
@@ -643,67 +679,73 @@ begin loop
                         if SkySettingsActive != 1
                             //say "ALIGN-GS3"
                             SkySettingsActive = 1
+                            stop script "WeatherSetSkySetting"
                             if get land number != 9
-                                enable predefined sky "ALIGN-GS3" time 1.25
+                                run background script WeatherSetSkySetting(PlayerID,ALIGNGS3)
                             else
-                                enable predefined sky "ALIGN-GS3L9" time 1.25
+                                run background script WeatherSetSkySetting(PlayerID,ALIGNGS3L9)
                             end if
-                            wait 1.25 seconds
+                            wait 2.5 seconds
                         end if
                     elsif PAlignment >= 0.65 and PAlignment < 0.9
                         if SkySettingsActive != 2
                             //say "ALIGN-GS2"
                             SkySettingsActive = 2
+                            stop script "WeatherSetSkySetting"
                             if get land number != 9
-                                enable predefined sky "ALIGN-GS2" time 1.25
+                                run background script WeatherSetSkySetting(PlayerID,ALIGNGS2)
                             else
-                                enable predefined sky "ALIGN-GS2L9" time 1.25
+                                run background script WeatherSetSkySetting(PlayerID,ALIGNGS2L9)
                             end if
-                            wait 1.25 seconds
+                            wait 2.5 seconds
                         end if
                     elsif PAlignment >= 0.3 and PAlignment < 0.65
                         if SkySettingsActive != 3
                             //say "ALIGN-GS1"
                             SkySettingsActive = 3
+                            stop script "WeatherSetSkySetting"
                             if get land number != 9
-                                enable predefined sky "ALIGN-GS1" time 1.25
+                                run background script WeatherSetSkySetting(PlayerID,ALIGNGS1)
                             else
-                                enable predefined sky "ALIGN-GS1L9" time 1.25
+                                run background script WeatherSetSkySetting(PlayerID,ALIGNGS1L9)
                             end if
-                            wait 1.25 seconds
+                            wait 2.5 seconds
                         end if
                     elsif PAlignment <= -0.3 and PAlignment > -0.65
                         if SkySettingsActive != 4
                             //say "ALIGN-ES1"
                             SkySettingsActive = 4
+                            stop script "WeatherSetSkySetting"
                             if get land number != 9
-                                enable predefined sky "ALIGN-ES1" time 1.25
+                                run background script WeatherSetSkySetting(PlayerID,ALIGNES1)
                             else
-                                enable predefined sky "ALIGN-ES1L9" time 1.25
+                                run background script WeatherSetSkySetting(PlayerID,ALIGNES1L9)
                             end if
-                            wait 1.25 seconds
+                            wait 2.5 seconds
                         end if
                     elsif PAlignment <= -0.65 and PAlignment > -0.9
                         if SkySettingsActive != 5
                             //say "ALIGN-ES2"
                             SkySettingsActive = 5
+                            stop script "WeatherSetSkySetting"
                             if get land number != 9
-                                enable predefined sky "ALIGN-ES2" time 1.25
+                                run background script WeatherSetSkySetting(PlayerID,ALIGNES2)
                             else
-                                enable predefined sky "ALIGN-ES2L9" time 1.25
+                                run background script WeatherSetSkySetting(PlayerID,ALIGNES2L9)
                             end if
-                            wait 1.25 seconds
+                            wait 2.5 seconds
                         end if
                     elsif PAlignment <= -0.9 and PAlignment >= -1.0
                         if SkySettingsActive != 6
                             //say "ALIGN-ES3"
                             SkySettingsActive = 6
+                            stop script "WeatherSetSkySetting"
                             if get land number != 9
-                                enable predefined sky "ALIGN-ES3" time 1.25
+                                run background script WeatherSetSkySetting(PlayerID,ALIGNES3)
                             else
-                                enable predefined sky "ALIGN-ES3L9" time 1.25
+                                run background script WeatherSetSkySetting(PlayerID,ALIGNES3L9)
                             end if
-                            wait 1.25 seconds
+                            wait 2.5 seconds
                         end if
                     end if
                 elsif get game time < 17.5 and get game time > 9 //Day
@@ -711,67 +753,73 @@ begin loop
                         if SkySettingsActive != 7
                             //say "ALIGN-G3"
                             SkySettingsActive = 7
+                            stop script "WeatherSetSkySetting"
                             if get land number != 9
-                                enable predefined sky "ALIGN-G3" time 1.25
+                                run background script WeatherSetSkySetting(PlayerID,ALIGNG3)
                             else
-                                enable predefined sky "ALIGN-G3L9" time 1.25
+                                run background script WeatherSetSkySetting(PlayerID,ALIGNG3L9)
                             end if
-                            wait 1.25 seconds
+                            wait 2.5 seconds
                         end if
                     elsif PAlignment >= 0.65 and PAlignment < 0.9
                         if SkySettingsActive != 8
                             //say "ALIGN-G2"
                             SkySettingsActive = 8
+                            stop script "WeatherSetSkySetting"
                             if get land number != 9
-                                enable predefined sky "ALIGN-G2" time 1.25
+                                run background script WeatherSetSkySetting(PlayerID,ALIGNG2)
                             else
-                                enable predefined sky "ALIGN-G2L9" time 1.25
+                                run background script WeatherSetSkySetting(PlayerID,ALIGNG2L9)
                             end if
-                            wait 1.25 seconds
+                            wait 2.5 seconds
                         end if
                     elsif PAlignment >= 0.3 and PAlignment < 0.65
                         if SkySettingsActive != 9
                             //say "ALIGN-G1"
                             SkySettingsActive = 9
+                            stop script "WeatherSetSkySetting"
                             if get land number != 9
-                                enable predefined sky "ALIGN-G1" time 1.25
+                                run background script WeatherSetSkySetting(PlayerID,ALIGNG1)
                             else
-                                enable predefined sky "ALIGN-G1L9" time 1.25
+                                run background script WeatherSetSkySetting(PlayerID,ALIGNG1L9)
                             end if
-                            wait 1.25 seconds
+                            wait 2.5 seconds
                         end if
                     elsif PAlignment <= -0.3 and PAlignment > -0.65
                         if SkySettingsActive != 10
                             //say "ALIGN-E1"
                             SkySettingsActive = 10
+                            stop script "WeatherSetSkySetting"
                             if get land number != 9
-                                enable predefined sky "ALIGN-E1" time 1.25
+                                run background script WeatherSetSkySetting(PlayerID,ALIGNE1)
                             else
-                                enable predefined sky "ALIGN-E1L9" time 1.25
+                                run background script WeatherSetSkySetting(PlayerID,ALIGNE1L9)
                             end if
-                            wait 1.25 seconds
+                            wait 2.5 seconds
                         end if
                     elsif PAlignment <= -0.65 and PAlignment > -0.9
                         if SkySettingsActive != 11
                             //say "ALIGN-E2"
                             SkySettingsActive = 11
+                            stop script "WeatherSetSkySetting"
                             if get land number != 9
-                                enable predefined sky "ALIGN-E2" time 1.25
+                                run background script WeatherSetSkySetting(PlayerID,ALIGNE2)
                             else
-                                enable predefined sky "ALIGN-E2L9" time 1.25
+                                run background script WeatherSetSkySetting(PlayerID,ALIGNE2L9)
                             end if
-                            wait 1.25 seconds
+                            wait 2.5 seconds
                         end if
                     elsif PAlignment <= -0.9 and PAlignment >= -1.0
                         if SkySettingsActive != 12
                             //say "ALIGN-E3"
                             SkySettingsActive = 12
+                            stop script "WeatherSetSkySetting"
                             if get land number != 9
-                                enable predefined sky "ALIGN-E3" time 1.25
+                                run background script WeatherSetSkySetting(PlayerID,ALIGNE3)
                             else
-                                enable predefined sky "ALIGN-E3L9" time 1.25
+                                run background script WeatherSetSkySetting(PlayerID,ALIGNE3L9)
                             end if
-                            wait 1.25 seconds
+                            wait 2.5 seconds
                         end if
                     end if
                 elsif get game time > 20.5 or get game time < 6 //Night
@@ -779,43 +827,49 @@ begin loop
                         if SkySettingsActive != 13
                             //say "ALIGN-GN3"
                             SkySettingsActive = 13
-                            enable predefined sky "ALIGN-GN3" time 1.25
-                            wait 1.25 seconds
+                            stop script "WeatherSetSkySetting"
+                            run background script WeatherSetSkySetting(PlayerID,ALIGNGN3)
+                            wait 2.5 seconds
                         end if
                     elsif PAlignment >= 0.65 and PAlignment < 0.9
                         if SkySettingsActive != 14
                             //say "ALIGN-GN2"
                             SkySettingsActive = 14
-                            enable predefined sky "ALIGN-GN2" time 1.25
-                            wait 1.25 seconds
+                            stop script "WeatherSetSkySetting"
+                            run background script WeatherSetSkySetting(PlayerID,ALIGNGN2)
+                            wait 2.5 seconds
                         end if
                     elsif PAlignment >= 0.3 and PAlignment < 0.65
                         if SkySettingsActive != 15
                             //say "ALIGN-GN1"
                             SkySettingsActive = 15
-                            enable predefined sky "ALIGN-GN1" time 1.25
-                            wait 1.25 seconds
+                            stop script "WeatherSetSkySetting"
+                            run background script WeatherSetSkySetting(PlayerID,ALIGNGN1)
+                            wait 2.5 seconds
                         end if
                     elsif PAlignment <= -0.3 and PAlignment > -0.65
                         if SkySettingsActive != 16
                             //say "ALIGN-EN1"
                             SkySettingsActive = 16
-                            enable predefined sky "ALIGN-EN1" time 1.25
-                            wait 1.25 seconds
+                            stop script "WeatherSetSkySetting"
+                            run background script WeatherSetSkySetting(PlayerID,ALIGNEN1)
+                            wait 2.5 seconds
                         end if
                     elsif PAlignment <= -0.65 and PAlignment > -0.9
                         if SkySettingsActive != 17
                             //say "ALIGN-EN2"
                             SkySettingsActive = 17
-                            enable predefined sky "ALIGN-EN2" time 1.25
-                            wait 1.25 seconds
+                            stop script "WeatherSetSkySetting"
+                            run background script WeatherSetSkySetting(PlayerID,ALIGNEN2)
+                            wait 2.5 seconds
                         end if
                     elsif PAlignment <= -0.9 and PAlignment >= -1.0
                         if SkySettingsActive != 18
                             //say "ALIGN-EN3"
                             SkySettingsActive = 18
-                            enable predefined sky "ALIGN-EN3" time 1.25
-                            wait 1.25 seconds
+                            stop script "WeatherSetSkySetting"
+                            run background script WeatherSetSkySetting(PlayerID,ALIGNEN3)
+                            wait 2.5 seconds
                         end if
                     end if
                 end if
@@ -829,6 +883,321 @@ begin loop
 end loop
 
 end script WeatherSkyTransitions
+
+
+begin script WeatherSetSkySetting(PlayerID,whichSkySetting)
+
+    PAlignment = 0
+
+start
+
+//PAlignment = get player PlayerID alignment
+if whichSkySetting == SK_DEFAULT
+    enable predefined sky "DEFAULT" time 2.5
+    wait 2.5 seconds
+elsif whichSkySetting == ALIGNE1
+    enable predefined sky "ALIGN-E1" time 2.5
+    wait 2.5 seconds
+    begin loop
+        enable predefined sky "ALIGN-E1" time 0
+        wait 0.5 seconds
+        enable predefined sky "ALIGN-E1-CC" time 0
+        //PAlignment = get player PlayerID alignment
+        //until get player PlayerID influence at camera position == 0 or PAlignment > -0.3 or PAlignment <= -0.65 or get game time >= 17.5 or get game time <= 9
+    end loop
+elsif whichSkySetting == ALIGNE1L9
+    enable predefined sky "ALIGN-E1L9" time 2.5
+    wait 2.5 seconds
+    begin loop
+        enable predefined sky "ALIGN-E1L9" time 0
+        wait 0.5 seconds
+        enable predefined sky "ALIGN-E1L9-CC" time 0
+        //PAlignment = get player PlayerID alignment
+        //until get player PlayerID influence at camera position == 0 or PAlignment > -0.3 or PAlignment <= -0.65 or get game time >= 17.5 or get game time <= 9
+    end loop
+elsif whichSkySetting == ALIGNE2
+    enable predefined sky "ALIGN-E2" time 2.5
+    wait 2.5 seconds
+    begin loop
+        enable predefined sky "ALIGN-E2" time 0
+        wait 0.5 seconds
+        enable predefined sky "ALIGN-E2-CC" time 0
+        //PAlignment = get player PlayerID alignment
+        //until get player PlayerID influence at camera position == 0 or PAlignment > -0.65 or PAlignment <= -0.9 or get game time >= 17.5 or get game time <= 9
+    end loop
+elsif whichSkySetting == ALIGNE2L9
+    enable predefined sky "ALIGN-E2L9" time 2.5
+    wait 2.5 seconds
+    begin loop
+        enable predefined sky "ALIGN-E2L9" time 0
+        wait 0.5 seconds
+        enable predefined sky "ALIGN-E2L9-CC" time 0
+        //PAlignment = get player PlayerID alignment
+        //until get player PlayerID influence at camera position == 0 or PAlignment > -0.3 or PAlignment <= -0.65 or get game time >= 17.5 or get game time <= 9
+    end loop
+elsif whichSkySetting == ALIGNE3
+    enable predefined sky "ALIGN-E3" time 2.5
+    wait 2.5 seconds
+    begin loop
+        enable predefined sky "ALIGN-E3" time 0
+        wait 0.5 seconds
+        enable predefined sky "ALIGN-E3-CC" time 0
+        //PAlignment = get player PlayerID alignment
+        //until get player PlayerID influence at camera position == 0 or PAlignment > -0.9 or PAlignment < -1.0 or get game time >= 17.5 or get game time <= 9
+    end loop
+elsif whichSkySetting == ALIGNE3L9
+    enable predefined sky "ALIGN-E3L9" time 2.5
+    wait 2.5 seconds
+    begin loop
+        enable predefined sky "ALIGN-E3L9" time 0
+        wait 0.5 seconds
+        enable predefined sky "ALIGN-E3L9-CC" time 0
+        //PAlignment = get player PlayerID alignment
+        //until get player PlayerID influence at camera position == 0 or PAlignment > -0.9 or PAlignment < -1.0 or get game time >= 17.5 or get game time <= 9
+    end loop
+elsif whichSkySetting == ALIGNEN1
+    enable predefined sky "ALIGN-EN1" time 2.5
+    wait 2.5 seconds
+    begin loop
+        enable predefined sky "ALIGN-EN1" time 0
+        wait 0.5 seconds
+        enable predefined sky "ALIGN-EN1-CC" time 0
+        //PAlignment = get player PlayerID alignment
+        //until get player PlayerID influence at camera position == 0 or PAlignment > -0.3 or PAlignment <= -0.65 or get game time <= 20.5 or get game time >= 6
+    end loop
+elsif whichSkySetting == ALIGNEN2
+    enable predefined sky "ALIGN-EN2" time 2.5
+    wait 2.5 seconds
+    begin loop
+        enable predefined sky "ALIGN-EN2" time 0
+        wait 0.5 seconds
+        enable predefined sky "ALIGN-EN2-CC" time 0
+        //PAlignment = get player PlayerID alignment
+        //until get player PlayerID influence at camera position == 0 or PAlignment > -0.65 or PAlignment <= -0.9 or get game time <= 20.5 or get game time >= 6
+    end loop
+elsif whichSkySetting == ALIGNEN3
+    enable predefined sky "ALIGN-EN3" time 2.5
+    wait 2.5 seconds
+    begin loop
+        enable predefined sky "ALIGN-EN3" time 0
+        wait 0.5 seconds
+        enable predefined sky "ALIGN-EN3-CC" time 0
+        //PAlignment = get player PlayerID alignment
+        //until get player PlayerID influence at camera position == 0 or PAlignment > -0.9 or PAlignment < -1.0 or get game time <= 20.5 or get game time >= 6
+    end loop
+elsif whichSkySetting == ALIGNES1
+    enable predefined sky "ALIGN-ES1" time 2.5
+    wait 2.5 seconds
+    begin loop
+        enable predefined sky "ALIGN-ES1" time 0
+        wait 0.5 seconds
+        enable predefined sky "ALIGN-ES1-CC" time 0
+        //PAlignment = get player PlayerID alignment
+        //until get player PlayerID influence at camera position == 0 or PAlignment > -0.3 and PAlignment <= -0.65 or (get game time < 17.5 or get game time > 20.5) or (get game time < 6 or get game time > 9)
+    end loop
+elsif whichSkySetting == ALIGNES1L9
+    enable predefined sky "ALIGN-ES1L9" time 2.5
+    wait 2.5 seconds
+    begin loop
+        enable predefined sky "ALIGN-ES1L9" time 0
+        wait 0.5 seconds
+        enable predefined sky "ALIGN-ES1L9-CC" time 0
+        //PAlignment = get player PlayerID alignment
+        //until get player PlayerID influence at camera position == 0 or PAlignment > -0.3 and PAlignment <= -0.65 or (get game time < 17.5 or get game time > 20.5) or (get game time < 6 or get game time > 9)
+    end loop
+elsif whichSkySetting == ALIGNES2
+    enable predefined sky "ALIGN-ES2" time 2.5
+    wait 2.5 seconds
+    begin loop
+        enable predefined sky "ALIGN-ES2" time 0
+        wait 0.5 seconds
+        enable predefined sky "ALIGN-ES2-CC" time 0
+        //PAlignment = get player PlayerID alignment
+        //until get player PlayerID influence at camera position == 0 or PAlignment > -0.65 or PAlignment <= -0.9 or (get game time < 17.5 or get game time > 20.5) or (get game time < 6 or get game time > 9)
+    end loop
+elsif whichSkySetting == ALIGNES2L9
+    enable predefined sky "ALIGN-ES2L9" time 2.5
+    wait 2.5 seconds
+    begin loop
+        enable predefined sky "ALIGN-ES2L9" time 0
+        wait 0.5 seconds
+        enable predefined sky "ALIGN-ES2L9-CC" time 0
+        //PAlignment = get player PlayerID alignment
+        //until get player PlayerID influence at camera position == 0 or PAlignment > -0.65 or PAlignment <= -0.9 or (get game time < 17.5 or get game time > 20.5) or (get game time < 6 or get game time > 9)
+    end loop
+elsif whichSkySetting == ALIGNES3
+    enable predefined sky "ALIGN-ES3" time 2.5
+    wait 2.5 seconds
+    begin loop
+        enable predefined sky "ALIGN-ES3" time 0
+        wait 0.5 seconds
+        enable predefined sky "ALIGN-ES3-CC" time 0
+        //PAlignment = get player PlayerID alignment
+        //until get player PlayerID influence at camera position == 0 or PAlignment > -0.9 and PAlignment < -1.0 or (get game time < 17.5 or get game time > 20.5) or (get game time < 6 or get game time > 9)
+    end loop
+elsif whichSkySetting == ALIGNES3L9
+    enable predefined sky "ALIGN-ES3L9" time 2.5
+    wait 2.5 seconds
+    begin loop
+        enable predefined sky "ALIGN-ES3L9" time 0
+        wait 0.5 seconds
+        enable predefined sky "ALIGN-ES3L9-CC" time 0
+        //PAlignment = get player PlayerID alignment
+        //until get player PlayerID influence at camera position == 0 or PAlignment > -0.9 and PAlignment < -1.0 or (get game time < 17.5 or get game time > 20.5) or (get game time < 6 or get game time > 9)
+    end loop
+elsif whichSkySetting == ALIGNG1
+    enable predefined sky "ALIGN-G1" time 2.5
+    wait 2.5 seconds
+    begin loop
+        enable predefined sky "ALIGN-G1" time 0
+        wait 0.5 seconds
+        enable predefined sky "ALIGN-G1-CC" time 0
+        //PAlignment = get player PlayerID alignment
+        //until get player PlayerID influence at camera position == 0 or PAlignment < 0.3 or PAlignment >= 0.65 or get game time >= 17.5 or get game time <= 9
+    end loop
+elsif whichSkySetting == ALIGNG1L9
+    enable predefined sky "ALIGN-G1L9" time 2.5
+    wait 2.5 seconds
+    begin loop
+        enable predefined sky "ALIGN-G1L9" time 0
+        wait 0.5 seconds
+        enable predefined sky "ALIGN-G1L9-CC" time 0
+        //PAlignment = get player PlayerID alignment
+        //until get player PlayerID influence at camera position == 0 or PAlignment < 0.3 or PAlignment >= 0.65 or get game time >= 17.5 or get game time <= 9
+    end loop
+elsif whichSkySetting == ALIGNG2
+    enable predefined sky "ALIGN-G2" time 2.5
+    wait 2.5 seconds
+    begin loop
+        enable predefined sky "ALIGN-G2" time 0
+        wait 0.5 seconds
+        enable predefined sky "ALIGN-G2-CC" time 0
+        //PAlignment = get player PlayerID alignment
+        //until get player PlayerID influence at camera position == 0 or PAlignment < 0.65 or PAlignment >= 0.9 or get game time >= 17.5 or get game time <= 9
+    end loop
+elsif whichSkySetting == ALIGNG2L9
+    enable predefined sky "ALIGN-G2L9" time 2.5
+    wait 2.5 seconds
+    begin loop
+        enable predefined sky "ALIGN-G2L9" time 0
+        wait 0.5 seconds
+        enable predefined sky "ALIGN-G2L9-CC" time 0
+        //PAlignment = get player PlayerID alignment
+        //until get player PlayerID influence at camera position == 0 or PAlignment < 0.65 or PAlignment >= 0.9 or get game time >= 17.5 or get game time <= 9
+    end loop
+elsif whichSkySetting == ALIGNG3
+    enable predefined sky "ALIGN-G3" time 2.5
+    wait 2.5 seconds
+    begin loop
+        enable predefined sky "ALIGN-G3" time 0
+        wait 0.5 seconds
+        enable predefined sky "ALIGN-G3-CC" time 0
+        //PAlignment = get player PlayerID alignment
+        //until get player PlayerID influence at camera position == 0 or PAlignment < 0.9 or PAlignment > 1.0 or get game time >= 17.5 or get game time <= 9
+    end loop
+elsif whichSkySetting == ALIGNG3L9
+    enable predefined sky "ALIGN-G3L9" time 2.5
+    wait 2.5 seconds
+    begin loop
+        enable predefined sky "ALIGN-G3L9" time 0
+        wait 0.5 seconds
+        enable predefined sky "ALIGN-G3L9-CC" time 0
+        //PAlignment = get player PlayerID alignment
+        //until get player PlayerID influence at camera position == 0 or PAlignment < 0.9 or PAlignment > 1.0 or get game time >= 17.5 or get game time <= 9
+    end loop
+elsif whichSkySetting == ALIGNGN1
+    enable predefined sky "ALIGN-GN1" time 2.5
+    wait 2.5 seconds
+    begin loop
+        enable predefined sky "ALIGN-GN1" time 0
+        wait 0.5 seconds
+        enable predefined sky "ALIGN-GN1-CC" time 0
+        //PAlignment = get player PlayerID alignment
+        //until get player PlayerID influence at camera position == 0 or PAlignment < 0.3 or PAlignment >= 0.65 or get game time <= 20.5 or get game time >= 6
+    end loop
+elsif whichSkySetting == ALIGNGN2
+    enable predefined sky "ALIGN-GN2" time 2.5
+    wait 2.5 seconds
+    begin loop
+        enable predefined sky "ALIGN-GN2" time 0
+        wait 0.5 seconds
+        enable predefined sky "ALIGN-GN2-CC" time 0
+        //PAlignment = get player PlayerID alignment
+        //until get player PlayerID influence at camera position == 0 or PAlignment < 0.65 or PAlignment >= 0.9 or get game time <= 20.5 or get game time >= 6
+    end loop
+elsif whichSkySetting == ALIGNGN3
+    enable predefined sky "ALIGN-GN3" time 2.5
+    wait 2.5 seconds
+    begin loop
+        enable predefined sky "ALIGN-GN3" time 0
+        wait 0.5 seconds
+        enable predefined sky "ALIGN-GN3-CC" time 0
+        //PAlignment = get player PlayerID alignment
+        //until get player PlayerID influence at camera position == 0 or PAlignment < 0.9 or PAlignment > 1.0 or get game time <= 20.5 or get game time >= 6
+    end loop
+elsif whichSkySetting == ALIGNGS1
+    enable predefined sky "ALIGN-GS1" time 2.5
+    wait 2.5 seconds
+    begin loop
+        enable predefined sky "ALIGN-GS1" time 0
+        wait 0.5 seconds
+        enable predefined sky "ALIGN-GS1-CC" time 0
+        //PAlignment = get player PlayerID alignment
+        //until get player PlayerID influence at camera position == 0 or PAlignment < 0.3 and PAlignment >= 0.65 or (get game time < 17.5 or get game time > 20.5) or (get game time < 6 or get game time > 9)
+    end loop
+elsif whichSkySetting == ALIGNGS1L9
+    enable predefined sky "ALIGN-GS1L9" time 2.5
+    wait 2.5 seconds
+    begin loop
+        enable predefined sky "ALIGN-GS1L9" time 0
+        wait 0.5 seconds
+        enable predefined sky "ALIGN-GS1L9-CC" time 0
+        //PAlignment = get player PlayerID alignment
+        //until get player PlayerID influence at camera position == 0 or PAlignment < 0.3 and PAlignment >= 0.65 or (get game time < 17.5 or get game time > 20.5) or (get game time < 6 or get game time > 9)
+    end loop
+elsif whichSkySetting == ALIGNGS2
+    enable predefined sky "ALIGN-GS2" time 2.5
+    wait 2.5 seconds
+    begin loop
+        enable predefined sky "ALIGN-GS2" time 0
+        wait 0.5 seconds
+        enable predefined sky "ALIGN-GS2-CC" time 0
+        //PAlignment = get player PlayerID alignment
+        //until get player PlayerID influence at camera position == 0 or PAlignment < 0.65 or PAlignment >= 0.9 or (get game time < 17.5 or get game time > 20.5) or (get game time < 6 or get game time > 9)
+    end loop
+elsif whichSkySetting == ALIGNGS2L9
+    enable predefined sky "ALIGN-GS2L9" time 2.5
+    wait 2.5 seconds
+    begin loop
+        enable predefined sky "ALIGN-GS2L9" time 0
+        wait 0.5 seconds
+        enable predefined sky "ALIGN-GS2L9-CC" time 0
+        //PAlignment = get player PlayerID alignment
+        //until get player PlayerID influence at camera position == 0 or PAlignment < 0.65 or PAlignment >= 0.9 or (get game time < 17.5 or get game time > 20.5) or (get game time < 6 or get game time > 9)
+    end loop
+elsif whichSkySetting == ALIGNGS3
+    enable predefined sky "ALIGN-GS3" time 2.5
+    wait 2.5 seconds
+    begin loop
+        enable predefined sky "ALIGN-GS3" time 0
+        wait 0.5 seconds
+        enable predefined sky "ALIGN-GS3-CC" time 0
+        //PAlignment = get player PlayerID alignment
+        //until get player PlayerID influence at camera position == 0 or PAlignment < 0.9 and PAlignment > 1.0 or (get game time < 17.5 or get game time > 20.5) or (get game time < 6 or get game time > 9)
+    end loop
+elsif whichSkySetting == ALIGNGS3L9
+    enable predefined sky "ALIGN-GS3L9" time 2.5
+    wait 2.5 seconds
+    begin loop
+        enable predefined sky "ALIGN-GS3L9" time 0
+        wait 0.5 seconds
+        enable predefined sky "ALIGN-GS3L9-CC" time 0
+        //PAlignment = get player PlayerID alignment
+        //until get player PlayerID influence at camera position == 0 or PAlignment < 0.9 and PAlignment > 1.0 or (get game time < 17.5 or get game time > 20.5) or (get game time < 6 or get game time > 9)
+    end loop
+end if
+
+end script WeatherSetSkySetting
 
 
 begin script WeatherVisuals
