@@ -20,6 +20,7 @@ global SkeletonCleanUp = 0
 global SkeletonCounter = 0
 global SkeletonWave = 0
 global SkeletonLoseCounter = 0
+global SkeletonQuestDone = 0
 
 global SkeletonsScrollPos = 0
 global SkeletonFieldMid = 0
@@ -94,8 +95,8 @@ start
     begin cinema
 		set fade red 0 green 0 blue 0 time 3
 		wait 3 seconds
-		set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 0.7
-		start music "creaturefightmain_01" loop -1
+		set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 0.15
+		start music "skeleton_bashing" loop -1
         set camera position to {708.06,165.00,983.01}
         set camera focus to {653.31,150.00,1030.35}
 		set fade in time 3
@@ -105,7 +106,7 @@ start
         move camera focus to {SkeletonSpawnPos[2]} + {25.00,8,0.00} time 6
 		//move camera
 		wait 2 seconds
-		set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 0.7 with fadetime 5
+		set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 0.35 with fadetime 5
 		say "BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV1_10"
 		clear dialogue
 		close dialogue
@@ -124,7 +125,6 @@ start
 		clear dialogue
 		close dialogue
 		wait BW2XT_CHALLENGE_NEW_WHACKAMOLE_LEV1_40 + 1.0 seconds
-		set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 1.0 with fadetime 5
 		set fade red 0 green 0 blue 0 time 3
 		wait 3 seconds
     end cinema
@@ -197,11 +197,15 @@ start
 			SkeletonsActivated = 0
 			SkeletonLightningActivated = 0
 		elsif dialogue ready
-			start music "creaturefightmain_01" loop -1
+			set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 0.35
+			start music "skeleton_bashing" loop -1
 			run background script LC12_SkeletonsLogic
 			wait 2 seconds
 		end if
+		until SkeletonQuestDone == 1
 	end loop
+
+	destroy mixer CSMixer with fadetime 2
 
 end script LC12_Skeletons_Intro
 
@@ -403,6 +407,7 @@ stop music with fadetime 5
 run script LC12_Skeletons_Outro
 
 set player 0 objective TRIBUTE_OBJECTIVE_LAND_2 status to TRIBUTE_OBJECTIVE_STATE_COMPLETE
+SkeletonQuestDone = 1
 
 end script LC12_SkeletonsLogic
 
