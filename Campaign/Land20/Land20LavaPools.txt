@@ -1,0 +1,75 @@
+///////////////////////////////////////////////////////////////////////////////
+//    Land 20 Lava Pools
+//    ~~~~~~~~~~~~~~~~~~
+//
+///////////////////////////////////////////////////////////////////////////////
+
+define script LC20_LavaPools
+define script LavaExplosions(lava_pos)
+define script LavaFireballs(lava_pos)
+
+run script LC20_LavaPools
+
+begin script LC20_LavaPools
+
+start
+
+    run background script LavaExplosions(marker at {668.78,80.05,1841.64})
+    run background script LavaExplosions(marker at {835.60,80.15,1863.41})
+    run background script LavaExplosions(marker at {914.09,80.18,1771.24})
+    run background script LavaExplosions(marker at {1206.80,134.33,1908.69})
+    run background script LavaExplosions(marker at {1302.00,128.52,1848.64})
+    run background script LavaExplosions(marker at {1475.22,83.83,1909.07})
+    run background script LavaExplosions(marker at {1980.59,80.71,1698.91})
+    run background script LavaExplosions(marker at {1247.71,147.18,1283.44})
+    run background script LavaExplosions(marker at {1358.82,144.75,1071.22})
+
+    run background script LavaFireballs(marker at {668.78,80.05,1841.64})
+    run background script LavaFireballs(marker at {835.60,80.15,1863.41})
+    run background script LavaFireballs(marker at {914.09,80.18,1771.24})
+    run background script LavaFireballs(marker at {1206.80,134.33,1908.69})
+    run background script LavaFireballs(marker at {1302.00,128.52,1848.64})
+    run background script LavaFireballs(marker at {1475.22,83.83,1909.07})
+    run background script LavaFireballs(marker at {1980.59,80.71,1698.91})
+    run background script LavaFireballs(marker at {1247.71,147.18,1283.44})
+    run background script LavaFireballs(marker at {1358.82,144.75,1071.22})
+
+end script LC20_LavaPools
+
+begin script LavaExplosions(lava_pos)
+
+Explosion = 0 
+RandomStrength = 0
+RandomScale = 0
+
+start
+    
+    begin loop
+        wait number from 1 to 3 seconds
+        RandomStrength = number from 70 to 130
+        RandomStrength /= 100
+        RandomScale = number from 70 to 130
+        RandomScale /= 100
+        Explosion=make player 2 throw miracle MIRACLE_TYPE_FIRE from {lava_pos} heading {lava_pos} + {number from -10 to 10, number from 5 to 10, number from -10 to 10}
+        wait number from 2 to 5 seconds
+    end loop
+
+end script LavaExplosions
+
+begin script LavaFireballs(lava_pos)
+
+FireBall = 0
+FireBallStart = 0
+FireBallTarget = 0
+
+start
+
+    begin loop
+        wait number from 1 to 5 seconds
+        FireBallStart = marker at ({lava_pos} + {0,15,0})
+        FireBallTarget = marker at ({FireBallStart} + {number from -45 to 45, 0, number from -45 to 45})
+        FireBall = make player 2 throw miracle MIRACLE_TYPE_FIRE from ({FireBallStart} + {0,-3.0,0}) heading ({FireBallTarget} + {0,21,0} - {FireBallStart})
+        wait number from 10 to 20 seconds
+    end loop
+
+end script LavaFireballs
