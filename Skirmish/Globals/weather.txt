@@ -666,7 +666,9 @@ begin loop
         if WT_SkyTransitionGlobalInfluence == 0 and get player 0 influence at camera position == 0 and get player 1 influence at camera position == 0 and get player 2 influence at camera position == 0 and get player 3 influence at camera position == 0 and SkySettingsActive != 0
             //say "DEFAULT"
             SkySettingsActive = 0
+            WT_ExitLoop = 1
             wait until WT_SkySetRunning == 0
+            WT_ExitLoop = 0
             run background script WeatherSetSkySetting(PlayerID,SK_DEFAULT)
             wait 1.25 seconds
         else
@@ -935,6 +937,7 @@ WT_SkySetRunning = 1
 if whichSkySetting == SK_DEFAULT
     enable predefined sky "DEFAULT" time 1.25
     wait 1.25 seconds
+    WT_SkySetRunning = 0
 elsif whichSkySetting == ALIGNE1
     enable predefined sky "ALIGN-E1" time 1.25
     wait 1.25 seconds
