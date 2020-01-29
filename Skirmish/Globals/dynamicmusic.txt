@@ -1,0 +1,140 @@
+///////////////////////////////////////////////////////////////////////////////
+//         Dynamic Music Script
+//    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+///////////////////////////////////////////////////////////////////////////////
+
+define DM_Small = 0
+define DM_Medium = 1
+define DM_Large = 2
+define DM_EndOfBattle = 3
+
+define DM_EndBattle01 = 0
+define DM_EndBattle02 = 1
+define DM_EndBattle03 = 2
+define smallbattle01 = 0
+define smallbattle02 = 0
+define smallbattle03 = 0
+
+define script DM_SetDynamicMusic(section,subsection,isurgent,mintime,maxtime)
+define script DM_WaitForNextMusic(howLong)
+define script DM_StopDynamicMusic(fadeouttime)
+
+global DM_DynamicMusicActive = 0
+global DM_DynamicMusicBreak = 0
+global DM_DynamicMusicDisallowed = 0
+global DM_WaitScriptRunning = 0
+global DM_ScriptRunning = 0
+global DM_AskStop = 0
+
+begin script DM_SetDynamicMusic(section,subsection,isurgent,mintime,maxtime)
+
+    DM_Rand = 0
+
+start
+
+//Check if the script is already running, if yes ask it to stop and wait until it is stopped
+if DM_ScriptRunning == 1
+    DM_AskStop = 1
+end if
+wait until DM_ScriptRunning == 0
+DM_AskStop = 0
+DM_ScriptRunning = 1
+
+//If urgent is set don't wait until current music is finished and stop it immediately
+if isurgent == 1
+    DM_DynamicMusicBreak = 1
+else
+    wait until DM_WaitScriptRunning == 0
+    if DM_DynamicMusicActive == 1
+        DM_DynamicMusicBreak = 1
+    end if
+end if
+
+//Check if everything is ready, randomize it if dynamic music is disallowed
+begin loop
+    if DM_DynamicMusicDisallowed == 1
+        wait number from 1 to 5 seconds
+    end if
+    until DM_DynamicMusicActive == 0 and DM_DynamicMusicDisallowed == 0
+end loop
+
+DM_DynamicMusicActive = 1
+DM_DynamicMusicBreak = 0
+
+while DM_DynamicMusicBreak == 0 and DM_DynamicMusicDisallowed == 0 and DM_AskStop == 0
+    if section == DM_Small
+        DM_Rand = number from 1 to 3
+        if subsection == smallbattle01 or subsection == smallbattle02 or subsection == smallbattle03
+            DM_Rand = 0
+        end if
+        if subsection == smallbattle01 or DM_Rand == 1
+            start music "smallbattle01" loop -1
+            run script DM_WaitForNextMusic(number from mintime to maxtime)
+        elsif subsection == smallbattle02 or DM_Rand == 2
+            start music "smallbattle02" loop -1
+            run script DM_WaitForNextMusic(number from mintime to maxtime)
+        elsif subsection == smallbattle03 or DM_Rand == 3
+            start music "smallbattle03" loop -1
+            run script DM_WaitForNextMusic(number from mintime to maxtime)
+        end if
+    elsif section == DM_Medium
+
+    elsif section == DM_Large
+
+    elsif section == DM_EndOfBattle
+        DM_Rand = number from 1 to 3
+        if subsection == DM_EndBattle01 or subsection == DM_EndBattle02 or subsection == DM_EndBattle03
+            DM_Rand = 0
+        end if
+        if subsection == DM_EndBattle01 or DM_Rand == 1
+            start music "endofbattle01" loop -1
+            run script DM_WaitForNextMusic(number from mintime to maxtime)
+        elsif subsection == DM_EndBattle02 or DM_Rand == 2
+            start music "endofbattle02" loop -1
+            run script DM_WaitForNextMusic(number from mintime to maxtime)
+        elsif subsection == DM_EndBattle03 or DM_Rand == 3
+            start music "endofbattle03" loop -1
+            run script DM_WaitForNextMusic(number from mintime to maxtime)
+        end if
+    end if
+end while
+
+DM_DynamicMusicBreak = 0
+DM_DynamicMusicActive = 0
+
+//Restart the music 
+if DM_DynamicMusicDisallowed == 1 and DM_AskStop == 0
+    run background script DM_SetDynamicMusic(section,subsection,isurgent,mintime,maxtime)
+end if
+
+DM_ScriptRunning = 0
+
+end script DM_SetDynamicMusic
+
+begin script DM_WaitForNextMusic(howLong)
+
+    MyTimer = create timer for howLong seconds
+
+start
+
+while get MyTimer time remaining > 0 and DM_DynamicMusicBreak == 0 and DM_DynamicMusicDisallowed == 0 and DM_AskStop == 0
+    wait 0.5 seconds
+end while
+
+end script DM_WaitForNextMusic
+
+begin script DM_StopDynamicMusic(fadeouttime)
+
+    DM_MusicMixer = 0
+
+start
+
+    DM_DynamicMusicBreak = 1
+    DM_MusicMixer = create mixer
+    set mixer DM_MusicMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 0.0 with fadetime fadeouttime
+    wait fadeouttime seconds
+    stop music
+    destroy mixer DM_MusicMixer
+
+end script DM_StopDynamicMusic
