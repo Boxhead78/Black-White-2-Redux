@@ -12,12 +12,13 @@ define DM_EndOfBattle = 3
 define DM_EndBattle01 = 0
 define DM_EndBattle02 = 1
 define DM_EndBattle03 = 2
-define smallbattle01 = 0
-define smallbattle02 = 0
-define smallbattle03 = 0
+define DM_smallbattle01 = 0
+define DM_smallbattle02 = 0
+define DM_smallbattle03 = 0
+define DM_mediumbattle01 = 0
 
 define script DM_SetDynamicMusic(section,subsection,isurgent,mintime,maxtime)
-define script DM_WaitForNextMusic(howLong)
+define script DM_WaitForNextMusic(musicLength,howLong)
 define script DM_StopDynamicMusic(fadeouttime)
 
 global DM_DynamicMusicActive = 0
@@ -26,6 +27,7 @@ global DM_DynamicMusicDisallowed = 0
 global DM_WaitScriptRunning = 0
 global DM_ScriptRunning = 0
 global DM_AskStop = 0
+global DM_MusicObject = 0
 
 begin script DM_SetDynamicMusic(section,subsection,isurgent,mintime,maxtime)
 
@@ -64,24 +66,39 @@ end loop
 DM_DynamicMusicActive = 1
 DM_DynamicMusicBreak = 0
 
+if DM_MusicObject not exists
+    DM_MusicObject = create SCRIPT_OBJECT_TYPE_FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {1000,1000}
+    enable DM_MusicObject indestructible
+    disable DM_MusicObject pickup
+    SCRIPT_OBJECT_PROPERTY_TYPE_SCALE of DM_MusicObject = 0.01
+end if
+
 while DM_DynamicMusicBreak == 0 and DM_DynamicMusicDisallowed == 0 and DM_AskStop == 0
+    detach music from DM_MusicObject
     if section == DM_Small
         DM_Rand = number from 1 to 3
-        if subsection == smallbattle01 or subsection == smallbattle02 or subsection == smallbattle03
+        if subsection == DM_smallbattle01 or subsection == DM_smallbattle02 or subsection == DM_smallbattle03
             DM_Rand = 0
         end if
-        if subsection == smallbattle01 or DM_Rand == 1
-            start music "smallbattle01" loop -1
-            run script DM_WaitForNextMusic(number from mintime to maxtime)
-        elsif subsection == smallbattle02 or DM_Rand == 2
-            start music "smallbattle02" loop -1
-            run script DM_WaitForNextMusic(number from mintime to maxtime)
-        elsif subsection == smallbattle03 or DM_Rand == 3
-            start music "smallbattle03" loop -1
-            run script DM_WaitForNextMusic(number from mintime to maxtime)
+        if subsection == DM_smallbattle01 or DM_Rand == 1
+            attach music "smallbattle01" to DM_MusicObject range 99999
+            run script DM_WaitForNextMusic(256,number from mintime to maxtime)
+        elsif subsection == DM_smallbattle02 or DM_Rand == 2
+            attach music "smallbattle02" to DM_MusicObject range 99999
+            run script DM_WaitForNextMusic(0,number from mintime to maxtime)
+        elsif subsection == DM_smallbattle03 or DM_Rand == 3
+            attach music "smallbattle03" to DM_MusicObject range 99999
+            run script DM_WaitForNextMusic(0,number from mintime to maxtime)
         end if
     elsif section == DM_Medium
-
+        DM_Rand = number from 1 to 1
+        if subsection == DM_mediumbattle01
+            DM_Rand = 0
+        end if
+        if subsection == DM_mediumbattle01 or DM_Rand == 1
+            attach music "mediumbattle01" to DM_MusicObject range 99999
+            run script DM_WaitForNextMusic(71,number from mintime to maxtime)
+        end if
     elsif section == DM_Large
 
     elsif section == DM_EndOfBattle
@@ -90,14 +107,14 @@ while DM_DynamicMusicBreak == 0 and DM_DynamicMusicDisallowed == 0 and DM_AskSto
             DM_Rand = 0
         end if
         if subsection == DM_EndBattle01 or DM_Rand == 1
-            start music "endofbattle01" loop -1
-            run script DM_WaitForNextMusic(number from mintime to maxtime)
+            attach music "endofbattle01" to DM_MusicObject range 99999
+            run script DM_WaitForNextMusic(53,number from mintime to maxtime)
         elsif subsection == DM_EndBattle02 or DM_Rand == 2
-            start music "endofbattle02" loop -1
-            run script DM_WaitForNextMusic(number from mintime to maxtime)
+            attach music "endofbattle02" to DM_MusicObject range 99999
+            run script DM_WaitForNextMusic(30,number from mintime to maxtime)
         elsif subsection == DM_EndBattle03 or DM_Rand == 3
-            start music "endofbattle03" loop -1
-            run script DM_WaitForNextMusic(number from mintime to maxtime)
+            attach music "endofbattle03" to DM_MusicObject range 99999
+            run script DM_WaitForNextMusic(36,number from mintime to maxtime)
         end if
     end if
 end while
@@ -114,14 +131,15 @@ DM_ScriptRunning = 0
 
 end script DM_SetDynamicMusic
 
-begin script DM_WaitForNextMusic(howLong)
+begin script DM_WaitForNextMusic(musicLength,howLong)
 
     MyTimer = create timer for howLong seconds
 
 start
 
 while get MyTimer time remaining > 0 and DM_DynamicMusicBreak == 0 and DM_DynamicMusicDisallowed == 0 and DM_AskStop == 0
-    wait 0.5 seconds
+    wait musicLength seconds
+    restart music on DM_MusicObject
 end while
 
 end script DM_WaitForNextMusic
