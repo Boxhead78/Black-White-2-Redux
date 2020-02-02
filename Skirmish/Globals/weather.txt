@@ -663,14 +663,16 @@ begin loop
         PlayerID = 0
     end if
     if WT_SkyTransitionAllowed == 1 //Skytransition is disabled during epic or scripted predefined sky
-        if WT_SkyTransitionGlobalInfluence == 0 and get player 0 influence at camera position == 0 and get player 1 influence at camera position == 0 and get player 2 influence at camera position == 0 and get player 3 influence at camera position == 0 and SkySettingsActive != 0
-            //say "DEFAULT"
-            SkySettingsActive = 0
-            WT_ExitLoop = 1
-            wait until WT_SkySetRunning == 0
-            WT_ExitLoop = 0
-            run background script WeatherSetSkySetting(PlayerID,SK_DEFAULT)
-            wait 1.25 seconds
+        if WT_SkyTransitionGlobalInfluence == 0 and SkySettingsActive != 0
+            if get player PlayerID influence at camera position == 0
+                //say "DEFAULT"
+                SkySettingsActive = 0
+                WT_ExitLoop = 1
+                wait until WT_SkySetRunning == 0
+                WT_ExitLoop = 0
+                run background script WeatherSetSkySetting(PlayerID,SK_DEFAULT)
+                wait 1.25 seconds
+            end if
         else
             if WT_SkyTransitionGlobalInfluence == 1 //If player has won only use him as a base
                 PlayerID = 0
@@ -919,7 +921,7 @@ begin loop
         wait until WT_SkyTransitionAllowed == 1
         wait 1.25 seconds
     end if
-    PlayerID++
+    if SkySettingsActive == 0 PlayerID++ end if
 end loop
 
 end script WeatherSkyTransitions
