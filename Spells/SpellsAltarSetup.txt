@@ -3,7 +3,7 @@ define script AltarEpics
 define script AltarEpicsLogic(Building,PlayerID,whichWonder)
 
 define NONE = 0
-define VERDANT = 1
+define Regrowth = 1
 define FIRERAIN = 2
 define THUNDERSTORM = 3
 define METEOR = 4
@@ -20,7 +20,7 @@ begin script AltarEpics
     Altar = 0
     myAbode = 0
     Counter = 0
-    VerdantActivated[25]
+    RegrowthActivated[25]
     FireRainActivated[25]
     ThunderStormActivated[25]
     MeteorActivated[25]
@@ -66,9 +66,9 @@ if EpicSpellsActivated == 1
                     end if
                     if PlayerID >= 1 and AISpellsActivated != 0
                         if get research ARTEFACT_EPIC_WONDER_NUMBER_SIREN available == variable RESEARCH_AVAILABILITY_RESEARCHED or PlayerID >= 1 
-                            if VerdantActivated[Counter] == 0
-                                VerdantActivated[Counter] = 1
-                                run background script AltarEpicsLogic(TownCentre,PlayerID,VERDANT)
+                            if RegrowthActivated[Counter] == 0
+                                RegrowthActivated[Counter] = 1
+                                run background script AltarEpicsLogic(TownCentre,PlayerID,Regrowth)
                             end if
                         end if
                         if get research ARTEFACT_EPIC_WONDER_NUMBER_HURRICANE available == variable RESEARCH_AVAILABILITY_RESEARCHED or PlayerID >= 1
@@ -100,9 +100,9 @@ if EpicSpellsActivated == 1
 
                     elsif PlayerID == 0
                         if get research ARTEFACT_EPIC_WONDER_NUMBER_SIREN available == variable RESEARCH_AVAILABILITY_RESEARCHED or PlayerID >= 1 
-                            if VerdantActivated[Counter] == 0
-                                VerdantActivated[Counter] = 1
-                                run background script AltarEpicsLogic(TownCentre,PlayerID,VERDANT)
+                            if RegrowthActivated[Counter] == 0
+                                RegrowthActivated[Counter] = 1
+                                run background script AltarEpicsLogic(TownCentre,PlayerID,Regrowth)
                             end if
                         end if
                         if get research ARTEFACT_EPIC_WONDER_NUMBER_HURRICANE available == variable RESEARCH_AVAILABILITY_RESEARCHED or PlayerID >= 1
@@ -165,8 +165,8 @@ RelPos[3] = marker at get world position from Building to {0,-19}
 RelPos[4] = marker at get world position from Building to {8,19}
 RelPos[5] = marker at get world position from Building to {-8,19}
 
-if whichWonder == VERDANT
-    //Verdant, 10000 mana
+if whichWonder == Regrowth
+    //Regrowth, 10000 mana
     Foundation[0] = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {RelPos[0]}
     ANGLE of Foundation[0] = ANGLE of Building
     SCALE of Foundation[0] = 3.25
@@ -220,7 +220,7 @@ end if
 
 //Check if useable
 begin loop
-    if whichWonder == VERDANT
+    if whichWonder == Regrowth
         if get player PlayerID mana >= 10000
             if ParticleEffect2[0] not exists
                 ParticleEffect2[0] = create visual effect VISUAL_EFFECT_MIRACLE_CHARGE at {RelPos[0]} + {0,1,0} time -1 target {RelPos[0]} + {0,50,0}
@@ -228,7 +228,7 @@ begin loop
             end if
             if bindable action BINDABLE_ACTION_TYPE_ACTION performed and hand position near {Foundation[0]} radius 4
                 delete Tooltip
-                run script VerdantSpell(0,0)
+                run script RegrowthSpell(0,0)
                 wait 2 seconds
             end if
         else

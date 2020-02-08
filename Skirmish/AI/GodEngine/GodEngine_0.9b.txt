@@ -112,7 +112,7 @@ global GE_MIRACLE_TYPE_WIND                               =  9 // Does not work
 global GE_MIRACLE_TYPE_TORNADO                            =  10
 global GE_MIRACLE_TYPE_WATER                              =  11
 global GE_MIRACLE_TYPE_STORM                              =  12
-global GE_MIRACLE_TYPE_VERDANT                            =  13
+global GE_MIRACLE_TYPE_REGROWTH                           =  13
 global GE_MIRACLE_TYPE_FIRERAIN                           =  14
 global GE_MIRACLE_TYPE_THUNDERSTORM                       =  15
 global GE_MIRACLE_TYPE_METEORID                           =  16
@@ -611,10 +611,10 @@ start
                 currMana = get player ge_Player[godHandle] mana
                 set player ge_Player[godHandle] mana currMana - geManaCostStorm
                 newMiracle = make player ge_Player[godHandle] throw miracle MIRACLE_TYPE_STORM from ({rGodInstance[godHandle]} + {0, -3.0, 0}) heading (({rTargetObject} + {0,geThrowArc,0}) - {rGodInstance[godHandle]})
-            elsif miracleType == GE_MIRACLE_TYPE_VERDANT
+            elsif miracleType == GE_MIRACLE_TYPE_REGROWTH
                 currMana = get player ge_Player[godHandle] mana
-                set player ge_Player[godHandle] mana currMana - geManaCostVerdant
-                run background script VerdantSpell(ge_Player[godHandle],rTargetObject)
+                set player ge_Player[godHandle] mana currMana - geManaCostRegrowth
+                run background script RegrowthSpell(ge_Player[godHandle],rTargetObject)
             elsif miracleType == GE_MIRACLE_TYPE_FIRERAIN
                 currMana = get player ge_Player[godHandle] mana
                 set player ge_Player[godHandle] mana currMana - geManaCostFirerain
@@ -1871,7 +1871,7 @@ start
         if playerMana >= 42500
             myNumber = number from 1 to 8
             if myNumber == 1
-                whichSpell = GE_MIRACLE_TYPE_VERDANT
+                whichSpell = GE_MIRACLE_TYPE_REGROWTH
 
             elsif myNumber == 2 or myNumber == 3
                 whichSpell = GE_MIRACLE_TYPE_FIRERAIN
@@ -1886,7 +1886,7 @@ start
         elsif playerMana >= 35000
             myNumber = number from 1 to 8
             if myNumber == 1
-                whichSpell = GE_MIRACLE_TYPE_VERDANT
+                whichSpell = GE_MIRACLE_TYPE_REGROWTH
 
             elsif myNumber == 2 or myNumber == 3
                 whichSpell = GE_MIRACLE_TYPE_FIRERAIN
@@ -1898,7 +1898,7 @@ start
         elsif playerMana >= 25000
             myNumber = number from 1 to 6
             if myNumber == 1
-                whichSpell = GE_MIRACLE_TYPE_VERDANT
+                whichSpell = GE_MIRACLE_TYPE_REGROWTH
 
             elsif myNumber == 2 or myNumber == 3
                 whichSpell = GE_MIRACLE_TYPE_FIRERAIN
@@ -1907,17 +1907,17 @@ start
         elsif playerMana >= 12500
             myNumber = number from 1 to 3
             if myNumber == 1
-                whichSpell = GE_MIRACLE_TYPE_VERDANT
+                whichSpell = GE_MIRACLE_TYPE_REGROWTH
 
             end if
         end if
 
         if whichSpell != 0
-            if whichSpell == GE_MIRACLE_TYPE_VERDANT
+            if whichSpell == GE_MIRACLE_TYPE_REGROWTH
                 myBuilding = get building ABODE_NUMBER_STORAGE_PIT in ge_HomeTown[godHandle] min built 1.0
                 myLocation = marker at {myBuilding} + {number from 20 to 35,number from -20 to -35}
                 if not {myLocation} under water
-                    run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_VERDANT,myLocation)
+                    run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_REGROWTH,myLocation)
                 end if
 
             elsif whichSpell == GE_MIRACLE_TYPE_FIRERAIN or whichSpell == GE_MIRACLE_TYPE_THUNDERSTORM or whichSpell == GE_MIRACLE_TYPE_METEORID
