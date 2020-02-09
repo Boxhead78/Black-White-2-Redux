@@ -15,6 +15,11 @@ define CT_ActionFinishedSeconds = 7
 
 define script CT_CreatureAI(PlayerID)
 
+global FireballAvailable[4]
+global LightningAvailable[4]
+global FireballMedRangeAvailable[4]
+global FireballHighRangeAvailable[4]
+
 run script CT_ScriptManager
 
 
@@ -42,6 +47,23 @@ start
 
 begin loop
     wait 5 seconds
+
+    if get research ARTEFACT_CREATURE_MAGIC_TYPE_FIREBALL available == variable RESEARCH_AVAILABILITY_RESEARCHED and PlayerID == 0 and FireballAvailable[PlayerID] == 0
+        FireballAvailable[PlayerID] = 1
+    end if
+
+    if get research ARTEFACT_CREATURE_MAGIC_TYPE_LIGHTNING available == variable RESEARCH_AVAILABILITY_RESEARCHED and PlayerID == 0 and LightningAvailable[PlayerID] == 0
+        LightningAvailable[PlayerID] = 1
+    end if
+
+    if get research ARTEFACT_CREATURE_MAGIC_TYPE_FIREBALL available == variable RESEARCH_AVAILABILITY_RESEARCHED and get research ARTEFACT_CREATURE_ROLE_SOLDIER_2 available == variable RESEARCH_AVAILABILITY_RESEARCHED and PlayerID == 0 and FireballMedRangeAvailable[PlayerID] == 0
+        FireballMedRangeAvailable[PlayerID] = 1
+    end if
+
+    if get research ARTEFACT_CREATURE_MAGIC_TYPE_FIREBALL available == variable RESEARCH_AVAILABILITY_RESEARCHED and get research ARTEFACT_CREATURE_ROLE_SOLDIER_3 available == variable RESEARCH_AVAILABILITY_RESEARCHED and PlayerID == 0 and FireballHighRangeAvailable[PlayerID] == 0
+        FireballHighRangeAvailable[PlayerID] = 1
+    end if
+
     if EnemyID > 4
         EnemyID = 0
         wait until (get ThrowMiracleTimer time remaining <= 0 or get ThrowMiracleTimerAggressive time remaining <= 0) and not leash is in hand and HEALTH of CT_Creature > 0
@@ -54,7 +76,7 @@ begin loop
         if EnemyObject exists and not leash is in hand
             if get ThrowMiracleTimer time remaining <= 0
                 ThrowMiracleTimer = create timer for number from CT_CreatureMiracleDelayMin to CT_CreatureMiracleDelayMax seconds
-                if number from 1 to 3 == 1
+                if number from 1 to 3 == 1 and FireballAvailable[PlayerID] == 1
                     force CT_Creature CREATURE_CAST_FIREBALL EnemyObject
                 else
                     force CT_Creature CREATURE_CAST_LIGHTNING_BOLT EnemyObject
@@ -68,7 +90,7 @@ begin loop
             if EnemyObject exists and not leash is in hand
                 if get ThrowMiracleTimer time remaining <= 0
                     ThrowMiracleTimer = create timer for number from CT_CreatureMiracleDelayMin to CT_CreatureMiracleDelayMax seconds
-                    if number from 1 to 3 == 1
+                    if number from 1 to 3 == 1 and FireballAvailable[PlayerID] == 1
                         force CT_Creature CREATURE_CAST_FIREBALL EnemyObject
                     else
                         force CT_Creature CREATURE_CAST_LIGHTNING_BOLT EnemyObject
@@ -76,7 +98,7 @@ begin loop
                     wait until creature CT_Creature finished script action or CT_ActionFinishedSeconds seconds
                     release CT_Creature
                 end if
-            else
+            elsif FireballMedRangeAvailable[PlayerID] == 1
                 //Med Range Enemy Platoon
                 EnemyObject = get platoon of player EnemyID nearest {CT_Creature} radius 75
                 if EnemyObject exists and not leash is in hand
@@ -96,7 +118,7 @@ begin loop
                             wait until creature CT_Creature finished script action or CT_ActionFinishedSeconds seconds
                             release CT_Creature
                         end if
-                    else
+                    elsif FireballHighRangeAvailable[PlayerID] == 1
                         //High Range Enemy Platoon
                         EnemyObject = get platoon of player EnemyID nearest {CT_Creature} radius 150
                         if EnemyObject exists and not leash is in hand
