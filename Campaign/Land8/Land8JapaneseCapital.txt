@@ -2301,19 +2301,20 @@ start
                         FireHurricane = 1
                         LC8_LargeSiegeLaunchAttack = 1
                         LC8_LargeSiegeIsRunning = 0
+                        LC8_LargeSiegeOver = 1
                     end if
                 end if
             end if
         end if
 
         if PLAYER of JapaneseTown1 != 1 or PLAYER of JapaneseTown2 != 1 or PLAYER of JapaneseCapital != 1 or TownsConverted >= 3 or size of PlayerTown > 425
-            if PortalsActivated == 0
+            if PortalsActivated == 0 and LC8_LargeSiegeOver == 1
                 PortalsActivated = 1
                 PortalTimer = create timer for 360 seconds
             end if
         end if
 
-        if PortalPlatoonsActivated == 0 and not town JapaneseCapital is under takeover from player 0 and not town PlayerTown is under takeover from player 1 //Also start aggressive altars here
+        if PortalPlatoonsActivated == 0 and not town JapaneseCapital is under takeover from player 0 and not town PlayerTown is under takeover from player 1 and LC8_LargeSiegeOver == 1 and PortalsActivated == 1 //Also start aggressive altars here
             if get PortalTimer time remaining <= 0
                 PortalPlatoonsActivated = 1
                 run background script LC8_PortalPlatoons
@@ -2365,13 +2366,13 @@ start
         end if
 
         if TownsConverted >= 3 or PLAYER of JapaneseTown1 != 1 or PLAYER of JapaneseTown2 != 1
-            if EarthquakeFirstTime == 0
+            if EarthquakeFirstTime == 0 and LC8_LargeSiegeOver == 1
                 EarthquakeFirstTime = 1
                 EarthquakeTimer = create timer for 720 seconds
             end if
         end if
 
-        if EarthquakeFirstTime == 1 and HEALTH of AIEarthquake >= 1.0 and get EarthquakeTimer time remaining <= 0 and PLAYER of JapaneseCapital == 1 and CinemaIsRunning == 0 and not town PlayerTown is under takeover from player 1 and PLAYER of PlayerTown == 0
+        if EarthquakeFirstTime == 1 and HEALTH of AIEarthquake >= 1.0 and get EarthquakeTimer time remaining <= 0 and PLAYER of JapaneseCapital == 1 and CinemaIsRunning == 0 and not town PlayerTown is under takeover from player 1 and PLAYER of PlayerTown == 0 and LC8_LargeSiegeOver == 1 and EarthquakeFirstTime == 1
             if TownsConverted >= 3 or PLAYER of JapaneseTown1 != 1 or PLAYER of JapaneseTown2 != 1
 
                 WT_SkyTransitionAllowed = 0
