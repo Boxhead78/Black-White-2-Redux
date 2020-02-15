@@ -222,7 +222,10 @@ begin script LC7_Platoon15Actions
     AttackMode = 0
     Building = 0
     RecalculateTimer = create timer for 0 seconds
-    
+    AttackingPoint = AttackPos[0]
+    AttackingPointFallBack = AttackPos[1]
+    Threshold = 0
+
 start
 
 wait 240 seconds
@@ -481,12 +484,20 @@ begin loop
                     TownCapturePlatoons[0]--
                 end if
                 clear LC7_Platoon[15] action queue
-            elsif LC7_Platoon[15] can navigate to {AttackPos[0]} + {20,0,20}
+            elsif LC7_Platoon[15] can navigate to {AttackingPoint} and not {LC7_Platoon[15]} near {AttackingPoint} radius 25 and get player 0 influence at {AttackingPoint} == 0
                 clear LC7_Platoon[15] action queue
-                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackPos[0]} + {20,0,20} to LC7_Platoon[15] action queue
-            elsif not {LC7_Platoon[1]} near {AttackPos[1]} radius 25
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPoint} to LC7_Platoon[15] action queue
+            elsif not {LC7_Platoon[15]} near {AttackingPointFallBack} radius 25
                 clear LC7_Platoon[15] action queue
-                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackPos[1]} + {20,0,20} to LC7_Platoon[15] action queue
+                if get player 0 influence at {AttackingPointFallBack} > 0
+                    begin loop
+                        AttackingPointFallBack = marker at {AttackingPointFallBack} + {number from -Threshold to Threshold,number from -Threshold to Threshold}
+                        Threshold += 5
+                        until (LC7_Platoon[15] can navigate to {AttackingPointFallBack} and get player 0 influence at {AttackingPointFallBack} == 0) or Threshold > 999
+                    end loop
+                    Threshold = 1
+                end if
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPointFallBack} to LC7_Platoon[15] action queue
             end if
             until LC7_Platoon[15] not exists
         end loop
@@ -773,7 +784,10 @@ begin script LC7_Platoon16Actions
     TestCreature2 = 0
     Timer = 0
     RecalculateTimer = create timer for 0 seconds
-    
+    AttackingPoint = AttackPos[2]
+    AttackingPointFallBack = AttackPos[1]
+    Threshold = 0
+
 start
 
 wait 240 seconds
@@ -979,12 +993,20 @@ begin loop
                     TownCapturePlatoons[0]--
                 end if
                 clear LC7_Platoon[16] action queue
-            elsif LC7_Platoon[16] can navigate to {AttackPos[2]}
+            elsif LC7_Platoon[16] can navigate to {AttackingPoint} and not {LC7_Platoon[16]} near {AttackingPoint} radius 25 and get player 0 influence at {AttackingPoint} == 0
                 clear LC7_Platoon[16] action queue
-                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackPos[2]} to LC7_Platoon[16] action queue
-            elsif not {LC7_Platoon[16]} near {AttackPos[1]} radius 25
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPoint} to LC7_Platoon[16] action queue
+            elsif not {LC7_Platoon[16]} near {AttackingPointFallBack} radius 25
                 clear LC7_Platoon[16] action queue
-                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackPos[1]} to LC7_Platoon[16] action queue
+                if get player 0 influence at {AttackingPointFallBack} > 0
+                    begin loop
+                        AttackingPointFallBack = marker at {AttackingPointFallBack} + {number from -Threshold to Threshold,number from -Threshold to Threshold}
+                        Threshold += 5
+                        until (LC7_Platoon[16] can navigate to {AttackingPointFallBack} and get player 0 influence at {AttackingPointFallBack} == 0) or Threshold > 999
+                    end loop
+                    Threshold = 1
+                end if
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPointFallBack} to LC7_Platoon[16] action queue
             end if
         //end if
 
@@ -1019,7 +1041,10 @@ begin script LC7_Platoon17Actions
     TestCreature2 = 0
     Timer = 0
     RecalculateTimer = create timer for 0 seconds
-    
+    AttackingPoint = AttackPos[0]
+    AttackingPointFallBack = AttackPos[1]
+    Threshold = 0
+
 start
 
 begin loop
@@ -1207,12 +1232,20 @@ begin loop
                     TownCapturePlatoons[0]--
                 end if
                 clear LC7_Platoon[17] action queue
-            elsif LC7_Platoon[17] can navigate to {AttackPos[0]}
+            elsif LC7_Platoon[17] can navigate to {AttackingPoint} and not {LC7_Platoon[17]} near {AttackingPoint} radius 25 and get player 0 influence at {AttackingPoint} == 0
                 clear LC7_Platoon[17] action queue
-                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackPos[0]} to LC7_Platoon[17] action queue
-            elsif not {LC7_Platoon[17]} near {AttackPos[1]} radius 25
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPoint} to LC7_Platoon[17] action queue
+            elsif not {LC7_Platoon[17]} near {AttackingPointFallBack} radius 25
                 clear LC7_Platoon[17] action queue
-                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackPos[1]} to LC7_Platoon[17] action queue
+                if get player 0 influence at {AttackingPointFallBack} > 0
+                    begin loop
+                        AttackingPointFallBack = marker at {AttackingPointFallBack} + {number from -Threshold to Threshold,number from -Threshold to Threshold}
+                        Threshold += 5
+                        until (LC7_Platoon[17] can navigate to {AttackingPointFallBack} and get player 0 influence at {AttackingPointFallBack} == 0) or Threshold > 999
+                    end loop
+                    Threshold = 1
+                end if
+                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPointFallBack} to LC7_Platoon[17] action queue
             end if
         end if
 
