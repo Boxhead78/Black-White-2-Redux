@@ -1363,6 +1363,17 @@ start
                 end if
             end if
 
+            if LC8_LargeSiegeLaunchAttack == 0 and PointOn >= 2
+                PointOn = 2
+                disable siege weapon SiegeWeapon auto attack
+                wait 5 seconds
+                clear siege weapon SiegeWeapon action queue
+                add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {Waypoint2} to siege weapon SiegeWeapon action queue
+                wait until HurricaneActive == 1 or 60 seconds
+                wait until HurricaneActive == 0 or 30 seconds
+                enable siege weapon SiegeWeapon auto attack
+            end if
+
             until SiegeWeapon not exists
         end loop
     else    
