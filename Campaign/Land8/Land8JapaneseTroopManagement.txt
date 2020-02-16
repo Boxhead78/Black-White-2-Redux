@@ -569,6 +569,91 @@ begin loop
         end if
     end if
 
+    if Type == Melee and Task == Special
+        PlayerCreature = get distance from {Platoon} to {oCreature}
+        if PlayerCreature <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00 and Platoon can navigate to {oCreature} and LC8_LargeSiegeLaunchAttack == 1
+            clear Platoon action queue
+            begin loop
+                PlayerCreature = get distance from {Platoon} to {oCreature}
+                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_MOVING_OBJECT using oCreature to Platoon action queue
+                NumPat1 = get number of villagers in platoon Platoon
+                until NumPat1 == 0 or SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature == 0.00 or not Platoon can navigate to {oCreature} or PlayerCreature > 150 * 1.25 or LC8_LargeSiegeLaunchAttack == 0
+            end loop
+            clear Platoon action queue
+        end if
+        
+        PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 150
+        Catapult = get siege weapon of player 0 nearest {Platoon} radius 50
+        if PlayerPlatoon1 exists and Platoon can navigate to {PlayerPlatoon1} and LC8_LargeSiegeLaunchAttack == 1
+            clear Platoon action queue
+            begin loop
+                PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 150 * 1.25
+                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_PLATOON using PlayerPlatoon1 to Platoon action queue
+                NumPat1 = get number of villagers in platoon Platoon
+                HeTeste1 = get number of villagers in platoon PlayerPlatoon1
+                until NumPat1 == 0 or HeTeste1 == 0 or not Platoon can navigate to {PlayerPlatoon1} or PlayerPlatoon1 not exists or LC8_LargeSiegeLaunchAttack == 0
+            end loop
+            clear Platoon action queue
+        elsif Catapult exists and Platoon can navigate to {Catapult} and LC8_LargeSiegeLaunchAttack == 1
+            clear Platoon action queue
+            a = 0
+            begin loop
+                Catapult = get siege weapon of player 0 nearest {Platoon} radius 50 * 1.25
+                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Catapult to Platoon action queue
+                NumPat1 = get number of villagers in platoon Platoon
+                PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 150
+                if PlayerPlatoon1 exists and Platoon can navigate to {PlayerPlatoon1}
+                    a = 1
+                end if
+                until NumPat1 == 0 or Catapult not exists or not Platoon can navigate to {Catapult} or a == 1 or Catapult not exists or LC8_LargeSiegeLaunchAttack == 0
+            end loop
+            clear Platoon action queue
+            a = 0
+        end if
+
+    elsif Type == Ranged and Task == Special
+        PlayerCreature = get distance from {Platoon} to {oCreature}
+        if PlayerCreature <= 150 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00 and Platoon can navigate to {oCreature} and LC8_LargeSiegeLaunchAttack == 1
+            clear Platoon action queue
+            begin loop
+                PlayerCreature = get distance from {Platoon} to {oCreature}
+                add action PLATOON_AGENDA_ACTION_RANGED_ATTACK_MAINTAINING_DISTANCE using oCreature to Platoon action queue
+                NumPat1 = get number of villagers in platoon Platoon
+                until NumPat1 == 0 or SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature == 0.00 or not Platoon can navigate to {oCreature} or PlayerCreature > 150 * 1.25 or LC8_LargeSiegeLaunchAttack == 0
+            end loop
+            clear Platoon action queue
+        end if
+        
+        PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 150
+        Catapult = get siege weapon of player 0 nearest {Platoon} radius 50
+        if PlayerPlatoon1 exists and Platoon can navigate to {PlayerPlatoon1} and LC8_LargeSiegeLaunchAttack == 1
+            clear Platoon action queue
+            begin loop
+                PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 150 * 1.25
+                add action PLATOON_AGENDA_ACTION_RANGED_ATTACK_MAINTAINING_DISTANCE using PlayerPlatoon1 to Platoon action queue
+                NumPat1 = get number of villagers in platoon Platoon
+                HeTeste1 = get number of villagers in platoon PlayerPlatoon1
+                until NumPat1 == 0 or HeTeste1 == 0 or not Platoon can navigate to {PlayerPlatoon1} or PlayerPlatoon1 not exists or LC8_LargeSiegeLaunchAttack == 0
+            end loop
+            clear Platoon action queue
+        elsif Catapult exists and Platoon can navigate to {Catapult} and LC8_LargeSiegeLaunchAttack == 1
+            clear Platoon action queue
+            a = 0
+            begin loop
+                Catapult = get siege weapon of player 0 nearest {Platoon} radius 50 * 1.25
+                add action PLATOON_AGENDA_ACTION_RANGED_ATTACK_MAINTAINING_DISTANCE using Catapult to Platoon action queue
+                NumPat1 = get number of villagers in platoon Platoon
+                PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius 150
+                if PlayerPlatoon1 exists and Platoon can navigate to {PlayerPlatoon1}
+                    a = 1
+                end if
+                until NumPat1 == 0 or Catapult not exists or not Platoon can navigate to {Catapult} or a == 1 or Catapult not exists or LC8_LargeSiegeLaunchAttack == 0
+            end loop
+            clear Platoon action queue
+            a = 0
+        end if
+    end if
+
     PlayerSettlement = get nearest town at {Platoon} for player 0 radius 500
     //Not a Armory, it's a towncentre.
     Armory = get building ABODE_NUMBER_TOWN_CENTRE in PlayerSettlement min built 1.0
