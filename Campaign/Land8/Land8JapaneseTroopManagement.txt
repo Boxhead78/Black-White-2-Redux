@@ -1053,7 +1053,7 @@ begin loop
 
     elsif Task == Special
         //if get size of Platoon action queue < 1
-            if LC8_LargeSiegeLaunchAttack == 1
+            if LC8_LargeSiegeLaunchAttack == 1 and HurricaneActive == 0
                 if Platoon can navigate to object oTownCentre and PLAYER of PlayerTown == 0
                     wait number from 5 to 25 seconds
                     a = 1
@@ -1169,7 +1169,7 @@ begin loop
                     end if
                     add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPointFallBack} to Platoon action queue
                 end if
-            elsif not {Platoon} near {AttackingPointFallBack} and LC8_LargeSiegeLaunchAttack == 0
+            elsif not {Platoon} near {AttackingPointFallBack}
                 clear Platoon action queue
                 if get player 0 influence at {AttackingPointFallBack} > 0
                     begin loop
@@ -1290,6 +1290,10 @@ start
 
                             elsif PointOn == 2
                                 if SiegeWeapon can navigate to {Waypoint3}
+                                    if Type == Special
+                                        wait until LC8_LargeSiegeLaunchAttack == 1
+                                        SiegeOnPointTimer = create timer for 40 seconds
+                                    end if
                                     add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {Waypoint3} to siege weapon SiegeWeapon action queue
                                 end if
 
