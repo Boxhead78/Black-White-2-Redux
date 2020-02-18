@@ -1819,6 +1819,8 @@ begin script LC7_Japanese_Capital
     
     AttackPlatoonTimer[2]
 
+    LargeAttackTimer = create timer for 1800 seconds
+
 start
 
     AttackNearestTownTimer = create timer for 300 seconds
@@ -2527,21 +2529,23 @@ start
             end if
         end if
 
-        if Difficulty >= 4 or HardMode == 1
-            if TownsConverted >= 4 or get army size in town PlayerTown > 60 or size of PlayerTown > 325
-                if TownsConverted >= 2 //If player has a large army, start siege earlier
-                    if PLAYER of JapaneseTown1 == 1 and not town JapaneseTown1 is under takeover from player 0 and LC7_LargeSiegeIsRunning == 0 and SiegeCheck == 0
-                        SiegeCheck = 1
-                        wait number from 20 to 30 seconds
-                        LC7_LargeSiegeIsRunning = 1
-                    elsif not PLAYER of JapaneseTown1 == 1 and SiegeCheck == 0
-                        SiegeCheck = 1
+        if get LargeAttackTimer time remaining <= 0
+            if Difficulty >= 4 or HardMode == 1
+                if TownsConverted >= 4 or get army size in town PlayerTown > 60 or size of PlayerTown > 325
+                    if TownsConverted >= 2 //If player has a large army, start siege earlier
+                        if PLAYER of JapaneseTown1 == 1 and not town JapaneseTown1 is under takeover from player 0 and LC7_LargeSiegeIsRunning == 0 and SiegeCheck == 0
+                            SiegeCheck = 1
+                            wait number from 20 to 30 seconds
+                            LC7_LargeSiegeIsRunning = 1
+                        elsif not PLAYER of JapaneseTown1 == 1 and SiegeCheck == 0
+                            SiegeCheck = 1
+                        end if
                     end if
                 end if
-            end if
-        else
-            if SiegeCheck == 0
-                SiegeCheck = 1
+            else
+                if SiegeCheck == 0
+                    SiegeCheck = 1
+                end if
             end if
         end if
 
