@@ -229,6 +229,7 @@ begin loop
     if get StaticPlatoonsActionTimer time remaining <= 0
         StaticPlatoonGoodWaypoint = StaticPlatoonGoodPos[number from 0 to 3]
         StaticPlatoonEvilWaypoint = StaticPlatoonEvilPos[number from 0 to 2]
+        wait until ALLOWED_TO_ATTACK == 0
         wait 60 seconds //Give platoons 60 seconds to react to new orders
         StaticPlatoonsActionTimer = create timer for number from 300 to 1200 seconds
     end if
@@ -345,40 +346,42 @@ begin loop
         end if
     end if
 
-    if get ThisStaticPlatoonActionTimer time remaining <= 0
-        ThisStaticPlatoonActionTimer = create timer for number from 25 to 35 seconds
-        //If emergency in OriginTown go defend it
-        PlayerPlatoon1 = get platoon of player 0 nearest {OriginTown} radius 500
-        Catapult = get siege weapon of player 0 nearest {OriginTown} radius 500
-        PlayerCreature = get distance from {OriginTown} to {oCreature}
-        if PlayerPlatoon1 exists or Catapult exists or (PlayerCreature <= 500 and HEALTH of oCreature > 0.00)
-            ThisOriginTownEmergency = 1
-        else
-            ThisOriginTownEmergency = 0
-        end if
-        if ThisOriginTownEmergency == 1
-            if ThisStaticPlatoonActive == 1
-                StaticPlatoonsActive--
-                ThisStaticPlatoonActive = 0
-            end if
-        end if
-    end if
-
-    if get StaticPlatoonsActionTimer time remaining <= 0
-        //say "DEBUG: StaticPlatoonsActive = $d" with number StaticPlatoonsActive
-        if get ThisStaticPlatoonActionTimer time remaining <= 5
-            wait 5 seconds
-            if number from 1 to 4 == 4
-                ThisStaticPlatoonActionTimer = create timer for 60 seconds
-                if ThisStaticPlatoonActive == 0 and StaticPlatoonsActive <= LC9_StaticPlatoonCounter * 0.2 //20% of all static platoons max
-                    StaticPlatoonsActive++
-                    ThisStaticPlatoonActive = 1
-                end if
+    if ALLOWED_TO_ATTACK == 1
+        if get ThisStaticPlatoonActionTimer time remaining <= 0
+            ThisStaticPlatoonActionTimer = create timer for number from 25 to 35 seconds
+            //If emergency in OriginTown go defend it
+            PlayerPlatoon1 = get platoon of player 0 nearest {OriginTown} radius 500
+            Catapult = get siege weapon of player 0 nearest {OriginTown} radius 500
+            PlayerCreature = get distance from {OriginTown} to {oCreature}
+            if PlayerPlatoon1 exists or Catapult exists or (PlayerCreature <= 500 and HEALTH of oCreature > 0.00)
+                ThisOriginTownEmergency = 1
             else
-                ThisStaticPlatoonActionTimer = create timer for 60 seconds
+                ThisOriginTownEmergency = 0
+            end if
+            if ThisOriginTownEmergency == 1
                 if ThisStaticPlatoonActive == 1
                     StaticPlatoonsActive--
                     ThisStaticPlatoonActive = 0
+                end if
+            end if
+        end if
+
+        if get StaticPlatoonsActionTimer time remaining <= 0
+            //say "DEBUG: StaticPlatoonsActive = $d" with number StaticPlatoonsActive
+            if get ThisStaticPlatoonActionTimer time remaining <= 5
+                wait 5 seconds
+                if number from 1 to 4 == 4
+                    ThisStaticPlatoonActionTimer = create timer for 60 seconds
+                    if ThisStaticPlatoonActive == 0 and StaticPlatoonsActive <= LC9_StaticPlatoonCounter * 0.2 //20% of all static platoons max
+                        StaticPlatoonsActive++
+                        ThisStaticPlatoonActive = 1
+                    end if
+                else
+                    ThisStaticPlatoonActionTimer = create timer for 60 seconds
+                    if ThisStaticPlatoonActive == 1
+                        StaticPlatoonsActive--
+                        ThisStaticPlatoonActive = 0
+                    end if
                 end if
             end if
         end if
