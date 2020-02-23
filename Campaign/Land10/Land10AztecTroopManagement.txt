@@ -424,6 +424,14 @@ if Platoon == LC10_Platoon[7] or Platoon == LC10_Platoon[8] or Platoon == LC10_P
     end if
 end if
 
+if Platoon == LC10_Platoon[11] or Platoon == LC10_Platoon[12] or Platoon == LC10_Platoon[13]
+    wait until LC10_Platoon[11] exists and LC10_Platoon[12] exists and LC10_Platoon[13] exists and LC10_SiegeCatapult[2] exists and LC10_SiegeCatapult[3] exists and ({LC10_SiegeCatapult[2]} near {AztecCapital} radius 800) and ({LC10_SiegeCatapult[3]} near {AztecCapital} radius 800)
+end if
+
+if Platoon == LC10_Platoon[28]
+    wait until LC10_Platoon[28] exists and LC10_SiegeCatapult[6] exists and ({LC10_SiegeCatapult[6]} near {AztecCapital} radius 800)
+end if
+
 begin loop
 
     if Type == Melee and Task != Special
@@ -1012,10 +1020,10 @@ begin loop
                     TownCapturePlatoons[0]--
                 end if
                 clear Platoon action queue
-            elsif Platoon can navigate to {AttackingPoint} and not {Platoon} near {AttackingPoint} radius 25 and get player 0 influence at {AttackingPoint} == 0
+            elsif Platoon can navigate to {AttackingPoint} and not {Platoon} near {AttackingPoint} radius 25 and get player 0 influence at {AttackingPoint} == 0 and VolcanoActive == 0
                 clear Platoon action queue
                 add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPoint} to Platoon action queue
-            elsif not {Platoon} near {AttackingPointFallBack} radius 25
+            elsif not {Platoon} near {AttackingPointFallBack} radius 25 and VolcanoActive == 0
                 clear Platoon action queue
                 if get player 0 influence at {AttackingPointFallBack} > 0
                     begin loop
@@ -1095,6 +1103,14 @@ start
     //Group up here
     if SiegeWeapon == LC10_SiegeCatapult[0] or SiegeWeapon == LC10_SiegeCatapult[1] or SiegeWeapon == LC10_SiegeCatapult[7] or SiegeWeapon == LC10_SiegeCatapult[8]
         wait until LC10_Platoon[7] exists and LC10_Platoon[8] exists and LC10_Platoon[9] exists and LC10_Platoon[10] exists and LC10_SiegeCatapult[0] exists and LC10_SiegeCatapult[1] exists and LC10_SiegeCatapult[7] exists and LC10_SiegeCatapult[8] exists and ({LC10_SiegeCatapult[0]} near {AztecCapital} radius 800) and ({LC10_SiegeCatapult[1]} near {AztecCapital} radius 800) and ({LC10_SiegeCatapult[7]} near {AztecCapital} radius 800) and ({LC10_SiegeCatapult[8]} near {AztecCapital} radius 800)
+    end if
+
+    if SiegeWeapon == LC10_SiegeCatapult[2] or SiegeWeapon == LC10_SiegeCatapult[3]
+        wait until VolcanoActive == 0 and LC10_Platoon[11] exists and LC10_Platoon[12] exists and LC10_Platoon[13] exists and LC10_SiegeCatapult[2] exists and LC10_SiegeCatapult[3] exists and ({LC10_SiegeCatapult[2]} near {AztecCapital} radius 800) and ({LC10_SiegeCatapult[3]} near {AztecCapital} radius 800)
+    end if
+
+    if SiegeWeapon == LC10_SiegeCatapult[6]
+        wait until LC10_Platoon[28] exists and LC10_SiegeCatapult[6] exists and ({LC10_SiegeCatapult[6]} near {AztecCapital} radius 800)
     end if
 
     disable siege weapon SiegeWeapon auto attack
