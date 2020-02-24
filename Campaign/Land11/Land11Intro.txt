@@ -3,7 +3,9 @@ define script LC11_Intro
 
 begin script LC11_Intro
 
+Podium=0
 Tez=0
+TezGuard[2]
 EdibleVillager = 0
 VillagerPos = marker at {1642.66,311.26,1685.80}
 
@@ -17,6 +19,8 @@ GreekPlatoon[4]
 GreekPlatoonPos[4]
 
 WindMixer = 0
+
+RelativePos = 0
 
 start
 
@@ -69,19 +73,16 @@ start
     run background script PT_CreateArtyJapanesePlatoonRanged(GreekPlatoon[3],0)
 
     IntroPlatoon[0] = create platoon ARMY_UNIT_TYPE_RANGED_5 at {IntroPlatoonPos[0]} with 120 * RecruitSizeModifier men and 0 women
-    attach IntroPlatoon[0] to AztecCapital
     PLAYER of IntroPlatoon[0] = 1
     set IntroPlatoon[0] focus to {AztecCapital}
     set IntroPlatoon[0] focus to {AztecCapital}
 
     IntroPlatoon[1] = create platoon ARMY_UNIT_TYPE_MELEE_5 at {IntroPlatoonPos[1]} with 120 * RecruitSizeModifier men and 0 women
-    attach IntroPlatoon[1] to AztecCapital
     PLAYER of IntroPlatoon[1] = 1
     set IntroPlatoon[1] focus to {AztecCapital}
     set IntroPlatoon[1] focus to {AztecCapital}
 
     IntroPlatoon[2] = create platoon ARMY_UNIT_TYPE_RANGED_5 at {IntroPlatoonPos[2]} with 120 * RecruitSizeModifier men and 0 women
-    attach IntroPlatoon[2] to AztecCapital
     PLAYER of IntroPlatoon[2] = 1
     set IntroPlatoon[2] focus to {AztecCapital}
     set IntroPlatoon[2] focus to {AztecCapital}
@@ -123,8 +124,21 @@ start
 
         Tez = create VILLAGER TEZOZOMOC at {482.73,484.38,1590.81}
         EdibleVillager = create VILLAGER GREEK_HOUSEWIFE at {VillagerPos}
-        ALTITUDE of Tez = 3.3
         set Tez focus to {482.48,479.36,1582.42}
+        Podium = create ROCK_OBJECT MOBILE_STATIC_INFO_SCRIPT_OBJECT at {482.73,484.38,1594.81}
+        ANGLE of Podium = 178
+        override mesh for Podium with "..\models\m_aztectowncentre_minor"
+        disable Podium pickup
+        enable Podium indestructible
+
+        RelativePos = marker at get world position from Tez to {8,0,0}
+        TezGuard[0] = create platoon PLATOON_INFO_AZTEC_MELEE_9 at {RelativePos} with 2 men and 0 women
+        RelativePos = marker at get world position from Tez to {-8,0,0}
+        TezGuard[1] = create platoon PLATOON_INFO_AZTEC_MELEE_9 at {RelativePos} with 2 men and 0 women
+        PLAYER of TezGuard[0] = 1
+        PLAYER of TezGuard[1] = 1
+        set TezGuard[0] focus to {476.48,479.36,1000.42}
+        set TezGuard[1] focus to {488.48,479.36,1000.42}
 
         //set camera position to {2919.016, 700.776, -87.309}
         //set camera focus to {2857.248, 667.988, -15.832}
@@ -213,6 +227,8 @@ start
         delete IntroCatapult[3]
         delete IntroCatapult[4]
         delete IntroCatapult[5]
+        delete TezGuard[0]
+        delete TezGuard[1]
 
     end cinema
     DM_DynamicMusicDisallowed = 0
