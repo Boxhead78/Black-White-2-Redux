@@ -9,6 +9,7 @@ define script Land12ScriptManager
 define script LC12_SetupCreature
 define script LC12_LavaPuddles
 define script LC12_SetupDamagedTowns(whichTown,Amount)
+define script LC12_SetSky
 define script LC12_SetupWeather(Amount,Position)
 define script LC12_SetupGodReq
 define script LC12_SetupPrison
@@ -373,7 +374,8 @@ begin script LC12_SetupWeather(Amount,Position)
 start
 
     WT_SkyTransitionAllowed = 0
-    enable predefined sky "land12" time 0
+    enable predefined sky "land12" time 1
+    wait 1 seconds
 
     AmountInit = Amount
 
@@ -386,9 +388,7 @@ start
     end while
 
     begin loop
-        enable predefined sky "land12" time 0
-        wait 0.5 seconds
-        enable predefined sky "land12_cc" time 0
+        run script LC12_SetSky
         until DeleteWeather == 1
     end loop
 
@@ -407,6 +407,16 @@ start
     end while
 
 end script LC12_SetupWeather
+
+begin script LC12_SetSky
+
+start
+
+enable predefined sky "land12" time 0
+wait 0.5 seconds
+enable predefined sky "land12_cc" time 0
+
+end script LC12_SetSky
 
 begin script LC12_SetupPrison
 
