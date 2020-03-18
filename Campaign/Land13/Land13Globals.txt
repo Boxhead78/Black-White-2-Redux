@@ -142,6 +142,7 @@ end script Globals
 begin script LC13_CreateUndeadPlatoon(whichPlatoon,howManyVillagersToDelete,howManyVillagersToSpawn,whichMesh)
 
     ArmyFlag = 0
+    ArmySize = 0
     Ghost[350]
     counter = 0
     myEffect = 0
@@ -165,20 +166,13 @@ start
     SCALE of myEffect = 2
 
     //Remove old villagers
-    while counter < howManyVillagersToDelete - 1 and size of whichPlatoon > 1
-        if counter < howManyVillagersToDelete
-            Villager = get villager from platoon whichPlatoon nearest {whichPlatoon}
-            myEffect = create visual effect VISUAL_EFFECT_WEATHER_LIGHTNING_EXPLOSION at {Villager} + {0,1,0} time 1.5
-            set myEffect color red 148 green 0 blue 211
-            SCALE of myEffect = 0.1
-            delete Villager
-        end if
-        counter++
+    ArmySize = get number of villagers in platoon whichPlatoon
+    force while get number of villagers in platoon whichPlatoon > 1
+        Villager = get villager from platoon whichPlatoon nearest {whichPlatoon}
+        delete Villager
     end while
-
     Villager = get villager from platoon whichPlatoon nearest {whichPlatoon}
     SCALE of Villager = 0.01
-    counter = 0
 
     //set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_MASS of whichPlatoon to 1.0
     set platoon movement value FORMATION_MOVEMENT_STAT_ACCELERATION_MAX of whichPlatoon to 30.0
@@ -193,7 +187,7 @@ start
     override mesh for ArmyFlag with "..\models\m_bannerundead"
     disable platoon whichPlatoon camp
 
-    while counter < howManyVillagersToSpawn
+    while counter < howManyVillagersToSpawn and counter < ArmySize
         //Create ghosts
         Ghost[counter] = create VILLAGER AZTEC_FORESTER at {whichPlatoon} + {number from -10 to 10,number from -10 to 10}
         myEffect = create visual effect VISUAL_EFFECT_WEATHER_LIGHTNING_EXPLOSION at {Ghost[counter]} + {0,1,0} time 1.5

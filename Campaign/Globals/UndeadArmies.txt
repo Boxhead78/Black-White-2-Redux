@@ -100,6 +100,7 @@ end script UA_SpawnUndeadPlatoonCheck
 begin script UA_CreateUndeadPlatoon(PlayerID,Graveyard,howManyVillagers)
 
     ArmyFlag = 0
+    ArmySize = 0
     Ghost[999]
     counter = 0
     myEffect = 0
@@ -143,9 +144,16 @@ start
     override mesh for ArmyFlag with "..\models\m_bannerundead"
     disable platoon myArmy camp
 
+    ArmySize = get number of villagers in platoon myArmy
+    force while get number of villagers in platoon myArmy > 1
+        Villager = get villager from platoon myArmy nearest {myArmy}
+        delete Villager
+    end while
     Villager = get villager from platoon myArmy nearest {myArmy}
     SCALE of Villager = 0.01
-    force while counter < howManyVillagers
+    Villager = get villager from platoon myArmy nearest {myArmy}
+    SCALE of Villager = 0.01
+    force while counter < howManyVillagers and counter < ArmySize
         //Create ghosts
         Ghost[counter] = create VILLAGER AZTEC_FORESTER at {myArmy} + {number from -10 to 10,number from -10 to 10}
         run background script UA_GhostScript(PlayerID,Ghost[counter],myArmy)
