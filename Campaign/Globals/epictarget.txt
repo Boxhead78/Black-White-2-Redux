@@ -1,9 +1,9 @@
-define script EpicTargeter(whichTown,EpicPos,Volcano,whichEpic)
+define script EpicTargeter(whichTown,EpicPos,Volcano,whichEpic,PlayerID)
 
 global ET_FireEpicLocation = 0
+global ET_FireCheckTimer = 0
 
-
-begin script EpicTargeter(whichTown,EpicPos,Volcano,whichEpic)
+begin script EpicTargeter(whichTown,EpicPos,Volcano,whichEpic,PlayerID)
 
     CounterEpic = 0
     Building = 0
@@ -14,50 +14,57 @@ begin script EpicTargeter(whichTown,EpicPos,Volcano,whichEpic)
     ExitLoop = 0
     Villager = 0
     TownOK = 0
+    myPlatoon = 0
+    myCatapult = 0
 
 start
 
-begin loop
-    CounterEpic = 0
-    while CounterEpic < 50 and ExitLoop == 0
-        if Volcano == 0
-            InfluencePos = get player 0 influence at {EpicPos}
-            if InfluencePos < 1
-                ET_FireEpicLocation = marker at {EpicPos}
-            else
-                Building = get random abode in town whichTown
-                if Building not exists
-                    ET_FireEpicLocation = marker at {whichTown} + {number from minNumber to maxNumber, number from minNumber to maxNumber}
+if get ET_FireCheckTimer time remaining <= 0
+    begin loop
+        CounterEpic = 0
+        while CounterEpic < 50 and ExitLoop == 0
+            if Volcano == 0
+                InfluencePos = get player 0 influence at {EpicPos}
+                if InfluencePos < 1
+                    ET_FireEpicLocation = marker at {EpicPos}
                 else
-                    ET_FireEpicLocation = marker at {Building} + {number from minNumber to maxNumber, number from minNumber to maxNumber}
+                    Building = get random abode in town whichTown
+                    if Building not exists
+                        ET_FireEpicLocation = marker at {whichTown} + {number from minNumber to maxNumber, number from minNumber to maxNumber}
+                    else
+                        ET_FireEpicLocation = marker at {Building} + {number from minNumber to maxNumber, number from minNumber to maxNumber}
+                    end if
                 end if
+            else
+                //Try Volcano nearest EpicPos (Due to scripted platoon behaivor in land 11)
+                ET_FireEpicLocation = marker at {EpicPos} + {number from minNumber to maxNumber, number from minNumber to maxNumber}
             end if
-        else
-            //Try Volcano nearest EpicPos (Due to scripted platoon behaivor in land 11)
-            ET_FireEpicLocation = marker at {EpicPos} + {number from minNumber to maxNumber, number from minNumber to maxNumber}
-        end if
-        Influence = get player 0 influence at {ET_FireEpicLocation}
-        Villager = create VILLAGER NORSE_HOUSEWIFE at {ET_FireEpicLocation} + {number from -5 to 5, number from -5 to 5}
-        if Influence < 1 and not {ET_FireEpicLocation} under water
-            if whichEpic == 3
-                if Villager can navigate to {ET_FireEpicLocation}
+            Influence = get player 0 influence at {ET_FireEpicLocation}
+            Villager = create VILLAGER NORSE_HOUSEWIFE at {ET_FireEpicLocation} + {number from -5 to 5, number from -5 to 5}
+            myPlatoon = get platoon of player PlayerID nearest {ET_FireEpicLocation} radius 150
+            myCatapult = get platoon of player PlayerID nearest {ET_FireEpicLocation} radius 150
+            if Influence < 1 and not {ET_FireEpicLocation} under water and myPlatoon not exists and myCatapult not exists
+                if whichEpic == 3
+                    if Villager can navigate to {ET_FireEpicLocation}
+                        ExitLoop = 1
+                    end if
+                else
                     ExitLoop = 1
                 end if
-            else
-                ExitLoop = 1
             end if
+            delete Villager
+            
+            CounterEpic++
+        end while
+        minNumber -= 25
+        maxNumber += 25
+        if minNumber > 999 and maxNumber > 999
+            minNumber = 25
+            maxNumber = 25
         end if
-        delete Villager
-        
-        CounterEpic++
-    end while
-    minNumber -= 25
-    maxNumber += 25
-    if minNumber > 999 and maxNumber > 999
-        minNumber = 25
-        maxNumber = 25
-    end if
-    until ExitLoop == 1
-end loop
+        until ExitLoop == 1
+    end loop
+    ET_FireCheckTimer = create timer for 90 seconds
+end if
 
 end script EpicTargeter

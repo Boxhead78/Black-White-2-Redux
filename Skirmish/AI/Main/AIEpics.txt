@@ -82,6 +82,8 @@ begin script SK_AIEpicFireLocation(PlayerID,whichEpic,Wonder)
     TownCentre = 0
     Platoon = 0
     Villager = 0
+    myPlatoon = 0
+    myCatapult = 0
 
     Hurricane = 0
     Earthquake = 0
@@ -118,13 +120,15 @@ start
                 FireEpicLocation[PlayerID] = marker at {Building} + {number from minNumber to maxNumber, number from minNumber to maxNumber}
             end if
             Influence = get player EnemyIDFinal[PlayerID] influence at {FireEpicLocation[PlayerID]}
+            myPlatoon = get platoon of player PlayerID nearest {FireEpicLocation[PlayerID]} radius 150
+            myCatapult = get platoon of player PlayerID nearest {FireEpicLocation[PlayerID]} radius 150
             if 1 == 2//whichEpic == 1 or whichEpic == 3 DEACTIVATED
-                if Influence < 1 and not {FireEpicLocation[PlayerID]} under water
+                if Influence < 1 and not {FireEpicLocation[PlayerID]} under water and myPlatoon not exists and myCatapult not exists
                     ExitLoop = 1
                 end if
             elsif whichEpic == 1 or whichEpic == 2 or whichEpic == 3
                 Villager = get VILLAGER at {FireEpicLocation[PlayerID]} radius 500
-                if Influence < 1 and not {FireEpicLocation[PlayerID]} under water and Villager exists
+                if Influence < 1 and not {FireEpicLocation[PlayerID]} under water and Villager exists and myPlatoon not exists and myCatapult not exists
                     if Villager can navigate to {FireEpicLocation[PlayerID]}
                         ExitLoop = 1
                     end if
