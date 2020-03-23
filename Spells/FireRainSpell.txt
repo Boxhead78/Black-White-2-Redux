@@ -2,7 +2,7 @@
 define script FirerainSpell(PlayerID,SpellPosition)
 define script Firerain_Fireballs(PlayerID,FirerainSpell)
 
-global Firerain_MaxCycles = 4 //Each cycle will fire 3 fireballs. 4 cycles = 12 fireballs
+global Firerain_MaxCycles = 4 //Each cycle will fire a barrel of fireballs
 
 
 begin script FirerainSpell(PlayerID,SpellPosition)
@@ -109,13 +109,13 @@ start
             FireballDestPos = marker at {FireballStartPos} + {number from -15 to -15,30,number from -15 to -15}
         end if
         FireballDestPosNew = FireballDestPos
-        while CounterFireball < 3
-            wait 0.45 seconds
+        CounterFireball = number from 5 to 7
+        while 0 < CounterFireball
+            wait 0.075 seconds
             FireballDestPos = marker at {FireballDestPosNew} + {number from -5 to 5,0,number from -5 to 5}
             Fireball = make player PlayerID throw miracle MIRACLE_TYPE_FIRE from ({FireballStartPos} + {0,1.5,0}) heading ({FireballDestPos} - {FireballStartPos})
-            CounterFireball++
+            CounterFireball--
         end while
-        CounterFireball = 0
         Counter++
     end while
 
