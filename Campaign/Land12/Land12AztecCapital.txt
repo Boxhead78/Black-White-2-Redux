@@ -20,6 +20,7 @@ define script LC12_AztecTown1VillagerManager
 define script LC12_AztecTown2RessourceManager
 define script LC12_AztecTown2VillagerManager
 define script DisableLocalPlatoonResponse
+define script LC12_DeathSpell(PlayerID,SpellPosition,GodPosition)
 define script LC12_PlatoonBehaivors
 define script LC12_GetPlayerUnits
 define script LC12_GenericTalusSpeeches(whichUnit,PlayerOfUnit)
@@ -3759,6 +3760,64 @@ begin loop
 end loop
 
 end script LC12_AttackNearestTownTimer
+
+
+begin script LC12_DeathSpell(PlayerID,SpellPosition,GodPosition)
+
+    myEffect = 0
+    myWonder = 0
+    AttackingPosition = 0
+    AttackingPositionFallBack = 0
+    myPlatoon1 = 0
+    myPlatoon2 = 0
+    myTown = 0
+
+start
+
+    //Effects here
+    myWonder = make player 1 throw miracle MIRACLE_TYPE_METEOR from ({GodPosition} + {0,-1.25,0}) heading ({SpellPosition} + {0,0,0} - {GodPosition})
+    set myWonder color red 148 green 0 blue 211
+    wait 2.5 seconds
+    delete myWonder
+
+    myEffect = create visual effect VISUAL_MIRACLE_METEOR_GROUND at {SpellPosition} time 25
+    set myWonder color red 148 green 0 blue 211
+    SCALE of myWonder = 1.0
+    wait 1.5 seconds
+    myEffect = create visual effect VISUAL_MIRACLE_HEAL_GROUND at {SpellPosition}  + {0,5,0} time 25
+    set myWonder color red 148 green 0 blue 211
+    SCALE of myWonder = 2.5
+
+    //Spawn Skeletons here
+    //Platoon1
+    myPlatoon1 = create platoon ARMY_UNIT_TYPE_MELEE_8 at {SpellPosition} + {-20,0,0} with 20 * RecruitSizeModifier men and 0 women
+    PLAYER of myPlatoon1 = 1
+    enable platoon myPlatoon1 respond to town AztecCapital attack
+    enable platoon myPlatoon1 respond to town AztecTown1 attack
+    enable platoon myPlatoon1 respond to town AztecTown2 attack
+    run background script LC12_CreateUndeadPlatoon(myPlatoon1,20 * RecruitSizeModifier,s_skeletonadultland2)
+
+    //Platoon2
+    myPlatoon2 = create platoon ARMY_UNIT_TYPE_MELEE_8 at {SpellPosition} + {20,0,0} with 20 * RecruitSizeModifier men and 0 women
+    PLAYER of myPlatoon2 = 1
+    enable platoon myPlatoon2 respond to town AztecCapital attack
+    enable platoon myPlatoon2 respond to town AztecTown1 attack
+    enable platoon myPlatoon2 respond to town AztecTown2 attack
+    run background script LC12_CreateUndeadPlatoon(myPlatoon2,20 * RecruitSizeModifier,s_skeletonadultland2)
+
+    begin loop
+        if get size of myPlatoon1 action queue == 0 and not {myPlatoon1} near {SpellPosition} + {-20,0,0} radius 50
+            clear myPlatoon1 action queue
+            add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {SpellPosition} + {-20,0,0} to myPlatoon1 action queue
+        end if
+        if get size of myPlatoon2 action queue == 0 and not {myPlatoon2} near {SpellPosition} + {20,0,0} radius 50
+            clear myPlatoon2 action queue
+            add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {SpellPosition} + {20,0,0} to myPlatoon2 action queue
+        end if
+        until myPlatoon1 not exists and myPlatoon2 not exists
+    end loop
+
+end script LC12_DeathSpell
 
 
 begin script LC12_PlatoonBehaivors
