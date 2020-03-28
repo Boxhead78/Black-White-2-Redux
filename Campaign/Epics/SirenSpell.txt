@@ -7,7 +7,6 @@ define script SetupDancerPositions(whichspell)
 define script DancerLookAtWonder(MyVillager, Wonder, Count, whichspell)
 define script SirenSpell(EnemyWonder, Siren)
 define script SirenSpellLightning(Siren,Cloud)
-define script SirenSpellDeleteCloud(Cloud)
 
 //--------------------------------------------------------------------------------------------------------------
 global DancePositions[20]
@@ -60,6 +59,7 @@ start
             wait until get SirenSubTimer time since set >= Marker6    
             say "BW2T_SCRIPT_SIREN_SONG_60"
             wait until read
+            wait 3 seconds
             clear dialogue
             SkipMeNow=1
         end while
@@ -308,6 +308,7 @@ start
         set cloud for RainyCloud above {RainyCloud} + {0, 30, 0}
         set RainyCloud properties rainfall 0.85 snowfall 0 overcast 0.9
         set cloud RainyCloud points to 5
+        set cloud RainyCloud altitude ALTITUDE of Siren + 270
 
         RelCamPos=marker at get world position from Wonder to {-13.391, 4.641, 1.841}
         RelCamFoc=marker at get world position from Wonder to {54.199, 77.960, 9.324}
@@ -736,7 +737,8 @@ start
     DM_DynamicMusicDisallowed = 0
     destroy mixer SirenMixer with fadetime 2
 
-    run background script SirenSpellDeleteCloud(RainyCloud)
+    wait until not {RainyCloud} viewed
+    delete RainyCloud
 
 end script SirenSpell
 
@@ -747,11 +749,11 @@ Number = 0
 start
 
     while StopLightning == 0
-        if StopLightning == 0 set lightning strike at {Siren} + {number from -33 to 33, number from -33 to 33} from Cloud scale 1 end if
+        if StopLightning == 0 set lightning strike at {Siren} + {number from -75 to 75, number from -75 to 75} from Cloud scale 0.33 end if
         Number = number from 1 to 3
         if Number == 1
             wait number from 1 to 2 seconds
-            if StopLightning == 0 set lightning strike at {Siren} + {number from -33 to 33, number from -33 to 33} from Cloud scale 1 end if
+            if StopLightning == 0 set lightning strike at {Siren} + {number from -75 to 75, number from -75 to 75} from Cloud scale 0.33 end if
         end if
         wait number from 20 to 35 seconds
     end while
@@ -759,13 +761,3 @@ start
     StopLightning = 0
 
 end script SirenSpellLightning
-
-begin script SirenSpellDeleteCloud(Cloud)
-
-start
-
-    wait 45 seconds
-    wait until not {Cloud} viewed and get distance from camera position to {Cloud} > 250
-    delete Cloud
-
-end script SirenSpellDeleteCloud

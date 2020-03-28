@@ -25,7 +25,15 @@ begin script Land6Siren(whichwonder, Siren)
     WaitUntilPairedAnimStarts=0
     SirenMixer=0
 
+    RainyCloud = 0
+
 start
+
+RainyCloud = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {Siren} + {0,100,0}
+set cloud for RainyCloud above {RainyCloud} + {0, 30, 0}
+set RainyCloud properties rainfall 0.85 snowfall 0 overcast 0.9
+set cloud RainyCloud points to 5
+set cloud RainyCloud altitude ALTITUDE of Siren + 270
 
 invoke AIEpic EPIC_WONDER_STAGE_1
 invoke AIEpic EPIC_WONDER_STAGE_2
@@ -310,5 +318,8 @@ play string sound "SCRIPT4_SEPIC_BEAMOFLIGHTSTART1"    //Short Beam Zap!
     end cinema//exit widescreen
     DM_DynamicMusicDisallowed = 0
 CinemaIsRunning = 0
+
+wait until not {RainyCloud} viewed
+delete RainyCloud
 
 end script Land6Siren
