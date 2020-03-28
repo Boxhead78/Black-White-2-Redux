@@ -6,6 +6,8 @@ define script SirenSubtitles
 define script SetupDancerPositions(whichspell)
 define script DancerLookAtWonder(MyVillager, Wonder, Count, whichspell)
 define script SirenSpell(EnemyWonder, Siren)
+define script SirenSpellLightning(Siren,Cloud)
+define script SirenSpellDeleteCloud(Cloud)
 
 //--------------------------------------------------------------------------------------------------------------
 global DancePositions[20]
@@ -13,6 +15,7 @@ global BellyPos=0
 global ATIEndFlag=0
 global Land11VolcanoCasting = 0
 global WhiChEpicSpellIsBeingCast = 0
+global StopLightning = 0
 
 //--------------------------------------------------------------------------------------------------------------
 begin script SirenSubtitles
@@ -255,6 +258,8 @@ begin script SirenSpell(EnemyWonder, Siren)
     SirenMixer=0
     HackVillexistingTimer=0
 
+    RainyCloud = 0
+
 start
 
     WhiChEpicSpellIsBeingCast = Siren
@@ -264,7 +269,7 @@ start
     set mixer SirenMixer channel AUDIO_MIXER_CHANNEL_ANIMATION_VILLAGER to 1.0
     set mixer SirenMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 1.0
     set mixer SirenMixer channel AUDIO_MIXER_CHANNEL_SCRIPT_SFX to 1.0
-    
+
     run script SetupDancerPositions(0)
 
     DM_DynamicMusicDisallowed = 1
@@ -299,6 +304,11 @@ start
         set fade red 255 green 255 blue 255 time 1
         wait 1 seconds
         
+        RainyCloud = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {Siren} + {0,100,0}
+        set cloud for RainyCloud above {RainyCloud} + {0, 30, 0}
+        set RainyCloud properties rainfall 0.85 snowfall 0 overcast 0.9
+        set cloud RainyCloud points to 5
+
         RelCamPos=marker at get world position from Wonder to {-13.391, 4.641, 1.841}
         RelCamFoc=marker at get world position from Wonder to {54.199, 77.960, 9.324}
         
@@ -519,6 +529,7 @@ start
         move camera focus to {RelCamFoc} time 6.5
         
         wait 6.5 seconds
+        run background script SirenSpellLightning(Siren,RainyCloud)
         //wait until camera ready
 
         set camera position follow Siren offset {-0.751, 7.898, 24.249}
@@ -684,6 +695,7 @@ start
         //play string sound "SCRIPT4_SEPIC_BEAMOFLIGHTLOOP6"
 
         invoke Siren EPIC_REMOVE_SIREN
+        StopLightning = 1
         set camera lens 70.000
 
         RelCamPos=marker at get world position from Siren to {-0.137, 15.183, 43.739}
@@ -724,4 +736,36 @@ start
     DM_DynamicMusicDisallowed = 0
     destroy mixer SirenMixer with fadetime 2
 
+    run background script SirenSpellDeleteCloud(RainyCloud)
+
 end script SirenSpell
+
+begin script SirenSpellLightning(Siren,Cloud)
+
+Number = 0
+
+start
+
+    while StopLightning == 0
+        if StopLightning == 0 set lightning strike at {Siren} + {number from -33 to 33, number from -33 to 33} from Cloud scale 1 end if
+        Number = number from 1 to 3
+        if Number == 1
+            wait number from 1 to 2 seconds
+            if StopLightning == 0 set lightning strike at {Siren} + {number from -33 to 33, number from -33 to 33} from Cloud scale 1 end if
+        end if
+        wait number from 20 to 35 seconds
+    end while
+
+    StopLightning = 0
+
+end script SirenSpellLightning
+
+begin script SirenSpellDeleteCloud(Cloud)
+
+start
+
+    wait 45 seconds
+    wait until not {Cloud} viewed and get distance from camera position to {Cloud} > 250
+    delete Cloud
+
+end script SirenSpellDeleteCloud
