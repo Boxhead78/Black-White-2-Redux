@@ -408,9 +408,11 @@ begin loop
                     TownCapturePlatoons[0]--
                 end if
                 clear LC6_Platoon[0] action queue
-            elsif LC6_Platoon[0] can navigate to {AttackingPoint} and not {LC6_Platoon[0]} near {AttackingPoint} radius 25 and get player 0 influence at {AttackingPoint} == 0
-                clear LC6_Platoon[0] action queue
-                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPoint} to LC6_Platoon[0] action queue
+            elsif LC6_Platoon[0] can navigate to {AttackingPoint} and get player 0 influence at {AttackingPoint} == 0
+                if not {LC6_Platoon[0]} near {AttackingPoint} radius 25
+                    clear LC6_Platoon[0] action queue
+                    add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPoint} to LC6_Platoon[0] action queue
+                end if
             elsif not {LC6_Platoon[0]} near {AttackingPointFallBack} radius 25
                 clear LC6_Platoon[0] action queue
                 if get player 0 influence at {AttackingPointFallBack} > 0
