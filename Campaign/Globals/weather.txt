@@ -12,6 +12,9 @@ define minActive = 300
 define maxActive = 600
 define minLightningDelay = 5
 define maxLightningDelay = 50
+define WT_SUNSET = 0
+define WT_DAY = 1
+define WT_NIGHT = 2
 
 define SK_DEFAULT = 0
 //Evil skies
@@ -657,6 +660,7 @@ begin script WeatherSkyTransitions
     PTown = 0
     SkySettingsActive = 0
     ChangeSkyTimer = create timer for 0 seconds
+    DayTime = 0
 
 start
 
@@ -666,7 +670,8 @@ begin loop
     end if
     WT_ChangeSkyTimer = create timer for 3 seconds
     if WT_SkyTransitionAllowed == 1 //Skytransition is disabled during epic or scripted predefined sky
-        if WT_SkyTransitionGlobalInfluence == 0 and SkySettingsActive != 0
+        PInfluence = get player PlayerID influence at camera position
+        if WT_SkyTransitionGlobalInfluence == 0 and SkySettingsActive != 0 and PInfluence == 0
             if get player PlayerID influence at camera position == 0
                 wait until get WT_ChangeSkyTimer time remaining <= 0 or get player PlayerID influence at camera position > 0
                 if get player PlayerID influence at camera position == 0
@@ -683,13 +688,13 @@ begin loop
             if WT_SkyTransitionGlobalInfluence == 1 //If player has won only use him as a base
                 PlayerID = 0
             end if
-            PInfluence = get player PlayerID influence at camera position
             if PInfluence > 0 or WT_SkyTransitionGlobalInfluence == 1
-                wait until get WT_ChangeSkyTimer time remaining <= 0 or get player PlayerID influence at camera position == 0 or WT_SkyTransitionGlobalInfluence == 1
+                wait until get WT_ChangeSkyTimer time remaining <= 0 or get player PlayerID influence at camera position == 0 or WT_SkyTransitionGlobalInfluence == 1 or (DayTime == WT_SUNSET and (get game time < 17.5 or get game time > 20.5)) or (DayTime == WT_DAY and (get game time >= 17.5 or get game time <= 9)) or (DayTime == WT_NIGHT and (get game time <= 20.5 or get game time >= 6))
                 PInfluence = get player PlayerID influence at camera position
                 if PInfluence > 0 or WT_SkyTransitionGlobalInfluence == 1
                     PAlignment = get player PlayerID alignment
                     if (get game time >= 17.5 and get game time <= 20.5) or (get game time >= 6 and get game time <= 9) //Sunrise, Sunset
+                        DayTime = WT_SUNSET
                         if PAlignment >= 0.9 and PAlignment <= 1.0
                             if SkySettingsActive != 1
                                 //say "ALIGN-GS3"
@@ -776,6 +781,7 @@ begin loop
                             end if
                         end if
                     elsif get game time < 17.5 and get game time > 9 //Day
+                        DayTime = WT_DAY
                         if PAlignment >= 0.9 and PAlignment <= 1.0
                             if SkySettingsActive != 7
                                 //say "ALIGN-G3"
@@ -862,6 +868,7 @@ begin loop
                             end if
                         end if
                     elsif get game time > 20.5 or get game time < 6 //Night
+                        DayTime = WT_NIGHT
                         if PAlignment >= 0.9 and PAlignment <= 1.0
                             if SkySettingsActive != 13
                                 //say "ALIGN-GN3"
