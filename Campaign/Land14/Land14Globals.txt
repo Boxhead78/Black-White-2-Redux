@@ -191,22 +191,6 @@ start
         disable Ghost[counter] hurt by fire
         disable Ghost[counter] set on fire
         run background script LC14_GhostScript(Ghost[counter],whichMesh)
-
-        //Set new mesh
-        if whichMesh == s_aztecwarrior_ghost
-            set anim speed of Ghost[counter] to 0.75
-            override mesh for Ghost[counter] with "..\skins\s_aztecwarrior_ghost"
-            set Ghost[counter] carrying CARRIED_OBJECT_NORSE_SWORD
-            disable Ghost[counter] can be fisted
-        elsif whichMesh == s_skeletonadultland2
-            set anim speed of Ghost[counter] to 0.7
-            override mesh for Ghost[counter] with "..\skins\s_skeletonadultland2"
-            set Ghost[counter] carrying CARRIED_OBJECT_NORSE_SWORD
-        else
-            set anim speed of Ghost[counter] to 0.7
-            override mesh for Ghost[counter] with "..\skins\s_undeadwarrior_noghost"
-            set Ghost[counter] carrying CARRIED_OBJECT_AZTEC_CLUB
-        end if
         counter++
     end while
 
@@ -226,7 +210,6 @@ begin script LC14_GhostScript(myGhost,whichMesh)
 start
 
     while myGhost exists and HEALTH of myGhost > 0.00 and LandWon == 0 and PLAYER of myGhost == 1
-        wait until HEALTH of myGhost == 0 or 5 seconds
         if whichMesh == s_aztecwarrior_ghost
             //set anim speed of myGhost to 0.75
             override mesh for myGhost with "..\skins\s_aztecwarrior_ghost"
@@ -244,6 +227,7 @@ start
             set myGhost carrying CARRIED_OBJECT_NONE
             set myGhost carrying CARRIED_OBJECT_AZTEC_CLUB
         end if
+        wait until HEALTH of myGhost == 0 or 5 seconds
     end while
 
     myEffect = create visual effect VISUAL_EFFECT_WEATHER_LIGHTNING_EXPLOSION at {myGhost} + {0,1,0} time 1.5
@@ -273,6 +257,7 @@ start
         else
             delete myGhost
         end if
+        wait until HEALTH of myGhost == 0 or 5 seconds
         until not myGhost exists
     end loop
 
