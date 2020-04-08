@@ -63,6 +63,7 @@ end script UA_GraveyardCheck
 
 begin script UA_SpawnUndeadPlatoonCheck(PlayerID,Graveyard,Flag,Foundation)
 
+    myArmySize = 0
     Tooltip[2]
 
 start
@@ -85,8 +86,19 @@ while HEALTH of Graveyard >= 1.0 and Graveyard exists and Flag exists and get pl
     end if
 
     if UA_myTempDeath[PlayerID] >= 30
+        if UA_myTempDeath[PlayerID] >= 150
+            myArmySize = 150
+        elsif UA_myTempDeath[PlayerID] >= 120
+            myArmySize = 120
+        elsif UA_myTempDeath[PlayerID] >= 90
+            myArmySize = 90
+        elsif UA_myTempDeath[PlayerID] >= 60
+            myArmySize = 60
+        elsif UA_myTempDeath[PlayerID] >= 30
+            myArmySize = 30
+        end if
         if (bindable action BINDABLE_ACTION_TYPE_ACTION performed or bindable action BINDABLE_ACTION_TYPE_MOVE performed) and hand position near {Flag} radius 4
-            run background script UA_CreateUndeadPlatoon(PlayerID,Graveyard,30)
+            run background script UA_CreateUndeadPlatoon(PlayerID,Graveyard,myArmySize)
         end if
     end if
 end while
@@ -111,7 +123,7 @@ begin script UA_CreateUndeadPlatoon(PlayerID,Graveyard,howManyVillagers)
 
 start
 
-    UA_myUsedUndead[PlayerID] += 30
+    UA_myUsedUndead[PlayerID] += howManyVillagers
     RelativePos = marker at get world position from Graveyard to {4,0,4}
 
     myEffect = create visual effect VISUAL_EFFECT_TOWN_TAKEOVER_DEFENDER at {RelativePos} + {0,2,0} time 10
@@ -127,7 +139,7 @@ start
     SCALE of myEffect = 2
 
     wait 3.33 seconds
-    myArmy = create platoon PLATOON_INFO_GREEK_MELEE_5 at {RelativePos} with 1 men and 0 women
+    myArmy = create platoon PLATOON_INFO_GREEK_MELEE_5 at {RelativePos} with howManyVillagers men and 0 women
     PLAYER of myArmy = PlayerID
     attach atmos "ghost_legion" to myArmy range 40
 
@@ -150,8 +162,6 @@ start
         play anim "a_p_dead1" on Villager loop 1
         delete Villager
     end while
-    Villager = get villager from platoon myArmy nearest {myArmy}
-    SCALE of Villager = 0.01
     Villager = get villager from platoon myArmy nearest {myArmy}
     SCALE of Villager = 0.01
     force while counter < howManyVillagers and counter < ArmySize
@@ -183,11 +193,12 @@ begin script UA_GhostScript(PlayerID,myGhost,myArmy)
 
 start
 
-    while myGhost exists and HEALTH of myGhost > 0.00 and PLAYER of myGhost == PlayerID and myArmy exists
+    while myGhost exists and HEALTH of myGhost > 0.00 and myArmy exists
         //set anim speed of myGhost to 0.5
         override mesh for myGhost with "..\skins\s_skeletonadultland2"
         set myGhost carrying CARRIED_OBJECT_NONE
         set myGhost carrying CARRIED_OBJECT_NORSE_SWORD
+        wait until HEALTH of myGhost == 0 or not myGhost exists or not myArmy exists or 60 seconds
     end while
 
     myEffect = create visual effect VISUAL_EFFECT_WEATHER_LIGHTNING_EXPLOSION at {myGhost} + {0,1,0} time 1.5
@@ -202,7 +213,8 @@ start
         override mesh for myGhost with "..\skins\s_skeletonadultland2"
         set myGhost carrying CARRIED_OBJECT_NONE
         set myGhost carrying CARRIED_OBJECT_NORSE_SWORD
-        until not myGhost exists or myArmy not exists
+        wait until not myGhost exists or not myArmy exists or 60 seconds
+        until not myGhost exists or not myArmy exists
     end loop
 
     //In case it gets disbanded, delete the ghost
