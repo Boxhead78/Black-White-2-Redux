@@ -94,6 +94,7 @@ begin script SK_AITownBuildingGetBuildingPos(AITown,PlayerID)
     ExistingRock = 0
     ExistingOreRock = 0
     ExistingSpell = 0
+    ExistingWall = 0
     Influence = 0
     Number = 0
     NumberofA = 0
@@ -1843,10 +1844,11 @@ start
         ExistingRock = get ROCK_OBJECT at {NextBuildingPos[PlayerID]} radius BuildRadius
         ExistingOreRock = get ORE_ROCK at {NextBuildingPos[PlayerID]} radius BuildRadius
         ExistingSpell = get FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {NextBuildingPos[PlayerID]} radius BuildRadius
+        ExistingWall = get wall segment nearest {NextBuildingPos[PlayerID]} radius BuildRadius
         Influence = get player PlayerID influence at {NextBuildingPos[PlayerID]}
         myDistance = BuildRadius / 1.5
         Villager = get VILLAGER in AITown
-        if Influence > 0 and not {AITown} near {NextBuildingPos[PlayerID]} radius 30 and ExistingEpic not exists and ExistingBuilding not exists and ExistingEmbellishment not exists and ExistingField not exists and ExistingRock not exists and ExistingOreRock not exists and ExistingSpell not exists and not {NextBuildingPos[PlayerID]} under water and Villager exists
+        if Influence > 0 and not {AITown} near {NextBuildingPos[PlayerID]} radius 30 and ExistingEpic not exists and ExistingBuilding not exists and ExistingEmbellishment not exists and ExistingField not exists and ExistingRock not exists and ExistingOreRock not exists and ExistingSpell not exists and ExistingWall not exists and not {NextBuildingPos[PlayerID]} under water and Villager exists
             if Villager can navigate to {NextBuildingPos[PlayerID]} //Last quick check
                 //Don't place buildings near an edge, the higher myDistance the less likely the building is placed near an edge
                 if Villager can navigate to ({NextBuildingPos[PlayerID]} + {myDistance,0}) and Villager can navigate to ({NextBuildingPos[PlayerID]} + {-myDistance,0}) and Villager can navigate to ({NextBuildingPos[PlayerID]} + {0,myDistance}) and Villager can navigate to ({NextBuildingPos[PlayerID]} + {0,myDistance})
@@ -1855,7 +1857,7 @@ start
             end if
 
         //Don't bother with influence if too many attempts
-        elsif not {AITown} near {NextBuildingPos[PlayerID]} radius 30 and ExistingEpic not exists and ExistingBuilding not exists and ExistingEmbellishment not exists and ExistingField not exists and ExistingRock not exists and ExistingOreRock not exists and ExistingSpell not exists and not {NextBuildingPos[PlayerID]} under water and Villager exists
+        elsif not {AITown} near {NextBuildingPos[PlayerID]} radius 30 and ExistingEpic not exists and ExistingBuilding not exists and ExistingEmbellishment not exists and ExistingField not exists and ExistingRock not exists and ExistingOreRock not exists and ExistingSpell not exists and ExistingWall not exists and not {NextBuildingPos[PlayerID]} under water and Villager exists
             if CurrTries[PlayerID] > 5 and Villager can navigate to ({NextBuildingPos[PlayerID]} + {myDistance,0}) and Villager can navigate to ({NextBuildingPos[PlayerID]} + {-myDistance,0}) and Villager can navigate to ({NextBuildingPos[PlayerID]} + {0,myDistance}) and Villager can navigate to ({NextBuildingPos[PlayerID]} + {0,myDistance})
                 BuildingPosValid = 1
             end if
