@@ -86,6 +86,7 @@ begin script SK_AITownBuildingGetBuildingPos(AITown,PlayerID)
     BuildRadius = 0
     Counter = 0
     EpicBuilt = 0
+    BuildingPosValid = 0
     ExistingBuilding = 0
     ExistingEmbellishment = 0
     ExistingEpic = 0
@@ -1849,19 +1850,19 @@ start
             if Villager can navigate to {NextBuildingPos[PlayerID]} //Last quick check
                 //Don't place buildings near an edge, the higher myDistance the less likely the building is placed near an edge
                 if Villager can navigate to ({NextBuildingPos[PlayerID]} + {myDistance,0}) and Villager can navigate to ({NextBuildingPos[PlayerID]} + {-myDistance,0}) and Villager can navigate to ({NextBuildingPos[PlayerID]} + {0,myDistance}) and Villager can navigate to ({NextBuildingPos[PlayerID]} + {0,myDistance})
-                    ExistingBuilding = 1
+                    BuildingPosValid = 1
                 end if
             end if
 
         //Don't bother with influence if too many attempts
         elsif not {AITown} near {NextBuildingPos[PlayerID]} radius 30 and ExistingEpic not exists and ExistingBuilding not exists and ExistingEmbellishment not exists and ExistingField not exists and ExistingRock not exists and ExistingOreRock not exists and ExistingSpell not exists and not {NextBuildingPos[PlayerID]} under water and Villager exists
             if CurrTries[PlayerID] > 5 and Villager can navigate to ({NextBuildingPos[PlayerID]} + {myDistance,0}) and Villager can navigate to ({NextBuildingPos[PlayerID]} + {-myDistance,0}) and Villager can navigate to ({NextBuildingPos[PlayerID]} + {0,myDistance}) and Villager can navigate to ({NextBuildingPos[PlayerID]} + {0,myDistance})
-                ExistingBuilding = 1
+                BuildingPosValid = 1
             end if
         end if
 
         Counter++
-        until ExistingBuilding == 1 or Counter > MaxTries
+        until BuildingPosValid == 1 or Counter > MaxTries
     end loop
 
     if Counter > MaxTries
