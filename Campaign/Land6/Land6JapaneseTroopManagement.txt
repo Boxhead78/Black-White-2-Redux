@@ -84,8 +84,8 @@ start
     PlatoonPos[3] = marker at {1725.24,69.15,1489.97}
     PlatoonPos[4] = marker at {1403.70,41.60,1294.29}
     PlatoonPos[5] = marker at {1483.03,35.80,1144.95}
-    PlatoonPos[6] = marker at {1356.95,40.67,1726.52}//MinorJapaneseTown1
-    PlatoonPos[7] = marker at {2027.82,14.26,1178.21}//MinorJapaneseTown2
+    PlatoonPos[6] = marker at {1356.95,40.67,1726.52}//JapaneseTown1
+    PlatoonPos[7] = marker at {2027.82,14.26,1178.21}//JapaneseTown2
     PlatoonPos[8] = marker at {807.82,21.35,1594.66}
     PlatoonPos[9] = marker at {797.88,18.38,1734.84}
     PlatoonPos[10] = marker at {679.59,21.21,1695.12}
@@ -94,9 +94,9 @@ start
     AttackPos[1] = marker at {1333.70,29.83,1205.83}//Backup if 0 is blocked
     AttackPos[2] = marker at {844.60,50.49,1007.68}
     AttackPos[3] = marker at {597.84,126.31,1260.10}//Backup if 2 is blocked
-    AttackPos[4] = marker at {1367.79,47.20,1666.02}//MinorJapaneseTown1
+    AttackPos[4] = marker at {1367.79,47.20,1666.02}//JapaneseTown1
     AttackPos[5] = marker at {1366.89,57.42,1570.45}//Backup if 4 is blocked
-    AttackPos[6] = marker at {1869.91,23.00,1187.53}//MinorJapaneseTown2
+    AttackPos[6] = marker at {1869.91,23.00,1187.53}//JapaneseTown2
     AttackPos[7] = marker at {1977.00,14.49,1162.50}//Backup if 6 is blocked
     
     SiegeRoute1[0] = marker at {1585.52,64.24,1309.70}
@@ -528,7 +528,7 @@ begin script LC6_Platoon14Actions
     NumPat5 = 0
     PlayerPlatoon1 = 0
     WorrNum = 0
-    JapaneseTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in MinorJapaneseTown1 min built 1.0
+    JapaneseTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in JapaneseTown1 min built 1.0
     ProPlatoonsLocation = 0
     AIPlatoon1 = 0
     Armory = 0
@@ -624,17 +624,17 @@ begin loop
             end loop
             PlayerPlatoonInRange = 0
         end if
-        JapaneseTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in MinorJapaneseTown1 min built 1.0
-        if LC6_Platoon[14] can navigate to object JapaneseTownCentre and PLAYER of MinorJapaneseTown1 != 1
+        JapaneseTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in JapaneseTown1 min built 1.0
+        if LC6_Platoon[14] can navigate to object JapaneseTownCentre and PLAYER of JapaneseTown1 != 1
             //wait number from 5 to 25 seconds
             a = 1
             clear LC6_Platoon[14] action queue
             wait 1 seconds
-            if LC6_Platoon[14] can navigate to object JapaneseTownCentre and PLAYER of MinorJapaneseTown1 != 1
+            if LC6_Platoon[14] can navigate to object JapaneseTownCentre and PLAYER of JapaneseTown1 != 1
                 begin loop
                     PlayerPlatoon1 = get platoon of player 0 nearest {LC6_Platoon[14]} radius 150
                     TestCreature2 = get distance from {LC6_Platoon[14]} to {oCreature}
-                    set LC6_Platoon[14] attack MinorJapaneseTown1 with severity 0.7 for takeover
+                    set LC6_Platoon[14] attack JapaneseTown1 with severity 0.7 for takeover
                     //if PlayerPlatoon1 exists or TestCreature2 <= 150 or not LC6_Platoon[14] can navigate to object JapaneseTownCentre
                         if PlayerPlatoon1 exists
                             a = 0
@@ -644,20 +644,20 @@ begin loop
                             a = 0
                         elsif LC6_Platoon[14] not exists
                             a = 0
-                        elsif PLAYER of MinorJapaneseTown1 == 1
+                        elsif PLAYER of JapaneseTown1 == 1
                             a = 0
                         end if
                     //end if
-                    until a == 0 or LC6_Platoon[14] not exists or PLAYER of MinorJapaneseTown1 == 1
+                    until a == 0 or LC6_Platoon[14] not exists or PLAYER of JapaneseTown1 == 1
                 end loop
             end if
             clear LC6_Platoon[14] action queue
         end if
-        if LC6_Platoon[14] can navigate to {AttackPos[5]} and PLAYER of MinorJapaneseTown1 != 1 and not {LC6_Platoon[14]} near {AttackPos[5]} radius 15
+        if LC6_Platoon[14] can navigate to {AttackPos[5]} and PLAYER of JapaneseTown1 != 1 and not {LC6_Platoon[14]} near {AttackPos[5]} radius 15
             clear LC6_Platoon[14] action queue
             add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackPos[5]} to LC6_Platoon[14] action queue
         end if
-        if LC6_Platoon[14] can navigate to {AttackPos[4]} and PLAYER of MinorJapaneseTown1 == 1 and not {LC6_Platoon[14]} near {AttackPos[4]} radius 15
+        if LC6_Platoon[14] can navigate to {AttackPos[4]} and PLAYER of JapaneseTown1 == 1 and not {LC6_Platoon[14]} near {AttackPos[4]} radius 15
             clear LC6_Platoon[14] action queue
             add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackPos[4]} to LC6_Platoon[14] action queue
         end if
@@ -681,7 +681,7 @@ begin script LC6_Platoon15Actions
     NumPat5 = 0
     PlayerPlatoon1 = 0
     WorrNum = 0
-    JapaneseTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in MinorJapaneseTown2 min built 1.0
+    JapaneseTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in JapaneseTown2 min built 1.0
     ProPlatoonsLocation = 0
     AIPlatoon1 = 0
     Armory = 0
@@ -777,17 +777,17 @@ begin loop
             end loop
             PlayerPlatoonInRange = 0
         end if
-        JapaneseTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in MinorJapaneseTown2 min built 1.0
-        if LC6_Platoon[15] can navigate to object JapaneseTownCentre and PLAYER of MinorJapaneseTown2 != 1
+        JapaneseTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in JapaneseTown2 min built 1.0
+        if LC6_Platoon[15] can navigate to object JapaneseTownCentre and PLAYER of JapaneseTown2 != 1
             //wait number from 5 to 25 seconds
             a = 1
             clear LC6_Platoon[15] action queue
             wait 1 seconds
-            if LC6_Platoon[15] can navigate to object JapaneseTownCentre and PLAYER of MinorJapaneseTown2 != 1
+            if LC6_Platoon[15] can navigate to object JapaneseTownCentre and PLAYER of JapaneseTown2 != 1
                 begin loop
                     PlayerPlatoon1 = get platoon of player 0 nearest {LC6_Platoon[15]} radius 150
                     TestCreature2 = get distance from {LC6_Platoon[15]} to {oCreature}
-                    set LC6_Platoon[15] attack MinorJapaneseTown2 with severity 0.7 for takeover
+                    set LC6_Platoon[15] attack JapaneseTown2 with severity 0.7 for takeover
                     //if PlayerPlatoon1 exists or TestCreature2 <= 150 or not LC6_Platoon[15] can navigate to object JapaneseTownCentre
                         if PlayerPlatoon1 exists
                             a = 0
@@ -797,21 +797,21 @@ begin loop
                             a = 0
                         elsif LC6_Platoon[15] not exists
                             a = 0
-                        elsif PLAYER of MinorJapaneseTown2 == 1
+                        elsif PLAYER of JapaneseTown2 == 1
                             a = 0
                         end if
                     //end if
-                    until a == 0 or LC6_Platoon[15] not exists or PLAYER of MinorJapaneseTown2 == 1
+                    until a == 0 or LC6_Platoon[15] not exists or PLAYER of JapaneseTown2 == 1
                 end loop
             end if
             clear LC6_Platoon[15] action queue
         end if
-        if LC6_Platoon[15] can navigate to {AttackPos[7]} and PLAYER of MinorJapaneseTown2 != 1 and not {LC6_Platoon[15]} near {AttackPos[7]} radius 15
+        if LC6_Platoon[15] can navigate to {AttackPos[7]} and PLAYER of JapaneseTown2 != 1 and not {LC6_Platoon[15]} near {AttackPos[7]} radius 15
             clear LC6_Platoon[15] action queue
             add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackPos[7]} to LC6_Platoon[15] action queue
         end if
         
-        if LC6_Platoon[15] can navigate to {AttackPos[6]} and PLAYER of MinorJapaneseTown2 == 1 and not {LC6_Platoon[15]} near {AttackPos[6]} radius 15
+        if LC6_Platoon[15] can navigate to {AttackPos[6]} and PLAYER of JapaneseTown2 == 1 and not {LC6_Platoon[15]} near {AttackPos[6]} radius 15
             clear LC6_Platoon[15] action queue
             add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackPos[6]} to LC6_Platoon[15] action queue
         end if
