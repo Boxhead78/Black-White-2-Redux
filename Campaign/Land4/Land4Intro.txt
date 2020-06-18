@@ -2,8 +2,6 @@
 //    Land 4 Intro
 //    ~~~~~~~~~~~~~~
 //
-//    Start date:     31.10.16            By: Boxhead
-//    Update date:    06.11.16            By: Boxhead
 ///////////////////////////////////////////////////////////////////////////////
 
 define script LC4_Intro
@@ -12,8 +10,13 @@ begin script LC4_Intro
 
     WindMixer = 0
     AtmosMixer = create mixer
+    IntroCloud = 0
 
 start
+
+    IntroCloud = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {2460.93,600.00,1382.69}
+    set cloud IntroCloud altitude 600
+    set cloud IntroCloud points to 5
 
     PD_ForcedSaving = 1
     wait until PD_ForcedSaving == 0 or 10 seconds
@@ -42,9 +45,9 @@ start
         start music "cut_scene_sad_34s_01" loop 3
         wait 2 seconds
         reset camera path
-        queue camera move with position {1281.73,550.00,390.71} focus {1307.59,450.75,1937.77} time 0.0
-        queue camera move with position {1284.19,380.85,1770.92} focus {1307.59,320.75,1937.77} + {5.00,0.00,-5.00} time 21.0
-        queue camera move with position {1304.74,350.88,1893.16} focus {1307.59,320.75,1937.77} time 7.0
+        queue camera move with position {2460.93,600.00,1382.69} focus {1586.27,600.00,1180.93} time 0.0
+        queue camera move with position {1586.27,400.00,1180.93} focus {922.61,300.59,1079.14} + {5.00,0.00,-5.00} time 19.0
+        queue camera move with position {922.61,190.59,1079.14} focus {820.28,160.34,1132.50} time 9.0
         
         disable load screen
         set fade in time 5    
@@ -58,13 +61,8 @@ start
         say "BW2T_SCRIPT_04FINAL_ADVISORS_INTRO_170"
         wait until read
         
-        /*say "BW2T_SCRIPT_04FINAL_ADVISORS_INTRO_180"
-        wait until read
-        say "BW2T_SCRIPT_04FINAL_ADVISORS_INTRO_190"
-        wait until read*/
         make good spirit play across 0.5 down 0.5 HELPDUDE_KM_04FINAL_INTRO_G_180_190
         make evil spirit play across 0.5 down 0.5 HELPDUDE_KM_04FINAL_INTRO_E_180_190
-
 
         wait until read
 
@@ -72,20 +70,25 @@ start
         wait until read
         
         reset camera path 
-           queue camera move with position {1226.21,340.00,1705.19} focus {1307.59,320.75,1937.77} time 6.0
-           queue camera move with position {1228.91,270.00,1223.69} focus {1317.55,256.19,1599.79} time 6.0
-           queue camera move with position {1208.90,200.00,913.21} focus {1318.19,205.80,1269.41} time 5.0
-           queue camera move with position {1392.86,140.00,474.62} focus {1290.20,96.99,551.77} time 5.0
+           queue camera move with position {1183.84,210.99,1144.10} focus {NorseCapital} time 7.0
+           queue camera move with position {1581.12,260.70,1297.24} focus {MinorTown5} time 6.0
+           queue camera move with position {1828.75,285.81,1455.01} focus {PlayerTown} time 4.0
         play camera path with easein 4 easeout 4 method SCRIPT_CAMERAPATH_EQUALTIME
-        wait 4 seconds
-        say "BW2T_SCRIPT_04FINAL_ADVISORS_INTRO_210"
+        wait 0.5 seconds
+        say "BW2T_SCRIPT_04FINAL_ADVISORS_INTRO_26"
         wait until read
-        say "BW2T_SCRIPT_04FINAL_ADVISORS_INTRO_220"
-        wait until read
+        wait 0.5 seconds
+        if get player 0 alignment > 0.05
+            say "BW2T_SCRIPT_04FINAL_ADVISORS_INTRO_80"
+            wait until read
+        else
+            say "BW2T_SCRIPT_04FINAL_ADVISORS_INTRO_50"
+            wait until read
+        end if
         make evil spirit disappear
         make good spirit disappear
 
-        wait 9 seconds    
+        wait 7 seconds    
     
         stop music with fadetime 4
         enable atmos sound
@@ -95,6 +98,8 @@ start
     end cinema
     DM_DynamicMusicDisallowed = 0
     
+    delete IntroCloud
+
     wait 2 seconds
     
     IntroFinished = 1

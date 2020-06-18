@@ -8,8 +8,6 @@
 //  
 //    Rewards:            20000 tribute
 //
-//    Start date:         03.11.16            By:    Boxhead
-//    Update date:        28.05.16            By: Boxhead
 ///////////////////////////////////////////////////////////////////////////////
 
 define script LC4_LostSheeps
@@ -38,7 +36,7 @@ global LostSheeps_Sheep1Pos = 0
 global LostSheeps_Sheep2Pos = 0
 global LostSheeps_Sheep3Pos = 0
 global LostSheeps_Sheep4Pos = 0
-global LostSheeps_SheepPos = 0
+global LostSheeps_SheepDropPos = 0
 global AllSheepsRescued = 0
 global SheepsRescued = 0
 global SheepsDead = 0
@@ -53,16 +51,16 @@ start
 
     begin loop
         wait 5 seconds
-        LostSheeps_Abode = get HOUSE at {1351.06,100.47,593.43} radius 15
+        LostSheeps_Abode = get HOUSE at {1672.02,230.81,1297.55} radius 15
         until LostSheeps_Abode exists
     end loop
-    LostSheeps_ScrollPos = marker at {1351.06,100.47,593.43} + {0.00,5.00,0.00}
-    LostSheeps_Guy1Pos = marker at {1345.58,102.10,588.22}
-    LostSheeps_Sheep1Pos = marker at {1029.30,203.11,977.46}
-    LostSheeps_Sheep2Pos = marker at {1161.19,110.06,453.62}
-    LostSheeps_Sheep3Pos = marker at {885.37,126.30,913.89}
-    LostSheeps_Sheep4Pos = marker at {1520.47,195.11,1034.98}
-    LostSheeps_SheepPos = marker at {1338.47,100.95,600.90}
+    LostSheeps_ScrollPos = marker at {1677.02,230.81,1306.32} + {0.00,5.00,0.00}
+    LostSheeps_Guy1Pos = marker at {1667.25,230.81,1299.46}
+    LostSheeps_Sheep1Pos = marker at {1282.11,244.40,877.38}
+    LostSheeps_Sheep2Pos = marker at {1432.07,230.72,1278.30}
+    LostSheeps_Sheep3Pos = marker at {1942.54,169.13,1498.13}
+    LostSheeps_Sheep4Pos = marker at {1352.46,217.46,640.48}
+    LostSheeps_SheepDropPos = marker at {1663.16,230.76,1303.21}
     
     LostSheeps_Sheep1 = create ANIMAL SHEEP at {LostSheeps_Sheep1Pos}
     SCALE of LostSheeps_Sheep1 = 1.75
@@ -87,11 +85,11 @@ start
     
     delete Scroll_LostSheeps
     
-    LostSheeps_Influence1 = create influence at {LostSheeps_SheepPos} radius 15
-    LostSheeps_Influence2 = create influence at {LostSheeps_Sheep1} radius 15
-    LostSheeps_Influence3 = create influence at {LostSheeps_Sheep2} radius 15
-    LostSheeps_Influence4 = create influence at {LostSheeps_Sheep3} radius 15
-    LostSheeps_Influence5 = create influence at {LostSheeps_Sheep4} radius 15
+    LostSheeps_Influence1 = create influence at {LostSheeps_SheepDropPos} radius 15
+    LostSheeps_Influence2 = create influence at {LostSheeps_Sheep1} radius 5
+    LostSheeps_Influence3 = create influence at {LostSheeps_Sheep2} radius 5
+    LostSheeps_Influence4 = create influence at {LostSheeps_Sheep3} radius 5
+    LostSheeps_Influence5 = create influence at {LostSheeps_Sheep4} radius 5
     
     run background script LC4_LostSheeps_Intro
 
@@ -102,7 +100,7 @@ begin script LC4_LostSheeps_Intro
 start
 
     LostSheeps_Guy1 = create VILLAGER VILLAGER_INFO_NORSE_FORESTER_MALE at {LostSheeps_Abode}
-    move LostSheeps_Guy1 position to {1345.58,100.53,588.22}
+    move LostSheeps_Guy1 position to {LostSheeps_Guy1Pos}
     
     disable LostSheeps_Guy1 pickup
     disable LostSheeps_Guy1 moveable
@@ -112,21 +110,21 @@ start
     DM_DynamicMusicDisallowed = 1
     begin cinema
         start music "lc4_lostsheeps_intro" loop 1
-        move camera position to {1344.74,101.50,585.51} time 7
-        move camera focus to {LostSheeps_Guy1Pos} + {-1.00,0.00,1.00} time 7
+        move camera position to {1665.13,232.00,1305.33} time 7
+        move camera focus to {LostSheeps_Guy1Pos} + {-1.00,1.50,1.00} time 7
         wait 1 seconds
         run background script LC4_LostSheeps_ExtraAnimations1
         wait 13 seconds
-        set camera position to {1023.29,205.37,991.82}
-        set camera focus to {1043.93,201.40,956.72}
-        move camera position to {1023.29,205.37,991.82} + {7.00,3.00,-7.00} time 7
-        move camera focus to {1043.93,194.40,956.72} time 7
+        set camera position to {1289.33,246.24,870.86}
+        set camera focus to {1168.75,247.00,1130.81}
+        move camera position to {1289.33,245.74,870.86} + {-3.00,3.50,3.00} time 9
+        move camera focus to {1168.75,215.00,1130.81} time 9
         wait 7 seconds
-        set camera position to {1344.74,101.50,585.51}
-        set camera focus to {LostSheeps_Guy1Pos} + {-1.00,0.00,1.00}
+        set camera position to {1665.13,232.00,1305.33}
+        set camera focus to {LostSheeps_Guy1Pos} + {-1.00,1.50,1.00}
         wait 2 seconds
-        move camera position to {1344.74,101.10,585.51} + {35.00,15.00,-20.00} time 6
-        move camera focus to {LostSheeps_Guy1Pos} + {-1.00,0.00,1.00} time 6
+        move camera position to {1665.13,232.00,1305.33} + {-35.00,15.00,20.00} time 6
+        move camera focus to {LostSheeps_Guy1Pos} + {-1.00,1.50,1.00} time 6
         wait 3 seconds
     end cinema
     DM_DynamicMusicDisallowed = 0
@@ -148,7 +146,7 @@ begin script LC4_LostSheeps_ExtraAnimations1
 
 start
 
-play anim "a_p_walk_tired_eyes" on LostSheeps_Guy1 loop 1
+play anim "a_p_yawn" on LostSheeps_Guy1 loop 1
 
 wait 4 seconds
 
@@ -165,8 +163,8 @@ begin script LC4_LostSheeps_Guy1Behaviour
 start
 
 begin loop
-    if not {LostSheeps_Guy1} near {1345.58,100.53,588.22} radius 5
-        move LostSheeps_Guy1 position to {1345.58,100.53,588.22}
+    if not {LostSheeps_Guy1} near {LostSheeps_Guy1Pos} radius 5
+        move LostSheeps_Guy1 position to {LostSheeps_Guy1Pos}
     else
         wait 1 seconds
     end if
@@ -191,7 +189,7 @@ start
 
 begin loop
 
-    if {LostSheeps_Sheep1} near {LostSheeps_SheepPos} radius 15 and AllSheepsRescued == 0 and a == 0 and not LostSheeps_Sheep1 is HELD
+    if {LostSheeps_Sheep1} near {LostSheeps_SheepDropPos} radius 15 and AllSheepsRescued == 0 and a == 0 and not LostSheeps_Sheep1 is HELD
         a = 1
         Sheepsremaining = Sheepsremaining -1
         if HEALTH of LostSheeps_Sheep1 == 0.00
@@ -201,7 +199,7 @@ begin loop
         end if
     end if
     
-    if {LostSheeps_Sheep2} near {LostSheeps_SheepPos} radius 15 and AllSheepsRescued == 0 and b == 0 and not LostSheeps_Sheep2 is HELD
+    if {LostSheeps_Sheep2} near {LostSheeps_SheepDropPos} radius 15 and AllSheepsRescued == 0 and b == 0 and not LostSheeps_Sheep2 is HELD
         b = 1
         Sheepsremaining = Sheepsremaining -1
         if HEALTH of LostSheeps_Sheep2 == 0.00
@@ -211,7 +209,7 @@ begin loop
         end if
     end if
     
-    if {LostSheeps_Sheep3} near {LostSheeps_SheepPos} radius 15 and AllSheepsRescued == 0 and c == 0 and not LostSheeps_Sheep3 is HELD
+    if {LostSheeps_Sheep3} near {LostSheeps_SheepDropPos} radius 15 and AllSheepsRescued == 0 and c == 0 and not LostSheeps_Sheep3 is HELD
         c = 1
         Sheepsremaining = Sheepsremaining -1
         if HEALTH of LostSheeps_Sheep3 == 0.00
@@ -221,7 +219,7 @@ begin loop
         end if
     end if
     
-    if {LostSheeps_Sheep4} near {LostSheeps_SheepPos} radius 15 and AllSheepsRescued == 0 and d == 0 and not LostSheeps_Sheep4 is HELD
+    if {LostSheeps_Sheep4} near {LostSheeps_SheepDropPos} radius 15 and AllSheepsRescued == 0 and d == 0 and not LostSheeps_Sheep4 is HELD
         d = 1
         Sheepsremaining = Sheepsremaining -1
         if HEALTH of LostSheeps_Sheep4 == 0.00

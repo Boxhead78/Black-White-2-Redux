@@ -180,7 +180,16 @@ start
     stop script "SavePersistentDataSetData"
     set persistent data "LAND_ID" to 4
     run script SavePersistentDataGetData
-    AbortLand4 = persistent data "ABORTED_LAND4"
+
+    if Intro == 0
+        disable load screen
+        set fade red 0 green 0 blue 0 time 0
+        set fade in time 4
+        wait 2 seconds
+        IntroFinished = 1
+    else
+        run background script LC4_Intro
+    end if
 
     run script Globals
     //run the script for the tombs on this land 0 to 13 are valid values
@@ -192,9 +201,6 @@ start
     run background script PT_FlagCheck(0)
     run background script LC4_DefendPlatoons
     run background script SetupBuildingsLand4
-    if AbortLand4 == 1
-        run background script LC4_Intro 
-    end if
     run background script LC4_Outro
     run background script LC4_SetupCreature
     run background script LC4_Norse_Capital_Impressiveness
@@ -202,48 +208,12 @@ start
     run background script TownConversion
     run background script LC4_Norse_Capital
     run background script LC4_AICreature
-    //run background script LC4_EnoughObjectivesDone
     run background script GodsPlaygroundLoader
     run background script DisableLocalPlatoonResponse
+    run background script AttackRndAttackLogic
+    run background script AttackSyncTimerLogic
 
-    if AbortLand4 != 1
-        process land end objectives
-        wait until land end objectives processed
-        wait 2 seconds
-
-        disable game can be lost
-        run script LandExit
-        PD_ForcedSaving = 1
-        wait until PD_ForcedSaving == 0 or 10 seconds
-        wait 1.5 seconds 
-        release MyCreature
-        MyCreature = get player 0 creature
-        if MyCreature exists
-            save my_creature
-        end if
-        wait 1.5 seconds
-        if get player 0 alignment >= -1.0 and get player 0 alignment <= -0.75
-            run map script line "SET_LAND_NUMBER(19)"
-            wait 3 seconds 
-            disable load screen
-            load map "./Data/Landscape/BW2/land20.bwe"
-            wait 3 seconds
-        elsif get player 0 alignment >= -0.75 and get player 0 alignment <= 0.75
-            run map script line "SET_LAND_NUMBER(20)"
-            wait 3 seconds 
-            disable load screen
-            load map "./Data/Landscape/BW2/land21.bwe"
-            wait 3 seconds
-        elsif get player 0 alignment <= 1.0 and get player 0 alignment >= 0.75
-            run map script line "SET_LAND_NUMBER(21)"
-            wait 3 seconds 
-            disable load screen
-            load map "./Data/Landscape/BW2/land22.bwe"
-            wait 3 seconds
-        end if
-
-        wait 3 seconds
-    end if
+    wait 3 seconds
 
     wait until IntroFinished == 1
     
@@ -251,7 +221,6 @@ start
     set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_MAP to 0.45
     set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_POSITIONAL to 0.45
 
-    run background script Land4Marauders
     run background script LC4_AttackNearestTownTimer
     run background script LC4_Speeches
     run background script Land4TownObjectives
@@ -277,12 +246,6 @@ start
 
     run background script LC4_LostSheeps
 
-    wait until TownsConverted >= 4
-
-    wait 180 seconds
-    
-    run background script LC4_Missionaries
-    
 end script Land4ScriptManager
 
 begin script LC4_SetupCreature
