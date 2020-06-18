@@ -1,0 +1,193 @@
+///////////////////////////////////////////////////////////////////////////////
+//        AI Generic Building Placement
+//    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+///////////////////////////////////////////////////////////////////////////////
+
+//Races
+define AGB_RNONE = 0
+define AGB_NORSE = 1
+define AGB_JAPANESE = 2
+define AGB_AZTEC = 3
+
+//Buildings
+define AGB_BNONE = 0
+define AGB_STORAGEPIT = 1
+define AGB_ALTAR = 2
+define AGB_TEMPLE = 3
+define AGB_ARMORYMELEE = 4
+define AGB_ARMORYRANGED = 5
+define AGB_HOUSE = 6
+
+//Platoons
+define AGB_PNONE = 0
+define AGB_PLATOONMELEE = 1
+define AGB_PLATOONRANGED = 2
+define AGB_SIEGEWEAPON = 3
+
+define script AGB_BuildBuilding(whichTown,BuildingType,Race)
+
+begin script AGB_BuildBuilding(whichTown,BuildingType,Race)
+
+    Angle = 0
+    Building = 0
+    BuildRadius = 0
+    Counter = 0
+    NextBuildingPos = 0
+    BuildingPosValid = 0
+    ExistingBuilding = 0
+    ExistingEmbellishment = 0
+    ExistingEpic = 0
+    ExistingField = 0
+    ExistingRock = 0
+    ExistingOreRock = 0
+    ExistingSpell = 0
+    ExistingWall = 0
+    myDistance = 0
+    NewBuilding = 0
+    Number = 0
+    Villager = 0
+
+start
+
+    say "Trying to build"
+    //Set the build radius
+    if BuildingType == AGB_STORAGEPIT or BuildingType == AGB_ALTAR or BuildingType == AGB_TEMPLE or BuildingType == AGB_ARMORYMELEE or BuildingType == AGB_ARMORYRANGED
+        BuildRadius = 30
+    elsif BuildingType == AGB_HOUSE
+        BuildRadius = 15
+    end if
+
+    //Calculate position
+    begin loop
+        Building = get random abode in town whichTown
+        if Building not exists
+            NextBuildingPos = marker at {whichTown} + {number from 50 to -50, number from 50 to -50}
+        else
+            NextBuildingPos = marker at {Building} + {number from 50 to -50, number from 50 to -50}
+        end if
+
+        ExistingBuilding = get HOUSE at {NextBuildingPos} radius BuildRadius
+        ExistingEmbellishment = get EMBELLISHMENT at {NextBuildingPos} radius BuildRadius
+        ExistingEpic = get WONDER at {NextBuildingPos} radius BuildRadius
+        ExistingField = get FIELD_OBJECT at {NextBuildingPos} radius 40
+        ExistingRock = get ROCK_OBJECT at {NextBuildingPos} radius BuildRadius
+        ExistingOreRock = get ORE_ROCK at {NextBuildingPos} radius BuildRadius
+        ExistingSpell = get FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {NextBuildingPos} radius BuildRadius
+        ExistingWall = get wall segment nearest {NextBuildingPos} radius BuildRadius
+        myDistance = BuildRadius / 1.5
+        Villager = get VILLAGER in whichTown
+        if not {whichTown} near {NextBuildingPos} radius 30 and ExistingEpic not exists and ExistingBuilding not exists and ExistingEmbellishment not exists and ExistingField not exists and ExistingRock not exists and ExistingOreRock not exists and ExistingSpell not exists and ExistingWall not exists and not {NextBuildingPos} under water and Villager exists
+            if Villager can navigate to ({NextBuildingPos} + {myDistance,0}) and Villager can navigate to ({NextBuildingPos} + {-myDistance,0}) and Villager can navigate to ({NextBuildingPos} + {0,myDistance}) and Villager can navigate to ({NextBuildingPos} + {0,myDistance})
+                BuildingPosValid = 1
+            end if
+        end if
+        Counter++
+        until BuildingPosValid == 1 or Counter > 100
+    end loop
+
+    if BuildingPosValid == 1
+        say "Position Valid"
+        //Set Angle
+        Number = number from 1 to 4
+        if Number == 1
+            Angle = 0
+        elsif Number == 2
+            Angle = 90
+        elsif Number == 3
+            Angle = 180
+        else
+            Angle = 270
+        end if
+
+        //Create the building
+        if Race == AGB_NORSE
+            if BuildingType == AGB_STORAGEPIT
+                NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_NORSE_STORAGE_PIT at {NextBuildingPos}
+
+            elsif BuildingType == AGB_ALTAR
+                NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_GREEK_ALTAR at {NextBuildingPos}
+
+            elsif BuildingType == AGB_TEMPLE
+                NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_NORSE_TEMPLE at {NextBuildingPos}
+
+            elsif BuildingType == AGB_ARMORYMELEE
+                NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_NORSE_MELEE_ARMOURY at {NextBuildingPos}
+
+            elsif BuildingType == AGB_ARMORYRANGED
+                NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_NORSE_RANGED_ARMOURY at {NextBuildingPos}
+
+            elsif BuildingType == AGB_HOUSE
+                NewBuilding = create with angle Angle and scale 0 HOUSE constant from ABODE_INFO_NORSE_HOUSE_A to ABODE_INFO_NORSE_HOUSE_C at {NextBuildingPos}
+
+            end if
+        elsif Race == AGB_JAPANESE
+            if BuildingType == AGB_STORAGEPIT
+                NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_JAPANESE_STORAGE_PIT at {NextBuildingPos}
+
+            elsif BuildingType == AGB_ALTAR
+                NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_GREEK_ALTAR at {NextBuildingPos}
+
+            elsif BuildingType == AGB_TEMPLE
+                NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_JAPANESE_TEMPLE at {NextBuildingPos}
+
+            elsif BuildingType == AGB_ARMORYMELEE
+                NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_JAPANESE_MELEE_ARMOURY at {NextBuildingPos}
+
+            elsif BuildingType == AGB_ARMORYRANGED
+                NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_JAPANESE_RANGED_ARMOURY at {NextBuildingPos}
+
+            elsif BuildingType == AGB_HOUSE
+                NewBuilding = create with angle Angle and scale 0 HOUSE constant from ABODE_INFO_JAPANESE_HOUSE_A to ABODE_INFO_JAPANESE_HOUSE_C at {NextBuildingPos}
+
+            end if
+
+        elsif Race == AGB_AZTEC
+            if BuildingType == AGB_STORAGEPIT
+                NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_AZTEC_STORAGE_PIT at {NextBuildingPos}
+
+            elsif BuildingType == AGB_ALTAR
+                NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_GREEK_ALTAR at {NextBuildingPos}
+
+            elsif BuildingType == AGB_TEMPLE
+                NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_AZTEC_TEMPLE at {NextBuildingPos}
+
+            elsif BuildingType == AGB_ARMORYMELEE
+                NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_AZTEC_MELEE_ARMOURY at {NextBuildingPos}
+
+            elsif BuildingType == AGB_ARMORYRANGED
+                NewBuilding = create with angle Angle and scale 0 HOUSE ABODE_INFO_AZTEC_RANGED_ARMOURY at {NextBuildingPos}
+
+            elsif BuildingType == AGB_HOUSE
+                NewBuilding = create with angle Angle and scale 0 HOUSE constant from ABODE_INFO_AZTEC_HOUSE_A to ABODE_INFO_AZTEC_HOUSE_C at {NextBuildingPos}
+
+            end if
+
+        end if
+
+        //Play sound and set attributes
+        if camera position near {NewBuilding} radius 200.00
+            play sound "PLANTSCAFFOLD" at {NewBuilding} with volume 1.0 pitch 0.0
+        end if
+        PLAYER of NewBuilding = 1
+        attach NewBuilding to whichTown
+        BUILT of NewBuilding = 0.0
+
+        wait until BUILT of NewBuilding == 1.0 or NewBuilding not exists or HEALTH of NewBuilding == 1.0
+
+        if NewBuilding exists
+            if BuildRadius == 15
+                if camera position near {NewBuilding} radius 200.00
+                    play sound "SMALLBUILDINGFINISH" at {NewBuilding} with volume 1.0 pitch 0.0
+                end if
+
+            else
+                if camera position near {NewBuilding} radius 200.00
+                    play sound "MEDIUMBUILDINGFINISH" at {NewBuilding} with volume 1.0 pitch 0.0
+                end if
+
+            end if
+        end if
+    end if
+
+end script AGB_BuildBuilding
