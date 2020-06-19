@@ -141,21 +141,19 @@ begin loop
                             else
                                 //Special Actions against Altars and stuff
                                 EnemyObject = get HOUSE ALTAR at {CT_Creature} radius 175
-                                if CREATURE_ALIGNMENT of CT_Creature <= 0.25
+                                if EnemyObject not exists or PLAYER of EnemyObject == PlayerID
+                                    EnemyObject = get HOUSE TEMPLE at {CT_Creature} radius 175
                                     if EnemyObject not exists or PLAYER of EnemyObject == PlayerID
-                                        EnemyObject = get HOUSE TEMPLE at {CT_Creature} radius 175
+                                        EnemyObject = get HOUSE MELEE_ARMOURY at {CT_Creature} radius 175
                                         if EnemyObject not exists or PLAYER of EnemyObject == PlayerID
-                                            EnemyObject = get HOUSE MELEE_ARMOURY at {CT_Creature} radius 175
+                                            EnemyObject = get HOUSE RANGED_ARMOURY at {CT_Creature} radius 175
                                             if EnemyObject not exists or PLAYER of EnemyObject == PlayerID
-                                                EnemyObject = get HOUSE RANGED_ARMOURY at {CT_Creature} radius 175
-                                                if EnemyObject not exists or PLAYER of EnemyObject == PlayerID
-                                                    EnemyObject = get HOUSE at {CT_Creature} radius 175
-                                                end if
+                                                EnemyObject = get HOUSE at {CT_Creature} radius 175
                                             end if
                                         end if
                                     end if
                                 end if
-                                if EnemyObject exists and not leash is in hand and PLAYER of EnemyObject == EnemyID
+                                if CREATURE_ALIGNMENT of CT_Creature <= 0.25 and EnemyObject exists and not leash is in hand and PLAYER of EnemyObject == EnemyID
                                     if get ThrowMiracleTimerAggressive time remaining <= 0
                                         ThrowMiracleTimerAggressive = create timer for number from CT_CreatureMiracleAggressiveDelayMin to CT_CreatureMiracleAggressiveDelayMax seconds
                                         force CT_Creature CREATURE_CAST_FIREBALL EnemyObject
