@@ -1,0 +1,185 @@
+///////////////////////////////////////////////////////////////////////////////
+//    Land 5 Outro
+//    ~~~~~~~~~~~~~
+//
+///////////////////////////////////////////////////////////////////////////////
+
+define script LC5_Outro
+define script LC5_Departure
+
+begin script LC5_Outro
+
+    AtmosMixer = create mixer
+    PlayerAlignment = 0
+
+start
+
+wait until PLAYER of NorseCapital != 1 and NorseCommanderArrived == 1 and LC5_Platoon[8] not exists and LC5_Platoon[9] not exists and LC5_Platoon[10] not exists and LC5_Platoon[11] not exists and LC5_Platoon[12] not exists
+
+PD_ForcedSaving = 1
+wait until PD_ForcedSaving == 0 or 10 seconds
+stop script "SavePersistentDataSetData"
+set persistent data "PREVLAND_OVER" to 1
+run script SavePersistentDataGetData
+LandWon = 1
+
+begin cinema
+
+    //AGC: Moved fade out & wait inside the cinema block
+    set fade red 0 green 0 blue 0 time 2
+    wait 2 seconds
+    run background script LC5_Departure
+    set town PlayerTown capture all enemy towns
+    disable dialogue manager
+    disable game can be lost
+    if PLAYER of NorseCapital == 0
+        set player 0 objective TRIBUTE_OBJECTIVE_SCRIPT_CONTROLLED_WIN_LAND with amount 1 text "BW2T_SCRIPT_07FINAL_SECONDARYOBJECTIVE_80" amount 1 description "BW2T_SCRIPT_06FINAL_SECONDARYOBJECTIVE_51" start value 0 reward 700000 alignment -0.05
+        CREATURE_ALIGNMENT of MyCreature = CREATURE_ALIGNMENT of MyCreature - 0.10
+    else
+        set player 0 objective TRIBUTE_OBJECTIVE_SCRIPT_CONTROLLED_WIN_LAND with amount 1 text "BW2T_SCRIPT_07FINAL_SECONDARYOBJECTIVE_80" amount 1 description "BW2T_SCRIPT_06FINAL_SECONDARYOBJECTIVE_51" start value 0 reward 700000 alignment 0.10
+        CREATURE_ALIGNMENT of MyCreature = CREATURE_ALIGNMENT of MyCreature + 0.10
+    end if
+    set player 0 objective TRIBUTE_OBJECTIVE_SCRIPT_CONTROLLED_WIN_LAND value 1
+    stop script "LC5_Speeches"
+    stop script "LC5_GenericSpeeches"
+
+    disable atmos sound
+    //set atmos volume 0
+    set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_MAP to 0.0
+    set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_POSITIONAL to 0.0
+
+    //24 seconds
+    reset camera path
+    queue camera move with position {1538.69,150.00,2370.99} focus {1555.54,125.00,1939.08} time 0.0
+    queue camera move with position {1555.54,250.00,1939.08} focus {1740.68,275.00,1417.78} time 9.0
+    queue camera move with position {1740.68,325.00,1417.78} focus {1685.28,250.00,1026.19} time 6.0
+    queue camera move with position {1685.28,300.00,1026.19} focus {1591.63,235.00,665.36} time 7.0
+    queue camera move with position {1591.63,285.00,665.36} focus {1542.10,222.04,581.76} time 7.0
+    play camera path with easein 20 easeout 8 method SCRIPT_CAMERAPATH_SMOOTHEST
+    set fade in time 3
+
+    wait 2.5 seconds
+
+    make good spirit appear
+    make evil spirit appear
+
+    //DIALOGUES
+    if PLAYER of NorseCapital == 0
+        say "BW2T_SCRIPT_04FINAL_ADVISORS_LAND_DONE_20"
+        wait until read
+    else
+        say "BW2T_SCRIPT_04FINAL_ADVISORS_LAND_DONE_10"
+        wait until read
+    end if
+
+    wait 0.5 seconds
+
+    say "BW2T_SCRIPT_04FINAL_ADVISORS_LAND_DONE_70"
+    wait until read
+    say "BW2T_SCRIPT_04FINAL_ADVISORS_LAND_DONE_80"
+    wait until read
+    say "BW2T_SCRIPT_04FINAL_ADVISORS_LAND_DONE_90"
+    wait until read
+    say "BW2T_SCRIPT_04FINAL_ADVISORS_LAND_DONE_100"
+    wait until read
+    say "BW2T_SCRIPT_04FINAL_ADVISORS_LAND_DONE_110"
+    wait until read
+    //say "BW2T_SCRIPT_04FINAL_ADVISORS_LAND_DONE_120"
+    //wait until read
+    //say "BW2T_SCRIPT_04FINAL_ADVISORS_LAND_DONE_130"
+    //wait until read
+
+    send good spirit home
+    send evil spirit home
+
+    wait until camera ready
+
+    //set atmos volume 0.45
+    set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_MAP to 0.45
+    set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_POSITIONAL to 0.45
+
+end cinema
+
+stop music with fadetime 5
+
+end script LC5_Outro
+
+
+begin script LC5_Departure
+
+    DepartureScrollPos = marker at {1542.10,222.04,581.76}
+    DepartureScroll = 0
+    Portal = 0
+    
+start
+
+    WT_SkyTransitionGlobalInfluence = 1
+    enable global influence
+
+    Portal = create visual effect VISUAL_EFFECT_TELEPORTER_HOOP at {DepartureScrollPos} + {0, 1.5, 0} time -1
+
+    DepartureScroll = create highlight GOLD name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {DepartureScrollPos}
+    ALTITUDE of DepartureScroll = 3
+
+    wait until DepartureScroll right clicked
+
+    wait until dialogue ready
+    begin dialogue
+        eject good spirit
+        //say "Are you sure you wish to leave the land?"
+        say "BW2T_SCRIPT_03FINAL_ADVISORS_TUT_934"
+        wait until read
+        //say "Click again to confirm"
+        say "BW2T_SCRIPT_03FINAL_ADVISORS_TUT_933"
+        wait until read
+        send good spirit home
+    end dialogue
+    
+    clear right clicked object
+    wait until DepartureScroll right clicked
+    delete DepartureScroll
+    
+    // Get the dialogue for the enemy and for the advisors
+    
+    set fade red 0 green 0 blue 0 time 2
+    wait 2 seconds
+    DM_DynamicMusicDisallowed = 1
+    begin cinema
+        start music "farming_communtiy_land2" loop 10
+        wait 2 seconds
+    
+        queue camera move with position {1542.10,222.04,581.76} + {10,7.5,10} focus {1542.10,222.04,581.76} + {0,5,0} time 0.0
+        queue camera move with position {1542.10,222.04,581.76} + {7.5,5,7.5} focus {1542.10,222.04,581.76} time 5.0
+        queue camera move with position {1542.10,222.04,581.76} + {1,1.5,1} focus {1542.10,222.04,581.76} time 4.0
+        play camera path with easein 4 easeout 4 method SCRIPT_CAMERAPATH_EQUALDISTANCE
+        set fade in time 1
+        wait 4 seconds
+        set fade red 0 green 0 blue 0 time 3
+        wait 3 seconds
+        wait 1 seconds
+    end cinema
+    
+    //TRIGGER processing of land end objectives
+    process land end objectives
+    wait until land end objectives processed    
+
+    run map script line "SET_LAND_NUMBER(3)"
+    wait 1.5 seconds 
+    release MyCreature
+    MyCreature = get player 0 creature
+    if MyCreature exists
+        save my_creature
+    end if
+    DM_DynamicMusicDisallowed = 0
+
+    disable game can be lost
+    run script LandExit
+
+    PD_ForcedSaving = 1
+    wait until PD_ForcedSaving == 0 or 10 seconds
+
+    disable load screen
+    load map "./Data/Landscape/BW2/Land4.bwe"
+    wait 3 seconds
+
+end script LC5_Departure

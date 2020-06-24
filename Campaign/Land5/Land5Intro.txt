@@ -1,0 +1,87 @@
+///////////////////////////////////////////////////////////////////////////////
+//    Land 5 Intro
+//    ~~~~~~~~~~~~~~
+//
+///////////////////////////////////////////////////////////////////////////////
+
+define False = 0
+define True = 1
+
+define script LC5_Intro
+
+begin script LC5_Intro
+
+    WindMixer = 0
+    AtmosMixer = create mixer
+
+start
+
+    PD_ForcedSaving = 1
+    wait until PD_ForcedSaving == 0 or 10 seconds
+    stop script "SavePersistentDataSetData"
+    set persistent data "PREVLAND_OVER" to 0
+    run script SavePersistentDataGetData
+
+    WindMixer = create mixer
+    set mixer WindMixer channel AUDIO_MIXER_CHANNEL_GLOBAL to 0.0
+
+    set fade red 0 green 0 blue 0 time 0
+    set game time 07.30
+
+    wait 5 seconds
+    set mixer WindMixer channel AUDIO_MIXER_CHANNEL_GLOBAL to 1.0 with fadetime 2
+    wait 2 seconds
+    destroy mixer WindMixer
+
+    DM_DynamicMusicDisallowed = 1
+    begin cinema
+    
+        disable atmos sound
+        //set atmos volume 0
+        set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_MAP to 0.0
+        set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_POSITIONAL to 0.0
+        wait 2 seconds
+
+        reset camera path
+        queue camera move with position {228.57,750.00,-234.51} focus {1700.33,500.00,913.03} time 0.0
+        queue camera move with position {1874.54,320.00,1180.95} focus {NorseTown3} time 17.0
+        queue camera move with position {1799.50,310.17,1348.97} focus {NorseTown3} time 7.0
+
+        disable load screen
+        set fade in time 5
+        play camera path with easein 4 easeout 4 method SCRIPT_CAMERAPATH_SMOOTHEST
+        start music "cut_scene_sad_100_01" loop -1
+        wait 14 seconds
+
+        make good spirit appear
+        make evil spirit appear
+        say "BW2T_SCRIPT_04FINAL_ADVISORS_INTRO_165"
+        wait until read
+        say "BW2T_SCRIPT_04FINAL_ADVISORS_WARN_10"
+        wait until read
+        wait 1 seconds
+        make evil spirit disappear
+        make good spirit disappear
+        wait 2 seconds
+
+        set fade red 0 green 0 blue 0 time 2
+        wait 2 seconds
+        reset camera path
+        queue camera move with position {1224.81,150.00,278.82} focus {PlayerTown} time 0.0
+        play camera path with easein 4 easeout 4 method SCRIPT_CAMERAPATH_EQUALTIME
+        set fade in time 2
+        wait 2 seconds
+        stop music with fadetime 4
+        enable atmos sound
+        //set atmos volume 0.45
+        set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_MAP to 0.45
+        set mixer AtmosMixer channel AUDIO_MIXER_CHANNEL_ATMOS_POSITIONAL to 0.45
+
+    end cinema
+    DM_DynamicMusicDisallowed = 0
+
+    wait 2 seconds
+    
+    IntroFinished = 1
+
+end script LC5_Intro
