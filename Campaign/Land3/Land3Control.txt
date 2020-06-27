@@ -4,6 +4,8 @@ define script Land3MaintainPopulation
 //    Land 3 Control
 //-----------------------------------------------------------------------------
 begin script Land3Control
+    DoNotScroll = 0
+    L3TutorialsScrollClicked = 0
 start
 
     run script Land3DidYouKnow
@@ -89,9 +91,80 @@ start
     disable global influence
     run background script SetupBuildingsLand3
     run background script Land3Marauders
-    run script Land3Tutorials
-    set town L3GreekTown desire for TOWN_DESIRE_FOR_ORE to -1
-    run script Land3BuildTabTutorial    
+
+    wait until L3TutorialsScroll right clicked or L3TutorialDoNotScroll right clicked
+    
+    if L3TutorialsScroll right clicked
+        L3TutorialsScrollClicked = 1
+    end if
+
+    if L3TutorialsScrollClicked == 1
+        run script Land3Tutorials
+        set town L3GreekTown desire for TOWN_DESIRE_FOR_ORE to -1
+        run script Land3BuildTabTutorial    
+    else
+        if not L3GreekTown exists
+            run script Land3Globals
+        end if
+        delete L3TutorialsScroll
+        delete L3TutorialDoNotScroll
+        enable interface action MANACOST_BALANCE_TYPE_GODBUILD
+        enable toolbar
+        enable can use destruction tool
+        
+        reset player 0 objective TRIBUTE_OBJECTIVE_LAND_1
+        reset player 0 objective TRIBUTE_OBJECTIVE_LAND_2
+        reset player 0 objective TRIBUTE_OBJECTIVE_LAND_3
+        reset player 0 objective TRIBUTE_OBJECTIVE_LAND_4
+        reset player 0 objective TRIBUTE_OBJECTIVE_LAND_5
+        reset player 0 objective TRIBUTE_OBJECTIVE_LAND_6
+        reset player 0 objective TRIBUTE_OBJECTIVE_LAND_7
+        reset player 0 objective TRIBUTE_OBJECTIVE_LAND_8
+        reset player 0 objective TRIBUTE_OBJECTIVE_LAND_9
+        reset player 0 objective TRIBUTE_OBJECTIVE_LAND_10 
+        reset player 0 objective TRIBUTE_OBJECTIVE_LAND_11
+        reset player 0 objective TRIBUTE_OBJECTIVE_LAND_12
+        reset player 0 objective TRIBUTE_OBJECTIVE_LAND_13
+        reset player 0 objective TRIBUTE_OBJECTIVE_LAND_14
+        reset player 0 objective TRIBUTE_OBJECTIVE_LAND_15
+        reset player 0 objective TRIBUTE_OBJECTIVE_LAND_16
+        reset player 0 objective TRIBUTE_OBJECTIVE_LAND_18
+        reset player 0 objective TRIBUTE_OBJECTIVE_LAND_19
+        reset player 0 objective TRIBUTE_OBJECTIVE_LAND_20
+        
+        // Setup the objective for taking over the other towns by force or imprssiveness
+        // Take over every Town on the land.
+        enable objective window
+        set player 0 objective TRIBUTE_OBJECTIVE_SCRIPT_CONTROLLED_WIN_LAND with amount 1 text "BW2T_SCRIPT_07FINAL_SECONDARYOBJECTIVE_80" amount 1 description "BW2T_SCRIPT_06FINAL_SECONDARYOBJECTIVE_51" start value 0 force open
+        set player 0 objective TRIBUTE_OBJECTIVE_LAND_11 with amount 1 text "BW2T_SCRIPT_08FINAL_SECONDARYOBJECTIVE_70" parent TRIBUTE_OBJECTIVE_SCRIPT_CONTROLLED_WIN_LAND start value 0 force open
+        
+        enable migration from L3MinorTown1 to all other towns
+        enable migration from L3MinorTown2 to all other towns
+        enable migration from L3MinorTown3 to all other towns
+        enable migration from L3MinorTown4 to all other towns
+        disable script controlled migration player 0
+        enable town L3MinorTown1 can be taken by force
+        enable town L3MinorTown3 can be taken by force
+        enable town L3MinorTown4 can be taken by force
+        disable build menu override
+
+        set toolbar state to MENU_TOOLBAR_STATE_CLOSED
+        run background script BT_SetEverythingToHowItShouldBe
+        set town L3GreekTown desire for TOWN_DESIRE_TO_BUILD to -1
+        set town L3GreekTown desire for TOWN_DESIRE_TO_BREED to -1
+        set town L3GreekTown desire for TOWN_DESIRE_FOR_SPARE_TIME to -1
+        set town L3GreekTown desire for TOWN_DESIRE_FOR_FOOD to -1
+        set town L3GreekTown desire for TOWN_DESIRE_FOR_HOMES to -1
+        enable town L3GreekTown job VILLAGER_JOB_MINER
+        enable town L3GreekTown job VILLAGER_JOB_BUILDER
+        enable town L3GreekTown job VILLAGER_JOB_FARMER
+        enable town L3GreekTown job VILLAGER_JOB_FORESTER
+        add resource RESOURCE_TYPE_FOOD 4000 to L3GreekTown
+        add resource RESOURCE_TYPE_WOOD 4000 to L3GreekTown
+        add resource RESOURCE_TYPE_ORE 4000 to L3GreekTown
+        TUT_FedTheVillagers = TUT_TRUE
+        TUT_FinishedTutorials = TUT_TRUE
+    end if
     
     L3FinishedTutorials = TUT_TRUE
     enable town L3GreekTown desire speech
