@@ -1,0 +1,121 @@
+///////////////////////////////////////////////////////////////////////////////
+//      Land 6 Monks
+//    ~~~~~~~~~~~~~~~~
+///////////////////////////////////////////////////////////////////////////////
+
+define script LC6_Monks
+define script LC6_CheckForTemples
+define script LC6_CheckForMonks(MonkPlatoon)
+
+global MonksCount = 0
+global TempleOwnedByPlayer = 9
+global MonkTemple[2]
+
+begin script LC6_Monks
+
+    FirstPlatoon = 0
+    MonkAttackTimer = create timer for 0 seconds
+    MonkPlatoonAttacking = 0
+    MonkPlatoon = 0
+    MonkSpawnPosition = marker at {1242.55,65.88,1488.44}
+    MonkMoveToPosition = marker at {1280.43,59.13,1479.26}
+
+start
+
+run background script LC6_CheckForTemples
+wait 2.5 seconds
+
+while LandWon == 0
+    if MonksCount < 1 and get MonkTimer time remaining <= 0 and MonkTemple[0] exists and HEALTH of MonkTemple[0] > 0.0 and MonkTemple[1] exists and HEALTH of MonkTemple[1] > 0.0
+        if FirstPlatoon == 0
+            FirstPlatoon = 1
+            MonkPlatoon = create platoon PLATOON_INFO_JAPANESE_MELEE_7 at {MonkSpawnPosition} with 20 men and 0 women
+        else
+            MonkPlatoon = create platoon PLATOON_INFO_JAPANESE_MELEE_7 at {MonkSpawnPosition} with 40 men and 0 women
+        end if
+        PLAYER of MonkPlatoon = TempleOwnedByPlayer
+        if MonkPlatoon exists
+            MonksCount++
+            //set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_MASS of MonkPlatoon to 1.5
+            set platoon movement value FORMATION_MOVEMENT_STAT_ACCELERATION_MAX of MonkPlatoon to 20.0
+            set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_SPEED_MAX of MonkPlatoon to 20.0
+            set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_SPEED_MIN of MonkPlatoon to 15.0
+            set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_CHARGE_SPEED of MonkPlatoon to 16.0
+            set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_FIGHTER_SPEED of MonkPlatoon to 6.0
+            set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_SPEED of MonkPlatoon to 11.0
+            set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_CHARGE_SPEED of MonkPlatoon to 16.0
+            run background script LC6_CheckForMonks(MonkPlatoon)
+            add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {MonkMoveToPosition} to MonkPlatoon action queue
+            //If Player is AI give platoon control to script
+            if TempleOwnedByPlayer == 1
+                wait 5 seconds
+                MonkPlatoonAttacking = 0
+                MonkAttackTimer = create timer for 1200 seconds
+            end if
+            MonkTimer = create timer for 600 seconds
+        end if
+    end if
+    if MonkPlatoonAttacking == 0 and PLAYER of MonkPlatoon != 0 and get size of MonkPlatoon action queue < 1 and not {MonkPlatoon} near {1242.55,65.88,1488.44} radius 40
+        clear MonkPlatoon action queue
+        add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {MonkMoveToPosition} to MonkPlatoon action queue
+    end if
+    if MonkPlatoon exists and PLAYER of MonkPlatoon == 1 and get MonkAttackTimer time remaining <= 0 and MonkPlatoonAttacking == 0
+        MonkPlatoonAttacking = 1
+        run script PlatoonTargetingMetric(size of MonkPlatoon * RecruitSizeModifier,PlayerTown)
+        run background script LC6_ArmyBehaivours(MonkPlatoon,Melee,Attacker,0,PlatoonTargetingMetricFocusResult,Passive,AttackPos[2],AttackPos[3],AttackPosFlank[0],AttackPosFlank[1],AttackPosFlank[2],0,0,0)
+    end if
+end while
+
+end script LC6_Monks
+
+
+begin script LC6_CheckForTemples
+
+    Object = 0
+    InfluenceIndicator = 0
+
+start
+
+MonkTemple[0] = get HOUSE TEMPLE at {1218.03,65.91,1484.45} radius 25
+MonkTemple[1] = get HOUSE TEMPLE at {1223.93,65.96,1501.60} radius 25
+begin loop
+    //Player 0
+    if get number of platoon of player 0 at {1242.55,65.88,1488.44} radius 40 > 0 and get number of platoon of player 1 at {1242.55,65.88,1488.44} radius 40 == 0 and get number of platoon of player 3 at {1242.55,65.88,1488.44} radius 40 == 0
+        TempleOwnedByPlayer = 0
+        if not InfluenceIndicator exists
+            InfluenceIndicator = create visual effect "gp_s_area.ves" strength 0.6 scale 10 at {1242.55,65.88,1488.44} time -1 
+        end if
+        set InfluenceIndicator colour red 0 green 204 blue 0
+    //Player 1
+    elsif get number of platoon of player 0 at {1242.55,65.88,1488.44} radius 40 == 0 and get number of platoon of player 1 at {1242.55,65.88,1488.44} radius 40 > 0 and get number of platoon of player 3 at {1242.55,65.88,1488.44} radius 40 == 0
+        TempleOwnedByPlayer = 1
+        if not InfluenceIndicator exists
+            InfluenceIndicator = create visual effect "gp_s_area.ves" strength 0.6 scale 10 at {1242.55,65.88,1488.44} time -1 
+        end if
+        set InfluenceIndicator colour red 105 green 0 blue 0
+    //Neutral
+    elsif get number of platoon of player 0 at {1242.55,65.88,1488.44} radius 40 == 0 and get number of platoon of player 1 at {1242.55,65.88,1488.44} radius 40 == 0 and get number of platoon of player 3 at {1242.55,65.88,1488.44} radius 40 == 0
+        TempleOwnedByPlayer = 3
+        if not InfluenceIndicator exists
+            InfluenceIndicator = create visual effect "gp_s_area.ves" strength 0.6 scale 10 at {1242.55,65.88,1488.44} time -1 
+        end if
+        set InfluenceIndicator colour red 200 green 200 blue 230
+    end if
+    until LandWon == 1
+end loop
+
+if InfluenceIndicator exists
+    delete InfluenceIndicator
+end if
+
+end script LC6_CheckForTemples
+
+
+begin script LC6_CheckForMonks(MonkPlatoon)
+
+start
+
+    wait until MonkPlatoon not exists
+    MonksCount--
+
+end script LC6_CheckForMonks
