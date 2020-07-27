@@ -3567,13 +3567,17 @@ start
             end while
         end if
 
-        if PLAYER of JapaneseTown1 == 0 or PLAYER of JapaneseTown2 == 0 or PLAYER of MinorTown5 == 0 or PLAYER of MinorTown4 == 0 or PLAYER of MinorTown3 == 0 or PLAYER of MinorTown9 == 0 or PLAYER of JapaneseCapital != 1
-            //Take over a town and start attacking the player a lot    
-            if NearestSettlement != 0 and PLAYER of NearestSettlement == 0
+        if PLAYER of JapaneseCapital == 0 or PLAYER of JapaneseTown1 == 0 or PLAYER of JapaneseTown2 == 0 or get ConquerorTimer time remaining <= 0
+            //Use platoons for settlements or minor towns
+            if AttackingPlatoons == 0 and NearestSettlement != 0
+                ConquerorResetTimer = create timer for 3000 seconds
                 AttackingPlatoons = 1
             end if
+        end if
 
-        elsif PLAYER of NearestSettlement == 1
+        if AttackingPlatoons == 1 and get ConquerorResetTimer time remaining <= 0
+            //Use platoons for PlayerTown
+            ConquerorTimer = create timer for 2400 * RecruitModifier seconds
             AttackingPlatoons = 0
         end if
 
