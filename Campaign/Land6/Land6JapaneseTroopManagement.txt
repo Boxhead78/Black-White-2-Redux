@@ -45,7 +45,7 @@ define script PlatoonTargetingMetric(PlatoonSize,TargetTown)
 define script CatapultTargetingMetric(TargetTown)
 define script LC6_StaticPlatoonsController
 define script LC6_StaticPlatoonsActions(Pos,Type,Platoon,OriginTown)
-define script LC6_ArmyBehaivours(Platoon,Type,Task,DefendObject,AttackFocus,Aggressiveness,AttackingPoint1,AttackingPoint2,AttackWP1,AttackWP2,AttackWP3,PatrolRoute,Town,Splitted)
+define script LC6_ArmyBehaivours(Platoon,Type,Task,DefendObject,AttackFocus,Aggressiveness,AttackingPoint1,AttackingPoint2,AttackWP1,AttackWP2,AttackWP3,PatrolRoute,Town,AttackWPStage)
 define script LC6_MoveCatapultThenAttack(SiegeWeapon,Task,AttackFocus,AttackWP1,AttackWP2,AttackWP3,AttackingPoint1,AttackingPoint2)
 
 global LC6_Defender[LC6_NUM_OF_DEFENDERS]
@@ -1696,9 +1696,8 @@ LC6_StaticPlatoonCounter--
 
 end script LC6_StaticPlatoonsActions
 
-begin script LC6_ArmyBehaivours(Platoon,Type,Task,DefendObject,AttackFocus,Aggressiveness,AttackingPoint1,AttackingPoint2,AttackWP1,AttackWP2,AttackWP3,PatrolRoute,Town,Splitted)
+begin script LC6_ArmyBehaivours(Platoon,Type,Task,DefendObject,AttackFocus,Aggressiveness,AttackingPoint1,AttackingPoint2,AttackWP1,AttackWP2,AttackWP3,PatrolRoute,Town,AttackWPStage)
 
-    AttackWPStage = 0
     PlayerCreature = 0
     PlayerPlatoon1 = 0
     oCreature = get player 0 creature
@@ -1736,10 +1735,6 @@ if MergeChance >= SplitUpChance
     SplitUpChance = 0
 else
     MergeChance = 0
-end if
-
-if Splitted == 1
-    AttackWPStage = 3
 end if
 
 AttackWP1 = marker at {AttackWP1Persistent} + {number from -66 to 66,number from -66 to 66}
@@ -2605,7 +2600,7 @@ begin loop
                 add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {Platoon} + {number from -50 to 50,number from -50 to 50} to NewPlatoon action queue
                 wait 5 seconds
                 clear NewPlatoon action queue
-                run background script LC6_ArmyBehaivours(NewPlatoon,Type,Task,0,Default,Neutral,AttackingPoint1,AttackingPoint2,AttackWP1,AttackWP2,AttackWP3,PatrolRoute,Town,1)
+                run background script LC6_ArmyBehaivours(NewPlatoon,Type,Task,0,Default,Neutral,AttackingPoint1,AttackingPoint2,AttackWP1,AttackWP2,AttackWP3,PatrolRoute,Town,3)
             end while
         end if
     end if
