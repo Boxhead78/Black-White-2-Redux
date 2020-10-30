@@ -1216,8 +1216,17 @@ begin script LC5_Norse_Capital
     TargetFound = 0
     FirstAttack1 = 0
     FirstAttack2 = 0
+    BuildingDefendersAllowed[5]
+    BuildingDefendersAllowedTimer = create timer for 0 seconds
+    Counter = 0
 
 start
+
+    BuildingDefendersAllowed[0] = 1
+    BuildingDefendersAllowed[1] = 1
+    BuildingDefendersAllowed[2] = 1
+    BuildingDefendersAllowed[3] = 1
+    BuildingDefendersAllowed[4] = 1
 
     //extend town NorseCapital influence by 40
 
@@ -1331,31 +1340,34 @@ start
         set player 4 alignment 0.0
 
         if get RecruitTimer1 time remaining <= 0
-            if LC5_Platoon[8] not exists and PLAYER of NorseCapital == 1 and get RecruitTimer1 time remaining <= 0 and not town NorseCapital is under takeover from player 0 and not town NorseCapital is under takeover from player 2 and not town NorseCapital is under takeover from player 3 and not town NorseCapital is under takeover from player 4
+            if LC5_Platoon[8] not exists and PLAYER of NorseCapital == 1 and get RecruitTimer1 time remaining <= 0 and not town NorseCapital is under takeover from player 0 and not town NorseCapital is under takeover from player 2 and not town NorseCapital is under takeover from player 3 and not town NorseCapital is under takeover from player 4 and BuildingDefendersAllowed[0] == 1
                 LC5_Platoon[8] = recruit ARMY_UNIT_TYPE_MELEE_1 town NorseCapital platoon of size 20 * RecruitSizeModifier
                 RecruitTimer1 = create timer for (20 * 2) * NORSERECRUITMENTMODIFIER * RecruitModifier seconds
                 enable platoon LC5_Platoon[8] respond to town NorseCapital attack
                 run background script LC5_StaticPlatoonsActions(PlatoonPos[8],Melee,LC5_Platoon[8],NorseCapital)
                 run background script LC5_GenericSpeeches(LC5_Platoon[8],1)
                 run background script PT_CreateBasicNorsePlatoon(LC5_Platoon[8],1)
+                BuildingDefendersAllowed[0] = 0
 
-            elsif LC5_Platoon[9] not exists and PLAYER of NorseCapital == 1 and get RecruitTimer1 time remaining <= 0 and not town NorseCapital is under takeover from player 0 and not town NorseCapital is under takeover from player 2 and not town NorseCapital is under takeover from player 3 and not town NorseCapital is under takeover from player 4
+            elsif LC5_Platoon[9] not exists and PLAYER of NorseCapital == 1 and get RecruitTimer1 time remaining <= 0 and not town NorseCapital is under takeover from player 0 and not town NorseCapital is under takeover from player 2 and not town NorseCapital is under takeover from player 3 and not town NorseCapital is under takeover from player 4 and BuildingDefendersAllowed[0] == 1
                 LC5_Platoon[9] = recruit ARMY_UNIT_TYPE_MELEE_1 town NorseCapital platoon of size 20 * RecruitSizeModifier
                 RecruitTimer1 = create timer for (20 * 2) * NORSERECRUITMENTMODIFIER * RecruitModifier seconds
                 enable platoon LC5_Platoon[9] respond to town NorseCapital attack
                 run background script LC5_StaticPlatoonsActions(PlatoonPos[9],Melee,LC5_Platoon[9],NorseCapital)
                 run background script LC5_GenericSpeeches(LC5_Platoon[9],1)
                 run background script PT_CreateBasicNorsePlatoon(LC5_Platoon[9],1)
+                BuildingDefendersAllowed[0] = 0
 
-            elsif LC5_Platoon[10] not exists and PLAYER of NorseCapital == 1 and get RecruitTimer1 time remaining <= 0 and not town NorseCapital is under takeover from player 0 and not town NorseCapital is under takeover from player 2 and not town NorseCapital is under takeover from player 3 and not town NorseCapital is under takeover from player 4
+            elsif LC5_Platoon[10] not exists and PLAYER of NorseCapital == 1 and get RecruitTimer1 time remaining <= 0 and not town NorseCapital is under takeover from player 0 and not town NorseCapital is under takeover from player 2 and not town NorseCapital is under takeover from player 3 and not town NorseCapital is under takeover from player 4 and BuildingDefendersAllowed[0] == 1
                 LC5_Platoon[10] = recruit ARMY_UNIT_TYPE_MELEE_1 town NorseCapital platoon of size 20 * RecruitSizeModifier
                 RecruitTimer1 = create timer for (20 * 2) * NORSERECRUITMENTMODIFIER * RecruitModifier seconds
                 enable platoon LC5_Platoon[10] respond to town NorseCapital attack
                 run background script LC5_StaticPlatoonsActions(PlatoonPos[10],Melee,LC5_Platoon[10],NorseCapital)
                 run background script LC5_GenericSpeeches(LC5_Platoon[10],1)
                 run background script PT_CreateBasicNorsePlatoon(LC5_Platoon[10],1)
+                BuildingDefendersAllowed[0] = 0
 
-            elsif LC5_Platoon[25] not exists and PLAYER of NorseCapital == 1 and get RecruitTimer1 time remaining <= 0 and not town NorseCapital is under takeover from player 0 and not town NorseCapital is under takeover from player 2 and not town NorseCapital is under takeover from player 3 and not town NorseCapital is under takeover from player 4
+            elsif LC5_Platoon[25] not exists and PLAYER of NorseCapital == 1 and get RecruitTimer1 time remaining <= 0 and not town NorseCapital is under takeover from player 0 and not town NorseCapital is under takeover from player 2 and not town NorseCapital is under takeover from player 3 and not town NorseCapital is under takeover from player 4 and BuildingDefendersAllowed[0] == 1
                 LC5_Platoon[25] = recruit ARMY_UNIT_TYPE_MELEE_1 town NorseCapital platoon of size 35 * RecruitSizeModifier
                 RecruitTimer1 = create timer for (35 * 2) * NORSERECRUITMENTMODIFIER * RecruitModifier seconds
                 run background script PT_CreateHeavyNorsePlatoon(LC5_Platoon[25],1)
@@ -1363,6 +1375,7 @@ start
                 wait until not LC5_Platoon[25] recruiting
                 run background script LC5_ArmyBehaivours(LC5_Platoon[25],Melee,Patrol,0,0,Alerted,0,0,0,0,0,WaypointsA,0,0)
                 FirstArmyCreated = 1
+                BuildingDefendersAllowed[0] = 0
             //Attackers
             //Random Attacks Evil Alignment
             //Direct large attack #1
@@ -1380,6 +1393,8 @@ start
                         run background script LC5_ArmyBehaivours(LC5_Platoon[15],Melee,Conqueror,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
                     end if
                     run background script PT_CreateBasicNorsePlatoon(LC5_Platoon[15],1)
+                    BuildingDefendersAllowed[0] = 1
+
                 elsif LC5_Platoon[16] not exists and PLAYER of NorseCapital == 1 and get RecruitTimer1 time remaining <= 0 and not town NorseCapital is under takeover from player 0 and not town NorseCapital is under takeover from player 2 and not town NorseCapital is under takeover from player 3 and not town NorseCapital is under takeover from player 4
                     LC5_Platoon[16] = recruit ARMY_UNIT_TYPE_MELEE_1 town NorseCapital platoon of size 15 * RecruitSizeModifier
                     RecruitTimer1 = create timer for (15 * 2) * NORSERECRUITMENTMODIFIER * RecruitModifier seconds
@@ -1393,6 +1408,8 @@ start
                         run background script LC5_ArmyBehaivours(LC5_Platoon[16],Melee,Conqueror,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
                     end if
                     run background script PT_CreateBasicNorsePlatoon(LC5_Platoon[16],1)
+                    BuildingDefendersAllowed[0] = 1
+                    
                 end if
             //Backdoor small attack #2
             elsif (RndAttack == 3 or RndAttack == 4) and PlayerAlignmentFinal < 0.0 and AttackersSent == 0
@@ -1409,6 +1426,8 @@ start
                         run background script LC5_ArmyBehaivours(LC5_Platoon[17],Melee,Conqueror,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosBack[0],AttackPosBack[1],AttackPosBack[2],0,0,0)
                     end if
                     run background script PT_CreateChargerNorsePlatoon(LC5_Platoon[17],1)
+                    BuildingDefendersAllowed[0] = 1
+
                 end if
             //Backdoor small attack #3
             elsif (RndAttack == 5) and PlayerAlignmentFinal < 0.0 and AttackersSent == 0
@@ -1425,6 +1444,8 @@ start
                         run background script LC5_ArmyBehaivours(LC5_Platoon[18],Melee,Conqueror,0,PlatoonTargetingMetricFocusResult,Passive,AttackingPosition,AttackingPositionFallBack,AttackPosBack[0],AttackPosBack[1],AttackPosBack[2],0,0,0)
                     end if
                     run background script PT_CreateChargerNorsePlatoon(LC5_Platoon[18],1)
+                    BuildingDefendersAllowed[0] = 1
+
                 end if
 
             //Random Attacks Good Alignment
@@ -1443,6 +1464,8 @@ start
                         run background script LC5_ArmyBehaivours(LC5_Platoon[19],Melee,Conqueror,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
                     end if
                     run background script PT_CreateBasicNorsePlatoon(LC5_Platoon[19],1)
+                    BuildingDefendersAllowed[0] = 1
+
                 elsif LC5_Platoon[20] not exists and PLAYER of NorseCapital == 1 and get RecruitTimer1 time remaining <= 0 and not town NorseCapital is under takeover from player 0 and not town NorseCapital is under takeover from player 2 and not town NorseCapital is under takeover from player 3 and not town NorseCapital is under takeover from player 4
                     LC5_Platoon[20] = recruit ARMY_UNIT_TYPE_MELEE_1 town NorseCapital platoon of size 20 * RecruitSizeModifier
                     RecruitTimer1 = create timer for (20 * 2) * NORSERECRUITMENTMODIFIER * RecruitModifier seconds
@@ -1456,6 +1479,8 @@ start
                         run background script LC5_ArmyBehaivours(LC5_Platoon[20],Melee,Conqueror,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
                     end if
                     run background script PT_CreateBasicNorsePlatoon(LC5_Platoon[20],1)
+                    BuildingDefendersAllowed[0] = 1
+
                 elsif LC5_Platoon[21] not exists and PLAYER of NorseCapital == 1 and get RecruitTimer1 time remaining <= 0 and not town NorseCapital is under takeover from player 0 and not town NorseCapital is under takeover from player 2 and not town NorseCapital is under takeover from player 3 and not town NorseCapital is under takeover from player 4
                     LC5_Platoon[21] = recruit ARMY_UNIT_TYPE_MELEE_1 town NorseCapital platoon of size 20 * RecruitSizeModifier
                     RecruitTimer1 = create timer for (20 * 2) * NORSERECRUITMENTMODIFIER * RecruitModifier seconds
@@ -1469,6 +1494,8 @@ start
                         run background script LC5_ArmyBehaivours(LC5_Platoon[21],Melee,Conqueror,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
                     end if
                     run background script PT_CreateBasicNorsePlatoon(LC5_Platoon[21],1)
+                    BuildingDefendersAllowed[0] = 1
+
                 end if
             //Direct large attack #2
             elsif (RndAttack == 3 or RndAttack == 4) and PlayerAlignmentFinal >= 0.0 and AttackersSent == 0
@@ -1485,6 +1512,8 @@ start
                         run background script LC5_ArmyBehaivours(LC5_Platoon[22],Melee,Conqueror,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
                     end if
                     run background script PT_CreateBasicNorsePlatoon(LC5_Platoon[22],1)
+                    BuildingDefendersAllowed[0] = 1
+
                 elsif LC5_Platoon[23] not exists and PLAYER of NorseCapital == 1 and get RecruitTimer1 time remaining <= 0 and not town NorseCapital is under takeover from player 0 and not town NorseCapital is under takeover from player 2 and not town NorseCapital is under takeover from player 3 and not town NorseCapital is under takeover from player 4
                     LC5_Platoon[23] = recruit ARMY_UNIT_TYPE_MELEE_1 town NorseCapital platoon of size 30 * RecruitSizeModifier
                     RecruitTimer1 = create timer for (30 * 2) * NORSERECRUITMENTMODIFIER * RecruitModifier seconds
@@ -1498,6 +1527,8 @@ start
                         run background script LC5_ArmyBehaivours(LC5_Platoon[23],Melee,Conqueror,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
                     end if
                     run background script PT_CreateBasicNorsePlatoon(LC5_Platoon[23],1)
+                    BuildingDefendersAllowed[0] = 1
+
                 end if
             //Backdoor small attack #3
             elsif (RndAttack == 5) and PlayerAlignmentFinal >= 0.0 and AttackersSent == 0
@@ -1514,6 +1545,8 @@ start
                         run background script LC5_ArmyBehaivours(LC5_Platoon[24],Melee,Conqueror,0,PlatoonTargetingMetricFocusResult,Passive,AttackingPosition,AttackingPositionFallBack,AttackPosBack[0],AttackPosBack[1],AttackPosBack[2],0,0,0)
                     end if
                     run background script PT_CreateChargerNorsePlatoon(LC5_Platoon[24],1)
+                    BuildingDefendersAllowed[0] = 1
+
                 end if
             end if
         end if
@@ -1716,52 +1749,118 @@ start
         end if
 
         //Town building depending on alignment
-        if PLAYER of NorseCapital == 1
-            if PlayerAlignmentFinal >= 0.0
-                if AlignmentTownBuildingPhase == 0 and get AlignmentTownBuildingTimer1 time remaining <= 0
-                    AlignmentTownBuildingPhase = 1
-                    build all town NorseCapital buildings in group 20
+        if PlayerAlignmentFinal >= 0.0
+            if AlignmentTownBuildingPhase == 0 and get AlignmentTownBuildingTimer1 time remaining <= 0
+                AlignmentTownBuildingPhase = 1
+                Counter = 0
+                while Counter < 16
+                    if PLAYER of get town with id Counter == 1
+                        build all town get town with id Counter buildings in group 20
+                    end if
+                    Counter++
+                end while
 
-                elsif AlignmentTownBuildingPhase == 1 and get AlignmentTownBuildingTimer2 time remaining <= 0
-                    AlignmentTownBuildingPhase = 2
-                    build all town NorseCapital buildings in group 21
+            elsif AlignmentTownBuildingPhase == 1 and get AlignmentTownBuildingTimer2 time remaining <= 0
+                AlignmentTownBuildingPhase = 2
+                Counter = 0
+                while Counter < 16
+                    if PLAYER of get town with id Counter == 1
+                        build all town get town with id Counter buildings in group 21
+                    end if
+                    Counter++
+                end while
 
-                elsif AlignmentTownBuildingPhase == 2 and get AlignmentTownBuildingTimer3 time remaining <= 0
-                    AlignmentTownBuildingPhase = 3
-                    build all town NorseCapital buildings in group 22
+            elsif AlignmentTownBuildingPhase == 2 and get AlignmentTownBuildingTimer3 time remaining <= 0
+                AlignmentTownBuildingPhase = 3
+                Counter = 0
+                while Counter < 16
+                    if PLAYER of get town with id Counter == 1
+                        build all town get town with id Counter buildings in group 22
+                    end if
+                    Counter++
+                end while
 
-                elsif AlignmentTownBuildingPhase == 3 and get AlignmentTownBuildingTimer4 time remaining <= 0
-                    AlignmentTownBuildingPhase = 4
-                    build all town NorseCapital buildings in group 23
+            elsif AlignmentTownBuildingPhase == 3 and get AlignmentTownBuildingTimer4 time remaining <= 0
+                AlignmentTownBuildingPhase = 4
+                Counter = 0
+                while Counter < 16
+                    if PLAYER of get town with id Counter == 1
+                        build all town get town with id Counter buildings in group 23
+                    end if
+                    Counter++
+                end while
 
-                elsif AlignmentTownBuildingPhase == 4 and get AlignmentTownBuildingTimer5 time remaining <= 0
-                    AlignmentTownBuildingPhase = 5
-                    build all town NorseCapital buildings in group 24
+            elsif AlignmentTownBuildingPhase == 4 and get AlignmentTownBuildingTimer5 time remaining <= 0
+                AlignmentTownBuildingPhase = 5
+                Counter = 0
+                while Counter < 16
+                    if PLAYER of get town with id Counter == 1
+                        build all town get town with id Counter buildings in group 24
+                    end if
+                    Counter++
+                end while
 
-                end if
-            elsif PlayerAlignmentFinal < 0.0
-                if AlignmentTownBuildingPhase == 0 and get AlignmentTownBuildingTimer1 time remaining <= 0
-                    AlignmentTownBuildingPhase = 1
-                    build all town NorseCapital buildings in group 30
-
-                elsif AlignmentTownBuildingPhase == 1 and get AlignmentTownBuildingTimer2 time remaining <= 0
-                    AlignmentTownBuildingPhase = 2
-                    build all town NorseCapital buildings in group 31
-
-                elsif AlignmentTownBuildingPhase == 2 and get AlignmentTownBuildingTimer3 time remaining <= 0
-                    AlignmentTownBuildingPhase = 3
-                    build all town NorseCapital buildings in group 32
-
-                elsif AlignmentTownBuildingPhase == 3 and get AlignmentTownBuildingTimer4 time remaining <= 0
-                    AlignmentTownBuildingPhase = 4
-                    build all town NorseCapital buildings in group 33
-
-                elsif AlignmentTownBuildingPhase == 4 and get AlignmentTownBuildingTimer5 time remaining <= 0
-                    AlignmentTownBuildingPhase = 5
-                    build all town NorseCapital buildings in group 34
-
-                end if
             end if
+        elsif PlayerAlignmentFinal < 0.0
+            if AlignmentTownBuildingPhase == 0 and get AlignmentTownBuildingTimer1 time remaining <= 0
+                AlignmentTownBuildingPhase = 1
+                Counter = 0
+                while Counter < 16
+                    if PLAYER of get town with id Counter == 1
+                        build all town get town with id Counter buildings in group 30
+                    end if
+                    Counter++
+                end while
+
+            elsif AlignmentTownBuildingPhase == 1 and get AlignmentTownBuildingTimer2 time remaining <= 0
+                AlignmentTownBuildingPhase = 2
+                Counter = 0
+                while Counter < 16
+                    if PLAYER of get town with id Counter == 1
+                        build all town get town with id Counter buildings in group 31
+                    end if
+                    Counter++
+                end while
+
+            elsif AlignmentTownBuildingPhase == 2 and get AlignmentTownBuildingTimer3 time remaining <= 0
+                AlignmentTownBuildingPhase = 3
+                Counter = 0
+                while Counter < 16
+                    if PLAYER of get town with id Counter == 1
+                        build all town get town with id Counter buildings in group 32
+                    end if
+                    Counter++
+                end while
+
+            elsif AlignmentTownBuildingPhase == 3 and get AlignmentTownBuildingTimer4 time remaining <= 0
+                AlignmentTownBuildingPhase = 4
+                Counter = 0
+                while Counter < 16
+                    if PLAYER of get town with id Counter == 1
+                        build all town get town with id Counter buildings in group 33
+                    end if
+                    Counter++
+                end while
+
+            elsif AlignmentTownBuildingPhase == 4 and get AlignmentTownBuildingTimer5 time remaining <= 0
+                AlignmentTownBuildingPhase = 5
+                Counter = 0
+                while Counter < 16
+                    if PLAYER of get town with id Counter == 1
+                        build all town get town with id Counter buildings in group 34
+                    end if
+                    Counter++
+                end while
+            end if
+        end if
+
+        if get BuildingDefendersAllowedTimer time remaining <= 0
+            BuildingDefendersAllowedTimer = create timer for 240 * NORSERECRUITMENTMODIFIER * RecruitModifier seconds
+            BuildingDefendersAllowed[0] = 1
+            BuildingDefendersAllowed[1] = 1
+            BuildingDefendersAllowed[2] = 1
+            BuildingDefendersAllowed[3] = 1
+            BuildingDefendersAllowed[4] = 1
         end if
 
         if PLAYER of NorseTown1 == 0 or PLAYER of NorseTown2 == 0 or PLAYER of NorseTown3 == 0 or PLAYER of NorseCapital == 0 or PLAYER of NorseTown3 == 4 or get ConquerorTimer time remaining <= 0
