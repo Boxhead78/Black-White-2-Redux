@@ -2,8 +2,6 @@
 //    Land 7 Globals
 //    ~~~~~~~~~~~~~~~
 //
-//    Start date:     02.03.18            By: Boxhead
-//    Update date:    08.03.18            By: Boxhead
 ///////////////////////////////////////////////////////////////////////////////
 
 
@@ -27,11 +25,13 @@ global L7Complete = 0
 global PlatoonKilled = 0
 global CatapultDestroyed = 0
 global CreatureKilled = 0
-global AttackNearestTownTimer = 0
 global HardMode = 0
 global PlayerAlignmentFinal = 0
 global StaticPlatoonsActionTimer = 0
 global StaticPlatoonsActive = 0
+global RndAttack = 0
+global ScriptedAttack[5]
+global HurricaneBuilding = 0
 
 global PlayerTown = 0
 global MinorTown1 = 0
@@ -51,9 +51,9 @@ global MINOR_TOWN3_IMPRESSIVENESS = 13000
 global MINOR_TOWN4_IMPRESSIVENESS = 7941
 global MINOR_TOWN5_IMPRESSIVENESS = 18921
 global MINOR_TOWN6_IMPRESSIVENESS = 24000
-global JAPANESE_TOWN1_IMPRESSIVENESS = 27413
-global JAPANESE_TOWN2_IMPRESSIVENESS = 16000
-global JAPANESE_CAPITAL_IMPRESSIVENESS = 26000
+global JAPANESE_TOWN1_IMPRESSIVENESS = 27000
+global JAPANESE_TOWN2_IMPRESSIVENESS = 14000
+global JAPANESE_CAPITAL_IMPRESSIVENESS = 20000
 
 global CinemaIsRunning = 0
 global LC7_EnemyCreature = 0
@@ -66,6 +66,11 @@ global LC7_CreatureAttackTimer = 0
 global SendCreature = 0
 global LC7_LargeSiegeLaunchAttack = 0
 global AIEpic = 0
+global LC7_LargeSiegeArmyReady = 0
+
+global LC7_RecruitTimer1 = 0
+global LC7_RecruitTimer2 = 0
+global LC7_RecruitTimer3 = 0
 
 begin script Globals
 
@@ -73,12 +78,12 @@ SecondPlaythrough = 0
 
 start
 
-    MINOR_TOWN3_IMPRESSIVENESS = MINOR_TOWN3_IMPRESSIVENESS * ImpressivenessModifier
-    MINOR_TOWN5_IMPRESSIVENESS = MINOR_TOWN5_IMPRESSIVENESS * ImpressivenessModifier
-    MINOR_TOWN6_IMPRESSIVENESS = MINOR_TOWN6_IMPRESSIVENESS * ImpressivenessModifier
-    JAPANESE_TOWN1_IMPRESSIVENESS = JAPANESE_TOWN1_IMPRESSIVENESS * ImpressivenessModifier
-    JAPANESE_TOWN2_IMPRESSIVENESS = JAPANESE_TOWN2_IMPRESSIVENESS * ImpressivenessModifier
-    JAPANESE_CAPITAL_IMPRESSIVENESS = JAPANESE_CAPITAL_IMPRESSIVENESS * ImpressivenessModifier
+    MINOR_TOWN3_IMPRESSIVENESS = MINOR_TOWN3_IMPRESSIVENESS * ImpressivenessModifier * PLAYEREIMPRESSIVENESSMULTIPLIER
+    MINOR_TOWN5_IMPRESSIVENESS = MINOR_TOWN5_IMPRESSIVENESS * ImpressivenessModifier * PLAYEREIMPRESSIVENESSMULTIPLIER
+    MINOR_TOWN6_IMPRESSIVENESS = MINOR_TOWN6_IMPRESSIVENESS * ImpressivenessModifier * PLAYEREIMPRESSIVENESSMULTIPLIER
+    JAPANESE_TOWN1_IMPRESSIVENESS = JAPANESE_TOWN1_IMPRESSIVENESS * ImpressivenessModifier * PLAYEREIMPRESSIVENESSMULTIPLIER
+    JAPANESE_TOWN2_IMPRESSIVENESS = JAPANESE_TOWN2_IMPRESSIVENESS * ImpressivenessModifier * PLAYEREIMPRESSIVENESSMULTIPLIER
+    JAPANESE_CAPITAL_IMPRESSIVENESS = JAPANESE_CAPITAL_IMPRESSIVENESS * ImpressivenessModifier * PLAYEREIMPRESSIVENESSMULTIPLIER
 
     SecondPlaythrough = persistent data "SECOND_PLAYTHROUGH"
     HardMode = persistent data "HARD_MODE"
@@ -111,6 +116,19 @@ start
         JAPANESE_TOWN1_IMPRESSIVENESS -= 2500
         JAPANESE_TOWN2_IMPRESSIVENESS -= 2500
         JAPANESE_CAPITAL_IMPRESSIVENESS += 5000
+    end if
+
+    ScriptedAttack[0] = 0
+    ScriptedAttack[1] = 0
+    ScriptedAttack[2] = 0
+    ScriptedAttack[3] = 0
+    ScriptedAttack[4] = 0
+
+    if HardMode == 1
+        NORSERECRUITMENTMODIFIER = 0.75
+        JAPANESERECRUITMENTMODIFIER = 0.75
+        AZTECRECRUITMENTMODIFIER = 0.75
+        TALUSRECRUITMENTMODIFIER = 0.75
     end if
 
     GB_PlayerTown = get town with id 0//For Global Script

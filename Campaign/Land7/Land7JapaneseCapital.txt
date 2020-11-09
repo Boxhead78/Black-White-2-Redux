@@ -2,8 +2,6 @@
 //    Land 7 Japanese-Strategy
 //    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
-//    Start date:     02.03.18            By: Boxhead
-//    Update date:    08.03.18            By: Boxhead
 ///////////////////////////////////////////////////////////////////////////////
 
 define script LC7_Japanese_Capital_Impressiveness
@@ -12,7 +10,6 @@ define script LC7_Tribute
 define script LC7_GatehouseManager
 define script LC7_Speeches
 define script LC7_Japanese_Capital
-define script LC7_AttackNearestTownTimer
 define script LC7_DefendPlatoons
 define script HurricaneResourceManager
 define script LC7_LargeSiegeScript
@@ -1029,6 +1026,8 @@ begin script LC7_Speeches
     AdvisorNumber = 0
     AdvisorTimer = create timer for 200 seconds
 
+    IntroDialogue = 0
+
 start
 
 begin loop
@@ -1131,6 +1130,7 @@ begin loop
         if SendCreature == 0 and GB_DialogueIsRunning == 0
             GB_DialogueIsRunning = 1
             SendCreature = 1
+            LC7_CreatureAttackTimer = create timer for 0 seconds
             wait until dialogue ready
             begin dialogue
                 say "BW2T_SCRIPT_07FINAL_ADVISORS_IMPRESSTOWN_10"
@@ -1140,14 +1140,30 @@ begin loop
         end if
     end if
 
+    if HurricaneBuilding == 1 and GB_DialogueIsRunning == 0
+        HurricaneBuilding = 2
+        GB_DialogueIsRunning = 1
+        wait until dialogue ready
+        begin dialogue
+            say "BW2T_SCRIPT_07FINAL_ADVISORS_JAPANESEBUILDHURRICANE_10"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+
     if HurricaneFired == 1 and GB_DialogueIsRunning == 0
         GB_DialogueIsRunning = 1
         HurricaneFired = 2
         wait until dialogue ready
         begin dialogue
             //say "Unleash the hurricane!"
-            say "BW2T_SCRIPT_07FINAL_ADVISORS_JAPANESEUSEHURRICANE_10"
-            wait until read
+            if number from 1 to 2 == 1
+                say "BW2T_SCRIPT_07FINAL_ADVISORS_JAPANESEUSEHURRICANE_10"
+                wait until read
+            else
+                say "BW2T_SCRIPT_07FINAL_ADVISORS_JAPANESE_HURRICANE_EPIC_10"
+                wait until read
+            end if
         end dialogue
         GB_DialogueIsRunning = 0
     end if
@@ -1708,23 +1724,31 @@ begin loop
         GB_DialogueIsRunning = 0
     end if
 
+    if IntroDialogue == 0
+        IntroDialogue = 1
+        GB_DialogueIsRunning = 1
+        wait until dialogue ready
+        begin dialogue
+            say "BW2T_SCRIPT_07FINAL_ADVISORS_INTRO_10"
+            wait until read
+            say "BW2T_SCRIPT_07FINAL_ADVISORS_INTRO_20"
+            wait until read
+        end dialogue
+        GB_DialogueIsRunning = 0
+    end if
+
 end loop
 
 end script LC7_Speeches
 
 begin script LC7_Japanese_Capital
 
-    LC7_RecruitTimer1 = create timer for 120 seconds
-    LC7_RecruitTimer2 = create timer for 120 seconds
-    LC7_RecruitTimer3 = create timer for 120 seconds
     LC7_AttackTimer = create timer for 0 seconds
     ATTACK_DELAY = 1000 * RecruitModifier
     
     a = 0
 
     Wall[13]
-
-    HurricaneBuilding = 0
 
     Number = 0
 
@@ -1751,9 +1775,40 @@ begin script LC7_Japanese_Capital
 
     LargeAttackTimer = create timer for 1800 seconds
 
+    RecruitTimerGeneric[16]
+    GenericTown = 0
+    GenericTownCounter = 0
+    GenericTownBuildingInitialTimer = create timer for 1800 * BuilderModifier seconds
+    GenericTownBuildingTimer = create timer for 0 * BuilderModifier seconds
+    GenericTownPlatoonTimer = create timer for 0 * RecruitModifier seconds
+    AlignmentTownBuildingTimer1 = create timer for 300 * BuilderModifier seconds
+    AlignmentTownBuildingTimer2 = create timer for 750 * BuilderModifier seconds
+    AlignmentTownBuildingTimer3 = create timer for 1500 * BuilderModifier seconds
+    AlignmentTownBuildingTimer4 = create timer for 2250 * BuilderModifier seconds
+    AlignmentTownBuildingTimer5 = create timer for 3000 * BuilderModifier seconds
+    AlignmentTownBuildingPhase = 0
+    ConquerorTimer = create timer for 0 seconds
+    ConquerorResetTimer = create timer for 0 seconds
+    AnotherPlatoon = 0
+    BuildingDefendersAllowed[5]
+    BuildingDefendersAllowedTimer = create timer for 0 seconds
+    
+    Counter = 0
+
 start
 
-    AttackNearestTownTimer = create timer for 300 seconds
+    BuildingDefendersAllowed[0] = 1
+    BuildingDefendersAllowed[1] = 1
+    BuildingDefendersAllowed[2] = 1
+    BuildingDefendersAllowed[3] = 1
+    BuildingDefendersAllowed[4] = 1
+
+    AlignmentTownBuildingTimer1 = create timer for 0 * BuilderModifier seconds
+    AlignmentTownBuildingTimer2 = create timer for 0 * BuilderModifier seconds
+    AlignmentTownBuildingTimer3 = create timer for 0 * BuilderModifier seconds
+    AlignmentTownBuildingTimer4 = create timer for 0 * BuilderModifier seconds
+    AlignmentTownBuildingTimer5 = create timer for 0 * BuilderModifier seconds
+
     AttackPlatoonTimer[0] = create timer for 0 seconds
     AttackPlatoonTimer[1] = create timer for 0 seconds
 
@@ -1779,12 +1834,6 @@ start
         add resource FOOD 12500 to PlayerTown
     end if
 
-    if Difficulty <= 3
-        LC7_RecruitTimer1 = create timer for 300 seconds
-        LC7_RecruitTimer2 = create timer for 300 seconds
-        LC7_RecruitTimer3 = create timer for 300 seconds
-    end if
-
     add resource WOOD 2500 to MinorTown2
     add resource ORE 500 to MinorTown2
     add resource FOOD 3000 to MinorTown2
@@ -1792,6 +1841,22 @@ start
     add resource WOOD 1000 to MinorTown3
     add resource ORE 0 to MinorTown3
     add resource FOOD 5000 to MinorTown3
+
+    if PlayerAlignmentFinal < 0.0
+        ConquerorTimer = create timer for 2400 * RecruitModifier seconds
+    elsif PlayerAlignmentFinal >= 0.0
+        ConquerorTimer = create timer for 4800 * RecruitModifier seconds
+    end if
+
+    LC7_RecruitTimer1 = create timer for 120 seconds
+    LC7_RecruitTimer2 = create timer for 120 seconds
+    LC7_RecruitTimer3 = create timer for 120 seconds
+
+    if Difficulty <= 3
+        LC7_RecruitTimer1 = create timer for 300 seconds
+        LC7_RecruitTimer2 = create timer for 300 seconds
+        LC7_RecruitTimer3 = create timer for 300 seconds
+    end if
 
     //JapaneseCapital Walls
     Wall[0] = get wall segment nearest {2014.54,135.62,542.40} radius 15
@@ -1895,7 +1960,7 @@ start
     LC7_Platoon[14] = create platoon PLATOON_INFO_JAPANESE_MELEE_3 at {PlatoonPos[12]} with 30 * RecruitSizeModifier men and 0 women
     attach LC7_Platoon[14] to JapaneseTown2
     PLAYER of LC7_Platoon[14] = 1
-    run background script LC7_StaticPlatoonsActions(PlatoonPos[12],Melee,LC7_Platoon[14],JapaneseTown1)
+    run background script LC7_StaticPlatoonsActions(PlatoonPos[12],Melee,LC7_Platoon[14],JapaneseTown2)
     run background script PT_CreateBasicJapanesePlatoon(LC7_Platoon[14],1)
     enable platoon LC7_Platoon[14] respond to town JapaneseTown2 attack
     set LC7_Platoon[14] focus to {PlayerTown}
@@ -1906,7 +1971,7 @@ start
         LC7_Platoon[9] = create platoon PLATOON_INFO_JAPANESE_MELEE_3 at {PatrolRouteA[0]} with 50 * RecruitSizeModifier men and 0 women
         attach LC7_Platoon[9] to JapaneseCapital
         PLAYER of LC7_Platoon[9] = 1
-        run background script LC7_ArmyBehaivours(LC7_Platoon[9],Melee,Patrol,0,0,0,WaypointsA,0)
+        run background script LC7_ArmyBehaivours(LC7_Platoon[9],Melee,Patrol,0,0,Alerted,0,0,0,0,0,WaypointsA,0,0)
         run background script PT_CreateChargerJapanesePlatoon(LC7_Platoon[9],1)
         enable platoon LC7_Platoon[9] respond to town JapaneseCapital attack
         enable platoon LC7_Platoon[9] respond to town JapaneseTown1 attack
@@ -1915,7 +1980,7 @@ start
         LC7_Platoon[32] = create platoon PLATOON_INFO_JAPANESE_MELEE_3 at {PatrolRouteA[0]} + {10,10} with 50 * RecruitSizeModifier men and 0 women
         attach LC7_Platoon[32] to JapaneseCapital
         PLAYER of LC7_Platoon[32] = 1
-        run background script LC7_ArmyBehaivours(LC7_Platoon[32],Melee,PatrolLinked,LC7_Platoon[9],0,0,WaypointsA,0)
+        run background script LC7_ArmyBehaivours(LC7_Platoon[9],Melee,PatrolLinked,LC7_Platoon[9],0,Alerted,0,0,0,0,0,WaypointsA,0,0)
         run background script PT_CreateChargerJapanesePlatoon(LC7_Platoon[32],1)
         enable platoon LC7_Platoon[32] respond to town JapaneseCapital attack
         enable platoon LC7_Platoon[32] respond to town JapaneseTown1 attack
@@ -1925,7 +1990,7 @@ start
     LC7_Platoon[10] = create platoon PLATOON_INFO_JAPANESE_MELEE_3 at {PatrolRouteB[0]} with 25 * RecruitSizeModifier men and 0 women
     attach LC7_Platoon[10] to JapaneseCapital
     PLAYER of LC7_Platoon[10] = 1
-    run background script LC7_ArmyBehaivours(LC7_Platoon[10],Melee,Patrol,0,0,0,WaypointsB,0)
+    run background script LC7_ArmyBehaivours(LC7_Platoon[10],Melee,Patrol,0,0,Alerted,0,0,0,0,0,WaypointsB,0,0)
     run background script PT_CreateBasicJapanesePlatoon(LC7_Platoon[10],1)
     enable platoon LC7_Platoon[10] respond to town JapaneseCapital attack
     enable platoon LC7_Platoon[10] respond to town JapaneseTown1 attack
@@ -2078,25 +2143,37 @@ start
     add action SIEGEWEAPON_AGENDA_ACTION_DEFEND_POSITION using {StaticSiegePos[4]} to siege weapon LC7_SiegeCatapult[4] action queue
 
     //----Create Attack Wave 1----//
-
-    ///*Let them use old scripts*///
-    if Difficulty > 2
+    if Difficulty >= 2
         LC7_Platoon[15] = create platoon PLATOON_INFO_JAPANESE_MELEE_3 at {PlatoonPos[13]} with 25 * RecruitSizeModifier men and 0 women
         attach LC7_Platoon[15] to JapaneseCapital
         PLAYER of LC7_Platoon[15] = 1
-        run background script PT_CreateHeavyJapanesePlatoon(LC7_Platoon[15],1)
+        AttackingPosition = marker at {AttackPos[0]}
+        AttackingPositionFallBack = marker at {AttackPos[1]}
+        run script PlatoonTargetingMetric(25 * RecruitSizeModifier,PlayerTown)
+        run background script LC7_ArmyBehaivours(LC7_Platoon[15],Melee,Attacker,0,PlatoonTargetingMetricFocusResult,Passive,AttackingPosition,AttackingPositionFallBack,0,0,0,0,0,3)
         set LC7_Platoon[15] focus to {PlayerTown}
+        run background script PT_CreateHeavyJapanesePlatoon(LC7_Platoon[15],1)
 
-        LC7_SiegeCatapult[5] = create siege weapon SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 belonging to JapaneseCapital at {PlatoonPos[13]} + {0,0,0}
-        disable siege weapon LC7_SiegeCatapult[5] auto attack
+        if Difficulty > 2
+            LC7_Platoon[16] = create platoon PLATOON_INFO_JAPANESE_MELEE_3 at {PlatoonPos[13]} + {50,10} with 25 * RecruitSizeModifier men and 0 women
+            attach LC7_Platoon[16] to JapaneseCapital
+            AttackingPosition = marker at {AttackPos[0]} + {-25,-25}
+            AttackingPositionFallBack = marker at {AttackPos[1]} + {-25,-25}
+            run script PlatoonTargetingMetric(25 * RecruitSizeModifier,PlayerTown)
+            run background script LC7_ArmyBehaivours(LC7_Platoon[16],Melee,Attacker,LC7_SiegeCatapult[5],PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,0,0,0,0,0,3)
+            set LC7_Platoon[16] focus to {PlayerTown}
+            run background script PT_CreateChargerJapanesePlatoon(LC7_Platoon[16],1)
 
-        LC7_Platoon[16] = create platoon PLATOON_INFO_JAPANESE_MELEE_3 at {PlatoonPos[13]} + {50,0,10} with 25 * RecruitSizeModifier men and 0 women
-        attach LC7_Platoon[16] to JapaneseCapital
-        PLAYER of LC7_Platoon[16] = 1
-        run background script PT_CreateChargerJapanesePlatoon(LC7_Platoon[16],1)
-        set LC7_Platoon[16] focus to {PlayerTown}
+            LC7_SiegeCatapult[5] = create siege weapon SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 belonging to JapaneseCapital at {PlatoonPos[13]} + {50,7.5,10}
+            disable siege weapon LC7_SiegeCatapult[5] auto attack
+            AttackingPosition = marker at {AttackPos[0]} + {-25,-25}
+            AttackingPositionFallBack = marker at {AttackPos[1]} + {-25,-25}
+            run script CatapultTargetingMetric(PlayerTown)
+            run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[5],Attacker,CatapultTargetingMetricFocusResult,0,0,0,AttackingPosition,AttackingPositionFallBack,3)
+        end if
     end if
 
+    ///*Let them use old scripts*///
     if HardMode == 1
         LC7_Platoon[37] = create platoon PLATOON_INFO_JAPANESE_MELEE_4 at {PlatoonPos[14]} with 30 * RecruitSizeModifier men and 0 women
         attach LC7_Platoon[37] to JapaneseTown1
@@ -2139,9 +2216,6 @@ start
         set LC7_Platoon[41] focus to {PlayerTown}
     end if
 
-    run background script LC7_Platoon15Actions
-    run background script LC7_Catapult5Actions
-    run background script LC7_Platoon16Actions
     if HardMode == 1
         run background script LC7_Platoon33Actions
         run background script LC7_Platoon34Actions
@@ -2151,305 +2225,1036 @@ start
 
     begin loop
         set player 1 alignment 0.0
+        //JapaneseCapital Walls
+        Wall[0] = get wall segment nearest {2014.54,135.62,542.40} radius 15
+        Wall[1] = get wall segment nearest {2012.79,143.57,514.57} radius 15
+        Wall[2] = get wall segment nearest {2084.54,186.76,373.85} radius 15
+        Wall[3] = get wall segment nearest {2186.74,187.16,340.29} radius 15
+        Wall[4] = get wall segment nearest {1422.57,65.95,1391.35} radius 15
+        Wall[5] = get wall segment nearest {1397.80,67.29,1466.61} radius 15
+        Wall[6] = get wall segment nearest {1315.95,56.40,1875.48} radius 15
+        Wall[7] = get wall segment nearest {1325.53,56.18,1945.45} radius 15
 
-        //if get LC7_RecruitTimer1 time remaining <= 0 or get LC7_RecruitTimer2 time remaining <= 0 or get LC7_RecruitTimer3 time remaining <= 0
+        //JapaneseTown1 Walls
+        Wall[8] = get wall segment nearest {1729.99,44.69,1219.22} radius 15
+        Wall[9] = get wall segment nearest {1682.14,44.66,1238.35} radius 15
 
-            //JapaneseCapital Walls
-            Wall[0] = get wall segment nearest {2014.54,135.62,542.40} radius 15
-            Wall[1] = get wall segment nearest {2012.79,143.57,514.57} radius 15
-            Wall[2] = get wall segment nearest {2084.54,186.76,373.85} radius 15
-            Wall[3] = get wall segment nearest {2186.74,187.16,340.29} radius 15
-            Wall[4] = get wall segment nearest {1422.57,65.95,1391.35} radius 15
-            Wall[5] = get wall segment nearest {1397.80,67.29,1466.61} radius 15
-            Wall[6] = get wall segment nearest {1315.95,56.40,1875.48} radius 15
-            Wall[7] = get wall segment nearest {1325.53,56.18,1945.45} radius 15
+        //JapaneseTown2 Walls
+        Wall[10] = get wall segment nearest {1103.75,85.13,838.40} radius 15
+        Wall[11] = get wall segment nearest {1101.67,84.63,1094.87} radius 15
+        Wall[12] = get wall segment nearest {938.65,76.97,1176.51} radius 15
 
-            //JapaneseTown1 Walls
-            Wall[8] = get wall segment nearest {1729.99,44.69,1219.22} radius 15
-            Wall[9] = get wall segment nearest {1682.14,44.66,1238.35} radius 15
-
-            //JapaneseTown2 Walls
-            Wall[10] = get wall segment nearest {1103.75,85.13,838.40} radius 15
-            Wall[11] = get wall segment nearest {1101.67,84.63,1094.87} radius 15
-            Wall[12] = get wall segment nearest {938.65,76.97,1176.51} radius 15
-
+        NearestSettlementTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in NearestSettlement min built 1.0
+        if get LC7_RecruitTimer1 time remaining <= 0
             //JapaneseCapital
-            NearestSettlementTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in NearestSettlement min built 1.0
-            if LC7_Platoon[0] not exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get LC7_RecruitTimer1 time remaining <= 0
+            if LC7_Platoon[0] not exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get LC7_RecruitTimer1 time remaining <= 0 and BuildingDefendersAllowed[0] == 1
                 LC7_Platoon[0] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 20 * RecruitSizeModifier
-                LC7_RecruitTimer1 = create timer for 180 * RecruitModifier seconds
+                LC7_RecruitTimer1 = create timer for (20 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
                 run background script PT_CreateHeavyJapanesePlatoon(LC7_Platoon[0],1)
                 enable platoon LC7_Platoon[0] respond to town JapaneseCapital attack
                 wait until not LC7_Platoon[0] recruiting
                 run background script LC7_StaticPlatoonsActions(PlatoonPos[0],Melee,LC7_Platoon[0],JapaneseCapital)
+                BuildingDefendersAllowed[0] = 0
 
-            elsif LC7_Platoon[1] not exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get LC7_RecruitTimer1 time remaining <= 0
+            elsif LC7_Platoon[1] not exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get LC7_RecruitTimer1 time remaining <= 0 and BuildingDefendersAllowed[0] == 1
                 LC7_Platoon[1] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 20 * RecruitSizeModifier
-                LC7_RecruitTimer1 = create timer for 180 * RecruitModifier seconds
+                LC7_RecruitTimer1 = create timer for (20 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
                 run background script PT_CreateHeavyJapanesePlatoon(LC7_Platoon[1],1)
                 enable platoon LC7_Platoon[1] respond to town JapaneseCapital attack
                 wait until not LC7_Platoon[1] recruiting
                 run background script LC7_StaticPlatoonsActions(PlatoonPos[1],Melee,LC7_Platoon[1],JapaneseCapital)
+                BuildingDefendersAllowed[0] = 0
 
-            elsif LC7_Platoon[2] not exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get LC7_RecruitTimer1 time remaining <= 0
+            elsif LC7_Platoon[2] not exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get LC7_RecruitTimer1 time remaining <= 0 and BuildingDefendersAllowed[0] == 1
                 LC7_Platoon[2] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 20 * RecruitSizeModifier
-                LC7_RecruitTimer1 = create timer for 180 * RecruitModifier seconds
+                LC7_RecruitTimer1 = create timer for (20 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
                 run background script PT_CreateHeavyJapanesePlatoon(LC7_Platoon[2],1)
                 enable platoon LC7_Platoon[2] respond to town JapaneseCapital attack
                 wait until not LC7_Platoon[2] recruiting
                 run background script LC7_StaticPlatoonsActions(PlatoonPos[2],Melee,LC7_Platoon[2],JapaneseCapital)
+                BuildingDefendersAllowed[0] = 0
 
-            elsif LC7_Platoon[3] not exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get LC7_RecruitTimer1 time remaining <= 0
+            elsif LC7_Platoon[3] not exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get LC7_RecruitTimer1 time remaining <= 0 and BuildingDefendersAllowed[0] == 1
                 LC7_Platoon[3] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 20 * RecruitSizeModifier
-                LC7_RecruitTimer1 = create timer for 180 * RecruitModifier seconds
+                LC7_RecruitTimer1 = create timer for (20 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
                 run background script PT_CreateBasicJapanesePlatoon(LC7_Platoon[3],1)
                 enable platoon LC7_Platoon[3] respond to town JapaneseCapital attack
                 wait until not LC7_Platoon[3] recruiting
                 run background script LC7_StaticPlatoonsActions(PlatoonPos[3],Melee,LC7_Platoon[3],JapaneseCapital)
+                BuildingDefendersAllowed[0] = 0
 
-            elsif LC7_Platoon[4] not exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get LC7_RecruitTimer1 time remaining <= 0
+            elsif LC7_Platoon[4] not exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get LC7_RecruitTimer1 time remaining <= 0 and BuildingDefendersAllowed[0] == 1
                 LC7_Platoon[4] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 20 * RecruitSizeModifier
-                LC7_RecruitTimer1 = create timer for 120 * RecruitModifier seconds
+                LC7_RecruitTimer1 = create timer for (20 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
                 run background script PT_CreateBasicJapanesePlatoon(LC7_Platoon[4],1)
                 enable platoon LC7_Platoon[4] respond to town JapaneseCapital attack
                 wait until not LC7_Platoon[4] recruiting
                 run background script LC7_StaticPlatoonsActions(PlatoonPos[4],Melee,LC7_Platoon[4],JapaneseCapital)
+                BuildingDefendersAllowed[0] = 0
 
-            elsif LC7_Platoon[5] not exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get LC7_RecruitTimer1 time remaining <= 0
+            elsif LC7_Platoon[5] not exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get LC7_RecruitTimer1 time remaining <= 0 and BuildingDefendersAllowed[0] == 1
                 LC7_Platoon[5] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 20 * RecruitSizeModifier
-                LC7_RecruitTimer1 = create timer for 120 * RecruitModifier seconds
+                LC7_RecruitTimer1 = create timer for (20 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
                 run background script PT_CreateBasicJapanesePlatoon(LC7_Platoon[5],1)
                 enable platoon LC7_Platoon[5] respond to town JapaneseCapital attack
                 wait until not LC7_Platoon[5] recruiting
                 run background script LC7_StaticPlatoonsActions(PlatoonPos[5],Melee,LC7_Platoon[5],JapaneseCapital)
+                BuildingDefendersAllowed[0] = 0
 
-            elsif LC7_WallArcher[0] not exists and Wall[0] exists and PLAYER of Wall[0] == 1 and HEALTH of Wall[0] == 1.0 and not town JapaneseCapital is under takeover from player 0 and get LC7_RecruitTimer1 time remaining <= 0
+            elsif LC7_WallArcher[0] not exists and Wall[0] exists and PLAYER of Wall[0] == 1 and HEALTH of Wall[0] == 1.0 and not town JapaneseCapital is under takeover from player 0 and get LC7_RecruitTimer1 time remaining <= 0 and BuildingDefendersAllowed[0] == 1
                 LC7_WallArcher[0] = recruit ARMY_UNIT_TYPE_RANGED_2 town JapaneseCapital platoon of size 20 * RecruitSizeModifier
-                LC7_RecruitTimer1 = create timer for 60 * RecruitModifier seconds
+                LC7_RecruitTimer1 = create timer for (20 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
                 run background script PT_CreateArtyJapanesePlatoonRanged(LC7_WallArcher[0],1)
                 wait until not LC7_WallArcher[0] recruiting
                 enable platoon LC7_WallArcher[0] respond to town JapaneseCapital attack
                 add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[0] to LC7_WallArcher[0] action queue
+                BuildingDefendersAllowed[0] = 0
 
-            elsif LC7_WallArcher[1] not exists and Wall[1] exists and PLAYER of Wall[1] == 1 and HEALTH of Wall[1] == 1.0 and not town JapaneseCapital is under takeover from player 0 and get LC7_RecruitTimer1 time remaining <= 0
+            elsif LC7_WallArcher[1] not exists and Wall[1] exists and PLAYER of Wall[1] == 1 and HEALTH of Wall[1] == 1.0 and not town JapaneseCapital is under takeover from player 0 and get LC7_RecruitTimer1 time remaining <= 0 and BuildingDefendersAllowed[0] == 1
                 LC7_WallArcher[1] = recruit ARMY_UNIT_TYPE_RANGED_2 town JapaneseCapital platoon of size 20 * RecruitSizeModifier
-                LC7_RecruitTimer1 = create timer for 60 * RecruitModifier seconds
+                LC7_RecruitTimer1 = create timer for (20 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
                 run background script PT_CreateArtyJapanesePlatoonRanged(LC7_WallArcher[1],1)
                 wait until not LC7_WallArcher[1] recruiting
                 enable platoon LC7_WallArcher[1] respond to town JapaneseCapital attack
                 add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[1] to LC7_WallArcher[1] action queue
+                BuildingDefendersAllowed[0] = 0
 
-            elsif LC7_WallArcher[2] not exists and Wall[2] exists and PLAYER of Wall[2] == 1 and HEALTH of Wall[2] == 1.0 and not town JapaneseCapital is under takeover from player 0 and get LC7_RecruitTimer1 time remaining <= 0
+            elsif LC7_WallArcher[2] not exists and Wall[2] exists and PLAYER of Wall[2] == 1 and HEALTH of Wall[2] == 1.0 and not town JapaneseCapital is under takeover from player 0 and get LC7_RecruitTimer1 time remaining <= 0 and BuildingDefendersAllowed[0] == 1
                 LC7_WallArcher[2] = recruit ARMY_UNIT_TYPE_RANGED_2 town JapaneseCapital platoon of size 20 * RecruitSizeModifier
-                LC7_RecruitTimer1 = create timer for 60 * RecruitModifier seconds
+                LC7_RecruitTimer1 = create timer for (20 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
                 run background script PT_CreateArtyJapanesePlatoonRanged(LC7_WallArcher[2],1)
                 wait until not LC7_WallArcher[2] recruiting
                 enable platoon LC7_WallArcher[2] respond to town JapaneseCapital attack
                 add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[2] to LC7_WallArcher[2] action queue
+                BuildingDefendersAllowed[0] = 0
 
-            elsif LC7_WallArcher[3] not exists and Wall[3] exists and PLAYER of Wall[3] == 1 and HEALTH of Wall[3] == 1.0 and not town JapaneseCapital is under takeover from player 0 and get LC7_RecruitTimer1 time remaining <= 0
+            elsif LC7_WallArcher[3] not exists and Wall[3] exists and PLAYER of Wall[3] == 1 and HEALTH of Wall[3] == 1.0 and not town JapaneseCapital is under takeover from player 0 and get LC7_RecruitTimer1 time remaining <= 0 and BuildingDefendersAllowed[0] == 1
                 LC7_WallArcher[3] = recruit ARMY_UNIT_TYPE_RANGED_2 town JapaneseCapital platoon of size 20 * RecruitSizeModifier
-                LC7_RecruitTimer1 = create timer for 60 * RecruitModifier seconds
+                LC7_RecruitTimer1 = create timer for (20 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
                 run background script PT_CreateArtyJapanesePlatoonRanged(LC7_WallArcher[3],1)
                 wait until not LC7_WallArcher[3] recruiting
                 enable platoon LC7_WallArcher[3] respond to town JapaneseCapital attack
                 add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[3] to LC7_WallArcher[3] action queue
+                BuildingDefendersAllowed[0] = 0
 
-            //Attack Nearest Settlement
-            elsif LC7_Platoon[24] not exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get AttackNearestTownTimer time remaining <= 0 and AttackingPlatoons == 1
-                LC7_Platoon[24] = recruit ARMY_UNIT_TYPE_RANGED_4 town JapaneseCapital platoon of size 60 * RecruitSizeModifier
-                LC7_RecruitTimer1 = create timer for 200 * RecruitModifier seconds
-                run background script PT_CreateBasicJapanesePlatoonRanged(LC7_Platoon[24],1)
-                enable platoon LC7_Platoon[24] respond to town JapaneseCapital attack
-                wait until not LC7_Platoon[24] recruiting
-                run background script LC7_ArmyBehaivours(LC7_Platoon[24],Ranged,Conqueror,LC7_SiegeCatapult[11],0,0,0,0)
-        
-            elsif LC7_Platoon[25] not exists and LC7_Platoon[24] exists and {LC7_Platoon[24]} near {JapaneseCapital} radius 550 and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get AttackNearestTownTimer time remaining <= 0 and AttackingPlatoons == 1
-                LC7_Platoon[25] = recruit ARMY_UNIT_TYPE_RANGED_4 town JapaneseCapital platoon of size 40 * RecruitSizeModifier
-                LC7_RecruitTimer1 = create timer for 200 * RecruitModifier seconds
-                run background script PT_CreateBasicJapanesePlatoonRanged(LC7_Platoon[25],1)
-                enable platoon LC7_Platoon[25] respond to town JapaneseCapital attack
-                wait until not LC7_Platoon[25] recruiting
-                run background script LC7_ArmyBehaivours(LC7_Platoon[25],Ranged,Conqueror,LC7_SiegeCatapult[12],0,0,0,0)
+            //Attack Epic
+            elsif LC7_Platoon[55] not exists and ScriptedAttack[1] == 0 and get number of type SCRIPT_OBJECT_TYPE_WONDER in PlayerTown min built 1.0 > 0 and PLAYER of JapaneseCapital == 1 and get LC7_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+                LC7_Platoon[55] = recruit ARMY_UNIT_TYPE_MELEE_4 town JapaneseCapital platoon of size 30 * RecruitSizeModifier
+                LC7_RecruitTimer1 = create timer for (30 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                AttackingPosition = marker at {AttackPos[0]} + {30,0}
+                AttackingPositionFallBack = marker at {AttackPos[1]} + {30,0}
+                run background script LC7_ArmyBehaivours(LC7_Platoon[55],Melee,Attacker,0,Epics,Passive,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,2)
+                run background script PT_CreateBasicJapanesePlatoon(LC7_Platoon[55],1)
 
-            elsif LC7_SiegeCatapult[11] not exists and LC7_Platoon[24] exists and {LC7_Platoon[24]} near {JapaneseCapital} radius 550 and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get AttackNearestTownTimer time remaining <= 0 and AttackingPlatoons == 1
-                LC7_SiegeCatapult[11] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_4 town JapaneseCapital siege weapon
-                LC7_RecruitTimer1 = create timer for 200 * RecruitModifier seconds
-                run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[11],Conqueror,0,0,0)
+            elsif LC7_Platoon[56] not exists and ScriptedAttack[1] == 0 and get number of type SCRIPT_OBJECT_TYPE_WONDER in PlayerTown min built 1.0 > 0 and PLAYER of JapaneseCapital == 1 and get LC7_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+                LC7_Platoon[56] = recruit ARMY_UNIT_TYPE_RANGED_4 town JapaneseCapital platoon of size 30 * RecruitSizeModifier
+                LC7_RecruitTimer1 = create timer for (30 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                AttackingPosition = marker at {AttackPos[0]} + {-30,15}
+                AttackingPositionFallBack = marker at {AttackPos[1]} + {-30,15}
+                run background script LC7_ArmyBehaivours(LC7_Platoon[56],Ranged,Attacker,0,Epics,Passive,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,2)
+                run background script PT_CreateBasicJapanesePlatoonRanged(LC7_Platoon[56],1)
 
-            elsif LC7_SiegeCatapult[12] not exists and LC7_Platoon[24] exists and {LC7_Platoon[24]} near {JapaneseCapital} radius 550 and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get AttackNearestTownTimer time remaining <= 0 and AttackingPlatoons == 1
-                LC7_SiegeCatapult[12] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_4 town JapaneseCapital siege weapon
-                LC7_RecruitTimer1 = create timer for 200 * RecruitModifier seconds
-                run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[12],Conqueror,0,0,0)
-    
-            //Attack PlayerTown
-            elsif LC7_Platoon[16] not exists and get AttackPlatoonTimer[0] time remaining <= 0 and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get LC7_RecruitTimer1 time remaining <= 0 and LC7_LargeSiegeIsRunning == 0 and StopSendingMe == 0
-                LC7_Platoon[16] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 30 * RecruitSizeModifier
-                LC7_RecruitTimer1 = create timer for 160 * RecruitModifier seconds
-                run background script PT_CreateChargerJapanesePlatoon(LC7_Platoon[16],1)
-                if TownsConverted < 4
-                    AttackPlatoonTimer[0] = create timer for 1500 seconds
-                elsif TownsConverted >= 4
-                    StopSendingMe = 1
-                end if
-                enable platoon LC7_Platoon[16] respond to town JapaneseCapital attack
-                wait until not LC7_Platoon[16] recruiting
-
-            elsif LC7_Platoon[17] not exists and TownsConverted >= 2 and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get LC7_RecruitTimer1 time remaining <= 0 and get LC7_CreatureAttackTimer time remaining <= 0 and LC7_LargeSiegeIsRunning == 0
-                LC7_CreatureAttackTimer = create timer for 1850 * RecruitModifier seconds
-                LC7_Platoon[17] = recruit ARMY_UNIT_TYPE_RANGED_2 town JapaneseCapital platoon of size 75 * RecruitSizeModifier
-                LC7_RecruitTimer1 = create timer for 160 * RecruitModifier seconds
+            //Attack with creature
+            elsif LC7_Platoon[17] not exists and get LC7_CreatureAttackTimer time remaining <= 0 and SendCreature == 1 and PLAYER of JapaneseCapital == 1 and get LC7_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+                LC7_CreatureAttackTimer = create timer for number from 900 to 1800 * RecruitModifier seconds
+                LC7_Platoon[17] = recruit ARMY_UNIT_TYPE_RANGED_3 town JapaneseCapital platoon of size 50 * RecruitSizeModifier
+                LC7_RecruitTimer1 = create timer for (50 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                AttackingPosition = marker at {AttackPos[2]} + {0,0}
+                AttackingPositionFallBack = marker at {AttackPos[3]} + {0,0}
+                run script PlatoonTargetingMetric(50 * RecruitSizeModifier,PlayerTown)
+                run background script LC7_ArmyBehaivours(LC7_Platoon[17],Ranged,Attacker,LC7_SiegeCatapult[16],PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosBack[0],AttackPosBack[1],AttackPosBack[2],0,0,0)
                 run background script PT_CreateArtyJapanesePlatoonRanged(LC7_Platoon[17],1)
-                enable platoon LC7_Platoon[17] respond to town JapaneseCapital attack
-                wait until not LC7_Platoon[17] recruiting
 
-            elsif LC7_Platoon[15] not exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get LC7_RecruitTimer1 time remaining <= 0  and get LC7_AttackTimer time remaining <= 0 and LC7_LargeSiegeIsRunning == 0
-                LC7_Platoon[15] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 20 * RecruitSizeModifier
-                LC7_RecruitTimer1 = create timer for 160 * RecruitModifier seconds
-                LC7_AttackTimer = create timer for ATTACK_DELAY seconds
-                ATTACK_DELAY = ATTACK_DELAY - 75
-                run background script PT_CreateHeavyJapanesePlatoon(LC7_Platoon[15],1)
-                enable platoon LC7_Platoon[15] respond to town JapaneseCapital attack
-                wait until not LC7_Platoon[15] recruiting
+            //Random Attacks Evil Alignment
+            //EA small direct attack #1
+            elsif (RndAttack == 1) and PlayerAlignmentFinal < 0.0 and AttackersSent == 0
+                if LC7_Platoon[42] not exists and PLAYER of JapaneseCapital == 1 and get LC7_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+                    LC7_Platoon[42] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 25 * RecruitSizeModifier
+                    LC7_RecruitTimer1 = create timer for (25 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                    AttackingPosition = marker at {AttackPos[0]} + {0,0}
+                    AttackingPositionFallBack = marker at {AttackPos[1]} + {0,0}
+                    if AttackingPlatoons == 0
+                        run script PlatoonTargetingMetric(25 * RecruitSizeModifier,PlayerTown)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[42],Melee,Attacker,LC7_SiegeCatapult[9],PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
+                    elsif AttackingPlatoons == 1
+                        run script PlatoonTargetingMetric(25 * RecruitSizeModifier,NearestSettlement)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[42],Melee,Conqueror,LC7_SiegeCatapult[9],PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
+                    end if
+                    run background script PT_CreateChargerJapanesePlatoon(LC7_Platoon[42],1)
+                    BuildingDefendersAllowed[0] = 1
 
-            elsif LC7_SiegeCatapult[5] not exists and LC7_Platoon[15] exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and get LC7_RecruitTimer1 time remaining <= 0 and get LC7_AttackTimer time remaining <= 0 and LC7_LargeSiegeIsRunning == 0
-                ATTACK_DELAY = ATTACK_DELAY - 75
-                LC7_SiegeCatapult[5] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseCapital siege weapon
-                LC7_RecruitTimer1 = create timer for 100 * RecruitModifier seconds
+                elsif LC7_SiegeCatapult[9] not exists and PLAYER of JapaneseCapital == 1 and get LC7_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+                    LC7_SiegeCatapult[9] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseCapital siege weapon
+                    LC7_RecruitTimer1 = create timer for (10 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                    AttackingPosition = marker at {AttackPos[0]} + {0,0}
+                    AttackingPositionFallBack = marker at {AttackPos[1]} + {0,0}
+                    if AttackingPlatoons == 0
+                        run script CatapultTargetingMetric(PlayerTown)
+                        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[9],Attacker,CatapultTargetingMetricFocusResult,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],AttackingPosition,AttackingPositionFallBack,0)
+                    elsif AttackingPlatoons == 1
+                        run script CatapultTargetingMetric(NearestSettlement)
+                        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[9],Conqueror,CatapultTargetingMetricFocusResult,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],AttackingPosition,AttackingPositionFallBack,0)
+                    end if
+                    BuildingDefendersAllowed[0] = 1
 
+                end if
+
+            //EA medium direct attack #2
+            elsif (RndAttack == 2) and PlayerAlignmentFinal < 0.0 and AttackersSent == 0
+                if LC7_Platoon[43] not exists and PLAYER of JapaneseCapital == 1 and get LC7_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+                    LC7_Platoon[43] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 30 * RecruitSizeModifier
+                    LC7_RecruitTimer1 = create timer for (30 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                    AttackingPosition = marker at {AttackPos[0]} + {0,30}
+                    AttackingPositionFallBack = marker at {AttackPos[1]} + {0,30}
+                    if AttackingPlatoons == 0
+                        run script PlatoonTargetingMetric(30 * RecruitSizeModifier,PlayerTown)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[43],Melee,Attacker,LC7_SiegeCatapult[10],PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
+                    elsif AttackingPlatoons == 1
+                        run script PlatoonTargetingMetric(30 * RecruitSizeModifier,NearestSettlement)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[43],Melee,Conqueror,LC7_SiegeCatapult[10],PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
+                    end if
+                    run background script PT_CreateBasicJapanesePlatoon(LC7_Platoon[43],1)
+                    BuildingDefendersAllowed[0] = 1
+
+                elsif LC7_Platoon[44] not exists and PLAYER of JapaneseCapital == 1 and get LC7_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+                    LC7_Platoon[44] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 30 * RecruitSizeModifier
+                    LC7_RecruitTimer1 = create timer for (30 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                    AttackingPosition = marker at {AttackPos[0]} + {30,0}
+                    AttackingPositionFallBack = marker at {AttackPos[1]} + {30,0}
+                    if AttackingPlatoons == 0
+                        run script PlatoonTargetingMetric(30 * RecruitSizeModifier,PlayerTown)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[44],Melee,Attacker,LC7_SiegeCatapult[11],PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
+                    elsif AttackingPlatoons == 1
+                        run script PlatoonTargetingMetric(30 * RecruitSizeModifier,NearestSettlement)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[44],Melee,Conqueror,LC7_SiegeCatapult[11],PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
+                    end if
+                    run background script PT_CreateBasicJapanesePlatoon(LC7_Platoon[44],1)
+                    BuildingDefendersAllowed[0] = 1
+
+                elsif LC7_SiegeCatapult[10] not exists and PLAYER of JapaneseCapital == 1 and get LC7_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+                    LC7_SiegeCatapult[10] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseCapital siege weapon
+                    LC7_RecruitTimer1 = create timer for (10 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                    AttackingPosition = marker at {AttackPos[0]} + {0,30}
+                    AttackingPositionFallBack = marker at {AttackPos[1]} + {0,30}
+                    if AttackingPlatoons == 0
+                        run script CatapultTargetingMetric(PlayerTown)
+                        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[10],Attacker,CatapultTargetingMetricFocusResult,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],AttackingPosition,AttackingPositionFallBack,0)
+                    elsif AttackingPlatoons == 1
+                        run script CatapultTargetingMetric(NearestSettlement)
+                        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[10],Conqueror,CatapultTargetingMetricFocusResult,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],AttackingPosition,AttackingPositionFallBack,0)
+                    end if
+                    BuildingDefendersAllowed[0] = 1
+
+                elsif LC7_SiegeCatapult[11] not exists and PLAYER of JapaneseCapital == 1 and get LC7_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+                    LC7_SiegeCatapult[11] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseCapital siege weapon
+                    LC7_RecruitTimer1 = create timer for (10 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                    AttackingPosition = marker at {AttackPos[0]} + {30,0}
+                    AttackingPositionFallBack = marker at {AttackPos[1]} + {30,0}
+                    if AttackingPlatoons == 0
+                        run script CatapultTargetingMetric(PlayerTown)
+                        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[11],Attacker,CatapultTargetingMetricFocusResult,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],AttackingPosition,AttackingPositionFallBack,0)
+                    elsif AttackingPlatoons == 1
+                        run script CatapultTargetingMetric(NearestSettlement)
+                        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[11],Conqueror,CatapultTargetingMetricFocusResult,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],AttackingPosition,AttackingPositionFallBack,0)
+                    end if
+                    BuildingDefendersAllowed[0] = 1
+
+                end if
+
+            //EA medium direct attack with ranged #3
+            elsif (RndAttack == 3) and PlayerAlignmentFinal < 0.0 and AttackersSent == 0
+                if LC7_Platoon[45] not exists and PLAYER of JapaneseCapital == 1 and get LC7_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+                    LC7_Platoon[45] = recruit ARMY_UNIT_TYPE_RANGED_3 town JapaneseCapital platoon of size 40 * RecruitSizeModifier
+                    LC7_RecruitTimer1 = create timer for (40 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                    AttackingPosition = marker at {AttackPos[0]} + {0,0}
+                    AttackingPositionFallBack = marker at {AttackPos[1]} + {0,0}
+                    if AttackingPlatoons == 0
+                        run script PlatoonTargetingMetric(40 * RecruitSizeModifier,PlayerTown)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[45],Ranged,Attacker,LC7_SiegeCatapult[12],PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
+                    elsif AttackingPlatoons == 1
+                        run script PlatoonTargetingMetric(40 * RecruitSizeModifier,NearestSettlement)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[45],Ranged,Conqueror,LC7_SiegeCatapult[12],PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
+                    end if
+                    run background script PT_CreateBasicJapanesePlatoonRanged(LC7_Platoon[45],1)
+                    BuildingDefendersAllowed[0] = 1
+
+                elsif LC7_Platoon[46] not exists and PLAYER of JapaneseCapital == 1 and get LC7_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+                    LC7_Platoon[46] = recruit ARMY_UNIT_TYPE_RANGED_3 town JapaneseCapital platoon of size 40 * RecruitSizeModifier
+                    LC7_RecruitTimer1 = create timer for (40 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                    AttackingPosition = marker at {AttackPos[0]} + {25,25}
+                    AttackingPositionFallBack = marker at {AttackPos[1]} + {25,25}
+                    if AttackingPlatoons == 0
+                        run script PlatoonTargetingMetric(40 * RecruitSizeModifier,PlayerTown)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[46],Ranged,Attacker,LC7_SiegeCatapult[13],PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
+                    elsif AttackingPlatoons == 1
+                        run script PlatoonTargetingMetric(40 * RecruitSizeModifier,NearestSettlement)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[46],Ranged,Conqueror,LC7_SiegeCatapult[13],PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
+                    end if
+                    run background script PT_CreateBasicJapanesePlatoonRanged(LC7_Platoon[46],1)
+                    BuildingDefendersAllowed[0] = 1
+
+                elsif LC7_SiegeCatapult[12] not exists and PLAYER of JapaneseCapital == 1 and get LC7_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+                    LC7_SiegeCatapult[12] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseCapital siege weapon
+                    LC7_RecruitTimer1 = create timer for (10 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                    AttackingPosition = marker at {AttackPos[0]} + {0,0}
+                    AttackingPositionFallBack = marker at {AttackPos[1]} + {0,0}
+                    if AttackingPlatoons == 0
+                        run script CatapultTargetingMetric(PlayerTown)
+                        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[12],Attacker,CatapultTargetingMetricFocusResult,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],AttackingPosition,AttackingPositionFallBack,0)
+                    elsif AttackingPlatoons == 1
+                        run script CatapultTargetingMetric(NearestSettlement)
+                        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[12],Conqueror,CatapultTargetingMetricFocusResult,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],AttackingPosition,AttackingPositionFallBack,0)
+                    end if
+                    BuildingDefendersAllowed[0] = 1
+
+                elsif LC7_SiegeCatapult[13] not exists and PLAYER of JapaneseCapital == 1 and get LC7_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+                    LC7_SiegeCatapult[13] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseCapital siege weapon
+                    LC7_RecruitTimer1 = create timer for (10 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                    AttackingPosition = marker at {AttackPos[0]} + {25,25}
+                    AttackingPositionFallBack = marker at {AttackPos[1]} + {25,25}
+                    if AttackingPlatoons == 0
+                        run script CatapultTargetingMetric(PlayerTown)
+                        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[13],Attacker,CatapultTargetingMetricFocusResult,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],AttackingPosition,AttackingPositionFallBack,0)
+                    elsif AttackingPlatoons == 1
+                        run script CatapultTargetingMetric(NearestSettlement)
+                        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[13],Conqueror,CatapultTargetingMetricFocusResult,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],AttackingPosition,AttackingPositionFallBack,0)
+                    end if
+                    BuildingDefendersAllowed[0] = 1
+
+                end if
+
+            //EA large direct attack #4
+            elsif (RndAttack == 4) and PlayerAlignmentFinal < 0.0 and AttackersSent == 0
+                if LC7_Platoon[47] not exists and PLAYER of JapaneseCapital == 1 and get LC7_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+                    LC7_Platoon[47] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 30 * RecruitSizeModifier
+                    LC7_RecruitTimer1 = create timer for (30 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                    AttackingPosition = marker at {AttackPos[0]} + {0,45}
+                    AttackingPositionFallBack = marker at {AttackPos[1]} + {0,45}
+                    if AttackingPlatoons == 0
+                        run script PlatoonTargetingMetric(30 * RecruitSizeModifier,PlayerTown)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[47],Melee,Attacker,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
+                    elsif AttackingPlatoons == 1
+                        run script PlatoonTargetingMetric(30 * RecruitSizeModifier,NearestSettlement)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[47],Melee,Conqueror,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
+                    end if
+                    run background script PT_CreateBasicJapanesePlatoon(LC7_Platoon[47],1)
+                    BuildingDefendersAllowed[0] = 1
+
+                elsif LC7_Platoon[48] not exists and PLAYER of JapaneseCapital == 1 and get LC7_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+                    LC7_Platoon[48] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 30 * RecruitSizeModifier
+                    LC7_RecruitTimer1 = create timer for (30 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                    AttackingPosition = marker at {AttackPos[0]} + {15,0}
+                    AttackingPositionFallBack = marker at {AttackPos[1]} + {15,0}
+                    if AttackingPlatoons == 0
+                        run script PlatoonTargetingMetric(30 * RecruitSizeModifier,PlayerTown)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[48],Melee,Attacker,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
+                    elsif AttackingPlatoons == 1
+                        run script PlatoonTargetingMetric(30 * RecruitSizeModifier,NearestSettlement)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[48],Melee,Conqueror,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
+                    end if
+                    run background script PT_CreateBasicJapanesePlatoon(LC7_Platoon[48],1)
+                    BuildingDefendersAllowed[0] = 1
+
+                elsif LC7_Platoon[49] not exists and PLAYER of JapaneseCapital == 1 and get LC7_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+                    LC7_Platoon[49] = recruit ARMY_UNIT_TYPE_RANGED_3 town JapaneseCapital platoon of size 30 * RecruitSizeModifier
+                    LC7_RecruitTimer1 = create timer for (30 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                    AttackingPosition = marker at {AttackPos[0]} + {45,0}
+                    AttackingPositionFallBack = marker at {AttackPos[1]} + {45,0}
+                    if AttackingPlatoons == 0
+                        run script PlatoonTargetingMetric(30 * RecruitSizeModifier,PlayerTown)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[49],Ranged,Attacker,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
+                    elsif AttackingPlatoons == 1
+                        run script PlatoonTargetingMetric(30 * RecruitSizeModifier,NearestSettlement)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[49],Ranged,Conqueror,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
+                    end if
+                    run background script PT_CreateBasicJapanesePlatoonRanged(LC7_Platoon[49],1)
+                    BuildingDefendersAllowed[0] = 1
+
+                elsif LC7_Platoon[50] not exists and PLAYER of JapaneseCapital == 1 and get LC7_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+                    LC7_Platoon[50] = recruit ARMY_UNIT_TYPE_RANGED_3 town JapaneseCapital platoon of size 30 * RecruitSizeModifier
+                    LC7_RecruitTimer1 = create timer for (30 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                    AttackingPosition = marker at {AttackPos[0]} + {-30,0}
+                    AttackingPositionFallBack = marker at {AttackPos[1]} + {-30,0}
+                    if AttackingPlatoons == 0
+                        run script PlatoonTargetingMetric(30 * RecruitSizeModifier,PlayerTown)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[50],Ranged,Attacker,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
+                    elsif AttackingPlatoons == 1
+                        run script PlatoonTargetingMetric(30 * RecruitSizeModifier,NearestSettlement)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[50],Ranged,Conqueror,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
+                    end if
+                    run background script PT_CreateBasicJapanesePlatoonRanged(LC7_Platoon[50],1)
+                    BuildingDefendersAllowed[0] = 1
+
+                elsif LC7_SiegeCatapult[14] not exists and PLAYER of JapaneseCapital == 1 and get LC7_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+                    LC7_SiegeCatapult[14] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseCapital siege weapon
+                    LC7_RecruitTimer1 = create timer for (10 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                    AttackingPosition = marker at {AttackPos[0]} + {0,0}
+                    AttackingPositionFallBack = marker at {AttackPos[1]} + {0,0}
+                    if AttackingPlatoons == 0
+                        run script CatapultTargetingMetric(PlayerTown)
+                        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[14],Attacker,CatapultTargetingMetricFocusResult,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],AttackingPosition,AttackingPositionFallBack,0)
+                    elsif AttackingPlatoons == 1
+                        run script CatapultTargetingMetric(NearestSettlement)
+                        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[14],Conqueror,CatapultTargetingMetricFocusResult,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],AttackingPosition,AttackingPositionFallBack,0)
+                    end if
+                    BuildingDefendersAllowed[0] = 1
+
+                elsif LC7_SiegeCatapult[15] not exists and PLAYER of JapaneseCapital == 1 and get LC7_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+                    LC7_SiegeCatapult[15] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseCapital siege weapon
+                    LC7_RecruitTimer1 = create timer for (10 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                    AttackingPosition = marker at {AttackPos[0]} + {0,-30}
+                    AttackingPositionFallBack = marker at {AttackPos[1]} + {0,-30}
+                    if AttackingPlatoons == 0
+                        run script CatapultTargetingMetric(PlayerTown)
+                        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[15],Attacker,CatapultTargetingMetricFocusResult,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],AttackingPosition,AttackingPositionFallBack,0)
+                    elsif AttackingPlatoons == 1
+                        run script CatapultTargetingMetric(NearestSettlement)
+                        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[15],Conqueror,CatapultTargetingMetricFocusResult,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],AttackingPosition,AttackingPositionFallBack,0)
+                    end if
+                    BuildingDefendersAllowed[0] = 1
+
+                end if
+
+            //EA large flank attack #5
+            elsif (RndAttack == 5) and PlayerAlignmentFinal < 0.0 and AttackersSent == 0
+                if LC7_Platoon[51] not exists and PLAYER of JapaneseCapital == 1 and get LC7_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+                    LC7_Platoon[51] = recruit ARMY_UNIT_TYPE_RANGED_3 town JapaneseCapital platoon of size 90 * RecruitSizeModifier
+                    LC7_RecruitTimer1 = create timer for (90 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                    AttackingPosition = marker at {AttackPos[2]} + {0,0}
+                    AttackingPositionFallBack = marker at {AttackPos[1]} + {0,0}
+                    if AttackingPlatoons == 0
+                        run script PlatoonTargetingMetric(90 * RecruitSizeModifier,PlayerTown)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[51],Ranged,Attacker,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFlank[0],AttackPosFlank[1],AttackPosFlank[2],0,0,0)
+                    elsif AttackingPlatoons == 1
+                        run script PlatoonTargetingMetric(90 * RecruitSizeModifier,NearestSettlement)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[51],Ranged,Conqueror,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFlank[0],AttackPosFlank[1],AttackPosFlank[2],0,0,0)
+                    end if
+                    run background script PT_CreateArtyJapanesePlatoonRanged(LC7_Platoon[51],1)
+                    BuildingDefendersAllowed[0] = 1
+
+                elsif LC7_SiegeCatapult[17] not exists and PLAYER of JapaneseCapital == 1 and get LC7_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+                    LC7_SiegeCatapult[17] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseCapital siege weapon
+                    LC7_RecruitTimer1 = create timer for (10 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                    AttackingPosition = marker at {AttackPos[2]} + {0,0}
+                    AttackingPositionFallBack = marker at {AttackPos[1]} + {0,0}
+                    if AttackingPlatoons == 0
+                        run script CatapultTargetingMetric(PlayerTown)
+                        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[17],Attacker,CatapultTargetingMetricFocusResult,AttackPosFlank[0],AttackPosFlank[1],AttackPosFlank[2],AttackingPosition,AttackingPositionFallBack,0)
+                    elsif AttackingPlatoons == 1
+                        run script CatapultTargetingMetric(NearestSettlement)
+                        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[17],Conqueror,CatapultTargetingMetricFocusResult,AttackPosFlank[0],AttackPosFlank[1],AttackPosFlank[2],AttackingPosition,AttackingPositionFallBack,0)
+                    end if
+                    BuildingDefendersAllowed[0] = 1
+
+                elsif LC7_SiegeCatapult[18] not exists and PLAYER of JapaneseCapital == 1 and get LC7_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+                    LC7_SiegeCatapult[18] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseCapital siege weapon
+                    LC7_RecruitTimer1 = create timer for (10 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                    AttackingPosition = marker at {AttackPos[2]} + {30,0}
+                    AttackingPositionFallBack = marker at {AttackPos[1]} + {30,0}
+                    if AttackingPlatoons == 0
+                        run script CatapultTargetingMetric(PlayerTown)
+                        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[18],Attacker,CatapultTargetingMetricFocusResult,AttackPosFlank[0],AttackPosFlank[1],AttackPosFlank[2],AttackingPosition,AttackingPositionFallBack,0)
+                    elsif AttackingPlatoons == 1
+                        run script CatapultTargetingMetric(NearestSettlement)
+                        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[18],Conqueror,CatapultTargetingMetricFocusResult,AttackPosFlank[0],AttackPosFlank[1],AttackPosFlank[2],AttackingPosition,AttackingPositionFallBack,0)
+                    end if
+                    BuildingDefendersAllowed[0] = 1
+
+                end if
+
+            //GA medium direct attack #1
+            elsif (RndAttack == 1 or RndAttack == 2) and PlayerAlignmentFinal >= 0.0 and AttackersSent == 0
+                if LC7_Platoon[43] not exists and PLAYER of JapaneseCapital == 1 and get LC7_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+                    LC7_Platoon[43] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 30 * RecruitSizeModifier
+                    LC7_RecruitTimer1 = create timer for (30 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                    AttackingPosition = marker at {AttackPos[0]} + {0,30}
+                    AttackingPositionFallBack = marker at {AttackPos[1]} + {0,30}
+                    if AttackingPlatoons == 0
+                        run script PlatoonTargetingMetric(30 * RecruitSizeModifier,PlayerTown)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[43],Melee,Attacker,LC7_SiegeCatapult[10],PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
+                    elsif AttackingPlatoons == 1
+                        run script PlatoonTargetingMetric(30 * RecruitSizeModifier,NearestSettlement)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[43],Melee,Conqueror,LC7_SiegeCatapult[10],PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
+                    end if
+                    run background script PT_CreateBasicJapanesePlatoon(LC7_Platoon[43],1)
+                    BuildingDefendersAllowed[0] = 1
+
+                elsif LC7_Platoon[44] not exists and PLAYER of JapaneseCapital == 1 and get LC7_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+                    LC7_Platoon[44] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 30 * RecruitSizeModifier
+                    LC7_RecruitTimer1 = create timer for (30 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                    AttackingPosition = marker at {AttackPos[0]} + {30,0}
+                    AttackingPositionFallBack = marker at {AttackPos[1]} + {30,0}
+                    if AttackingPlatoons == 0
+                        run script PlatoonTargetingMetric(30 * RecruitSizeModifier,PlayerTown)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[44],Melee,Attacker,LC7_SiegeCatapult[11],PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
+                    elsif AttackingPlatoons == 1
+                        run script PlatoonTargetingMetric(30 * RecruitSizeModifier,NearestSettlement)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[44],Melee,Conqueror,LC7_SiegeCatapult[11],PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
+                    end if
+                    run background script PT_CreateBasicJapanesePlatoon(LC7_Platoon[44],1)
+                    BuildingDefendersAllowed[0] = 1
+
+                elsif LC7_SiegeCatapult[10] not exists and PLAYER of JapaneseCapital == 1 and get LC7_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+                    LC7_SiegeCatapult[10] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseCapital siege weapon
+                    LC7_RecruitTimer1 = create timer for (10 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                    AttackingPosition = marker at {AttackPos[0]} + {0,30}
+                    AttackingPositionFallBack = marker at {AttackPos[1]} + {0,30}
+                    if AttackingPlatoons == 0
+                        run script CatapultTargetingMetric(PlayerTown)
+                        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[10],Attacker,CatapultTargetingMetricFocusResult,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],AttackingPosition,AttackingPositionFallBack,0)
+                    elsif AttackingPlatoons == 1
+                        run script CatapultTargetingMetric(NearestSettlement)
+                        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[10],Conqueror,CatapultTargetingMetricFocusResult,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],AttackingPosition,AttackingPositionFallBack,0)
+                    end if
+                    BuildingDefendersAllowed[0] = 1
+
+                elsif LC7_SiegeCatapult[11] not exists and PLAYER of JapaneseCapital == 1 and get LC7_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+                    LC7_SiegeCatapult[11] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseCapital siege weapon
+                    LC7_RecruitTimer1 = create timer for (10 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                    AttackingPosition = marker at {AttackPos[0]} + {30,0}
+                    AttackingPositionFallBack = marker at {AttackPos[1]} + {30,0}
+                    if AttackingPlatoons == 0
+                        run script CatapultTargetingMetric(PlayerTown)
+                        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[11],Attacker,CatapultTargetingMetricFocusResult,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],AttackingPosition,AttackingPositionFallBack,0)
+                    elsif AttackingPlatoons == 1
+                        run script CatapultTargetingMetric(NearestSettlement)
+                        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[11],Conqueror,CatapultTargetingMetricFocusResult,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],AttackingPosition,AttackingPositionFallBack,0)
+                    end if
+                    BuildingDefendersAllowed[0] = 1
+
+                end if
+
+            //GA medium direct attack with ranged #2
+            elsif (RndAttack == 3) and PlayerAlignmentFinal >= 0.0 and AttackersSent == 0
+                if LC7_Platoon[45] not exists and PLAYER of JapaneseCapital == 1 and get LC7_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+                    LC7_Platoon[45] = recruit ARMY_UNIT_TYPE_RANGED_3 town JapaneseCapital platoon of size 40 * RecruitSizeModifier
+                    LC7_RecruitTimer1 = create timer for (40 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                    AttackingPosition = marker at {AttackPos[0]} + {0,0}
+                    AttackingPositionFallBack = marker at {AttackPos[1]} + {0,0}
+                    if AttackingPlatoons == 0
+                        run script PlatoonTargetingMetric(40 * RecruitSizeModifier,PlayerTown)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[45],Ranged,Attacker,LC7_SiegeCatapult[12],PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
+                    elsif AttackingPlatoons == 1
+                        run script PlatoonTargetingMetric(40 * RecruitSizeModifier,NearestSettlement)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[45],Ranged,Conqueror,LC7_SiegeCatapult[12],PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
+                    end if
+                    run background script PT_CreateBasicJapanesePlatoonRanged(LC7_Platoon[45],1)
+                    BuildingDefendersAllowed[0] = 1
+
+                elsif LC7_Platoon[46] not exists and PLAYER of JapaneseCapital == 1 and get LC7_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+                    LC7_Platoon[46] = recruit ARMY_UNIT_TYPE_RANGED_3 town JapaneseCapital platoon of size 40 * RecruitSizeModifier
+                    LC7_RecruitTimer1 = create timer for (40 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                    AttackingPosition = marker at {AttackPos[0]} + {25,25}
+                    AttackingPositionFallBack = marker at {AttackPos[1]} + {25,25}
+                    if AttackingPlatoons == 0
+                        run script PlatoonTargetingMetric(40 * RecruitSizeModifier,PlayerTown)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[46],Ranged,Attacker,LC7_SiegeCatapult[13],PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
+                    elsif AttackingPlatoons == 1
+                        run script PlatoonTargetingMetric(40 * RecruitSizeModifier,NearestSettlement)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[46],Ranged,Conqueror,LC7_SiegeCatapult[13],PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
+                    end if
+                    run background script PT_CreateBasicJapanesePlatoonRanged(LC7_Platoon[46],1)
+                    BuildingDefendersAllowed[0] = 1
+
+                elsif LC7_SiegeCatapult[12] not exists and PLAYER of JapaneseCapital == 1 and get LC7_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+                    LC7_SiegeCatapult[12] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseCapital siege weapon
+                    LC7_RecruitTimer1 = create timer for (10 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                    AttackingPosition = marker at {AttackPos[0]} + {0,0}
+                    AttackingPositionFallBack = marker at {AttackPos[1]} + {0,0}
+                    if AttackingPlatoons == 0
+                        run script CatapultTargetingMetric(PlayerTown)
+                        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[12],Attacker,CatapultTargetingMetricFocusResult,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],AttackingPosition,AttackingPositionFallBack,0)
+                    elsif AttackingPlatoons == 1
+                        run script CatapultTargetingMetric(NearestSettlement)
+                        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[12],Conqueror,CatapultTargetingMetricFocusResult,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],AttackingPosition,AttackingPositionFallBack,0)
+                    end if
+                    BuildingDefendersAllowed[0] = 1
+
+                elsif LC7_SiegeCatapult[13] not exists and PLAYER of JapaneseCapital == 1 and get LC7_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+                    LC7_SiegeCatapult[13] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseCapital siege weapon
+                    LC7_RecruitTimer1 = create timer for (10 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                    AttackingPosition = marker at {AttackPos[0]} + {25,25}
+                    AttackingPositionFallBack = marker at {AttackPos[1]} + {25,25}
+                    if AttackingPlatoons == 0
+                        run script CatapultTargetingMetric(PlayerTown)
+                        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[13],Attacker,CatapultTargetingMetricFocusResult,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],AttackingPosition,AttackingPositionFallBack,0)
+                    elsif AttackingPlatoons == 1
+                        run script CatapultTargetingMetric(NearestSettlement)
+                        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[13],Conqueror,CatapultTargetingMetricFocusResult,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],AttackingPosition,AttackingPositionFallBack,0)
+                    end if
+                    BuildingDefendersAllowed[0] = 1
+
+                end if
+
+            //GA large direct attack #3
+            elsif (RndAttack == 4) and PlayerAlignmentFinal >= 0.0 and AttackersSent == 0
+                if LC7_Platoon[47] not exists and PLAYER of JapaneseCapital == 1 and get LC7_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+                    LC7_Platoon[47] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 30 * RecruitSizeModifier
+                    LC7_RecruitTimer1 = create timer for (30 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                    AttackingPosition = marker at {AttackPos[0]} + {0,45}
+                    AttackingPositionFallBack = marker at {AttackPos[1]} + {0,45}
+                    if AttackingPlatoons == 0
+                        run script PlatoonTargetingMetric(30 * RecruitSizeModifier,PlayerTown)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[47],Melee,Attacker,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
+                    elsif AttackingPlatoons == 1
+                        run script PlatoonTargetingMetric(30 * RecruitSizeModifier,NearestSettlement)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[47],Melee,Conqueror,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
+                    end if
+                    run background script PT_CreateBasicJapanesePlatoon(LC7_Platoon[47],1)
+                    BuildingDefendersAllowed[0] = 1
+
+                elsif LC7_Platoon[48] not exists and PLAYER of JapaneseCapital == 1 and get LC7_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+                    LC7_Platoon[48] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 30 * RecruitSizeModifier
+                    LC7_RecruitTimer1 = create timer for (30 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                    AttackingPosition = marker at {AttackPos[0]} + {15,0}
+                    AttackingPositionFallBack = marker at {AttackPos[1]} + {15,0}
+                    if AttackingPlatoons == 0
+                        run script PlatoonTargetingMetric(30 * RecruitSizeModifier,PlayerTown)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[48],Melee,Attacker,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
+                    elsif AttackingPlatoons == 1
+                        run script PlatoonTargetingMetric(30 * RecruitSizeModifier,NearestSettlement)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[48],Melee,Conqueror,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
+                    end if
+                    run background script PT_CreateBasicJapanesePlatoon(LC7_Platoon[48],1)
+                    BuildingDefendersAllowed[0] = 1
+
+                elsif LC7_Platoon[49] not exists and PLAYER of JapaneseCapital == 1 and get LC7_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+                    LC7_Platoon[49] = recruit ARMY_UNIT_TYPE_RANGED_3 town JapaneseCapital platoon of size 30 * RecruitSizeModifier
+                    LC7_RecruitTimer1 = create timer for (30 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                    AttackingPosition = marker at {AttackPos[0]} + {45,0}
+                    AttackingPositionFallBack = marker at {AttackPos[1]} + {45,0}
+                    if AttackingPlatoons == 0
+                        run script PlatoonTargetingMetric(30 * RecruitSizeModifier,PlayerTown)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[49],Ranged,Attacker,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
+                    elsif AttackingPlatoons == 1
+                        run script PlatoonTargetingMetric(30 * RecruitSizeModifier,NearestSettlement)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[49],Ranged,Conqueror,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
+                    end if
+                    run background script PT_CreateBasicJapanesePlatoonRanged(LC7_Platoon[49],1)
+                    BuildingDefendersAllowed[0] = 1
+
+                elsif LC7_Platoon[50] not exists and PLAYER of JapaneseCapital == 1 and get LC7_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+                    LC7_Platoon[50] = recruit ARMY_UNIT_TYPE_RANGED_3 town JapaneseCapital platoon of size 30 * RecruitSizeModifier
+                    LC7_RecruitTimer1 = create timer for (30 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                    AttackingPosition = marker at {AttackPos[0]} + {-30,0}
+                    AttackingPositionFallBack = marker at {AttackPos[1]} + {-30,0}
+                    if AttackingPlatoons == 0
+                        run script PlatoonTargetingMetric(30 * RecruitSizeModifier,PlayerTown)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[50],Ranged,Attacker,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
+                    elsif AttackingPlatoons == 1
+                        run script PlatoonTargetingMetric(30 * RecruitSizeModifier,NearestSettlement)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[50],Ranged,Conqueror,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
+                    end if
+                    run background script PT_CreateBasicJapanesePlatoonRanged(LC7_Platoon[50],1)
+                    BuildingDefendersAllowed[0] = 1
+
+                elsif LC7_SiegeCatapult[14] not exists and PLAYER of JapaneseCapital == 1 and get LC7_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+                    LC7_SiegeCatapult[14] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseCapital siege weapon
+                    LC7_RecruitTimer1 = create timer for (10 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                    AttackingPosition = marker at {AttackPos[0]} + {0,0}
+                    AttackingPositionFallBack = marker at {AttackPos[1]} + {0,0}
+                    if AttackingPlatoons == 0
+                        run script CatapultTargetingMetric(PlayerTown)
+                        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[14],Attacker,CatapultTargetingMetricFocusResult,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],AttackingPosition,AttackingPositionFallBack,0)
+                    elsif AttackingPlatoons == 1
+                        run script CatapultTargetingMetric(NearestSettlement)
+                        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[14],Conqueror,CatapultTargetingMetricFocusResult,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],AttackingPosition,AttackingPositionFallBack,0)
+                    end if
+                    BuildingDefendersAllowed[0] = 1
+
+                elsif LC7_SiegeCatapult[15] not exists and PLAYER of JapaneseCapital == 1 and get LC7_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+                    LC7_SiegeCatapult[15] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseCapital siege weapon
+                    LC7_RecruitTimer1 = create timer for (10 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                    AttackingPosition = marker at {AttackPos[0]} + {0,-30}
+                    AttackingPositionFallBack = marker at {AttackPos[1]} + {0,-30}
+                    if AttackingPlatoons == 0
+                        run script CatapultTargetingMetric(PlayerTown)
+                        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[15],Attacker,CatapultTargetingMetricFocusResult,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],AttackingPosition,AttackingPositionFallBack,0)
+                    elsif AttackingPlatoons == 1
+                        run script CatapultTargetingMetric(NearestSettlement)
+                        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[15],Conqueror,CatapultTargetingMetricFocusResult,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],AttackingPosition,AttackingPositionFallBack,0)
+                    end if
+                    BuildingDefendersAllowed[0] = 1
+
+                end if
+
+            //GA large balanced attack #4
+            elsif (RndAttack == 5) and PlayerAlignmentFinal >= 0.0 and AttackersSent == 0
+                if LC7_Platoon[52] not exists and PLAYER of JapaneseCapital == 1 and get LC7_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+                    LC7_Platoon[52] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 75 * RecruitSizeModifier
+                    LC7_RecruitTimer1 = create timer for (75 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                    AttackingPosition = marker at {AttackPos[0]} + {0,45}
+                    AttackingPositionFallBack = marker at {AttackPos[1]} + {0,45}
+                    if AttackingPlatoons == 0
+                        run script PlatoonTargetingMetric(75 * RecruitSizeModifier,PlayerTown)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[52],Melee,Attacker,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
+                    elsif AttackingPlatoons == 1
+                        run script PlatoonTargetingMetric(75 * RecruitSizeModifier,NearestSettlement)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[52],Melee,Conqueror,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
+                    end if
+                    run background script PT_CreateHeavyJapanesePlatoon(LC7_Platoon[52],1)
+                    BuildingDefendersAllowed[0] = 1
+
+                elsif LC7_Platoon[53] not exists and PLAYER of JapaneseCapital == 1 and get LC7_RecruitTimer1 time remaining <= 0 and not town JapaneseCapital is under takeover from player 0
+                    LC7_Platoon[53] = recruit ARMY_UNIT_TYPE_RANGED_3 town JapaneseCapital platoon of size 75 * RecruitSizeModifier
+                    LC7_RecruitTimer1 = create timer for (75 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                    AttackingPosition = marker at {AttackPos[2]} + {15,0}
+                    AttackingPositionFallBack = marker at {AttackPos[1]} + {15,0}
+                    if AttackingPlatoons == 0
+                        run script PlatoonTargetingMetric(75 * RecruitSizeModifier,PlayerTown)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[53],Ranged,Attacker,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
+                    elsif AttackingPlatoons == 1
+                        run script PlatoonTargetingMetric(75 * RecruitSizeModifier,NearestSettlement)
+                        run background script LC7_ArmyBehaivours(LC7_Platoon[53],Ranged,Conqueror,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
+                    end if
+                    run background script PT_CreateArtyJapanesePlatoonRanged(LC7_Platoon[53],1)
+                    BuildingDefendersAllowed[0] = 1
+
+                end if
+            end if
+        end if
+
+        if get LC7_RecruitTimer2 time remaining <= 0
             //JapaneseTown1
-            elsif LC7_Platoon[11] not exists and PLAYER of JapaneseTown1 == 1 and not town JapaneseTown1 is under takeover from player 0 and get LC7_RecruitTimer2 time remaining <= 0
+            if LC7_Platoon[11] not exists and PLAYER of JapaneseTown1 == 1 and not town JapaneseTown1 is under takeover from player 0 and get LC7_RecruitTimer2 time remaining <= 0 and BuildingDefendersAllowed[1] == 1
                 LC7_Platoon[11] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown1 platoon of size 30 * RecruitSizeModifier
-                LC7_RecruitTimer2 = create timer for 180 * RecruitModifier seconds
+                LC7_RecruitTimer2 = create timer for (30 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
                 run background script PT_CreateBasicJapanesePlatoon(LC7_Platoon[11],1)
                 enable platoon LC7_Platoon[11] respond to town JapaneseTown1 attack
                 wait until not LC7_Platoon[11] recruiting
                 run background script LC7_StaticPlatoonsActions(PlatoonPos[9],Melee,LC7_Platoon[11],JapaneseTown1)
+                BuildingDefendersAllowed[1] = 0
 
-            elsif LC7_Platoon[12] not exists and PLAYER of JapaneseTown1 == 1 and not town JapaneseTown1 is under takeover from player 0 and get LC7_RecruitTimer2 time remaining <= 0
+            elsif LC7_Platoon[12] not exists and PLAYER of JapaneseTown1 == 1 and not town JapaneseTown1 is under takeover from player 0 and get LC7_RecruitTimer2 time remaining <= 0 and BuildingDefendersAllowed[1] == 1
                 LC7_Platoon[12] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown1 platoon of size 30 * RecruitSizeModifier
-                LC7_RecruitTimer2 = create timer for 180 * RecruitModifier seconds
+                LC7_RecruitTimer2 = create timer for (30 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
                 run background script PT_CreateBasicJapanesePlatoon(LC7_Platoon[12],1)
                 enable platoon LC7_Platoon[12] respond to town JapaneseTown1 attack
                 wait until not LC7_Platoon[12] recruiting
                 run background script LC7_StaticPlatoonsActions(PlatoonPos[10],Melee,LC7_Platoon[12],JapaneseTown1)
+                BuildingDefendersAllowed[1] = 0
 
-            elsif LC7_Platoon[13] not exists and PLAYER of JapaneseTown1 == 1 and not town JapaneseTown1 is under takeover from player 0 and get LC7_RecruitTimer2 time remaining <= 0
+            elsif LC7_Platoon[13] not exists and PLAYER of JapaneseTown1 == 1 and not town JapaneseTown1 is under takeover from player 0 and get LC7_RecruitTimer2 time remaining <= 0 and BuildingDefendersAllowed[1] == 1
                 LC7_Platoon[13] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown1 platoon of size 30 * RecruitSizeModifier
-                LC7_RecruitTimer2 = create timer for 180 * RecruitModifier seconds
+                LC7_RecruitTimer2 = create timer for (30 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
                 run background script PT_CreateBasicJapanesePlatoon(LC7_Platoon[13],1)
                 enable platoon LC7_Platoon[13] respond to town JapaneseTown1 attack
                 wait until not LC7_Platoon[13] recruiting
                 run background script LC7_StaticPlatoonsActions(PlatoonPos[11],Melee,LC7_Platoon[13],JapaneseTown1)
+                BuildingDefendersAllowed[1] = 0
 
-            elsif LC7_WallArcher[8] not exists and Wall[8] exists and PLAYER of Wall[8] == 1 and HEALTH of Wall[8] == 1.0 and not town JapaneseTown1 is under takeover from player 0 and get LC7_RecruitTimer2 time remaining <= 0
+            elsif LC7_WallArcher[8] not exists and Wall[8] exists and PLAYER of Wall[8] == 1 and HEALTH of Wall[8] == 1.0 and not town JapaneseTown1 is under takeover from player 0 and get LC7_RecruitTimer2 time remaining <= 0 and BuildingDefendersAllowed[1] == 1
                 LC7_WallArcher[8] = recruit ARMY_UNIT_TYPE_RANGED_2 town JapaneseTown1 platoon of size 20 * RecruitSizeModifier
-                LC7_RecruitTimer2 = create timer for 60 * RecruitModifier seconds
+                LC7_RecruitTimer2 = create timer for (20 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
                 run background script PT_CreateBasicJapanesePlatoonRanged(LC7_WallArcher[8],1)
                 wait until not LC7_WallArcher[8] recruiting
                 enable platoon LC7_WallArcher[8] respond to town JapaneseTown1 attack
                 add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[8] to LC7_WallArcher[8] action queue
+                BuildingDefendersAllowed[1] = 0
 
-            elsif LC7_WallArcher[9] not exists and Wall[9] exists and PLAYER of Wall[9] == 1 and HEALTH of Wall[9] == 1.0 and not town JapaneseTown1 is under takeover from player 0 and get LC7_RecruitTimer2 time remaining <= 0
+            elsif LC7_WallArcher[9] not exists and Wall[9] exists and PLAYER of Wall[9] == 1 and HEALTH of Wall[9] == 1.0 and not town JapaneseTown1 is under takeover from player 0 and get LC7_RecruitTimer2 time remaining <= 0 and BuildingDefendersAllowed[1] == 1
                 LC7_WallArcher[9] = recruit ARMY_UNIT_TYPE_RANGED_2 town JapaneseTown1 platoon of size 20 * RecruitSizeModifier
-                LC7_RecruitTimer2 = create timer for 60 * RecruitModifier seconds
+                LC7_RecruitTimer2 = create timer for (20 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
                 run background script PT_CreateBasicJapanesePlatoonRanged(LC7_WallArcher[9],1)
                 wait until not LC7_WallArcher[9] recruiting
                 enable platoon LC7_WallArcher[9] respond to town JapaneseTown1 attack
                 add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[9] to LC7_WallArcher[9] action queue
-
-            //Attack Nearest Settlement
-            elsif LC7_Platoon[25] not exists and LC7_Platoon[24] exists and {LC7_Platoon[24]} near {JapaneseCapital} radius 550 and PLAYER of JapaneseTown1 == 1 and not town JapaneseTown1 is under takeover from player 0 and get AttackNearestTownTimer time remaining <= 0 and AttackingPlatoons == 1
-                LC7_Platoon[25] = recruit ARMY_UNIT_TYPE_RANGED_4 town JapaneseTown1 platoon of size 40 * RecruitSizeModifier
-                LC7_RecruitTimer2 = create timer for 200 * RecruitModifier seconds
-                run background script PT_CreateBasicJapanesePlatoonRanged(LC7_Platoon[25],1)
-                enable platoon LC7_Platoon[25] respond to town JapaneseTown1 attack
-                wait until not LC7_Platoon[25] recruiting
-                run background script LC7_ArmyBehaivours(LC7_Platoon[25],Ranged,Conqueror,LC7_SiegeCatapult[11],0,0,0,0)
-
-            //Attack PlayerTown
-            elsif LC7_Platoon[22] not exists and PLAYER of JapaneseTown1 == 1 and not town JapaneseTown1 is under takeover from player 0 and get LC7_RecruitTimer2 time remaining <= 0 and LC7_LargeSiegeIsRunning == 0 and TownsConverted >= 4
-                LC7_Platoon[22] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown1 platoon of size 25 * RecruitSizeModifier
-                LC7_RecruitTimer2 = create timer for 160 * RecruitModifier seconds
-                run background script PT_CreateBasicJapanesePlatoon(LC7_Platoon[22],1)
-                enable platoon LC7_Platoon[22] respond to town JapaneseTown1 attack
-                wait until not LC7_Platoon[22] recruiting
-                AttackingPosition = marker at {SiegeAttackPos[0]}//+{40,0,40}
-                AttackingPositionFallBack = marker at {SiegeAttackPrePos[0]}//+{40,0,40}
-                run background script LC7_ArmyBehaivours(LC7_Platoon[22],Melee,Escort,LC7_SiegeCatapult[9],AttackingPosition,AttackingPositionFallBack,0,0)
-
-            elsif LC7_Platoon[23] not exists and PLAYER of JapaneseTown1 == 1 and not town JapaneseTown1 is under takeover from player 0 and get LC7_RecruitTimer2 time remaining <= 0 and LC7_LargeSiegeIsRunning == 0 and TownsConverted >= 4
-                LC7_Platoon[23] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown1 platoon of size 25 * RecruitSizeModifier
-                LC7_RecruitTimer2 = create timer for 160 * RecruitModifier seconds
-                run background script PT_CreateBasicJapanesePlatoon(LC7_Platoon[23],1)
-                enable platoon LC7_Platoon[23] respond to town JapaneseTown1 attack
-                wait until not LC7_Platoon[23] recruiting
-                AttackingPosition = marker at {SiegeAttackPos[1]}//+{40,0,40}
-                AttackingPositionFallBack = marker at {SiegeAttackPrePos[1]}//+{40,0,40}
-                run background script LC7_ArmyBehaivours(LC7_Platoon[23],Melee,Escort,LC7_SiegeCatapult[10],AttackingPosition,AttackingPositionFallBack,0,0)
+                BuildingDefendersAllowed[1] = 0
             
-            elsif LC7_SiegeCatapult[9] not exists and PLAYER of JapaneseTown1 == 1 and not town JapaneseTown1 is under takeover from player 0 and get LC7_RecruitTimer2 time remaining <= 0 and LC7_LargeSiegeIsRunning == 0 and TownsConverted >= 4
-                LC7_SiegeCatapult[9] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseTown1 siege weapon
-                LC7_RecruitTimer2 = create timer for 100 * RecruitModifier seconds
-                run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[9],0,SiegeRoute2[0],SiegeRoute2[1],SiegeRoute2[2])
+            //Scripted Attack #1 - Only execute once
+            elsif LC7_Platoon[54] not exists and ScriptedAttack[0] == 0 and (get player 0 impressiveness > 15000 or size of PlayerTown > 200) and PLAYER of JapaneseTown1 == 1 and get LC7_RecruitTimer2 time remaining <= 0 and not town JapaneseTown1 is under takeover from player 0
+                LC7_Platoon[54] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown1 platoon of size 20 * RecruitSizeModifier
+                LC7_RecruitTimer2 = create timer for (20 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                AttackingPosition = marker at {AttackPos[2]} + {0,0}
+                AttackingPositionFallBack = marker at {AttackPos[3]} + {0,0}
+                if AttackingPlatoons == 0
+                    run script PlatoonTargetingMetric(20 * RecruitSizeModifier,PlayerTown)
+                    run background script LC7_ArmyBehaivours(LC7_Platoon[54],Melee,Attacker,LC7_SiegeCatapult[16],PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFlank[0],AttackPosFlank[1],AttackPosFlank[2],0,0,2)
+                elsif AttackingPlatoons == 1
+                    run script PlatoonTargetingMetric(20 * RecruitSizeModifier,NearestSettlement)
+                    run background script LC7_ArmyBehaivours(LC7_Platoon[54],Melee,Conqueror,LC7_SiegeCatapult[16],PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFlank[0],AttackPosFlank[1],AttackPosFlank[2],0,0,2)
+                end if
+                run background script PT_CreateChargerJapanesePlatoon(LC7_Platoon[54],1)
 
-            elsif LC7_SiegeCatapult[10] not exists and PLAYER of JapaneseTown1 == 1 and not town JapaneseTown1 is under takeover from player 0 and get LC7_RecruitTimer2 time remaining <= 0 and LC7_LargeSiegeIsRunning == 0 and TownsConverted >= 4
-                LC7_SiegeCatapult[10] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseTown1 siege weapon
-                LC7_RecruitTimer2 = create timer for 100 * RecruitModifier seconds
-                run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[10],0,SiegeRoute4[0],SiegeRoute4[1],SiegeRoute4[2])
+            elsif LC7_SiegeCatapult[16] not exists and ScriptedAttack[0] == 0 and get player 0 impressiveness > 15000 and PLAYER of JapaneseTown1 == 1 and get LC7_RecruitTimer2 time remaining <= 0 and not town JapaneseTown1 is under takeover from player 0
+                LC7_SiegeCatapult[16] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseTown1 siege weapon
+                LC7_RecruitTimer2 = create timer for (10 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                AttackingPosition = marker at {AttackPos[2]} + {0,0}
+                AttackingPositionFallBack = marker at {AttackPos[3]} + {0,0}
+                if AttackingPlatoons == 0
+                    run script CatapultTargetingMetric(PlayerTown)
+                    run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[16],Attacker,CatapultTargetingMetricFocusResult,AttackPosFlank[0],AttackPosFlank[1],AttackPosFlank[2],AttackingPosition,AttackingPositionFallBack,2)
+                elsif AttackingPlatoons == 1
+                    run script CatapultTargetingMetric(NearestSettlement)
+                    run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[16],Conqueror,CatapultTargetingMetricFocusResult,AttackPosFlank[0],AttackPosFlank[1],AttackPosFlank[2],AttackingPosition,AttackingPositionFallBack,2)
 
+                end if
+            end if
+        end if
+
+        if get LC7_RecruitTimer3 time remaining <= 0
             //JapaneseTown2
-            //Attack Nearest Settlement
-            elsif LC7_Platoon[25] not exists and LC7_Platoon[24] exists and {LC7_Platoon[24]} near {JapaneseCapital} radius 550 and PLAYER of JapaneseTown2 == 1 and not town JapaneseTown2 is under takeover from player 0 and get AttackNearestTownTimer time remaining <= 0 and AttackingPlatoons == 1
-                LC7_Platoon[25] = recruit ARMY_UNIT_TYPE_RANGED_4 town JapaneseTown2 platoon of size 30 * RecruitSizeModifier
-                LC7_RecruitTimer3 = create timer for 200 * RecruitModifier seconds
-                run background script PT_CreateBasicJapanesePlatoonRanged(LC7_Platoon[25],1)
-                enable platoon LC7_Platoon[25] respond to town JapaneseTown2 attack
-                wait until not LC7_Platoon[25] recruiting
-                run background script LC7_ArmyBehaivours(LC7_Platoon[25],Ranged,Conqueror,0,0,0,0,0)
-    
-            elsif LC7_Platoon[14] not exists and PLAYER of JapaneseTown2 == 1 and not town JapaneseTown2 is under takeover from player 0 and get LC7_RecruitTimer3 time remaining <= 0
-                LC7_Platoon[14] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown2 platoon of size 40 * RecruitSizeModifier
-                LC7_RecruitTimer3 = create timer for 180 * RecruitModifier seconds
+            if LC7_Platoon[14] not exists and PLAYER of JapaneseTown2 == 1 and not town JapaneseTown2 is under takeover from player 0 and get LC7_RecruitTimer3 time remaining <= 0
+                LC7_Platoon[14] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown2 platoon of size 30 * RecruitSizeModifier
+                LC7_RecruitTimer3 = create timer for (30 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
                 run background script PT_CreateBasicJapanesePlatoon(LC7_Platoon[14],1)
                 enable platoon LC7_Platoon[14] respond to town JapaneseTown2 attack
                 wait until not LC7_Platoon[14] recruiting
                 run background script LC7_StaticPlatoonsActions(PlatoonPos[12],Melee,LC7_Platoon[14],JapaneseTown2)
+    
+            elsif LC7_Platoon[33] not exists and size of PlayerTown > 100 and HardMode == 1 and PLAYER of JapaneseTown2 == 1 and not town JapaneseTown2 is under takeover from player 0 and get LC7_RecruitTimer3 time remaining <= 0
+                LC7_Platoon[33] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown2 platoon of size 50 * RecruitSizeModifier
+                LC7_RecruitTimer3 = create timer for (50 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                run background script PT_CreateChargerJapanesePlatoon(LC7_Platoon[33],1)
+                enable platoon LC7_Platoon[33] respond to town JapaneseTown2 attack
+                wait until not LC7_Platoon[33] recruiting
 
-            elsif LC7_WallArcher[10] not exists and Wall[10] exists and PLAYER of Wall[10] == 1 and HEALTH of Wall[10] == 1.0 and not town JapaneseTown2 is under takeover from player 0 and get LC7_RecruitTimer3 time remaining <= 0
-                LC7_WallArcher[10] = recruit ARMY_UNIT_TYPE_RANGED_2 town JapaneseTown2 platoon of size 20 * RecruitSizeModifier
-                LC7_RecruitTimer3 = create timer for 60 * RecruitModifier seconds
-                run background script PT_CreateBasicJapanesePlatoonRanged(LC7_WallArcher[10],1)
-                wait until not LC7_WallArcher[10] recruiting
-                enable platoon LC7_WallArcher[10] respond to town JapaneseTown2 attack
-                add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[10] to LC7_WallArcher[10] action queue
+            elsif LC7_Platoon[34] not exists and size of PlayerTown > 100 and HardMode == 1 and PLAYER of JapaneseTown2 == 1 and not town JapaneseTown2 is under takeover from player 0 and get LC7_RecruitTimer3 time remaining <= 0
+                LC7_Platoon[34] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown2 platoon of size 50 * RecruitSizeModifier
+                LC7_RecruitTimer3 = create timer for (50 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                run background script PT_CreateHeavyJapanesePlatoon(LC7_Platoon[34],1)
+                enable platoon LC7_Platoon[34] respond to town JapaneseTown2 attack
+                wait until not LC7_Platoon[34] recruiting
 
-            elsif LC7_WallArcher[11] not exists and Wall[11] exists and PLAYER of Wall[11] == 1 and HEALTH of Wall[11] == 1.0 and not town JapaneseTown2 is under takeover from player 0 and get LC7_RecruitTimer3 time remaining <= 0
-                LC7_WallArcher[11] = recruit ARMY_UNIT_TYPE_RANGED_2 town JapaneseTown2 platoon of size 20 * RecruitSizeModifier
-                LC7_RecruitTimer3 = create timer for 60 * RecruitModifier seconds
-                run background script PT_CreateBasicJapanesePlatoonRanged(LC7_WallArcher[11],1)
-                wait until not LC7_WallArcher[11] recruiting
-                enable platoon LC7_WallArcher[11] respond to town JapaneseTown2 attack
-                add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[11] to LC7_WallArcher[11] action queue
+            //Take over MinorTown6
+            elsif LC7_Platoon[35] not exists and size of PlayerTown > 175 and HardMode == 1 and PLAYER of JapaneseTown2 == 1 and not town JapaneseTown2 is under takeover from player 0 and get LC7_RecruitTimer3 time remaining <= 0
+                LC7_Platoon[35] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown2 platoon of size 50 * RecruitSizeModifier
+                LC7_RecruitTimer3 = create timer for (50 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                run background script PT_CreateChargerJapanesePlatoon(LC7_Platoon[35],1)
+                enable platoon LC7_Platoon[35] respond to town JapaneseTown2 attack
+                wait until not LC7_Platoon[35] recruiting
 
-            elsif LC7_WallArcher[12] not exists and Wall[12] exists and PLAYER of Wall[12] == 1 and HEALTH of Wall[12] == 1.0 and not town JapaneseTown2 is under takeover from player 0 and get LC7_RecruitTimer3 time remaining <= 0
-                LC7_WallArcher[12] = recruit ARMY_UNIT_TYPE_RANGED_2 town JapaneseTown2 platoon of size 20 * RecruitSizeModifier
-                LC7_RecruitTimer3 = create timer for 60 * RecruitModifier seconds
-                run background script PT_CreateBasicJapanesePlatoonRanged(LC7_WallArcher[12],1)
-                wait until not LC7_WallArcher[12] recruiting
-                enable platoon LC7_WallArcher[12] respond to town JapaneseTown2 attack
-                add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[12] to LC7_WallArcher[12] action queue
+            elsif LC7_Platoon[36] not exists and size of PlayerTown > 175 and HardMode == 1 and PLAYER of JapaneseTown2 == 1 and not town JapaneseTown2 is under takeover from player 0 and get LC7_RecruitTimer3 time remaining <= 0
+                LC7_Platoon[36] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown2 platoon of size 50 * RecruitSizeModifier
+                LC7_RecruitTimer3 = create timer for (50 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                run background script PT_CreateHeavyJapanesePlatoon(LC7_Platoon[36],1)
+                enable platoon LC7_Platoon[36] respond to town JapaneseTown2 attack
+                wait until not LC7_Platoon[36] recruiting
 
             end if
-        //end if
+        end if
 
-        if PLAYER of JapaneseTown1 == 0 or PLAYER of JapaneseTown2 == 0 or PLAYER of MinorTown5 == 0 or PLAYER of MinorTown6 == 0 or PLAYER of JapaneseCapital != 1 or HardMode == 1
-            //Take over a town and start attacking the player a lot    
-            if NearestSettlement != 0 and PLAYER of NearestSettlement == 0
+        //Generic Town production
+        //Dynamically build a few armories and minimum needed buildings for all towns + platoon recruitment for minor towns
+        if get GenericTownBuildingInitialTimer time remaining <= 0
+            GenericTown = get town with id GenericTownCounter
+            if GenericTown exists
+                if PLAYER of GenericTown == 1
+                    if PlayerAlignmentFinal < 0.0
+                        //Buildings
+                        if get GenericTownBuildingTimer time remaining <= 0
+                            if get number of type HOUSE ABODE_NUMBER_STORAGE_PIT in GenericTown min built 0.0 < 1
+                                run background script AGB_BuildBuilding(GenericTown,AGB_STORAGEPIT,AGB_JAPANESE)
+
+                            elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in GenericTown min built 0.0 < 3
+                                run background script AGB_BuildBuilding(GenericTown,AGB_ARMORYMELEE,AGB_JAPANESE)
+
+                            elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in GenericTown min built 0.0 < 3
+                                run background script AGB_BuildBuilding(GenericTown,AGB_ARMORYRANGED,AGB_JAPANESE)
+
+                            elsif adult capacity of GenericTown < 120
+                                run background script AGB_BuildBuilding(GenericTown,AGB_HOUSE,AGB_JAPANESE)
+
+                            end if
+                            GenericTownBuildingTimer = create timer for 75 * BuilderModifier seconds
+                        end if
+
+                        //Platoons
+                        if GenericTown != JapaneseCapital and GenericTown != JapaneseTown1 and GenericTown != JapaneseTown2
+                            if get GenericTownPlatoonTimer time remaining <= 0
+                                if get army size in town GenericTown < 60 * RecruitModifier
+                                    Number = number from 1 to 3
+                                    if Number == 1 or Number == 2
+                                        AnotherPlatoon = recruit ARMY_UNIT_TYPE_MELEE_2 town GenericTown platoon of size 30 * RecruitSizeModifier
+                                        enable platoon AnotherPlatoon respond to town GenericTown attack
+                                        run background script LC7_StaticPlatoonsActions(marker at {GenericTown} + {number from -50 to 50,number from -50 to 50},Melee,AnotherPlatoon,GenericTown)
+                                        run background script PT_CreateBasicJapanesePlatoon(AnotherPlatoon,1)
+                                    else
+                                        AnotherPlatoon = recruit ARMY_UNIT_TYPE_RANGED_2 town GenericTown platoon of size 30 * RecruitSizeModifier
+                                        enable platoon AnotherPlatoon respond to town GenericTown attack
+                                        run background script LC7_StaticPlatoonsActions(marker at {GenericTown} + {number from -50 to 50,number from -50 to 50},Melee,AnotherPlatoon,GenericTown)
+                                        run background script PT_CreateBasicJapanesePlatoon(AnotherPlatoon,1)
+                                    end if
+                                    GenericTownPlatoonTimer = create timer for (30 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                                end if
+                            end if
+                        end if
+
+                    elsif PlayerAlignmentFinal >= 0.0
+                        //Buildings
+                        if get GenericTownBuildingTimer time remaining <= 0
+                            if get number of type HOUSE ABODE_NUMBER_STORAGE_PIT in GenericTown min built 0.0 < 2
+                                run background script AGB_BuildBuilding(GenericTown,AGB_STORAGEPIT,AGB_JAPANESE)
+
+                            elsif get number of type HOUSE ABODE_NUMBER_TEMPLE in GenericTown min built 0.0 < 2
+                                run background script AGB_BuildBuilding(GenericTown,AGB_ARMORYRANGED,AGB_JAPANESE)
+
+                            elsif get number of type HOUSE ABODE_NUMBER_MELEE_ARMOURY in GenericTown min built 0.0 < 2
+                                run background script AGB_BuildBuilding(GenericTown,AGB_ARMORYMELEE,AGB_JAPANESE)
+
+                            elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in GenericTown min built 0.0 < 2
+                                run background script AGB_BuildBuilding(GenericTown,AGB_ARMORYRANGED,AGB_JAPANESE)
+
+                            elsif adult capacity of GenericTown < 150
+                                run background script AGB_BuildBuilding(GenericTown,AGB_HOUSE,AGB_JAPANESE)
+
+                            end if
+                            GenericTownBuildingTimer = create timer for 75 * BuilderModifier seconds
+                        end if
+
+                        //Platoons
+                        if GenericTown != JapaneseCapital and GenericTown != JapaneseTown1 and GenericTown != JapaneseTown2
+                            if get GenericTownPlatoonTimer time remaining <= 0
+                                if get army size in town GenericTown < 60 * RecruitModifier
+                                    Number = number from 1 to 3
+                                    if Number == 1 or Number == 2
+                                        AnotherPlatoon = recruit ARMY_UNIT_TYPE_MELEE_2 town GenericTown platoon of size 30 * RecruitSizeModifier
+                                        enable platoon AnotherPlatoon respond to town GenericTown attack
+                                        run background script LC7_StaticPlatoonsActions(marker at {GenericTown} + {number from -50 to 50,number from -50 to 50},Melee,AnotherPlatoon,GenericTown)
+                                        run background script PT_CreateBasicJapanesePlatoon(AnotherPlatoon,1)
+                                    else
+                                        AnotherPlatoon = recruit ARMY_UNIT_TYPE_RANGED_2 town GenericTown platoon of size 30 * RecruitSizeModifier
+                                        enable platoon AnotherPlatoon respond to town GenericTown attack
+                                        run background script LC7_StaticPlatoonsActions(marker at {GenericTown} + {number from -50 to 50,number from -50 to 50},Melee,AnotherPlatoon,GenericTown)
+                                        run background script PT_CreateBasicJapanesePlatoon(AnotherPlatoon,1)
+                                    end if
+                                    GenericTownPlatoonTimer = create timer for (30 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+                                end if
+                            end if
+                        end if
+                    end if
+                end if
+            end if
+            GenericTownCounter = number from 0 to 16
+        end if
+
+        //Town building depending on alignment
+        if PlayerAlignmentFinal >= 0.0
+            if AlignmentTownBuildingPhase == 0 and get AlignmentTownBuildingTimer1 time remaining <= 0
+                AlignmentTownBuildingPhase = 1
+                Counter = 0
+                while Counter < 16
+                    if PLAYER of get town with id Counter == 1
+                        build all town get town with id Counter buildings in group 20
+                    end if
+                    Counter++
+                end while
+
+            elsif AlignmentTownBuildingPhase == 1 and get AlignmentTownBuildingTimer2 time remaining <= 0
+                AlignmentTownBuildingPhase = 2
+                Counter = 0
+                while Counter < 16
+                    if PLAYER of get town with id Counter == 1
+                        build all town get town with id Counter buildings in group 21
+                    end if
+                    Counter++
+                end while
+
+            elsif AlignmentTownBuildingPhase == 2 and get AlignmentTownBuildingTimer3 time remaining <= 0
+                AlignmentTownBuildingPhase = 3
+                Counter = 0
+                while Counter < 16
+                    if PLAYER of get town with id Counter == 1
+                        build all town get town with id Counter buildings in group 22
+                    end if
+                    Counter++
+                end while
+
+            elsif AlignmentTownBuildingPhase == 3 and get AlignmentTownBuildingTimer4 time remaining <= 0
+                AlignmentTownBuildingPhase = 4
+                Counter = 0
+                while Counter < 16
+                    if PLAYER of get town with id Counter == 1
+                        build all town get town with id Counter buildings in group 23
+                    end if
+                    Counter++
+                end while
+
+            elsif AlignmentTownBuildingPhase == 4 and get AlignmentTownBuildingTimer5 time remaining <= 0
+                AlignmentTownBuildingPhase = 5
+                Counter = 0
+                while Counter < 16
+                    if PLAYER of get town with id Counter == 1
+                        build all town get town with id Counter buildings in group 24
+                    end if
+                    Counter++
+                end while
+
+            end if
+        elsif PlayerAlignmentFinal < 0.0
+            if AlignmentTownBuildingPhase == 0 and get AlignmentTownBuildingTimer1 time remaining <= 0
+                AlignmentTownBuildingPhase = 1
+                Counter = 0
+                while Counter < 16
+                    if PLAYER of get town with id Counter == 1
+                        build all town get town with id Counter buildings in group 30
+                    end if
+                    Counter++
+                end while
+
+            elsif AlignmentTownBuildingPhase == 1 and get AlignmentTownBuildingTimer2 time remaining <= 0
+                AlignmentTownBuildingPhase = 2
+                Counter = 0
+                while Counter < 16
+                    if PLAYER of get town with id Counter == 1
+                        build all town get town with id Counter buildings in group 31
+                    end if
+                    Counter++
+                end while
+
+            elsif AlignmentTownBuildingPhase == 2 and get AlignmentTownBuildingTimer3 time remaining <= 0
+                AlignmentTownBuildingPhase = 3
+                Counter = 0
+                while Counter < 16
+                    if PLAYER of get town with id Counter == 1
+                        build all town get town with id Counter buildings in group 32
+                    end if
+                    Counter++
+                end while
+
+            elsif AlignmentTownBuildingPhase == 3 and get AlignmentTownBuildingTimer4 time remaining <= 0
+                AlignmentTownBuildingPhase = 4
+                Counter = 0
+                while Counter < 16
+                    if PLAYER of get town with id Counter == 1
+                        build all town get town with id Counter buildings in group 33
+                    end if
+                    Counter++
+                end while
+
+            elsif AlignmentTownBuildingPhase == 4 and get AlignmentTownBuildingTimer5 time remaining <= 0
+                AlignmentTownBuildingPhase = 5
+                Counter = 0
+                while Counter < 16
+                    if PLAYER of get town with id Counter == 1
+                        build all town get town with id Counter buildings in group 34
+                    end if
+                    Counter++
+                end while
+
+            end if
+        end if
+
+        if get BuildingDefendersAllowedTimer time remaining <= 0
+            BuildingDefendersAllowedTimer = create timer for 240 * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+            BuildingDefendersAllowed[0] = 1
+            BuildingDefendersAllowed[1] = 1
+            BuildingDefendersAllowed[2] = 1
+            BuildingDefendersAllowed[3] = 1
+            BuildingDefendersAllowed[4] = 1
+        end if
+
+        if PLAYER of JapaneseCapital == 0 or PLAYER of JapaneseTown1 == 0 or PLAYER of JapaneseTown2 == 0 or get ConquerorTimer time remaining <= 0
+            //Use platoons for settlements or minor towns
+            if AttackingPlatoons == 0 and NearestSettlement != 0
+                ConquerorResetTimer = create timer for 3000 seconds
                 AttackingPlatoons = 1
             end if
+        end if
 
-        elsif PLAYER of NearestSettlement == 1
+        if AttackingPlatoons == 1 and get ConquerorResetTimer time remaining <= 0
+            //Use platoons for PlayerTown
+            ConquerorTimer = create timer for 2400 * RecruitModifier seconds
             AttackingPlatoons = 0
         end if
 
@@ -2479,14 +3284,6 @@ start
                     SiegeCheck = 1
                 end if
             end if
-        end if
-
-        if SendCreature == 1
-            SendCreature = 2
-            LC7_Platoon[17] = recruit ARMY_UNIT_TYPE_RANGED_2 town JapaneseCapital platoon of size 45 * RecruitSizeModifier
-            run background script LC7_Platoon17Actions
-            LC7_CreatureAttackTimer = create timer for 1200 * RecruitModifier seconds
-            run background script PT_CreateBasicJapanesePlatoonRanged(LC7_Platoon[17],1)
         end if
 
         if get HurricaneTimer time remaining <= 300 and PLAYER of JapaneseCapital == 1 and HEALTH of AIEpic >= 1.0 and CHARGE of AIEpic != 1.0
@@ -2521,55 +3318,9 @@ start
 
             end if
         end if
-
-        if HardMode == 1
-            //Take over MinorTown4
-            if LC7_Platoon[33] not exists and size of PlayerTown > 100 and PLAYER of JapaneseTown2 == 1 and not town JapaneseTown2 is under takeover from player 0 and get LC7_RecruitTimer3 time remaining <= 0
-                LC7_Platoon[33] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown2 platoon of size 50 * RecruitSizeModifier
-                LC7_RecruitTimer3 = create timer for 120 * RecruitModifier seconds
-                run background script PT_CreateChargerJapanesePlatoon(LC7_Platoon[33],1)
-                enable platoon LC7_Platoon[33] respond to town JapaneseTown2 attack
-                wait until not LC7_Platoon[33] recruiting
-            elsif LC7_Platoon[34] not exists and size of PlayerTown > 100 and PLAYER of JapaneseTown2 == 1 and not town JapaneseTown2 is under takeover from player 0 and get LC7_RecruitTimer3 time remaining <= 0
-                LC7_Platoon[34] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown2 platoon of size 50 * RecruitSizeModifier
-                LC7_RecruitTimer3 = create timer for 120 * RecruitModifier seconds
-                run background script PT_CreateHeavyJapanesePlatoon(LC7_Platoon[34],1)
-                enable platoon LC7_Platoon[34] respond to town JapaneseTown2 attack
-                wait until not LC7_Platoon[34] recruiting
-
-            //Take over MinorTown6
-            elsif LC7_Platoon[35] not exists and size of PlayerTown > 175 and PLAYER of JapaneseTown2 == 1 and not town JapaneseTown2 is under takeover from player 0 and get LC7_RecruitTimer3 time remaining <= 0
-                LC7_Platoon[35] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown2 platoon of size 50 * RecruitSizeModifier
-                LC7_RecruitTimer3 = create timer for 120 * RecruitModifier seconds
-                run background script PT_CreateChargerJapanesePlatoon(LC7_Platoon[35],1)
-                enable platoon LC7_Platoon[35] respond to town JapaneseTown2 attack
-                wait until not LC7_Platoon[35] recruiting
-            elsif LC7_Platoon[36] not exists and size of PlayerTown > 175 and PLAYER of JapaneseTown2 == 1 and not town JapaneseTown2 is under takeover from player 0 and get LC7_RecruitTimer3 time remaining <= 0
-                LC7_Platoon[36] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown2 platoon of size 50 * RecruitSizeModifier
-                LC7_RecruitTimer3 = create timer for 120 * RecruitModifier seconds
-                run background script PT_CreateHeavyJapanesePlatoon(LC7_Platoon[36],1)
-                enable platoon LC7_Platoon[36] respond to town JapaneseTown2 attack
-                wait until not LC7_Platoon[36] recruiting
-            end if
-        end if
     end loop
 
 end script LC7_Japanese_Capital
-
-begin script LC7_AttackNearestTownTimer
-
-start
-
-begin loop
-
-    if get AttackNearestTownTimer time remaining <= 0
-        wait 45 seconds
-        AttackNearestTownTimer = create timer for 1000 * RecruitModifier seconds
-    end if
-
-end loop
-
-end script LC7_AttackNearestTownTimer
 
 begin script LC7_DefendPlatoons
 
@@ -2685,6 +3436,7 @@ end loop
 
 end script HurricaneResourceManager
 
+//Todo: as soon music is ready
 begin script LC7_LargeSiegeScript
 
 start
@@ -2692,15 +3444,19 @@ start
     wait until LC7_LargeSiegeIsRunning == 1
 
     run background script LC7_LargeSiegePlatoonManager
-    run background script LC7_LargeSiegeMusicManager
 
-    wait 80 seconds
+    wait until LC7_LargeSiegeArmyReady == 1 or 600 seconds
     
+    run background script LC7_LargeSiegeMusicManager
     LC7_LargeSiegeLaunchAttack = 1
 
-    wait 275 seconds
+    wait 260 seconds
 
     LC7_LargeSiegeIsRunning = 0
+
+    LC7_RecruitTimer1 = create timer for 900 seconds
+    LC7_RecruitTimer2 = create timer for 900 seconds
+    LC7_RecruitTimer3 = create timer for 900 seconds
 
 end script LC7_LargeSiegeScript
 
@@ -2708,70 +3464,90 @@ begin script LC7_LargeSiegePlatoonManager
 
     AttackingPosition = 0
     AttackingPositionFallBack = 0
+    ARMYRECRUITDELAY = 75
+    CATAPULTMULTIPLIER = 0.25
 
 start
 
 begin loop
 
+    if LC7_LargeSiegeArmyReady == 0 and LC7_Platoon[18] exists and LC7_Platoon[19] exists and LC7_Platoon[20] exists and LC7_Platoon[21] exists and LC7_SiegeCatapult[6] exists and LC7_SiegeCatapult[7] exists and LC7_SiegeCatapult[8] exists
+        LC7_LargeSiegeArmyReady = 1
+        ARMYRECRUITDELAY = 15
+    end if
+
     if LC7_Platoon[18] not exists and PLAYER of JapaneseTown1 == 1 and LC7_LargeSiegeIsRunning == 1
-        wait number from 5 to 10 seconds
+        wait ARMYRECRUITDELAY seconds
         LC7_Platoon[18] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown1 platoon of size 25 * RecruitSizeModifier
         run background script PT_CreateBasicJapanesePlatoon(LC7_Platoon[18],1)
         wait until not LC7_Platoon[18] recruiting
         AttackingPosition = marker at {SiegeAttackPos[0]}
         AttackingPositionFallBack = marker at {SiegeAttackPrePos[0]}
-        run background script LC7_ArmyBehaivours(LC7_Platoon[18],Melee,Special,0,AttackingPosition,AttackingPositionFallBack,0,0)
+        run script PlatoonTargetingMetric(25 * RecruitSizeModifier,PlayerTown)
+        run background script LC7_ArmyBehaivours(LC7_Platoon[18],Melee,Special,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,0,0,0,0,0,3)
     end if
 
     if LC7_Platoon[19] not exists and PLAYER of JapaneseTown1 == 1 and LC7_LargeSiegeIsRunning == 1 and Difficulty >= 2
-        wait number from 5 to 10 seconds
+        wait ARMYRECRUITDELAY seconds
         LC7_Platoon[19] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown1 platoon of size 25 * RecruitSizeModifier
         run background script PT_CreateBasicJapanesePlatoon(LC7_Platoon[19],1)
         wait until not LC7_Platoon[19] recruiting
         AttackingPosition = marker at {SiegeAttackPos[1]}
         AttackingPositionFallBack = marker at {SiegeAttackPrePos[1]}
-        run background script LC7_ArmyBehaivours(LC7_Platoon[19],Melee,Special,0,AttackingPosition,AttackingPositionFallBack,0,0)
+        run script PlatoonTargetingMetric(25 * RecruitSizeModifier,PlayerTown)
+        run background script LC7_ArmyBehaivours(LC7_Platoon[19],Melee,Special,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,0,0,0,0,0,3)
     end if
 
     if LC7_Platoon[20] not exists and PLAYER of JapaneseTown1 == 1 and LC7_LargeSiegeIsRunning == 1 and Difficulty >= 3
-        wait number from 5 to 10 seconds
+        wait ARMYRECRUITDELAY seconds
         LC7_Platoon[20] = recruit ARMY_UNIT_TYPE_RANGED_2 town JapaneseTown1 platoon of size 25 * RecruitSizeModifier
         run background script PT_CreateBasicJapanesePlatoonRanged(LC7_Platoon[20],1)
         wait until not LC7_Platoon[20] recruiting
         AttackingPosition = marker at {SiegeAttackPos[2]}
         AttackingPositionFallBack = marker at {SiegeAttackPrePos[2]}
-        run background script LC7_ArmyBehaivours(LC7_Platoon[20],Ranged,Special,0,AttackingPosition,AttackingPositionFallBack,0,0)
+        run script PlatoonTargetingMetric(25 * RecruitSizeModifier,PlayerTown)
+        run background script LC7_ArmyBehaivours(LC7_Platoon[20],Ranged,Special,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,0,0,0,0,0,3)
     end if
 
     if LC7_Platoon[21] not exists and PLAYER of JapaneseTown1 == 1 and LC7_LargeSiegeIsRunning == 1 and Difficulty >= 4
-        wait number from 5 to 10 seconds
+        wait ARMYRECRUITDELAY seconds
         LC7_Platoon[21] = recruit ARMY_UNIT_TYPE_RANGED_2 town JapaneseTown1 platoon of size 25 * RecruitSizeModifier
         run background script PT_CreateBasicJapanesePlatoonRanged(LC7_Platoon[21],1)
         wait until not LC7_Platoon[21] recruiting
         AttackingPosition = marker at {SiegeAttackPos[3]}
         AttackingPositionFallBack = marker at {SiegeAttackPrePos[3]}
-        run background script LC7_ArmyBehaivours(LC7_Platoon[21],Ranged,Special,0,AttackingPosition,AttackingPositionFallBack,0,0)
+        run script PlatoonTargetingMetric(25 * RecruitSizeModifier,PlayerTown)
+        run background script LC7_ArmyBehaivours(LC7_Platoon[21],Ranged,Special,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,0,0,0,0,0,3)
     end if
 
     if LC7_SiegeCatapult[6] not exists and PLAYER of JapaneseTown1 == 1 and LC7_LargeSiegeIsRunning == 1 and LC7_LargeSiegeLaunchAttack == 1
-        wait number from 3 to 9 seconds
+        wait ARMYRECRUITDELAY * CATAPULTMULTIPLIER seconds
         LC7_SiegeCatapult[6] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseTown1 siege weapon
         disable siege weapon LC7_SiegeCatapult[6] auto attack
-        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[6],0,SiegeRoute2[0],SiegeRoute2[1],SiegeRoute2[2])
+        AttackingPosition = marker at {SiegeAttackPos[0]}
+        AttackingPositionFallBack = marker at {SiegeAttackPrePos[0]}
+        run script CatapultTargetingMetric(PlayerTown)
+        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[6],Special,CatapultTargetingMetricFocusResult,0,0,0,AttackingPosition,AttackingPositionFallBack,3)
     end if
 
     if LC7_SiegeCatapult[7] not exists and PLAYER of JapaneseTown1 == 1 and LC7_LargeSiegeIsRunning == 1 and LC7_LargeSiegeLaunchAttack == 1 and Difficulty >= 2
-        wait number from 3 to 9 seconds
+        wait ARMYRECRUITDELAY * CATAPULTMULTIPLIER seconds
         LC7_SiegeCatapult[7] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseTown1 siege weapon
         disable siege weapon LC7_SiegeCatapult[7] auto attack
-        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[7],0,SiegeRoute3[0],SiegeRoute3[1],SiegeRoute3[2])
+        AttackingPosition = marker at {SiegeAttackPos[1]}
+        AttackingPositionFallBack = marker at {SiegeAttackPrePos[1]}
+        run script CatapultTargetingMetric(PlayerTown)
+        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[7],Special,CatapultTargetingMetricFocusResult,0,0,0,AttackingPosition,AttackingPositionFallBack,3)
     end if
 
     if LC7_SiegeCatapult[8] not exists and PLAYER of JapaneseTown1 == 1 and LC7_LargeSiegeIsRunning == 1 and LC7_LargeSiegeLaunchAttack == 1 and Difficulty >= 4
-        wait number from 3 to 9 seconds
+        wait ARMYRECRUITDELAY * CATAPULTMULTIPLIER seconds
         LC7_SiegeCatapult[8] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseTown1 siege weapon
         disable siege weapon LC7_SiegeCatapult[8] auto attack
-        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[8],0,SiegeRoute4[0],SiegeRoute4[1],SiegeRoute4[2])
+        AttackingPosition = marker at {SiegeAttackPos[3]}
+        AttackingPositionFallBack = marker at {SiegeAttackPrePos[3]}
+        run script CatapultTargetingMetric(PlayerTown)
+        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[8],Special,CatapultTargetingMetricFocusResult,0,0,0,AttackingPosition,AttackingPositionFallBack,3)
     end if
 
     until LC7_LargeSiegeIsRunning == 0
@@ -2785,7 +3561,7 @@ begin script LC7_LargeSiegeMusicManager
 
 start
 
-    wait 140 seconds
+    wait 60 seconds
     DM_DynamicMusicDisallowed = 1
     CSMixer = create mixer
     set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 0.0 with fadetime 0
@@ -2827,7 +3603,7 @@ begin loop
             
             wait number from 6 to 10 seconds
             Counter++
-            until Counter >= 40 or PLAYER of JapaneseCapital != 1 or size of JapaneseCapital >= 325
+            until Counter >= 40 or PLAYER of JapaneseCapital != 1 or (size of JapaneseCapital - get army size in town JapaneseCapital) >= 150
         end loop
     end if
 
@@ -2861,7 +3637,7 @@ begin loop
             
             wait number from 6 to 10 seconds
             Counter++
-            until Counter >= 40 or PLAYER of JapaneseTown1 != 1 or size of JapaneseTown1 >= 200
+            until Counter >= 40 or PLAYER of JapaneseTown1 != 1 or (size of JapaneseTown1 - get army size in town JapaneseTown1) >= 100
         end loop
     end if
 
@@ -2895,7 +3671,7 @@ begin loop
             
             wait number from 6 to 10 seconds
             Counter++
-            until Counter >= 25 or PLAYER of JapaneseTown2 != 1 or size of JapaneseTown2 >= 125
+            until Counter >= 25 or PLAYER of JapaneseTown2 != 1 or (size of JapaneseTown2 - get army size in town JapaneseTown2) >= 75
         end loop
     end if
 
@@ -2978,34 +3754,40 @@ end script LC7_JapaneseTown2RessourceManager
 begin script LC7_GetNearestSettlement
 
     NearestTown = 0
+    NearestSettlementPlayerTownSwitch = 0
 
 start
 
 begin loop
-    if PLAYER of JapaneseCapital == 1
-        if PLAYER of JapaneseTown1 == 0
-            NearestTown = JapaneseTown1
+    if PLAYER of JapaneseCapital != 1
+        NearestTown = JapaneseCapital
 
-        elsif PLAYER of JapaneseTown2 == 0
-            NearestTown = JapaneseTown2
+    elsif PLAYER of JapaneseTown1 != 1
+        NearestTown = JapaneseTown1
 
-        elsif PLAYER of MinorTown5 == 0
-            NearestTown = MinorTown5
+    elsif PLAYER of JapaneseTown2 != 1
+        NearestTown = JapaneseTown2
 
-        elsif PLAYER of MinorTown6 == 0
-            NearestTown = MinorTown6
-
-        elsif PLAYER of MinorTown4 == 0
-            NearestTown = MinorTown4
-
-        else
+    elsif PLAYER of JapaneseTown1 == 1 and PLAYER of JapaneseTown2 == 1 and PLAYER of JapaneseCapital == 1
+        begin loop
+            NearestTown = get town with id number from 0 to 15
+            if NearestTown exists
+                if variable get town NearestTown status == variable TOWN_STATUS_MIGRATION_STARTED
+                    NearestTown = 0
+                end if
+            end if
+            until PLAYER of NearestTown != 1 and NearestTown exists
+        end loop
+        if NearestSettlementPlayerTownSwitch == 1
+            NearestSettlementPlayerTownSwitch = 0
             NearestTown = PlayerTown
-
+        else
+            NearestSettlementPlayerTownSwitch = 1
         end if
-
+    end if
+    if NearestTown exists
         NearestSettlement = NearestTown
-        //wait 45 seconds
-
+        wait until PLAYER of NearestSettlement == 1 or NearestSettlement not exists or 2400 seconds
     end if
 end loop
 

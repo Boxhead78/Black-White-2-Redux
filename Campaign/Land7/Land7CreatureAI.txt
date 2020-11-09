@@ -2,8 +2,6 @@
 //    Land 7 Creature AI
 //    ~~~~~~~~~~~~~~~~~~~
 //
-//    Start date:     02.03.18            By: Boxhead
-//    Update date: 08.03.18            By: Boxhead
 ///////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
@@ -111,96 +109,56 @@ end script LC7_CreatureAI
 begin script LC7_CreatureLogic
 
     Number = 0
+    AITown[17]
+    AICounter = -1
     CreatureRollRoleTimer = create timer for 0 seconds
     CreatureAttackTimer = create timer for 0 seconds
-    Town[16]
-    Counter = 0
+    Position = 0
 
 start
 
 begin loop
 
-    while Counter > 14
-        Counter = 0
-    end while
-
-    if HEALTH of LC7_EnemyCreature == 0.00
-        //CreatureKilled = 1
-        wait until HEALTH of LC7_EnemyCreature > 0.00
-        set creature LC7_EnemyCreature role to CR_NONE radius 500 at {CreatureGathererPos[0]}
-        HEALTH of LC7_EnemyCreature = 1.0
+    if AICounter > 16
+        AICounter = -1
+    else
+        AITown[AICounter] = get town with id AICounter
     end if
 
-    if town JapaneseCapital is under takeover from player 0 and HEALTH of LC7_EnemyCreature > 0
+    if HEALTH of LC7_EnemyCreature == 0.00
+        wait until HEALTH of LC7_EnemyCreature > 0.00
+        set creature LC7_EnemyCreature role to CR_NONE radius 500 at {JapaneseCapital}
         HEALTH of LC7_EnemyCreature = 1.0
-        set creature LC7_EnemyCreature role to CR_SOLDIER radius 100 at {JapaneseCapital}
-        
-        wait until HEALTH of LC7_EnemyCreature == 0.00 or not town JapaneseCapital is under takeover from player 0 or 1000 seconds
+    end if
     
-    elsif town JapaneseTown1 is under takeover from player 0 and HEALTH of LC7_EnemyCreature > 0
+    if town AITown[AICounter] is under takeover from player 0 and HEALTH of LC7_EnemyCreature > 0
         HEALTH of LC7_EnemyCreature = 1.0
-        set creature LC7_EnemyCreature role to CR_SOLDIER radius 100 at {JapaneseTown1}
+        set creature LC7_EnemyCreature role to CR_SOLDIER radius 100 at {AITown[AICounter]}
         
-        wait until HEALTH of LC7_EnemyCreature == 0.00 or not town JapaneseTown1 is under takeover from player 0 or 1000 seconds
+        wait until HEALTH of LC7_EnemyCreature == 0.00 or not town AITown[AICounter] is under takeover from player 0 or 1000 seconds
 
-    elsif town JapaneseTown2 is under takeover from player 0 and HEALTH of LC7_EnemyCreature > 0
-        HEALTH of LC7_EnemyCreature = 1.0
-        set creature LC7_EnemyCreature role to CR_SOLDIER radius 100 at {JapaneseTown2}
-        
-        wait until HEALTH of LC7_EnemyCreature == 0.00 or not town JapaneseTown2 is under takeover from player 0 or 1000 seconds
-
-    elsif town Town[Counter] is under takeover from player 1 and HEALTH of LC7_EnemyCreature > 0
-        HEALTH of LC7_EnemyCreature = 1.0
-        set creature LC7_EnemyCreature role to CR_SOLDIER radius 100 at {Town[Counter]}
-        
-        wait until HEALTH of LC7_EnemyCreature == 0.00 or not town PlayerTown is under takeover from player 0 or 1000 seconds
-
-    elsif LC7_LargeSiegeIsRunning == 1 and HEALTH of LC7_EnemyCreature > 0.00 and get CreatureAttackTimer time remaining <= 0
-        CreatureAttackTimer = create timer for 600 seconds
-        HEALTH of LC7_EnemyCreature = 1.0
-        if LC7_LargeSiegeIsRunning == 1
-            begin loop
-                set creature LC7_EnemyCreature role to CR_SOLDIER radius 100 at {CreatureAttackPos[1]}
-                until HEALTH of LC7_EnemyCreature == 0.00 or LC7_LargeSiegeLaunchAttack == 1
-            end loop
-        end if
-        if LC7_LargeSiegeIsRunning == 1
-            begin loop
-                set creature LC7_EnemyCreature role to CR_SOLDIER radius 100 at {CreatureAttackPos[0]}
-                until HEALTH of LC7_EnemyCreature == 0.00 or 500 seconds
-            end loop
-        end if
     elsif LC7_Platoon[17] exists and {LC7_Platoon[17]} near {JapaneseCapital} radius 500 and HEALTH of LC7_EnemyCreature > 0.00 and get CreatureAttackTimer time remaining <= 0
-        CreatureAttackTimer = create timer for 600 seconds
+        CreatureAttackTimer = create timer for 1800 * RecruitModifier seconds
         HEALTH of LC7_EnemyCreature = 1.0
         begin loop
             if LC7_Platoon[17] exists and not {LC7_Platoon[17]} near {AttackPos[0]} radius 350
-                set creature LC7_EnemyCreature role to CR_SOLDIER radius 5 at {LC7_Platoon[17]}
+                set creature LC7_EnemyCreature role to CR_SOLDIER radius 50 at {LC7_Platoon[17]}
             else
-                set creature LC7_EnemyCreature role to CR_SOLDIER radius 100 at {CreatureAttackPos[0]}
+                set creature LC7_EnemyCreature role to CR_SOLDIER radius 300 at {CreatureAttackPos[0]}
             end if
-            until HEALTH of LC7_EnemyCreature == 0.00 or 1000 seconds
+            until HEALTH of LC7_EnemyCreature == 0.00 or 750 seconds
         end loop
 
     elsif HEALTH of LC7_EnemyCreature > 0.00 and get CreatureRollRoleTimer time remaining <= 0
-        Number = number from 1 to 3
-        if Number == 1 and PLAYER of JapaneseCapital == 1
-            set creature LC7_EnemyCreature role to CR_GATHERER radius 200 at {CreatureGathererPos[0]}
-            CreatureRollRoleTimer = create timer for 360 seconds
-            
-        elsif Number == 2 and PLAYER of JapaneseTown1 == 1
-            set creature LC7_EnemyCreature role to CR_GATHERER radius 200 at {CreatureGathererPos[1]}
-            CreatureRollRoleTimer = create timer for 360 seconds
-
-        elsif Number == 3 and PLAYER of JapaneseTown2 == 1
-            set creature LC7_EnemyCreature role to CR_GATHERER radius 200 at {CreatureGathererPos[2]}
+        if PLAYER of AITown[AICounter] == 1
+            Position = marker at {AITown[AICounter]} + {number from 50 to -50,number from 50 to -50}
+            set creature LC7_EnemyCreature role to CR_GATHERER radius 200 at {Position}
             CreatureRollRoleTimer = create timer for 360 seconds
         
         end if
     end if
-    
-    Counter++
 
+    AICounter += number from 0 to 16
     until LandWon == 1
 end loop
 
