@@ -1,0 +1,2235 @@
+/**************************************************************************************************
+ * Program:	Vortex for Black and White 2
+ * Purpose:	Allows the user to move objects and resources from one land to the next
+ * Author:		Willy
+ * Version: 	0
+ * Date: 		July 23 2018
+**************************************************************************************************/
+//-------------------------------------------Scripts-----------------------------------------------
+//Interface Scripts
+//These are the scripts you use to setup the vortex
+define script Vtx_Create_Exiting(xPos, yPos, zPos)
+define script Vtx_Create_Entering(xPos, yPos, zPos, playerTown)
+define script Vtx_SetScrollType(Scoll_type)
+define script Vtx_SetCloudAttributes(clGeneration, clHeight, clprecipitation, clOvercast)
+define script Vtx_SetVortexAttributes(vtxSize, vtxColourChangeEnabled, vtxColour1_R, vtxColour1_G, vtxColour1_B, vtxHeight, vtxAngle)
+//Static Scripts
+//Do not call these from outside this file!
+define script Vtx_MainControl_Out
+define script Vtx_MainControl_In
+define script Vtx_Click_Check
+
+define script Vtx_Save_Data
+define script Vtx_Clear_Data
+define script Vtx_Send_Platoon(army1)
+define script Vtx_Send_Resource(reso)
+define script Vtx_Send_SiegeWeapon(sieg)
+define script Vtx_Send_Tree(treeObj)
+define script Vtx_Send_Rock(rockObj)
+define script Vtx_Send_Villager(vill)
+define script Vtx_Send_Child(chil)
+define script Vtx_Send_Misc(vtxObj)
+
+define script VTX_Read_Data
+define script Vtx_Create_Tree(treeType, num)
+define script Vtx_Create_Rock(rockType, num)
+define script Vtx_Create_Food(amoun)
+define script Vtx_Create_Wood(amoun)
+define script Vtx_Create_Ore(amoun)
+define script Vtx_Create_Villager(villType, num)
+define script Vtx_Create_Child(villType, num)
+define script Vtx_Create_Army(aType, aMen, xp)
+define script Vtx_Create_Siege(xp)
+define script Vtx_Create_Misc(miscType, num)
+define script Vtx_Lead_Villager(vtxObj)
+define script Vtx_Lead_Army(vtxObj)
+define script Vtx_Lead_Siege(vtxObj)
+define script Vtx_LaunchObject(obj)
+define script Vtx_LaunchMisc(obj)
+//------------------------------------------Constants----------------------------------------------
+define VTX_TRUE 	= 1
+define VTX_FALSE 	= 0
+
+global constant VTX_BRONZE = SCRIPT_HIGHLIGHT_INFO_SCRIPT_BRONZE
+global constant VTX_SILVER = SCRIPT_HIGHLIGHT_INFO_SCRIPT_SILVER
+global constant VTX_GOLD = SCRIPT_HIGHLIGHT_INFO_SCRIPT_GOLD
+
+//Max Settings
+global VTX_MAX_ARMIES = 60 //Do not make any larger then 60
+global VTX_MAX_SIEGES = 20 //Do not make any larger then 20
+
+//Launching Settings
+global VTX_DEGREES_MIN	= 60
+global VTX_DEGREES_MAX	= 300
+global VTX_DISTANCE_MIN = 10
+global VTX_DISTANCE_MAX = 25
+global VTX_HEIGHT_MIN = 25
+global VTX_HEIGHT_MAX = 50
+global VTX_SPEED_MIN = 60
+global VTX_SPEED_MAX = 80
+//-------------------------------------------Globals-----------------------------------------------
+//External communication variables
+//These variables can be read outside this file, but do not set them
+global vtx_created = VTX_FALSE
+global vtx_debug	= VTX_FALSE
+global vtx_scroll_clicked	= VTX_FALSE
+global vtx_exporting = VTX_FALSE
+global vtx_export_complete = VTX_FALSE
+
+//Static variables
+global vtx_vortex	= 0
+global vtx_size	= 4
+global vtx_height = 2
+global vtx_angle = 0
+global vtx_radius	= 50
+global vtx_Col1_R = 0
+global vtx_Col1_G = 0
+global vtx_Col1_B = 0
+global vtx_En_Cols = VTX_FALSE
+
+global vtx_marker = 0
+global vtx_attachTown = 0
+
+global vtx_posX = 0
+global vtx_posY = 0
+global vtx_posZ = 0
+
+global vtx_scroll	= 0
+global vtx_sc_vis	= 0
+global vtx_type	= 3		//Gold by default
+
+global vtx_cloud	= 0
+global vtx_cl_gen	= 4
+global vtx_cl_height	= 400
+global vtx_cl_rain	= 0
+global vtx_cl_snow	= 0
+global vtx_cl_overcast	= 0.7
+
+global vtx_num_armies = 0
+global vtx_max_armies_reached = VTX_FALSE
+global vtx_num_sieges = 0
+global vtx_max_sieges_reached = VTX_FALSE
+
+global vtx_tree_export = 0
+global vtx_rock_export = 0
+
+global vtx_loop_control = VTX_TRUE
+
+global data1[400]
+//--------------------------------------------Main-------------------------------------------------
+begin script Vtx_Create_Exiting(xPos, yPos, zPos)
+	land_height	= 0
+	vis = 0
+start
+	//Create cloud above vortex location
+	vtx_cloud = create SCRIPT_OBJECT_TYPE_WEATHER_THING WEATHER_INFO_MEDIUM_CLOUD at {xPos, yPos, zPos} + {0, vtx_cl_height, 0}
+	set cloud for vtx_cloud above {xPos, yPos, zPos} + {0, vtx_cl_height, 0}
+	set cloud generation vtx_cl_gen
+	set vtx_cloud properties rainfall vtx_cl_rain snowfall 0 overcast vtx_cl_overcast
+	
+	//Initialize Variables
+	land_height = land height at {xPos, zPos}
+	vtx_marker = marker at {xPos, land_height, zPos}
+	vtx_posX = xPos
+	vtx_posY = land_height
+	vtx_posZ = zPos
+	
+	//Create vortex
+	vtx_vortex = create visual effect VISUAL_EFFECT_TELEPORTER_HOOP at {vtx_marker}+{0,vtx_height,0} time -1
+	SCRIPT_OBJECT_PROPERTY_TYPE_SCALE of vtx_vortex = vtx_size
+	if(vtx_En_Cols == 1)
+		set vtx_vortex colour red vtx_Col1_R green vtx_Col1_G blue vtx_Col1_B
+	end if
+	
+	//Initialize return value
+	vtx_scroll_clicked = VTX_FALSE
+	
+	//Create scroll
+	if (vtx_type == 1)
+		vtx_scroll = create highlight VTX_BRONZE name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {xPos, yPos, zPos}
+	elsif (vtx_type == 2)
+		vtx_scroll = create highlight VTX_SILVER name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {xPos, yPos, zPos}
+	else
+		vtx_scroll = create highlight VTX_GOLD name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {xPos, yPos, zPos}
+	end if
+	SCRIPT_OBJECT_PROPERTY_TYPE_YPOS of vtx_scroll = 3
+	
+	//Call scripts
+	run background script Vtx_Click_Check
+	run background script Vtx_MainControl_Out
+	
+	vtx_created = VTX_TRUE
+
+end script Vtx_Create_Exiting
+
+begin script Vtx_Create_Entering(xPos, yPos, zPos, playerTown)
+	land_height	= 0
+start
+	//Initialize Variables
+	land_height = land height at {xPos, zPos}
+	vtx_marker = marker at {xPos, land_height, zPos}
+	vtx_posX = xPos
+	vtx_posY = land_height
+	vtx_posZ = zPos
+	vtx_attachTown = playerTown
+	
+	//Create vortex
+	vtx_vortex = create visual effect VISUAL_EFFECT_TELEPORTER_HOOP at {vtx_marker}+{0,vtx_height,0} time -1
+	SCRIPT_OBJECT_PROPERTY_TYPE_SCALE of vtx_vortex = vtx_size
+	if(vtx_En_Cols == 1)
+		set vtx_vortex colour red vtx_Col1_R green vtx_Col1_G blue vtx_Col1_B
+	end if
+	
+	//Begin the exporting of objects
+	run script VTX_Read_Data
+	vtx_exporting = VTX_TRUE
+	run background script Vtx_MainControl_In
+	
+	vtx_created = VTX_TRUE
+end script Vtx_Create_Entering
+
+//------------------------------------------Interface----------------------------------------------
+//Set Scroll Type
+//1 -> Bronze		2 -> Silver		3 -> Gold
+begin script Vtx_SetScrollType(Scoll_type)
+
+start
+	if(Scoll_type == 1)
+		vtx_type = 1 //Bronze
+	elsif(Scoll_type == 2)
+		vtx_type = 2 //Silver
+	elsif(Scoll_type == 3)
+		vtx_type = 3 //Gold
+	else
+		vtx_type = 0 //Error: Unknown scroll type
+	end if
+end script Vtx_SetScrollType
+
+//Set Cloud Attributes
+begin script Vtx_SetCloudAttributes(clGeneration, clHeight, clprecipitation, clOvercast)
+start
+	vtx_cl_gen = clGeneration
+	vtx_cl_height = clHeight
+	vtx_cl_rain = clprecipitation
+	vtx_cl_overcast = clOvercast
+end script Vtx_SetCloudAttributes
+
+//Settings for the vortex
+begin script Vtx_SetVortexAttributes(vtxSize, vtxColourChangeEnabled, vtxColour1_R, vtxColour1_G, vtxColour1_B, vtxHeight, vtxAngle)
+start
+	if (vtxSize != 0)
+		vtx_size = vtxSize
+	end if
+	if (vtxHeight != 0)
+		vtx_height = vtxHeight
+	end if
+	if (vtxAngle != 0)
+		vtx_angle = vtxAngle
+	end if
+	if (vtxColourChangeEnabled != 0)
+		vtx_Col1_R = vtxColour1_R
+		vtx_Col1_G = vtxColour1_G
+		vtx_Col1_B = vtxColour1_B
+		vtx_En_Cols = vtxColourChangeEnabled
+	end if
+end script Vtx_SetVortexAttributes
+
+//-------------------------------------------Control-----------------------------------------------
+
+begin script Vtx_MainControl_Out
+	plat_near = 0
+	reso_near = 0
+	sieg_near = 0
+	tree_near = 0
+	tree_near2 = 0
+	rock_near = 0
+	oreRock_near = 0
+	person_near = 0
+	child_near = 0
+	anim_near = 0
+	misc_near = 0
+	
+	vis_debug = 0
+	vals1 = 0
+	vals2 = 0
+	mess1 = 0
+start
+	while((vtx_loop_control == VTX_TRUE) and (vtx_scroll_clicked != VTX_TRUE))
+		//Platoons
+		plat_near = get platoon nearest {vtx_scroll} radius vtx_radius
+		if ((plat_near exists) and (vtx_max_armies_reached == VTX_FALSE))
+			run script Vtx_Send_Platoon(plat_near)
+			set lightning strike at {plat_near} from vtx_cloud scale 1
+			wait 0.2 seconds
+			delete plat_near
+			wait 0.1 seconds
+		end if
+		
+		//Siege weapons
+		sieg_near = get siege weapon of player 0 nearest {vtx_scroll} radius vtx_radius
+		if ((sieg_near exists) and (vtx_max_sieges_reached == VTX_FALSE))
+			run script Vtx_Send_SiegeWeapon(sieg_near)
+			set lightning strike at {sieg_near} from vtx_cloud scale 1
+			wait 0.2 seconds
+			delete sieg_near
+			wait 0.1 seconds
+		end if
+		
+		//Reasources
+		reso_near = get SCRIPT_OBJECT_TYPE_STORE at {vtx_scroll} radius vtx_radius 
+		if (reso_near exists)
+			run script Vtx_Send_Resource(reso_near)
+			set lightning strike at {reso_near} from vtx_cloud scale 1
+			wait 0.2 seconds
+			delete reso_near
+			wait 0.1 seconds
+		end if
+		
+		//Trees
+		tree_near = get SCRIPT_OBJECT_TYPE_TREE at {vtx_scroll} radius vtx_radius //Does not detect fallen trees
+		if (tree_near not exists)
+			//Yes SCRIPT_OBJECT_TYPE_DEAD_TREE can find fallen trees
+			tree_near2 = get SCRIPT_OBJECT_TYPE_DEAD_TREE at {vtx_scroll} radius vtx_radius //NOTE: Unable to read sub type of fallen trees, why? because this game SUCKS!
+			if ((tree_near2 exists) and (mess1 == 0))
+				say "Cannot Send Fallen Trees!" //Since I cannot read the sub type of fallen trees, I cannot determine what kind of tree it is, and therefore cannot send it 
+				mess1 = 1
+			end if
+		end if
+		if (tree_near exists)
+			run script Vtx_Send_Tree(tree_near)
+			set lightning strike at {tree_near} from vtx_cloud scale 1
+			wait 0.2 seconds
+			delete tree_near
+			wait 0.1 seconds
+		end if
+		
+		//Rocks
+		rock_near = get SCRIPT_OBJECT_TYPE_ROCK at {vtx_scroll} radius vtx_radius 
+		if (rock_near exists)
+			run script Vtx_Send_Rock(rock_near)
+			set lightning strike at {rock_near} from vtx_cloud scale 1
+			wait 0.2 seconds
+			delete rock_near
+			wait 0.1 seconds
+		end if
+		
+		//Misc Objects
+		misc_near = get SCRIPT_OBJECT_TYPE_MOBILE_STATIC at {vtx_scroll} radius vtx_radius 
+		if (misc_near exists)
+			run script Vtx_Send_Misc(misc_near)
+			set lightning strike at {misc_near} from vtx_cloud scale 1
+			wait 0.2 seconds
+			delete misc_near
+			wait 0.1 seconds
+		end if
+
+		//People
+		person_near = get SCRIPT_OBJECT_TYPE_VILLAGER at {vtx_scroll} radius vtx_radius
+		if (person_near exists)
+			run script Vtx_Send_Villager(person_near)
+			set lightning strike at {person_near} from vtx_cloud scale 1
+			wait 0.2 seconds
+			delete person_near
+			wait 0.1 seconds
+		end if
+		
+		//Children
+		child_near = get SCRIPT_OBJECT_TYPE_VILLAGER_CHILD at {vtx_scroll} radius vtx_radius
+		if (child_near exists)
+			run script Vtx_Send_Child(child_near)
+			set lightning strike at {child_near} from vtx_cloud scale 1
+			wait 0.2 seconds
+			delete child_near
+			wait 0.1 seconds
+		end if
+	end while
+end script Vtx_MainControl_Out
+
+begin script Vtx_MainControl_In
+	cnt1 = 0
+	i = 0
+	idxType = 0
+	idxMen = 0
+	idxXp = 0
+	armyCnt = 0
+start
+
+	if (persistent data "VTX_SAVED_DATA" == VTX_TRUE) //Check if there is actual data
+		//Trees
+		i = 0
+		if (data1[0] != 0)
+			while (i < 12)
+				if (data1[i+1] != 0)
+					run script Vtx_Create_Tree(i, data1[i+1])
+				end if
+				i++
+			end while
+		end if
+		
+		//Rocks
+		if (data1[12] != 0)
+			if (data1[13] != 0)
+				run script Vtx_Create_Rock(9, data1[13])
+			end if
+			if (data1[14] != 0)
+				run script Vtx_Create_Rock(0, data1[14])
+			end if
+			if (data1[15] != 0)
+				run script Vtx_Create_Rock(1, data1[15])
+			end if
+			if (data1[16] != 0)
+				run script Vtx_Create_Rock(2, data1[16])
+			end if
+			
+			i = 318
+			while (i < 321)
+				if (data1[i] != 0)
+					run script Vtx_Create_Rock(i - 275, data1[i])
+				end if
+				i++
+			end while
+			
+			if (data1[321] != 0)
+				run script Vtx_Create_Rock(47, data1[321])
+			end if
+			if (data1[322] != 0)
+				run script Vtx_Create_Rock(48, data1[322])
+			end if
+			
+			i = 323
+			while (i < 326)
+				if (data1[i] != 0)
+					run script Vtx_Create_Rock(i - 217, data1[i])
+				end if
+				i++
+			end while
+			
+			i = 17
+			while (i < 46)
+				if (data1[i] != 0)
+					run script Vtx_Create_Rock(i + 50, data1[i])
+				end if
+				i++
+			end while
+		end if
+		
+		//Misc
+		if (data1[328] != 0)
+			if (data1[326] != 0)
+				run script Vtx_Create_Misc(7, data1[326])
+			end if
+			if (data1[327] != 0)
+				run script Vtx_Create_Misc(18, data1[327])
+			end if
+			
+			i = 329
+			while (i < 344)
+				if (data1[i] != 0)
+					run script Vtx_Create_Misc(i - 304, data1[i])
+				end if
+				i++
+			end while
+			
+			if (data1[344] != 0)
+				run script Vtx_Create_Misc(46, data1[344])
+			end if
+			if (data1[345] != 0)
+				run script Vtx_Create_Misc(49, data1[345])
+			end if
+			
+			i = 346
+			while (i < 353)
+				if (data1[i] != 0)
+					run script Vtx_Create_Misc(i - 286, data1[i])
+				end if
+				i++
+			end while
+			
+			i = 353
+			while (i < 361)
+				if (data1[i] != 0)
+					run script Vtx_Create_Misc(i - 255, data1[i])
+				end if
+				i++
+			end while
+			
+			i = 361
+			while (i < 391)
+				if (data1[i] != 0)
+					run script Vtx_Create_Misc(i - 252, data1[i])
+				end if
+				i++
+			end while
+			
+			i = 391
+			while (i < 400)
+				if (data1[i] != 0)
+					run script Vtx_Create_Misc(i - 251, data1[i])
+				end if
+				i++
+			end while
+		end if
+
+		//Food, Wood, Ore
+		if (data1[315] != 0)
+			run script Vtx_Create_Food(data1[315])
+		end if
+		if (data1[316] != 0)
+			run script Vtx_Create_Wood(data1[316])
+		end if
+		if (data1[317] != 0)
+			run script Vtx_Create_Ore(data1[317])
+		end if
+		
+		//Then people, armies, siege weapons
+		if (data1[46] != 0)
+			i = 47
+			while (i < 61)
+				if (data1[i] != 0)
+					run script Vtx_Create_Villager(i - 47, data1[i])
+				end if
+				i++
+			end while
+			
+			while (i < 75)
+				if (data1[i] != 0)
+					run script Vtx_Create_Villager(i - 40, data1[i])
+				end if
+				i++
+			end while
+		end if
+		//Children
+		if (data1[75] != 0)
+			i = 76
+			while (i < 89)
+				if (data1[i] != 0)
+					run script Vtx_Create_Child(i - 76, data1[i])
+				end if
+				i++
+			end while
+			
+			while (i < 104)
+				if (data1[i] != 0)
+					run script Vtx_Create_Child(i - 69, data1[i])
+				end if
+				i++
+			end while
+		end if
+		
+		//Armies
+		armyCnt = data1[126] + data1[127]
+		if(armyCnt != 0)
+			i = 0
+			while(i < armyCnt)
+				idxType = (128 + (i * 3)) + 0
+				idxMen = (128 + (i * 3)) + 2
+				idxXp = (128 + (i * 3)) + 1
+				run script Vtx_Create_Army(data1[idxType], data1[idxMen], data1[idxXp])
+				i++
+			end while
+		end if
+		
+		//Sieges
+		if (data1[104] != 0)
+			i = 105
+			while(i < (data1[104] + 105))
+				run script Vtx_Create_Siege(data1[i])
+				i++
+			end while
+		end if
+	end if
+	
+	wait 17 seconds	
+	delete vtx_vortex with fade
+	
+	vtx_exporting = VTX_FALSE
+	vtx_export_complete = VTX_TRUE
+	
+end script Vtx_MainControl_In
+
+begin script Vtx_Click_Check
+
+start
+	clear right clicked object
+	wait until vtx_scroll right clicked
+	//TODO: ASK AGAIN
+
+	say "CLICKED"
+	run script Vtx_Save_Data
+	set persistent data "VTX_SAVED_DATA" to VTX_TRUE
+	vtx_scroll_clicked = VTX_TRUE
+end script Vtx_Click_Check
+
+//------------------------------------------Low Level----------------------------------------------
+
+//---------------------------------------Sending Functions-----------------------------------------
+begin script Vtx_Save_Data
+
+start
+	set persistent data "VTX_NUM_TREE" to data1[0] 
+	set persistent data "VTX_NUM_TREE_BEECH" to data1[1] 
+	set persistent data "VTX_NUM_TREE_SPRUCE" to data1[2] 
+	set persistent data "VTX_NUM_TREE_CEDAR" to data1[3] 
+	set persistent data "VTX_NUM_TREE_OAK" to data1[4] 
+	set persistent data "VTX_NUM_TREE_OLIVE" to data1[5] 
+	set persistent data "VTX_NUM_TREE_PINE" to data1[6] 
+	set persistent data "VTX_NUM_TREE_ACACIA" to data1[7] 
+	set persistent data "VTX_NUM_TREE_PALM" to data1[8] 
+	set persistent data "VTX_NUM_TREE_BIG_PALM" to data1[9] 
+	set persistent data "VTX_NUM_TREE_FIR" to data1[10]
+	set persistent data "VTX_NUM_TREE_MAPLE" to data1[11]
+
+	set persistent data "VTX_NUM_ROCK" to data1[12]
+	set persistent data "VTX_NUM_ROCK_ROCK" to data1[13]
+	set persistent data "VTX_NUM_ROCK_NOR_SM" to data1[14]
+	set persistent data "VTX_NUM_ROCK_NOR_MED" to data1[15]
+	set persistent data "VTX_NUM_ROCK_NOR_LAR" to data1[16]
+	set persistent data "VTX_NUM_ROCK_BOU_SM" to data1[17]
+	set persistent data "VTX_NUM_ROCK_BOU_BIG" to data1[18]
+	set persistent data "VTX_NUM_ROCK_BOU_TINY" to data1[19]
+	set persistent data "VTX_NUM_ROCK_BOU_HUGE" to data1[20]
+	set persistent data "VTX_NUM_ROCK_BOU_MASS" to data1[21]
+	set persistent data "VTX_NUM_ROCK_ELI_SM" to data1[22]
+	set persistent data "VTX_NUM_ROCK_ELI_MED" to data1[23]
+	set persistent data "VTX_NUM_ROCK_ELI_MASS" to data1[24]
+	set persistent data "VTX_NUM_ROCK_ELI_HUGE" to data1[25]
+	set persistent data "VTX_NUM_ROCK_ELI_BIG" to data1[26]
+	set persistent data "VTX_NUM_ROCK_ELI_TINY" to data1[27]
+	set persistent data "VTX_NUM_ROCK_SHP_SM" to data1[28]
+	set persistent data "VTX_NUM_ROCK_SHP_MED" to data1[29]
+	set persistent data "VTX_NUM_ROCK_SHP_TINY" to data1[30]
+	set persistent data "VTX_NUM_ROCK_SHP_BIG" to data1[31]
+	set persistent data "VTX_NUM_ROCK_SHP_HUGE" to data1[32]
+	set persistent data "VTX_NUM_ROCK_SHP_MASS" to data1[33]
+	set persistent data "VTX_NUM_ROCK_ERO_BIG" to data1[34]
+	set persistent data "VTX_NUM_ROCK_ERO_MED" to data1[35]
+	set persistent data "VTX_NUM_ROCK_ERO_TINY" to data1[36]
+	set persistent data "VTX_NUM_ROCK_ERO_HUGE" to data1[37]
+	set persistent data "VTX_NUM_ROCK_ERO_SM" to data1[38]
+	set persistent data "VTX_NUM_ROCK_ERO_MASS" to data1[39]
+	set persistent data "VTX_NUM_ROCK_BLO_TINY" to data1[40]
+	set persistent data "VTX_NUM_ROCK_BLO_MED" to data1[41]
+	set persistent data "VTX_NUM_ROCK_BLO_SM" to data1[42]
+	set persistent data "VTX_NUM_ROCK_BLO_MASS" to data1[43]
+	set persistent data "VTX_NUM_ROCK_BLO_HUGE" to data1[44]
+	set persistent data "VTX_NUM_ROCK_BLO_BIG" to data1[45]
+
+	set persistent data "VTX_NUM_VILLAGERS" to data1[46]
+	set persistent data "VTX_NUM_VILL_AZ_FM" to data1[47]
+	set persistent data "VTX_NUM_VILL_AZ_ML" to data1[48]
+	set persistent data "VTX_NUM_VILL_AZ_FIM" to data1[49]
+	set persistent data "VTX_NUM_VILL_AZ_FRM" to data1[50]
+	set persistent data "VTX_NUM_VILL_AZ_SPM" to data1[51]
+	set persistent data "VTX_NUM_VILL_AZ_LM" to data1[52]
+	set persistent data "VTX_NUM_VILL_AZ_TM" to data1[53]
+	set persistent data "VTX_NUM_VILL_JP_FM" to data1[54]
+	set persistent data "VTX_NUM_VILL_JP_ML" to data1[55]
+	set persistent data "VTX_NUM_VILL_JP_FIM" to data1[56]
+	set persistent data "VTX_NUM_VILL_JP_FRM" to data1[57]
+	set persistent data "VTX_NUM_VILL_JP_SPM" to data1[58]
+	set persistent data "VTX_NUM_VILL_JP_LM" to data1[59]
+	set persistent data "VTX_NUM_VILL_JP_TM" to data1[60]
+	set persistent data "VTX_NUM_VILL_GR_FM" to data1[61]
+	set persistent data "VTX_NUM_VILL_GR_ML" to data1[62]
+	set persistent data "VTX_NUM_VILL_GR_FIM" to data1[63]
+	set persistent data "VTX_NUM_VILL_GR_FRM" to data1[64]
+	set persistent data "VTX_NUM_VILL_GR_SPM" to data1[65]
+	set persistent data "VTX_NUM_VILL_GR_LM" to data1[66]
+	set persistent data "VTX_NUM_VILL_GR_TM" to data1[67]
+	set persistent data "VTX_NUM_VILL_NO_FM" to data1[68]
+	set persistent data "VTX_NUM_VILL_NO_ML" to data1[69]
+	set persistent data "VTX_NUM_VILL_NO_FIM" to data1[70]
+	set persistent data "VTX_NUM_VILL_NO_FRM" to data1[71]
+	set persistent data "VTX_NUM_VILL_NO_SPM" to data1[72]
+	set persistent data "VTX_NUM_VILL_NO_LM" to data1[73]
+	set persistent data "VTX_NUM_VILL_NO_TM" to data1[74]
+
+	set persistent data "VTX_NUM_CHILDERN" to data1[75]
+	set persistent data "VTX_NUM_CHILD_AZ_FM" to data1[76]
+	set persistent data "VTX_NUM_CHILD_AZ_ML" to data1[77]
+	set persistent data "VTX_NUM_CHILD_AZ_FIM" to data1[78]
+	set persistent data "VTX_NUM_CHILD_AZ_FRM" to data1[79]
+	set persistent data "VTX_NUM_CHILD_AZ_SPM" to data1[80]
+	set persistent data "VTX_NUM_CHILD_AZ_LM" to data1[81]
+	set persistent data "VTX_NUM_CHILD_AZ_TM" to data1[82]
+	set persistent data "VTX_NUM_CHILD_JP_FM" to data1[83]
+	set persistent data "VTX_NUM_CHILD_JP_ML" to data1[84]
+	set persistent data "VTX_NUM_CHILD_JP_FIM" to data1[85]
+	set persistent data "VTX_NUM_CHILD_JP_FRM" to data1[86]
+	set persistent data "VTX_NUM_CHILD_JP_SPM" to data1[87]
+	set persistent data "VTX_NUM_CHILD_JP_LM" to data1[88]
+	set persistent data "VTX_NUM_CHILD_JP_TM" to data1[89]
+	set persistent data "VTX_NUM_CHILD_GR_FM" to data1[90]
+	set persistent data "VTX_NUM_CHILD_GR_ML" to data1[91]
+	set persistent data "VTX_NUM_CHILD_GR_FIM" to data1[92]
+	set persistent data "VTX_NUM_CHILD_GR_FRM" to data1[93]
+	set persistent data "VTX_NUM_CHILD_GR_SPM" to data1[94]
+	set persistent data "VTX_NUM_CHILD_GR_LM" to data1[95]
+	set persistent data "VTX_NUM_CHILD_GR_TM" to data1[96]
+	set persistent data "VTX_NUM_CHILD_NO_FM" to data1[97]
+	set persistent data "VTX_NUM_CHILD_NO_ML" to data1[98]
+	set persistent data "VTX_NUM_CHILD_NO_FIM" to data1[99]
+	set persistent data "VTX_NUM_CHILD_NO_FRM" to data1[100]
+	set persistent data "VTX_NUM_CHILD_NO_SPM" to data1[101]
+	set persistent data "VTX_NUM_CHILD_NO_LM" to data1[102]
+	set persistent data "VTX_NUM_CHILD_NO_TM" to data1[103]
+        
+	set persistent data "VTX_NUM_SEIGE" to data1[104]
+	set persistent data "VTX_SIEGE_0_XP" to data1[105]
+	set persistent data "VTX_SIEGE_1_XP" to data1[106]
+	set persistent data "VTX_SIEGE_2_XP" to data1[107]
+	set persistent data "VTX_SIEGE_3_XP" to data1[108]
+	set persistent data "VTX_SIEGE_4_XP" to data1[109]
+	set persistent data "VTX_SIEGE_5_XP" to data1[110]
+	set persistent data "VTX_SIEGE_6_XP" to data1[111]
+	set persistent data "VTX_SIEGE_7_XP" to data1[112]
+	set persistent data "VTX_SIEGE_8_XP" to data1[113]
+	set persistent data "VTX_SIEGE_9_XP" to data1[114]
+	set persistent data "VTX_SIEGE_10_XP" to data1[115]
+	set persistent data "VTX_SIEGE_11_XP" to data1[116]
+	set persistent data "VTX_SIEGE_12_XP" to data1[117]
+	set persistent data "VTX_SIEGE_13_XP" to data1[118]
+	set persistent data "VTX_SIEGE_14_XP" to data1[119]
+	set persistent data "VTX_SIEGE_15_XP" to data1[120]
+	set persistent data "VTX_SIEGE_16_XP" to data1[121]
+	set persistent data "VTX_SIEGE_17_XP" to data1[122]
+	set persistent data "VTX_SIEGE_18_XP" to data1[123]
+	set persistent data "VTX_SIEGE_19_XP" to data1[124]
+	set persistent data "VTX_SIEGE_20_XP" to data1[125]
+        
+	set persistent data "VTX_NUM_RANGED" to data1[126]
+	set persistent data "VTX_NUM_MELEE" to data1[127]
+	set persistent data "VTX_ARMY_0_TYPE" to data1[128]
+	set persistent data "VTX_ARMY_0_XP" to data1[129]
+	set persistent data "VTX_ARMY_0_MEN" to data1[130]
+	set persistent data "VTX_ARMY_1_TYPE" to data1[131]
+	set persistent data "VTX_ARMY_1_XP" to data1[132]
+	set persistent data "VTX_ARMY_1_MEN" to data1[133]
+	set persistent data "VTX_ARMY_2_TYPE" to data1[134]
+	set persistent data "VTX_ARMY_2_XP" to data1[135]
+	set persistent data "VTX_ARMY_2_MEN" to data1[136]
+	set persistent data "VTX_ARMY_3_TYPE" to data1[137]
+	set persistent data "VTX_ARMY_3_XP" to data1[138]
+	set persistent data "VTX_ARMY_3_MEN" to data1[139]
+	set persistent data "VTX_ARMY_4_TYPE" to data1[140]
+	set persistent data "VTX_ARMY_4_XP" to data1[141]
+	set persistent data "VTX_ARMY_4_MEN" to data1[142]
+	set persistent data "VTX_ARMY_5_TYPE" to data1[143]
+	set persistent data "VTX_ARMY_5_XP" to data1[144]
+	set persistent data "VTX_ARMY_5_MEN" to data1[145]
+	set persistent data "VTX_ARMY_6_TYPE" to data1[146]
+	set persistent data "VTX_ARMY_6_XP" to data1[147]
+	set persistent data "VTX_ARMY_6_MEN" to data1[148]
+	set persistent data "VTX_ARMY_7_TYPE" to data1[149]
+	set persistent data "VTX_ARMY_7_XP" to data1[150]
+	set persistent data "VTX_ARMY_7_MEN" to data1[151]
+	set persistent data "VTX_ARMY_8_TYPE" to data1[152]
+	set persistent data "VTX_ARMY_8_XP" to data1[153]
+	set persistent data "VTX_ARMY_8_MEN" to data1[154]
+	set persistent data "VTX_ARMY_9_TYPE" to data1[155]
+	set persistent data "VTX_ARMY_9_XP" to data1[156]
+	set persistent data "VTX_ARMY_9_MEN" to data1[157]
+	set persistent data "VTX_ARMY_10_TYPE" to data1[158]
+	set persistent data "VTX_ARMY_10_XP" to data1[159]
+	set persistent data "VTX_ARMY_10_MEN" to data1[160]
+	set persistent data "VTX_ARMY_11_TYPE" to data1[161]
+	set persistent data "VTX_ARMY_11_XP" to data1[162]
+	set persistent data "VTX_ARMY_11_MEN" to data1[163]
+	set persistent data "VTX_ARMY_12_TYPE" to data1[164]
+	set persistent data "VTX_ARMY_12_XP" to data1[165]
+	set persistent data "VTX_ARMY_12_MEN" to data1[166]
+	set persistent data "VTX_ARMY_13_TYPE" to data1[167]
+	set persistent data "VTX_ARMY_13_XP" to data1[168]
+	set persistent data "VTX_ARMY_13_MEN" to data1[169]
+	set persistent data "VTX_ARMY_14_TYPE" to data1[170]
+	set persistent data "VTX_ARMY_14_XP" to data1[171]
+	set persistent data "VTX_ARMY_14_MEN" to data1[172]
+	set persistent data "VTX_ARMY_15_TYPE" to data1[173]
+	set persistent data "VTX_ARMY_15_XP" to data1[174]
+	set persistent data "VTX_ARMY_15_MEN" to data1[175]
+	set persistent data "VTX_ARMY_16_TYPE" to data1[176]
+	set persistent data "VTX_ARMY_16_XP" to data1[177]
+	set persistent data "VTX_ARMY_16_MEN" to data1[178]
+	set persistent data "VTX_ARMY_17_TYPE" to data1[179]
+	set persistent data "VTX_ARMY_17_XP" to data1[180]
+	set persistent data "VTX_ARMY_17_MEN" to data1[181]
+	set persistent data "VTX_ARMY_18_TYPE" to data1[182]
+	set persistent data "VTX_ARMY_18_XP" to data1[183]
+	set persistent data "VTX_ARMY_18_MEN" to data1[184]
+	set persistent data "VTX_ARMY_19_TYPE" to data1[185]
+	set persistent data "VTX_ARMY_19_XP" to data1[186]
+	set persistent data "VTX_ARMY_19_MEN" to data1[187]
+	set persistent data "VTX_ARMY_20_TYPE" to data1[188]
+	set persistent data "VTX_ARMY_20_XP" to data1[189]
+	set persistent data "VTX_ARMY_20_MEN" to data1[190]
+	set persistent data "VTX_ARMY_21_TYPE" to data1[191]
+	set persistent data "VTX_ARMY_21_XP" to data1[192]
+	set persistent data "VTX_ARMY_21_MEN" to data1[193]
+	set persistent data "VTX_ARMY_22_TYPE" to data1[194]
+	set persistent data "VTX_ARMY_22_XP" to data1[195]
+	set persistent data "VTX_ARMY_22_MEN" to data1[196]
+	set persistent data "VTX_ARMY_23_TYPE" to data1[197]
+	set persistent data "VTX_ARMY_23_XP" to data1[198]
+	set persistent data "VTX_ARMY_23_MEN" to data1[199]
+	set persistent data "VTX_ARMY_24_TYPE" to data1[200]
+	set persistent data "VTX_ARMY_24_XP" to data1[201]
+	set persistent data "VTX_ARMY_24_MEN" to data1[202]
+	set persistent data "VTX_ARMY_25_TYPE" to data1[203]
+	set persistent data "VTX_ARMY_25_XP" to data1[204]
+	set persistent data "VTX_ARMY_25_MEN" to data1[205]
+	set persistent data "VTX_ARMY_26_TYPE" to data1[206]
+	set persistent data "VTX_ARMY_26_XP" to data1[207]
+	set persistent data "VTX_ARMY_26_MEN" to data1[208]
+	set persistent data "VTX_ARMY_27_TYPE" to data1[209]
+	set persistent data "VTX_ARMY_27_XP" to data1[210]
+	set persistent data "VTX_ARMY_27_MEN" to data1[211]
+	set persistent data "VTX_ARMY_28_TYPE" to data1[212]
+	set persistent data "VTX_ARMY_28_XP" to data1[213]
+	set persistent data "VTX_ARMY_28_MEN" to data1[214]
+	set persistent data "VTX_ARMY_29_TYPE" to data1[215]
+	set persistent data "VTX_ARMY_29_XP" to data1[216]
+	set persistent data "VTX_ARMY_29_MEN" to data1[217]
+	set persistent data "VTX_ARMY_30_TYPE" to data1[218]
+	set persistent data "VTX_ARMY_30_XP" to data1[219]
+	set persistent data "VTX_ARMY_30_MEN" to data1[220]
+	set persistent data "VTX_ARMY_31_TYPE" to data1[221]
+	set persistent data "VTX_ARMY_31_XP" to data1[222]
+	set persistent data "VTX_ARMY_31_MEN" to data1[223]
+	set persistent data "VTX_ARMY_32_TYPE" to data1[224]
+	set persistent data "VTX_ARMY_32_XP" to data1[225]
+	set persistent data "VTX_ARMY_32_MEN" to data1[226]
+	set persistent data "VTX_ARMY_33_TYPE" to data1[227]
+	set persistent data "VTX_ARMY_33_XP" to data1[228]
+	set persistent data "VTX_ARMY_33_MEN" to data1[229]
+	set persistent data "VTX_ARMY_34_TYPE" to data1[230]
+	set persistent data "VTX_ARMY_34_XP" to data1[231]
+	set persistent data "VTX_ARMY_34_MEN" to data1[232]
+	set persistent data "VTX_ARMY_35_TYPE" to data1[233]
+	set persistent data "VTX_ARMY_35_XP" to data1[234]
+	set persistent data "VTX_ARMY_35_MEN" to data1[235]
+	set persistent data "VTX_ARMY_36_TYPE" to data1[236]
+	set persistent data "VTX_ARMY_36_XP" to data1[237]
+	set persistent data "VTX_ARMY_36_MEN" to data1[238]
+	set persistent data "VTX_ARMY_37_TYPE" to data1[239]
+	set persistent data "VTX_ARMY_37_XP" to data1[240]
+	set persistent data "VTX_ARMY_37_MEN" to data1[241]
+	set persistent data "VTX_ARMY_38_TYPE" to data1[242]
+	set persistent data "VTX_ARMY_38_XP" to data1[243]
+	set persistent data "VTX_ARMY_38_MEN" to data1[244]
+	set persistent data "VTX_ARMY_39_TYPE" to data1[245]
+	set persistent data "VTX_ARMY_39_XP" to data1[246]
+	set persistent data "VTX_ARMY_39_MEN" to data1[247]
+	set persistent data "VTX_ARMY_40_TYPE" to data1[248]
+	set persistent data "VTX_ARMY_40_XP" to data1[249]
+	set persistent data "VTX_ARMY_40_MEN" to data1[250]
+	set persistent data "VTX_ARMY_41_TYPE" to data1[251]
+	set persistent data "VTX_ARMY_41_XP" to data1[252]
+	set persistent data "VTX_ARMY_41_MEN" to data1[253]
+	set persistent data "VTX_ARMY_42_TYPE" to data1[254]
+	set persistent data "VTX_ARMY_42_XP" to data1[255]
+	set persistent data "VTX_ARMY_42_MEN" to data1[256]
+	set persistent data "VTX_ARMY_43_TYPE" to data1[257]
+	set persistent data "VTX_ARMY_43_XP" to data1[258]
+	set persistent data "VTX_ARMY_43_MEN" to data1[259]
+	set persistent data "VTX_ARMY_44_TYPE" to data1[260]
+	set persistent data "VTX_ARMY_44_XP" to data1[261]
+	set persistent data "VTX_ARMY_44_MEN" to data1[262]
+	set persistent data "VTX_ARMY_45_TYPE" to data1[263]
+	set persistent data "VTX_ARMY_45_XP" to data1[264]
+	set persistent data "VTX_ARMY_45_MEN" to data1[265]
+	set persistent data "VTX_ARMY_46_TYPE" to data1[266]
+	set persistent data "VTX_ARMY_46_XP" to data1[267]
+	set persistent data "VTX_ARMY_46_MEN" to data1[268]
+	set persistent data "VTX_ARMY_47_TYPE" to data1[269]
+	set persistent data "VTX_ARMY_47_XP" to data1[270]
+	set persistent data "VTX_ARMY_47_MEN" to data1[271]
+	set persistent data "VTX_ARMY_48_TYPE" to data1[272]
+	set persistent data "VTX_ARMY_48_XP" to data1[273]
+	set persistent data "VTX_ARMY_48_MEN" to data1[274]
+	set persistent data "VTX_ARMY_49_TYPE" to data1[275]
+	set persistent data "VTX_ARMY_49_XP" to data1[276]
+	set persistent data "VTX_ARMY_49_MEN" to data1[277]
+	set persistent data "VTX_ARMY_50_TYPE" to data1[278]
+	set persistent data "VTX_ARMY_50_XP" to data1[279]
+	set persistent data "VTX_ARMY_50_MEN" to data1[280]
+	set persistent data "VTX_ARMY_51_TYPE" to data1[281]
+	set persistent data "VTX_ARMY_51_XP" to data1[282]
+	set persistent data "VTX_ARMY_51_MEN" to data1[283]
+	set persistent data "VTX_ARMY_52_TYPE" to data1[284]
+	set persistent data "VTX_ARMY_52_XP" to data1[285]
+	set persistent data "VTX_ARMY_52_MEN" to data1[286]
+	set persistent data "VTX_ARMY_53_TYPE" to data1[287]
+	set persistent data "VTX_ARMY_53_XP" to data1[288]
+	set persistent data "VTX_ARMY_53_MEN" to data1[289]
+	set persistent data "VTX_ARMY_54_TYPE" to data1[290]
+	set persistent data "VTX_ARMY_54_XP" to data1[291]
+	set persistent data "VTX_ARMY_54_MEN" to data1[292]
+	set persistent data "VTX_ARMY_55_TYPE" to data1[293]
+	set persistent data "VTX_ARMY_55_XP" to data1[294]
+	set persistent data "VTX_ARMY_55_MEN" to data1[295]
+	set persistent data "VTX_ARMY_56_TYPE" to data1[296]
+	set persistent data "VTX_ARMY_56_XP" to data1[297]
+	set persistent data "VTX_ARMY_56_MEN" to data1[298]
+	set persistent data "VTX_ARMY_57_TYPE" to data1[299]
+	set persistent data "VTX_ARMY_57_XP" to data1[300]
+	set persistent data "VTX_ARMY_57_MEN" to data1[301]
+	set persistent data "VTX_ARMY_58_TYPE" to data1[302]
+	set persistent data "VTX_ARMY_58_XP" to data1[303]
+	set persistent data "VTX_ARMY_58_MEN" to data1[304]
+	set persistent data "VTX_ARMY_59_TYPE" to data1[305]
+	set persistent data "VTX_ARMY_59_XP" to data1[306]
+	set persistent data "VTX_ARMY_59_MEN" to data1[307]
+	set persistent data "VTX_ARMY_60_TYPE" to data1[308]
+	set persistent data "VTX_ARMY_60_XP" to data1[309]
+	set persistent data "VTX_ARMY_60_MEN" to data1[310]
+        
+	set persistent data "VTX_NUM_OREROCK" to data1[311]
+	set persistent data "VTX_NUM_ROCK_OREROCK_SM" to data1[312]
+	set persistent data "VTX_NUM_ROCK_OREROCK_MED" to data1[313]
+	set persistent data "VTX_NUM_ROCK_OREROCK_LAR" to data1[314]
+        
+	set persistent data "VTX_FOOD" to data1[315]
+	set persistent data "VTX_WOOD" to data1[316]
+	set persistent data "VTX_ORE" to data1[317]
+	
+	set persistent data "VTX_NUM_ROCK_ROCK_BOU_ROU_LAR" to data1[318] 
+	set persistent data "VTX_NUM_ROCK_ROCK_BOU_ROU_MED" to data1[319] 
+	set persistent data "VTX_NUM_ROCK_ROCK_BOU_ROU_LAR" to data1[320] 
+	set persistent data "VTX_NUM_ROCK_ROCK_SIEGE" to data1[321] 
+	set persistent data "VTX_NUM_ROCK_ROCK_ELOI" to data1[322] 
+	set persistent data "VTX_NUM_ROCK_MOAI_SAD" to data1[323] 
+	set persistent data "VTX_NUM_ROCK_MOAI_SMI" to data1[324] 
+	set persistent data "VTX_NUM_ROCK_MOAI_FUN" to data1[325] 
+  
+	set persistent data "VTX_MISC_STREET_LAMP" to data1[326] 
+	set persistent data "VTX_MISC_TRIBUTE_BOX" to data1[327] 
+	set persistent data "VTX_MISC_COUNT" to data1[328] 
+	set persistent data "VTX_MISC_AZ_STEETLAMP" to data1[329] 
+	set persistent data "VTX_MISC_JA_TABLE" to data1[330] 
+	set persistent data "VTX_MISC_JA_LADDER" to data1[331] 
+	set persistent data "VTX_MISC_AZ_BARREL_1" to data1[332] 
+	set persistent data "VTX_MISC_AZ_BARREL_2" to data1[333] 
+	set persistent data "VTX_MISC_GR_BERREL_1" to data1[334] 
+	set persistent data "VTX_MISC_GR_BERREL_2" to data1[335] 
+	set persistent data "VTX_MISC_JA_BERREL_1" to data1[336] 
+	set persistent data "VTX_MISC_JA_BERREL_2" to data1[337] 
+	set persistent data "VTX_MISC_NO_BERREL_1" to data1[338] 
+	set persistent data "VTX_MISC_NO_BERREL_2" to data1[339] 
+	set persistent data "VTX_MISC_GR_URN_1" to data1[340] 
+	set persistent data "VTX_MISC_GR_URN_2" to data1[341] 
+	set persistent data "VTX_MISC_GR_URN_3" to data1[342] 
+	set persistent data "VTX_MISC_GR_URN_4" to data1[343] 
+	set persistent data "VTX_MISC_POO" to data1[344] 
+	set persistent data "VTX_MISC_NUTOIL_BERREL" to data1[345] 
+	set persistent data "VTX_MISC_7SAM_1" to data1[346] 
+	set persistent data "VTX_MISC_7SAM_2" to data1[347] 
+	set persistent data "VTX_MISC_7SAM_3" to data1[348] 
+	set persistent data "VTX_MISC_7SAM_4" to data1[349] 
+	set persistent data "VTX_MISC_7SAM_5" to data1[350] 
+	set persistent data "VTX_MISC_7SAM_6" to data1[351] 
+	set persistent data "VTX_MISC_7SAM_7" to data1[352] 
+	set persistent data "VTX_MISC_GR_CART_1" to data1[353] 
+	set persistent data "VTX_MISC_GR_CART_2" to data1[354] 
+	set persistent data "VTX_MISC_NO_BENCH_1" to data1[355] 
+	set persistent data "VTX_MISC_NO_BENCH_2" to data1[356] 
+	set persistent data "VTX_MISC_GR_BENCH_1" to data1[357] 
+	set persistent data "VTX_MISC_GR_BENCH_2" to data1[358] 
+	set persistent data "VTX_MISC_JA_BENCH_1" to data1[359] 
+	set persistent data "VTX_MISC_JA_BENCH_2" to data1[360] 
+	set persistent data "VTX_MISC_NO_POT_1" to data1[361] 
+	set persistent data "VTX_MISC_NO_POT_2" to data1[362] 
+	set persistent data "VTX_MISC_NO_POT_3" to data1[363] 
+	set persistent data "VTX_MISC_AZ_POT_1" to data1[364] 
+	set persistent data "VTX_MISC_AZ_POT_2" to data1[365] 
+	set persistent data "VTX_MISC_AZ_POT_3" to data1[366] 
+	set persistent data "VTX_MISC_JA_POT_1" to data1[367] 
+	set persistent data "VTX_MISC_JA_POT_2" to data1[368] 
+	set persistent data "VTX_MISC_JA_POT_3" to data1[369] 
+	set persistent data "VTX_MISC_GR_BARROW" to data1[370] 
+	set persistent data "VTX_MISC_GR_WALL_3_90" to data1[371] 
+	set persistent data "VTX_MISC_GR_WALL_3_180" to data1[372] 
+	set persistent data "VTX_MISC_GR_WALL_4_90" to data1[373] 
+	set persistent data "VTX_MISC_GR_WALL_4_180" to data1[374] 
+	set persistent data "VTX_MISC_AZ_WALL_1_90" to data1[375] 
+	set persistent data "VTX_MISC_AZ_WALL_1_180" to data1[376] 
+	set persistent data "VTX_MISC_AZ_WALL_4_90" to data1[377] 
+	set persistent data "VTX_MISC_AZ_WALL_4_180" to data1[378] 
+	set persistent data "VTX_MISC_JA_WALL_1_90" to data1[379] 
+	set persistent data "VTX_MISC_JA_WALL_1_180" to data1[380] 
+	set persistent data "VTX_MISC_JA_WALL_4_90" to data1[381] 
+	set persistent data "VTX_MISC_JA_WALL_4_180" to data1[382] 
+	set persistent data "VTX_MISC_NO_WALL_3_90" to data1[383] 
+	set persistent data "VTX_MISC_NO_WALL_3_180" to data1[384] 
+	set persistent data "VTX_MISC_NO_WALL_4_90" to data1[385] 
+	set persistent data "VTX_MISC_NO_WALL_4_180" to data1[386] 
+	set persistent data "VTX_MISC_STEETLIGHTWOOD" to data1[387] 
+	set persistent data "VTX_MISC_STREETLIGHTNORSE" to data1[388] 
+	set persistent data "VTX_MISC_STEETLIGHTBRASS" to data1[389] 
+	set persistent data "VTX_MISC_STREETLIGHTJAP" to data1[390] 
+	set persistent data "VTX_MISC_NO_PLANT_1" to data1[391] 
+	set persistent data "VTX_MISC_NO_PLANT_2" to data1[392] 
+	set persistent data "VTX_MISC_GR_WASHING" to data1[393] 
+	set persistent data "VTX_MISC_GR_PLANT_1" to data1[394] 
+	set persistent data "VTX_MISC_PLANT_NORMAL" to data1[395] 
+	set persistent data "VTX_MISC_PALM_STUMP" to data1[396] 
+	set persistent data "VTX_MISC_PALM_SPIKE" to data1[397] 
+	set persistent data "VTX_MISC_PALM_BANANA" to data1[398] 
+	set persistent data "VTX_MISC_HAY_BAL" to data1[399] 
+end script Vtx_Save_Data
+
+begin script Vtx_Clear_Data
+	i = 0
+start
+	while (i < 400)
+		data1[i] = 0
+	end while
+end script Vtx_Clear_Data
+
+begin script Vtx_Send_Platoon(army1)
+	numMen = 0
+	xp = 0
+	aType = 0 //Assume melee
+	subType = 0
+start
+	//Az (0,1), Jp(2,3), No(4,5), Gr(6,7), 7S(8), Sk(9), 
+	subType = variable get platoon army1 type
+	if((subType > 19) and (subType < 40))
+		aType = 2
+	elsif((subType > 59) and (subType < 80))
+		aType = 4
+	elsif((subType > 79) and (subType < 100))
+		aType = 6
+	elsif (subType == 100)
+		aType = 9
+	elsif (subType == 102)
+		aType = 8
+	end if
+	
+	//Get the number of men in the platoon
+	numMen = get number of villagers in platoon army1
+	//Get the experience
+	xp = (get platoon army1 experience)
+	if (platoon army1 melee)
+		if(xp < 3)
+			xp *= 5
+		elsif ((xp >= 3)and(xp < 6))
+			xp = (xp * 5) + ((xp-3)*5)
+		else
+			xp = (45) + ((xp-6)*15)
+		end if
+		
+		data1[127]++
+		
+	elsif (platoon army1 ranged)
+		aType++ //Set type to ranged
+		
+		if(xp < 3)
+			xp *= 10
+		elsif ((xp >= 3)and(xp < 6))
+			xp = (xp * 10) + ((xp-3)*5)
+		elsif ((xp >= 6)and(xp < 7))
+			xp = (xp * 10) + ((xp-2)*5)
+		else
+			xp = 30*((xp-7)^1.225) + 100
+		end if
+		
+		data1[126]++
+		
+	end if
+	
+	data1[(128 + (vtx_num_armies * 3)) + 0] = aType
+	data1[(128 + (vtx_num_armies * 3)) + 1] = xp
+	data1[(128 + (vtx_num_armies * 3)) + 2] = numMen
+	
+	vtx_num_armies++
+	if (vtx_num_armies == VTX_MAX_ARMIES)
+		vtx_max_armies_reached = VTX_TRUE
+	end if
+end script Vtx_Send_Platoon
+
+begin script Vtx_Send_SiegeWeapon(sieg)
+	xp = 0
+start
+	xp = get platoon sieg experience
+	data1[104]++
+	
+	data1[vtx_num_sieges + 105] = xp
+	
+	vtx_num_sieges++
+	if (vtx_num_sieges == VTX_MAX_SIEGES)
+		vtx_max_sieges_reached = VTX_TRUE
+	end if
+end script Vtx_Send_SiegeWeapon
+
+begin script Vtx_Send_Resource(reso)
+	resoType = 0
+	resoAmount = 0
+start
+	resoType = variable get reso sub type
+	
+	if (resoType == 10) //Food
+		resoAmount = get resource RESOURCE_TYPE_FOOD in reso
+		data1[315] += resoAmount
+	elsif (resoType == 9) //Wood
+		resoAmount = get resource RESOURCE_TYPE_WOOD in reso
+		data1[316] += resoAmount
+	elsif (resoType == 23) //Ore
+		resoAmount = get resource RESOURCE_TYPE_ORE in reso
+		data1[317] += resoAmount
+	end if
+end script Vtx_Send_Resource
+
+begin script Vtx_Send_Tree(treeObj)
+	treeType = 0
+	idx = 0
+start
+	data1[0]++
+	treeType = variable get treeObj sub type
+	
+	idx = treeType + 1
+	if ((idx < 12) and (idx > 0))
+		data1[idx]++
+	end if
+end script Vtx_Send_Tree
+
+begin script Vtx_Send_Rock(rockObj)
+	rockType = 0
+	idx = 0
+start
+	data1[12]++
+	rockType = variable get rockObj sub type
+	
+	if(rockType == 9)
+		data1[13]++
+	elsif (rockType == 0)
+		data1[14]++
+	elsif (rockType == 1)
+		data1[15]++
+	elsif (rockType == 2)
+		data1[16]++
+	elsif ((rockType > 42) and (rockType < 46))
+		idx = rockType + 275
+		data1[idx]++
+	elsif (rockType == 47)
+		data1[321]++
+	elsif (rockType == 48)
+		data1[322]++
+	elsif ((rockType > 105) and (rockType < 109))
+		idx = rockType + 217
+		data1[idx]++
+	else //Starts at 67 goes to 95
+		idx = rockType - 50
+		if ((idx < 46) and (idx > 12))
+			data1[idx]++
+		end if
+	end if
+	
+end script Vtx_Send_Rock
+
+begin script Vtx_Send_Villager(vill)
+	villType = 0
+	idx = 0
+start
+	data1[46]++
+	villType = variable get vill sub type
+	
+	if (villType < 14)
+		idx = villType + 47
+	elsif(villType > 20)
+		idx = villType + 40
+	end if
+	
+	if ((idx < 75) and (idx > 46))
+		data1[idx]++
+	end if
+	
+end script Vtx_Send_Villager
+
+begin script Vtx_Send_Child(chil)
+	villType = 0
+	idx = 0
+start
+	data1[75]++
+	villType = variable get chil sub type
+	
+	if (villType < 14)
+		idx = villType + 76
+	else
+		idx = villType + 69
+	end if
+	
+	if ((idx < 104) and (idx > 75))
+		data1[idx]++
+	end if
+	
+end script Vtx_Send_Child
+
+begin script Vtx_Send_Misc(vtxObj)
+	idx = 0
+	miscType = 0
+start
+	data1[328]++
+	miscType = variable get vtxObj sub type
+	
+	if(miscType == 7)
+		data1[326]++
+	elsif (miscType == 18)
+		data1[327]++
+	elsif ((miscType > 24) and (miscType < 40))
+		idx = miscType + 304
+		data1[idx]++
+	elsif (miscType == 46)
+		data1[344]++
+	elsif (miscType == 49)
+		data1[345]++
+	elsif ((miscType > 59) and (miscType < 67))
+		idx = miscType + 286
+		data1[idx]++
+	elsif ((miscType > 97) and (miscType < 106))
+		idx = miscType + 255
+		data1[idx]++
+	elsif ((miscType > 139) and (miscType < 149))
+		idx = miscType + 251
+		data1[idx]++
+	else
+		idx = miscType + 252
+		if ((idx < 391) and (idx > 360))	
+			data1[idx]++
+		end if
+	end if
+end script Vtx_Send_Misc
+
+
+//--------------------------------------Entering Functions------------------------------------------
+begin script VTX_Read_Data
+
+start
+	data1[0] = persistent data "VTX_NUM_TREE"
+	data1[1] = persistent data "VTX_NUM_TREE_BEECH"
+	data1[2] = persistent data "VTX_NUM_TREE_SPRUCE"
+	data1[3] = persistent data "VTX_NUM_TREE_CEDAR"
+	data1[4] = persistent data "VTX_NUM_TREE_OAK"
+	data1[5] = persistent data "VTX_NUM_TREE_OLIVE"
+	data1[6] = persistent data "VTX_NUM_TREE_PINE"
+	data1[7] = persistent data "VTX_NUM_TREE_ACACIA"
+	data1[8] = persistent data "VTX_NUM_TREE_PALM"
+	data1[9] = persistent data "VTX_NUM_TREE_BIG_PALM"
+	data1[10] = persistent data "VTX_NUM_TREE_FIR"
+	data1[11] = persistent data "VTX_NUM_TREE_MAPLE"
+	
+	data1[12] = persistent data "VTX_NUM_ROCK"
+	data1[13] = persistent data "VTX_NUM_ROCK_ROCK"
+	data1[14] = persistent data "VTX_NUM_ROCK_NOR_SM"
+	data1[15] = persistent data "VTX_NUM_ROCK_NOR_MED"
+	data1[16] = persistent data "VTX_NUM_ROCK_NOR_LAR"
+	data1[17] = persistent data "VTX_NUM_ROCK_BOU_SM"
+	data1[18] = persistent data "VTX_NUM_ROCK_BOU_BIG"
+	data1[19] = persistent data "VTX_NUM_ROCK_BOU_TINY"
+	data1[20] = persistent data "VTX_NUM_ROCK_BOU_HUGE"
+	data1[21] = persistent data "VTX_NUM_ROCK_BOU_MASS"
+	data1[22] = persistent data "VTX_NUM_ROCK_ELI_SM"
+	data1[23] = persistent data "VTX_NUM_ROCK_ELI_MED"
+	data1[24] = persistent data "VTX_NUM_ROCK_ELI_MASS"
+	data1[25] = persistent data "VTX_NUM_ROCK_ELI_HUGE"
+	data1[26] = persistent data "VTX_NUM_ROCK_ELI_BIG"
+	data1[27] = persistent data "VTX_NUM_ROCK_ELI_TINY"
+	data1[28] = persistent data "VTX_NUM_ROCK_SHP_SM"
+	data1[29] = persistent data "VTX_NUM_ROCK_SHP_MED"
+	data1[30] = persistent data "VTX_NUM_ROCK_SHP_TINY"
+	data1[31] = persistent data "VTX_NUM_ROCK_SHP_BIG"
+	data1[32] = persistent data "VTX_NUM_ROCK_SHP_HUGE"
+	data1[33] = persistent data "VTX_NUM_ROCK_SHP_MASS"
+	data1[34] = persistent data "VTX_NUM_ROCK_ERO_BIG"
+	data1[35] = persistent data "VTX_NUM_ROCK_ERO_MED"
+	data1[36] = persistent data "VTX_NUM_ROCK_ERO_TINY"
+	data1[37] = persistent data "VTX_NUM_ROCK_ERO_HUGE"
+	data1[38] = persistent data "VTX_NUM_ROCK_ERO_SM"
+	data1[39] = persistent data "VTX_NUM_ROCK_ERO_MASS"
+	data1[40] = persistent data "VTX_NUM_ROCK_BLO_TINY"
+	data1[41] = persistent data "VTX_NUM_ROCK_BLO_MED"
+	data1[42] = persistent data "VTX_NUM_ROCK_BLO_SM"
+	data1[43] = persistent data "VTX_NUM_ROCK_BLO_MASS"
+	data1[44] = persistent data "VTX_NUM_ROCK_BLO_HUGE"
+	data1[45] = persistent data "VTX_NUM_ROCK_BLO_BIG"
+	
+	data1[46] = persistent data "VTX_NUM_VILLAGERS"
+	data1[47] = persistent data "VTX_NUM_VILL_AZ_FM"
+	data1[48] = persistent data "VTX_NUM_VILL_AZ_ML"
+	data1[49] = persistent data "VTX_NUM_VILL_AZ_FIM"
+	data1[50] = persistent data "VTX_NUM_VILL_AZ_FRM"
+	data1[51] = persistent data "VTX_NUM_VILL_AZ_SPM"
+	data1[52] = persistent data "VTX_NUM_VILL_AZ_LM"
+	data1[53] = persistent data "VTX_NUM_VILL_AZ_TM"
+	data1[54] = persistent data "VTX_NUM_VILL_JP_FM"
+	data1[55] = persistent data "VTX_NUM_VILL_JP_ML"
+	data1[56] = persistent data "VTX_NUM_VILL_JP_FIM"
+	data1[57] = persistent data "VTX_NUM_VILL_JP_FRM"
+	data1[58] = persistent data "VTX_NUM_VILL_JP_SPM"
+	data1[59] = persistent data "VTX_NUM_VILL_JP_LM"
+	data1[60] = persistent data "VTX_NUM_VILL_JP_TM"
+	data1[61] = persistent data "VTX_NUM_VILL_GR_FM"
+	data1[62] = persistent data "VTX_NUM_VILL_GR_ML"
+	data1[63] = persistent data "VTX_NUM_VILL_GR_FIM"
+	data1[64] = persistent data "VTX_NUM_VILL_GR_FRM"
+	data1[65] = persistent data "VTX_NUM_VILL_GR_SPM"
+	data1[66] = persistent data "VTX_NUM_VILL_GR_LM"
+	data1[67] = persistent data "VTX_NUM_VILL_GR_TM"
+	data1[68] = persistent data "VTX_NUM_VILL_NO_FM"
+	data1[69] = persistent data "VTX_NUM_VILL_NO_ML"
+	data1[70] = persistent data "VTX_NUM_VILL_NO_FIM"
+	data1[71] = persistent data "VTX_NUM_VILL_NO_FRM"
+	data1[72] = persistent data "VTX_NUM_VILL_NO_SPM"
+	data1[73] = persistent data "VTX_NUM_VILL_NO_LM"
+	data1[74] = persistent data "VTX_NUM_VILL_NO_TM"
+	
+	data1[75] = persistent data "VTX_NUM_CHILDERN"
+	data1[76] = persistent data "VTX_NUM_CHILD_AZ_FM"
+	data1[77] = persistent data "VTX_NUM_CHILD_AZ_ML"
+	data1[78] = persistent data "VTX_NUM_CHILD_AZ_FIM"
+	data1[79] = persistent data "VTX_NUM_CHILD_AZ_FRM"
+	data1[80] = persistent data "VTX_NUM_CHILD_AZ_SPM"
+	data1[81] = persistent data "VTX_NUM_CHILD_AZ_LM"
+	data1[82] = persistent data "VTX_NUM_CHILD_AZ_TM"
+	data1[83] = persistent data "VTX_NUM_CHILD_JP_FM"
+	data1[84] = persistent data "VTX_NUM_CHILD_JP_ML"
+	data1[85] = persistent data "VTX_NUM_CHILD_JP_FIM"
+	data1[86] = persistent data "VTX_NUM_CHILD_JP_FRM"
+	data1[87] = persistent data "VTX_NUM_CHILD_JP_SPM"
+	data1[88] = persistent data "VTX_NUM_CHILD_JP_LM"
+	data1[89] = persistent data "VTX_NUM_CHILD_JP_TM"
+	data1[90] = persistent data "VTX_NUM_CHILD_GR_FM"
+	data1[91] = persistent data "VTX_NUM_CHILD_GR_ML"
+	data1[92] = persistent data "VTX_NUM_CHILD_GR_FIM"
+	data1[93] = persistent data "VTX_NUM_CHILD_GR_FRM"
+	data1[94] = persistent data "VTX_NUM_CHILD_GR_SPM"
+	data1[95] = persistent data "VTX_NUM_CHILD_GR_LM"
+	data1[96] = persistent data "VTX_NUM_CHILD_GR_TM"
+	data1[97] = persistent data "VTX_NUM_CHILD_NO_FM"
+	data1[98] = persistent data "VTX_NUM_CHILD_NO_ML"
+	data1[99] = persistent data "VTX_NUM_CHILD_NO_FIM"
+	data1[100] = persistent data "VTX_NUM_CHILD_NO_FRM"
+	data1[101] = persistent data "VTX_NUM_CHILD_NO_SPM"
+	data1[102] = persistent data "VTX_NUM_CHILD_NO_LM"
+	data1[103] = persistent data "VTX_NUM_CHILD_NO_TM"
+	
+	data1[104] = persistent data "VTX_NUM_SEIGE"
+	data1[105] = persistent data "VTX_SIEGE_0_XP"
+	data1[106] = persistent data "VTX_SIEGE_1_XP"
+	data1[107] = persistent data "VTX_SIEGE_2_XP"
+	data1[108] = persistent data "VTX_SIEGE_3_XP"
+	data1[109] = persistent data "VTX_SIEGE_4_XP"
+	data1[110] = persistent data "VTX_SIEGE_5_XP"
+	data1[111] = persistent data "VTX_SIEGE_6_XP"
+	data1[112] = persistent data "VTX_SIEGE_7_XP"
+	data1[113] = persistent data "VTX_SIEGE_8_XP"
+	data1[114] = persistent data "VTX_SIEGE_9_XP"
+	data1[115] = persistent data "VTX_SIEGE_10_XP"
+	data1[116] = persistent data "VTX_SIEGE_11_XP"
+	data1[117] = persistent data "VTX_SIEGE_12_XP"
+	data1[118] = persistent data "VTX_SIEGE_13_XP"
+	data1[119] = persistent data "VTX_SIEGE_14_XP"
+	data1[120] = persistent data "VTX_SIEGE_15_XP"
+	data1[121] = persistent data "VTX_SIEGE_16_XP"
+	data1[122] = persistent data "VTX_SIEGE_17_XP"
+	data1[123] = persistent data "VTX_SIEGE_18_XP"
+	data1[124] = persistent data "VTX_SIEGE_19_XP"
+	data1[125] = persistent data "VTX_SIEGE_20_XP"
+	
+	data1[126] = persistent data "VTX_NUM_RANGED"
+	data1[127] = persistent data "VTX_NUM_MELEE"
+	data1[128] = persistent data "VTX_ARMY_0_TYPE"
+	data1[129] = persistent data "VTX_ARMY_0_XP"
+	data1[130] = persistent data "VTX_ARMY_0_MEN"
+	data1[131] = persistent data "VTX_ARMY_1_TYPE"
+	data1[132] = persistent data "VTX_ARMY_1_XP"
+	data1[133] = persistent data "VTX_ARMY_1_MEN"
+	data1[134] = persistent data "VTX_ARMY_2_TYPE"
+	data1[135] = persistent data "VTX_ARMY_2_XP"
+	data1[136] = persistent data "VTX_ARMY_2_MEN"
+	data1[137] = persistent data "VTX_ARMY_3_TYPE"
+	data1[138] = persistent data "VTX_ARMY_3_XP"
+	data1[139] = persistent data "VTX_ARMY_3_MEN"
+	data1[140] = persistent data "VTX_ARMY_4_TYPE"
+	data1[141] = persistent data "VTX_ARMY_4_XP"
+	data1[142] = persistent data "VTX_ARMY_4_MEN"
+	data1[143] = persistent data "VTX_ARMY_5_TYPE"
+	data1[144] = persistent data "VTX_ARMY_5_XP"
+	data1[145] = persistent data "VTX_ARMY_5_MEN"
+	data1[146] = persistent data "VTX_ARMY_6_TYPE"
+	data1[147] = persistent data "VTX_ARMY_6_XP"
+	data1[148] = persistent data "VTX_ARMY_6_MEN"
+	data1[149] = persistent data "VTX_ARMY_7_TYPE"
+	data1[150] = persistent data "VTX_ARMY_7_XP"
+	data1[151] = persistent data "VTX_ARMY_7_MEN"
+	data1[152] = persistent data "VTX_ARMY_8_TYPE"
+	data1[153] = persistent data "VTX_ARMY_8_XP"
+	data1[154] = persistent data "VTX_ARMY_8_MEN"
+	data1[155] = persistent data "VTX_ARMY_9_TYPE"
+	data1[156] = persistent data "VTX_ARMY_9_XP"
+	data1[157] = persistent data "VTX_ARMY_9_MEN"
+	data1[158] = persistent data "VTX_ARMY_10_TYPE"
+	data1[159] = persistent data "VTX_ARMY_10_XP"
+	data1[160] = persistent data "VTX_ARMY_10_MEN"
+	data1[161] = persistent data "VTX_ARMY_11_TYPE"
+	data1[162] = persistent data "VTX_ARMY_11_XP"
+	data1[163] = persistent data "VTX_ARMY_11_MEN"
+	data1[164] = persistent data "VTX_ARMY_12_TYPE"
+	data1[165] = persistent data "VTX_ARMY_12_XP"
+	data1[166] = persistent data "VTX_ARMY_12_MEN"
+	data1[167] = persistent data "VTX_ARMY_13_TYPE"
+	data1[168] = persistent data "VTX_ARMY_13_XP"
+	data1[169] = persistent data "VTX_ARMY_13_MEN"
+	data1[170] = persistent data "VTX_ARMY_14_TYPE"
+	data1[171] = persistent data "VTX_ARMY_14_XP"
+	data1[172] = persistent data "VTX_ARMY_14_MEN"
+	data1[173] = persistent data "VTX_ARMY_15_TYPE"
+	data1[174] = persistent data "VTX_ARMY_15_XP"
+	data1[175] = persistent data "VTX_ARMY_15_MEN"
+	data1[176] = persistent data "VTX_ARMY_16_TYPE"
+	data1[177] = persistent data "VTX_ARMY_16_XP"
+	data1[178] = persistent data "VTX_ARMY_16_MEN"
+	data1[179] = persistent data "VTX_ARMY_17_TYPE"
+	data1[180] = persistent data "VTX_ARMY_17_XP"
+	data1[181] = persistent data "VTX_ARMY_17_MEN"
+	data1[182] = persistent data "VTX_ARMY_18_TYPE"
+	data1[183] = persistent data "VTX_ARMY_18_XP"
+	data1[184] = persistent data "VTX_ARMY_18_MEN"
+	data1[185] = persistent data "VTX_ARMY_19_TYPE"
+	data1[186] = persistent data "VTX_ARMY_19_XP"
+	data1[187] = persistent data "VTX_ARMY_19_MEN"
+	data1[188] = persistent data "VTX_ARMY_20_TYPE"
+	data1[189] = persistent data "VTX_ARMY_20_XP"
+	data1[190] = persistent data "VTX_ARMY_20_MEN"
+	data1[191] = persistent data "VTX_ARMY_21_TYPE"
+	data1[192] = persistent data "VTX_ARMY_21_XP"
+	data1[193] = persistent data "VTX_ARMY_21_MEN"
+	data1[194] = persistent data "VTX_ARMY_22_TYPE"
+	data1[195] = persistent data "VTX_ARMY_22_XP"
+	data1[196] = persistent data "VTX_ARMY_22_MEN"
+	data1[197] = persistent data "VTX_ARMY_23_TYPE"
+	data1[198] = persistent data "VTX_ARMY_23_XP"
+	data1[199] = persistent data "VTX_ARMY_23_MEN"
+	data1[200] = persistent data "VTX_ARMY_24_TYPE"
+	data1[201] = persistent data "VTX_ARMY_24_XP"
+	data1[202] = persistent data "VTX_ARMY_24_MEN"
+	data1[203] = persistent data "VTX_ARMY_25_TYPE"
+	data1[204] = persistent data "VTX_ARMY_25_XP"
+	data1[205] = persistent data "VTX_ARMY_25_MEN"
+	data1[206] = persistent data "VTX_ARMY_26_TYPE"
+	data1[207] = persistent data "VTX_ARMY_26_XP"
+	data1[208] = persistent data "VTX_ARMY_26_MEN"
+	data1[209] = persistent data "VTX_ARMY_27_TYPE"
+	data1[210] = persistent data "VTX_ARMY_27_XP"
+	data1[211] = persistent data "VTX_ARMY_27_MEN"
+	data1[212] = persistent data "VTX_ARMY_28_TYPE"
+	data1[213] = persistent data "VTX_ARMY_28_XP"
+	data1[214] = persistent data "VTX_ARMY_28_MEN"
+	data1[215] = persistent data "VTX_ARMY_29_TYPE"
+	data1[216] = persistent data "VTX_ARMY_29_XP"
+	data1[217] = persistent data "VTX_ARMY_29_MEN"
+	data1[218] = persistent data "VTX_ARMY_30_TYPE"
+	data1[219] = persistent data "VTX_ARMY_30_XP"
+	data1[220] = persistent data "VTX_ARMY_30_MEN"
+	data1[221] = persistent data "VTX_ARMY_31_TYPE"
+	data1[222] = persistent data "VTX_ARMY_31_XP"
+	data1[223] = persistent data "VTX_ARMY_31_MEN"
+	data1[224] = persistent data "VTX_ARMY_32_TYPE"
+	data1[225] = persistent data "VTX_ARMY_32_XP"
+	data1[226] = persistent data "VTX_ARMY_32_MEN"
+	data1[227] = persistent data "VTX_ARMY_33_TYPE"
+	data1[228] = persistent data "VTX_ARMY_33_XP"
+	data1[229] = persistent data "VTX_ARMY_33_MEN"
+	data1[230] = persistent data "VTX_ARMY_34_TYPE"
+	data1[231] = persistent data "VTX_ARMY_34_XP"
+	data1[232] = persistent data "VTX_ARMY_34_MEN"
+	data1[233] = persistent data "VTX_ARMY_35_TYPE"
+	data1[234] = persistent data "VTX_ARMY_35_XP"
+	data1[235] = persistent data "VTX_ARMY_35_MEN"
+	data1[236] = persistent data "VTX_ARMY_36_TYPE"
+	data1[237] = persistent data "VTX_ARMY_36_XP"
+	data1[238] = persistent data "VTX_ARMY_36_MEN"
+	data1[239] = persistent data "VTX_ARMY_37_TYPE"
+	data1[240] = persistent data "VTX_ARMY_37_XP"
+	data1[241] = persistent data "VTX_ARMY_37_MEN"
+	data1[242] = persistent data "VTX_ARMY_38_TYPE"
+	data1[243] = persistent data "VTX_ARMY_38_XP"
+	data1[244] = persistent data "VTX_ARMY_38_MEN"
+	data1[245] = persistent data "VTX_ARMY_39_TYPE"
+	data1[246] = persistent data "VTX_ARMY_39_XP"
+	data1[247] = persistent data "VTX_ARMY_39_MEN"
+	data1[248] = persistent data "VTX_ARMY_40_TYPE"
+	data1[249] = persistent data "VTX_ARMY_40_XP"
+	data1[250] = persistent data "VTX_ARMY_40_MEN"
+	data1[251] = persistent data "VTX_ARMY_41_TYPE"
+	data1[252] = persistent data "VTX_ARMY_41_XP"
+	data1[253] = persistent data "VTX_ARMY_41_MEN"
+	data1[254] = persistent data "VTX_ARMY_42_TYPE"
+	data1[255] = persistent data "VTX_ARMY_42_XP"
+	data1[256] = persistent data "VTX_ARMY_42_MEN"
+	data1[257] = persistent data "VTX_ARMY_43_TYPE"
+	data1[258] = persistent data "VTX_ARMY_43_XP"
+	data1[259] = persistent data "VTX_ARMY_43_MEN"
+	data1[260] = persistent data "VTX_ARMY_44_TYPE"
+	data1[261] = persistent data "VTX_ARMY_44_XP"
+	data1[262] = persistent data "VTX_ARMY_44_MEN"
+	data1[263] = persistent data "VTX_ARMY_45_TYPE"
+	data1[264] = persistent data "VTX_ARMY_45_XP"
+	data1[265] = persistent data "VTX_ARMY_45_MEN"
+	data1[266] = persistent data "VTX_ARMY_46_TYPE"
+	data1[267] = persistent data "VTX_ARMY_46_XP"
+	data1[268] = persistent data "VTX_ARMY_46_MEN"
+	data1[269] = persistent data "VTX_ARMY_47_TYPE"
+	data1[270] = persistent data "VTX_ARMY_47_XP"
+	data1[271] = persistent data "VTX_ARMY_47_MEN"
+	data1[272] = persistent data "VTX_ARMY_48_TYPE"
+	data1[273] = persistent data "VTX_ARMY_48_XP"
+	data1[274] = persistent data "VTX_ARMY_48_MEN"
+	data1[275] = persistent data "VTX_ARMY_49_TYPE"
+	data1[276] = persistent data "VTX_ARMY_49_XP"
+	data1[277] = persistent data "VTX_ARMY_49_MEN"
+	data1[278] = persistent data "VTX_ARMY_50_TYPE"
+	data1[279] = persistent data "VTX_ARMY_50_XP"
+	data1[280] = persistent data "VTX_ARMY_50_MEN"
+	data1[281] = persistent data "VTX_ARMY_51_TYPE"
+	data1[282] = persistent data "VTX_ARMY_51_XP"
+	data1[283] = persistent data "VTX_ARMY_51_MEN"
+	data1[284] = persistent data "VTX_ARMY_52_TYPE"
+	data1[285] = persistent data "VTX_ARMY_52_XP"
+	data1[286] = persistent data "VTX_ARMY_52_MEN"
+	data1[287] = persistent data "VTX_ARMY_53_TYPE"
+	data1[288] = persistent data "VTX_ARMY_53_XP"
+	data1[289] = persistent data "VTX_ARMY_53_MEN"
+	data1[290] = persistent data "VTX_ARMY_54_TYPE"
+	data1[291] = persistent data "VTX_ARMY_54_XP"
+	data1[292] = persistent data "VTX_ARMY_54_MEN"
+	data1[293] = persistent data "VTX_ARMY_55_TYPE"
+	data1[294] = persistent data "VTX_ARMY_55_XP"
+	data1[295] = persistent data "VTX_ARMY_55_MEN"
+	data1[296] = persistent data "VTX_ARMY_56_TYPE"
+	data1[297] = persistent data "VTX_ARMY_56_XP"
+	data1[298] = persistent data "VTX_ARMY_56_MEN"
+	data1[299] = persistent data "VTX_ARMY_57_TYPE"
+	data1[300] = persistent data "VTX_ARMY_57_XP"
+	data1[301] = persistent data "VTX_ARMY_57_MEN"
+	data1[302] = persistent data "VTX_ARMY_58_TYPE"
+	data1[303] = persistent data "VTX_ARMY_58_XP"
+	data1[304] = persistent data "VTX_ARMY_58_MEN"
+	data1[305] = persistent data "VTX_ARMY_59_TYPE"
+	data1[306] = persistent data "VTX_ARMY_59_XP"
+	data1[307] = persistent data "VTX_ARMY_59_MEN"
+	data1[308] = persistent data "VTX_ARMY_60_TYPE"
+	data1[309] = persistent data "VTX_ARMY_60_XP"
+	data1[310] = persistent data "VTX_ARMY_60_MEN"
+	
+	data1[311] = persistent data "VTX_NUM_OREROCK"
+	data1[312] = persistent data "VTX_NUM_ROCK_OREROCK_SM"
+	data1[313] = persistent data "VTX_NUM_ROCK_OREROCK_MED"
+	data1[314] = persistent data "VTX_NUM_ROCK_OREROCK_LAR"
+	
+	data1[315] = persistent data "VTX_FOOD"
+	data1[316] = persistent data "VTX_WOOD"
+	data1[317] = persistent data "VTX_ORE"
+	
+	data1[318] = persistent data "VTX_NUM_ROCK_ROCK_BOU_ROU_LAR"
+	data1[319] = persistent data "VTX_NUM_ROCK_ROCK_BOU_ROU_MED"
+	data1[320] = persistent data "VTX_NUM_ROCK_ROCK_BOU_ROU_LAR"
+	data1[321] = persistent data "VTX_NUM_ROCK_ROCK_SIEGE"
+	data1[322] = persistent data "VTX_NUM_ROCK_ROCK_ELOI"
+	data1[323] = persistent data "VTX_NUM_ROCK_MOAI_SAD"
+	data1[324] = persistent data "VTX_NUM_ROCK_MOAI_SMI"
+	data1[325] = persistent data "VTX_NUM_ROCK_MOAI_FUN"
+	
+	data1[326] = persistent data "VTX_MISC_STREET_LAMP"
+	data1[327] = persistent data "VTX_MISC_TRIBUTE_BOX"
+	data1[328] = persistent data "VTX_MISC_COUNT"
+	data1[329] = persistent data "VTX_MISC_AZ_STEETLAMP"
+	data1[330] = persistent data "VTX_MISC_JA_TABLE"
+	data1[331] = persistent data "VTX_MISC_JA_LADDER"
+	data1[332] = persistent data "VTX_MISC_AZ_BARREL_1"
+	data1[333] = persistent data "VTX_MISC_AZ_BARREL_2"
+	data1[334] = persistent data "VTX_MISC_GR_BERREL_1"
+	data1[335] = persistent data "VTX_MISC_GR_BERREL_2"
+	data1[336] = persistent data "VTX_MISC_JA_BERREL_1"
+	data1[337] = persistent data "VTX_MISC_JA_BERREL_2"
+	data1[338] = persistent data "VTX_MISC_NO_BERREL_1"
+	data1[339] = persistent data "VTX_MISC_NO_BERREL_2"
+	data1[340] = persistent data "VTX_MISC_GR_URN_1"
+	data1[341] = persistent data "VTX_MISC_GR_URN_2"
+	data1[342] = persistent data "VTX_MISC_GR_URN_3"
+	data1[343] = persistent data "VTX_MISC_GR_URN_4"
+	data1[344] = persistent data "VTX_MISC_POO"
+	data1[345] = persistent data "VTX_MISC_NUTOIL_BERREL"
+	data1[346] = persistent data "VTX_MISC_7SAM_1"
+	data1[347] = persistent data "VTX_MISC_7SAM_2"
+	data1[348] = persistent data "VTX_MISC_7SAM_3"
+	data1[349] = persistent data "VTX_MISC_7SAM_4"
+	data1[350] = persistent data "VTX_MISC_7SAM_5"
+	data1[351] = persistent data "VTX_MISC_7SAM_6"
+	data1[352] = persistent data "VTX_MISC_7SAM_7"
+	data1[353] = persistent data "VTX_MISC_GR_CART_1"
+	data1[354] = persistent data "VTX_MISC_GR_CART_2"
+	data1[355] = persistent data "VTX_MISC_NO_BENCH_1"
+	data1[356] = persistent data "VTX_MISC_NO_BENCH_2"
+	data1[357] = persistent data "VTX_MISC_GR_BENCH_1"
+	data1[358] = persistent data "VTX_MISC_GR_BENCH_2"
+	data1[359] = persistent data "VTX_MISC_JA_BENCH_1"
+	data1[360] = persistent data "VTX_MISC_JA_BENCH_2"
+	data1[361] = persistent data "VTX_MISC_NO_POT_1"
+	data1[362] = persistent data "VTX_MISC_NO_POT_2"
+	data1[363] = persistent data "VTX_MISC_NO_POT_3"
+	data1[364] = persistent data "VTX_MISC_AZ_POT_1"
+	data1[365] = persistent data "VTX_MISC_AZ_POT_2"
+	data1[366] = persistent data "VTX_MISC_AZ_POT_3"
+	data1[367] = persistent data "VTX_MISC_JA_POT_1"
+	data1[368] = persistent data "VTX_MISC_JA_POT_2"
+	data1[369] = persistent data "VTX_MISC_JA_POT_3"
+	data1[370] = persistent data "VTX_MISC_GR_BARROW"
+	data1[371] = persistent data "VTX_MISC_GR_WALL_3_90"
+	data1[372] = persistent data "VTX_MISC_GR_WALL_3_180"
+	data1[373] = persistent data "VTX_MISC_GR_WALL_4_90"
+	data1[374] = persistent data "VTX_MISC_GR_WALL_4_180"
+	data1[375] = persistent data "VTX_MISC_AZ_WALL_1_90"
+	data1[376] = persistent data "VTX_MISC_AZ_WALL_1_180"
+	data1[377] = persistent data "VTX_MISC_AZ_WALL_4_90"
+	data1[378] = persistent data "VTX_MISC_AZ_WALL_4_180"
+	data1[379] = persistent data "VTX_MISC_JA_WALL_1_90"
+	data1[380] = persistent data "VTX_MISC_JA_WALL_1_180"
+	data1[381] = persistent data "VTX_MISC_JA_WALL_4_90"
+	data1[382] = persistent data "VTX_MISC_JA_WALL_4_180"
+	data1[383] = persistent data "VTX_MISC_NO_WALL_3_90"
+	data1[384] = persistent data "VTX_MISC_NO_WALL_3_180"
+	data1[385] = persistent data "VTX_MISC_NO_WALL_4_90"
+	data1[386] = persistent data "VTX_MISC_NO_WALL_4_180"
+	data1[387] = persistent data "VTX_MISC_STEETLIGHTWOOD"
+	data1[388] = persistent data "VTX_MISC_STREETLIGHTNORSE"
+	data1[389] = persistent data "VTX_MISC_STEETLIGHTBRASS"
+	data1[390] = persistent data "VTX_MISC_STREETLIGHTJAP"
+	data1[391] = persistent data "VTX_MISC_NO_PLANT_1"
+	data1[392] = persistent data "VTX_MISC_NO_PLANT_2"
+	data1[393] = persistent data "VTX_MISC_GR_WASHING"
+	data1[394] = persistent data "VTX_MISC_GR_PLANT_1"
+	data1[395] = persistent data "VTX_MISC_PLANT_NORMAL"
+	data1[396] = persistent data "VTX_MISC_PALM_STUMP"
+	data1[397] = persistent data "VTX_MISC_PALM_SPIKE"
+	data1[398] = persistent data "VTX_MISC_PALM_BANANA"
+	data1[399] = persistent data "VTX_MISC_HAY_BAL"
+	
+end script VTX_Read_Data
+
+begin script Vtx_Create_Tree(treeType, num)
+	cnt = 0
+	obj = 0
+	ang = 0
+start
+	wait 0.3 seconds
+	while (cnt < num)
+		ang = number from 0 to 360
+		if (treeType == 0)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_TREE TREE_INFO_BEECH at {vtx_marker}
+		elsif (treeType == 1)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_TREE TREE_INFO_SPRUCE at {vtx_marker}
+		elsif (treeType == 2)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_TREE TREE_INFO_CEDAR at {vtx_marker}
+		elsif (treeType == 3)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_TREE TREE_INFO_OAK at {vtx_marker}
+		elsif (treeType == 4)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_TREE TREE_INFO_OLIVE at {vtx_marker}
+		elsif (treeType == 5)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_TREE TREE_INFO_PINE at {vtx_marker}
+		elsif (treeType == 6)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_TREE TREE_INFO_ACACIA at {vtx_marker}
+		elsif (treeType == 7)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_TREE TREE_INFO_PALM at {vtx_marker}
+		elsif (treeType == 8)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_TREE TREE_INFO_BIG_PALM at {vtx_marker}
+		elsif (treeType == 9)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_TREE TREE_INFO_FIR at {vtx_marker}
+		elsif (treeType == 10)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_TREE TREE_INFO_MAPLE at {vtx_marker}
+		end if
+		run background script Vtx_LaunchObject(obj)
+		wait 0.3 seconds
+		cnt++
+	end while
+end script Vtx_Create_Tree
+
+begin script Vtx_Create_Rock(rockType, num)
+	cnt = 0
+	obj = 0
+	ang = 0
+start
+	wait 0.6 seconds
+	while (cnt < num)
+		ang = number from 0 to 360
+		if (rockType == 9)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK at {vtx_marker}
+		elsif (rockType == 0)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_SMALL_NORSE_ROCK at {vtx_marker}
+		elsif (rockType == 1)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_MEDIUM_NORSE_ROCK at {vtx_marker}
+		elsif (rockType == 2)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_LARGE_NORSE_ROCK at {vtx_marker}
+		elsif (rockType == 67)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_BOULDER_SMALL at {vtx_marker}
+		elsif (rockType == 68)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_BOULDER_BIG at {vtx_marker}
+		elsif (rockType == 69)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_BOULDER_TINY at {vtx_marker}
+		elsif (rockType == 70)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_BOULDER_HUGE at {vtx_marker}
+		elsif (rockType == 71)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_BOULDER_MASSIVE at {vtx_marker}
+		elsif (rockType == 72)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_ELIPSOID_SMALL at {vtx_marker}
+		elsif (rockType == 73)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_ELIPSOID_MEDIUM at {vtx_marker}
+		elsif (rockType == 74)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_ELIPSOID_MASSIVE at {vtx_marker}
+		elsif (rockType == 75)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_ELIPSOID_HUGE at {vtx_marker}
+		elsif (rockType == 76)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_ELIPSOID_BIG at {vtx_marker}
+		elsif (rockType == 77)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_ELIPSOID_TINY at {vtx_marker}
+		elsif (rockType == 78)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_SHARP_SMALL at {vtx_marker}
+		elsif (rockType == 79)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_SHARP_MEDIUM at {vtx_marker}
+		elsif (rockType == 80)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_SHARP_TINY at {vtx_marker}
+		elsif (rockType == 81)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_SHARP_BIG at {vtx_marker}
+		elsif (rockType == 82)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_SHARP_HUGE at {vtx_marker}
+		elsif (rockType == 83)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_SHARP_MASSIVE at {vtx_marker}
+		elsif (rockType == 84)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_ERODED_BIG at {vtx_marker}
+		elsif (rockType == 85)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_ERODED_MEDIUM at {vtx_marker}
+		elsif (rockType == 86)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_ERODED_TINY at {vtx_marker}
+		elsif (rockType == 87)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_ERODED_HUGE at {vtx_marker}
+		elsif (rockType == 88)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_ERODED_SMALL at {vtx_marker}
+		elsif (rockType == 89)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_ERODED_MASSIVE at {vtx_marker}
+		elsif (rockType == 90)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_BLOCK_TINY at {vtx_marker}
+		elsif (rockType == 91)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_BLOCK_MEDIUM at {vtx_marker}
+		elsif (rockType == 92)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_BLOCK_SMALL at {vtx_marker}
+		elsif (rockType == 93)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_BLOCK_MASSIVE at {vtx_marker}
+		elsif (rockType == 94)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_BLOCK_HUGE at {vtx_marker}
+		elsif (rockType == 95)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_BLOCK_BIG at {vtx_marker}
+		elsif (rockType == 43)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_BOULDER_ROUND at {vtx_marker}
+		elsif (rockType == 44)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_BOULDER_ROUND_MEDIUM at {vtx_marker}
+		elsif (rockType == 45)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_BOULDER_ROUND_LARGE at {vtx_marker}
+		elsif (rockType == 48)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ELOI_ROCK at {vtx_marker}
+		elsif (rockType == 49)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_SIEGE_ROCK at {vtx_marker}
+		elsif (rockType == 106)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_MOAI_SAD at {vtx_marker}
+		elsif (rockType == 107)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_MOAI_SMILING at {vtx_marker}
+		elsif (rockType == 108)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_MOAI_FUNNY at {vtx_marker}
+		end if
+		run background script Vtx_LaunchObject(obj)
+		wait 1 seconds
+		obj = get SCRIPT_OBJECT_TYPE_ROCK at {vtx_marker} radius 5
+		if(obj exists)
+			run background script Vtx_LaunchObject(obj)
+			wait 1 seconds
+		end if
+		cnt++
+	end while
+end script Vtx_Create_Rock
+
+begin script Vtx_Create_Food(amoun)
+	obj = 0
+	tarX = 0
+	tarZ = 0
+	deg = 0
+start 
+	deg = 180
+	tarX = (get SCRIPT_OBJECT_PROPERTY_TYPE_XPOS of vtx_marker) + (15/57.294) * cos (deg)
+	tarZ = (get SCRIPT_OBJECT_PROPERTY_TYPE_ZPOS of vtx_marker) + (15/57.294) * sin (deg)
+	obj = create SCRIPT_OBJECT_TYPE_STORE RESOURCE_TYPE_FOOD at {tarX,0,tarZ}
+	set obj resource RESOURCE_TYPE_FOOD to amoun
+end script Vtx_Create_Food
+
+begin script Vtx_Create_Wood(amoun)
+	obj = 0
+	tarX = 0
+	tarZ = 0
+	deg = 0
+start 
+	deg = 90
+	tarX = (get SCRIPT_OBJECT_PROPERTY_TYPE_XPOS of vtx_marker) + (15/57.294) * cos (deg)
+	tarZ = (get SCRIPT_OBJECT_PROPERTY_TYPE_ZPOS of vtx_marker) + (15/57.294) * sin (deg)
+	obj = create SCRIPT_OBJECT_TYPE_STORE RESOURCE_TYPE_WOOD at {tarX,0,tarZ}
+	set obj resource RESOURCE_TYPE_WOOD to amoun
+end script Vtx_Create_Wood
+
+begin script Vtx_Create_Ore(amoun)
+	obj = 0
+	tarX = 0
+	tarZ = 0
+	deg = 0
+start 
+	deg = 270
+	tarX = (get SCRIPT_OBJECT_PROPERTY_TYPE_XPOS of vtx_marker) + (15/57.294) * cos (deg)
+	tarZ = (get SCRIPT_OBJECT_PROPERTY_TYPE_ZPOS of vtx_marker) + (15/57.294) * sin (deg)
+	obj = create SCRIPT_OBJECT_TYPE_STORE RESOURCE_TYPE_ORE at {tarX,0,tarZ}
+	set obj resource RESOURCE_TYPE_ORE to amoun
+end script Vtx_Create_Ore
+
+begin script Vtx_Create_Villager(villType, num)
+	cnt = 0
+	obj = 0
+start
+	while (cnt < num)
+		if (villType == 0)
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER VILLAGER_INFO_AZTEC_HOUSEWIFE_FEMALE at {vtx_marker}
+		elsif (villType == 1)
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER VILLAGER_INFO_AZTEC_FORESTER_MALE at {vtx_marker}
+		elsif (villType == 2)
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER VILLAGER_INFO_AZTEC_FISHERMAN_MALE at {vtx_marker}
+		elsif (villType == 3)
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER VILLAGER_INFO_AZTEC_FARMER_MALE at {vtx_marker}
+		elsif (villType == 4)
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER VILLAGER_INFO_AZTEC_SHEPHERD_MALE at {vtx_marker}
+		elsif (villType == 5)
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER VILLAGER_INFO_AZTEC_LEADER_MALE at {vtx_marker}
+		elsif (villType == 6)
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER VILLAGER_INFO_AZTEC_TRADER_MALE at {vtx_marker}
+		elsif (villType == 7)
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER VILLAGER_INFO_JAPANESE_HOUSEWIFE_FEMALE at {vtx_marker}
+		elsif (villType == 8)
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER VILLAGER_INFO_JAPANESE_FORESTER_MALE at {vtx_marker}
+		elsif (villType == 9)
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER VILLAGER_INFO_JAPANESE_FISHERMAN_MALE at {vtx_marker}
+		elsif (villType == 10)
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER VILLAGER_INFO_JAPANESE_FARMER_MALE at {vtx_marker}
+		elsif (villType == 11)
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER VILLAGER_INFO_JAPANESE_SHEPHERD_MALE at {vtx_marker}
+		elsif (villType == 12)
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER VILLAGER_INFO_JAPANESE_LEADER_MALE at {vtx_marker}
+		elsif (villType == 13)
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER VILLAGER_INFO_JAPANESE_TRADER_MALE at {vtx_marker}
+		elsif (villType == 21)
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER VILLAGER_INFO_GREEK_HOUSEWIFE_FEMALE at {vtx_marker}
+		elsif (villType == 22)
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER VILLAGER_INFO_GREEK_FORESTER_MALE at {vtx_marker}
+		elsif (villType == 23)
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER VILLAGER_INFO_GREEK_FISHERMAN_MALE at {vtx_marker}
+		elsif (villType == 24)
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER VILLAGER_INFO_GREEK_FARMER_MALE at {vtx_marker}
+		elsif (villType == 25)
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER VILLAGER_INFO_GREEK_SHEPHERD_MALE at {vtx_marker}
+		elsif (villType == 26)
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER VILLAGER_INFO_GREEK_LEADER_MALE at {vtx_marker}
+		elsif (villType == 27)
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER VILLAGER_INFO_GREEK_TRADER_MALE at {vtx_marker}
+		elsif (villType == 28)
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER VILLAGER_INFO_NORSE_HOUSEWIFE_FEMALE at {vtx_marker}
+		elsif (villType == 29)
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER VILLAGER_INFO_NORSE_FORESTER_MALE at {vtx_marker}
+		elsif (villType == 30)
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER VILLAGER_INFO_NORSE_FISHERMAN_MALE at {vtx_marker}
+		elsif (villType == 31)
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER VILLAGER_INFO_NORSE_FARMER_MALE at {vtx_marker}
+		elsif (villType == 32)
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER VILLAGER_INFO_NORSE_SHEPHERD_MALE at {vtx_marker}
+		elsif (villType == 33)
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER VILLAGER_INFO_NORSE_LEADER_MALE at {vtx_marker}
+		elsif (villType == 34)
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER VILLAGER_INFO_NORSE_TRADER_MALE at {vtx_marker}
+		end if
+		run background script Vtx_Lead_Villager(obj)
+		wait 0.2 seconds
+		cnt++
+	end while
+end script Vtx_Create_Villager
+
+begin script Vtx_Create_Child(villType, num)
+	cnt = 0
+	obj = 0
+start
+	while (cnt < num)
+		if (villType == 0)
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER_CHILD VILLAGER_INFO_AZTEC_HOUSEWIFE_FEMALE at {vtx_marker}
+		elsif (villType == 1)
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER_CHILD VILLAGER_INFO_AZTEC_FORESTER_MALE at {vtx_marker}
+		elsif (villType == 2)
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER_CHILD VILLAGER_INFO_AZTEC_FISHERMAN_MALE at {vtx_marker}
+		elsif (villType == 3)
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER_CHILD VILLAGER_INFO_AZTEC_FARMER_MALE at {vtx_marker}
+		elsif (villType == 4)
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER_CHILD VILLAGER_INFO_AZTEC_SHEPHERD_MALE at {vtx_marker}
+		elsif (villType == 5)
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER_CHILD VILLAGER_INFO_AZTEC_LEADER_MALE at {vtx_marker}
+		elsif (villType == 6)                        
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER_CHILD VILLAGER_INFO_AZTEC_TRADER_MALE at {vtx_marker}
+		elsif (villType == 7)                        
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER_CHILD VILLAGER_INFO_JAPANESE_HOUSEWIFE_FEMALE at {vtx_marker}
+		elsif (villType == 8)                        
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER_CHILD VILLAGER_INFO_JAPANESE_FORESTER_MALE at {vtx_marker}
+		elsif (villType == 9)                        
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER_CHILD VILLAGER_INFO_JAPANESE_FISHERMAN_MALE at {vtx_marker}
+		elsif (villType == 10)                       
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER_CHILD VILLAGER_INFO_JAPANESE_FARMER_MALE at {vtx_marker}
+		elsif (villType == 11)                       
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER_CHILD VILLAGER_INFO_JAPANESE_SHEPHERD_MALE at {vtx_marker}
+		elsif (villType == 12)                       
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER_CHILD VILLAGER_INFO_JAPANESE_LEADER_MALE at {vtx_marker}
+		elsif (villType == 13)                       
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER_CHILD VILLAGER_INFO_JAPANESE_TRADER_MALE at {vtx_marker}
+		elsif (villType == 21)                       
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER_CHILD VILLAGER_INFO_GREEK_HOUSEWIFE_FEMALE at {vtx_marker}
+		elsif (villType == 22)                       
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER_CHILD VILLAGER_INFO_GREEK_FORESTER_MALE at {vtx_marker}
+		elsif (villType == 23)                       
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER_CHILD VILLAGER_INFO_GREEK_FISHERMAN_MALE at {vtx_marker}
+		elsif (villType == 24)                       
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER_CHILD VILLAGER_INFO_GREEK_FARMER_MALE at {vtx_marker}
+		elsif (villType == 25)                       
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER_CHILD VILLAGER_INFO_GREEK_SHEPHERD_MALE at {vtx_marker}
+		elsif (villType == 26)                       
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER_CHILD VILLAGER_INFO_GREEK_LEADER_MALE at {vtx_marker}
+		elsif (villType == 27)                       
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER_CHILD VILLAGER_INFO_GREEK_TRADER_MALE at {vtx_marker}
+		elsif (villType == 28)                       
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER_CHILD VILLAGER_INFO_NORSE_HOUSEWIFE_FEMALE at {vtx_marker}
+		elsif (villType == 29)                       
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER_CHILD VILLAGER_INFO_NORSE_FORESTER_MALE at {vtx_marker}
+		elsif (villType == 30)                       
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER_CHILD VILLAGER_INFO_NORSE_FISHERMAN_MALE at {vtx_marker}
+		elsif (villType == 31)                       
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER_CHILD VILLAGER_INFO_NORSE_FARMER_MALE at {vtx_marker}
+		elsif (villType == 32)                       
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER_CHILD VILLAGER_INFO_NORSE_SHEPHERD_MALE at {vtx_marker}
+		elsif (villType == 33)                       
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER_CHILD VILLAGER_INFO_NORSE_LEADER_MALE at {vtx_marker}
+		elsif (villType == 34)                       
+			obj = create SCRIPT_OBJECT_TYPE_VILLAGER_CHILD VILLAGER_INFO_NORSE_TRADER_MALE at {vtx_marker}
+		end if
+		run background script Vtx_Lead_Villager(obj)
+		wait 0.2 seconds
+		cnt++
+	end while
+end script Vtx_Create_Child
+
+begin script Vtx_Create_Army(aType, aMen, xp)
+	plat = 0
+start
+	if (aType == 0)
+		plat = create platoon PLATOON_INFO_AZTEC_MELEE_1 at {vtx_marker} with aMen men and 0 women
+	elsif (aType == 1)
+		plat = create platoon PLATOON_INFO_AZTEC_RANGED_1 at {vtx_marker} with aMen men and 0 women
+	elsif (aType == 2)
+		plat = create platoon PLATOON_INFO_JAPANESE_MELEE_1 at {vtx_marker} with aMen men and 0 women
+	elsif (aType == 3)
+		plat = create platoon PLATOON_INFO_JAPANESE_RANGED_1 at {vtx_marker} with aMen men and 0 women
+	elsif (aType == 4)
+		plat = create platoon PLATOON_INFO_GREEK_MELEE_1 at {vtx_marker} with aMen men and 0 women
+	elsif (aType == 5)
+		plat = create platoon PLATOON_INFO_GREEK_RANGED_1 at {vtx_marker} with aMen men and 0 women
+	elsif (aType == 6)
+		plat = create platoon PLATOON_INFO_NORSE_MELEE_1 at {vtx_marker} with aMen men and 0 women
+	elsif (aType == 7)
+		plat = create platoon PLATOON_INFO_NORSE_RANGED_1 at {vtx_marker} with aMen men and 0 women
+	elsif (aType == 8)
+		plat = create platoon PLATOON_INFO_SEVEN_SAMURAI at {vtx_marker} with aMen men and 0 women
+	elsif (aType == 9)
+		plat = create platoon PLATOON_INFO_SKELETON_MELEE at {vtx_marker} with aMen men and 0 women
+	end if
+	
+	set plat player 0
+	set platoon plat experience to xp
+	
+	run background script Vtx_Lead_Army(plat)
+	
+end script Vtx_Create_Army
+
+begin script Vtx_Create_Siege(xp)
+	siege1 = 0
+start
+	if (xp == 0)
+		siege1 = create siege weapon SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_1 belonging to vtx_attachTown at {vtx_marker}
+	elsif (xp == 1)
+		siege1 = create siege weapon SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_2 belonging to vtx_attachTown at {vtx_marker}
+	elsif (xp == 2)
+		siege1 = create siege weapon SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 belonging to vtx_attachTown at {vtx_marker}
+	elsif (xp == 3)
+		siege1 = create siege weapon SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_4 belonging to vtx_attachTown at {vtx_marker}
+	elsif (xp == 4)
+		siege1 = create siege weapon SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_5 belonging to vtx_attachTown at {vtx_marker}
+	elsif (xp == 5)
+		siege1 = create siege weapon SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_6 belonging to vtx_attachTown at {vtx_marker}
+	elsif (xp == 6)
+		siege1 = create siege weapon SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_7 belonging to vtx_attachTown at {vtx_marker}
+	elsif (xp == 7)
+		siege1 = create siege weapon SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_8 belonging to vtx_attachTown at {vtx_marker}
+	elsif (xp == 8)
+		siege1 = create siege weapon SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_9 belonging to vtx_attachTown at {vtx_marker}
+	elsif (xp == 9)
+		siege1 = create siege weapon SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_10 belonging to vtx_attachTown at {vtx_marker}
+	end if
+	
+	run background script Vtx_Lead_Siege(siege1)
+end script Vtx_Create_Siege
+
+begin script Vtx_Create_Misc(miscType, num)
+	cnt = 0
+	ang = 0
+	obj = 0
+start
+	wait 0.5 seconds
+	while (cnt < num)
+		ang = number from 0 to 360
+		if (miscType == 7)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_STREET_LANTERN at {vtx_marker}
+		elsif (miscType == 18)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_TRIBUTE_BOX at {vtx_marker}
+		elsif (miscType == 23)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_TOMBMARKERS at {vtx_marker}
+		elsif (miscType == 25)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_AZTEC_STREETLIGHT at {vtx_marker}
+		elsif (miscType == 26)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_JAPANESE_TABLE at {vtx_marker}
+		elsif (miscType == 27)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_JAPANESE_LADDER at {vtx_marker}
+		elsif (miscType == 28)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_AZTEC_BARREL_01 at {vtx_marker}
+		elsif (miscType == 29)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_AZTEC_BARREL_02 at {vtx_marker}
+		elsif (miscType == 30)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_BARREL_01 at {vtx_marker}
+		elsif (miscType == 31)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_BARREL_02 at {vtx_marker}
+		elsif (miscType == 32)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_JAPANESE_BARREL_01 at {vtx_marker}
+		elsif (miscType == 33)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_JAPANESE_BARREL_02 at {vtx_marker}
+		elsif (miscType == 34)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSE_BARREL_01 at {vtx_marker}
+		elsif (miscType == 35)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSE_BARREL_02 at {vtx_marker}
+		elsif (miscType == 36)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_URN_01 at {vtx_marker}
+		elsif (miscType == 37)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_URN_02 at {vtx_marker}
+		elsif (miscType == 38)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_URN_03 at {vtx_marker}
+		elsif (miscType == 39)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_URN_04 at {vtx_marker}
+		elsif (miscType == 46)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_LUMP_OF_POO at {vtx_marker}
+		elsif (miscType == 49)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NUTOIL_BARREL at {vtx_marker}
+		elsif (miscType == 60)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_SEVEN_SAMURAI_01 at {vtx_marker}
+		elsif (miscType == 61)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_SEVEN_SAMURAI_02 at {vtx_marker}
+		elsif (miscType == 62)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_SEVEN_SAMURAI_03 at {vtx_marker}
+		elsif (miscType == 63)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_SEVEN_SAMURAI_04 at {vtx_marker}
+		elsif (miscType == 64)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_SEVEN_SAMURAI_05 at {vtx_marker}
+		elsif (miscType == 65)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_SEVEN_SAMURAI_06 at {vtx_marker}
+		elsif (miscType == 66)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_SEVEN_SAMURAI_07 at {vtx_marker}
+		elsif (miscType == 98)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_CART_01 at {vtx_marker}
+		elsif (miscType == 99)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_CART_02 at {vtx_marker}
+		elsif (miscType == 100)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSE_BENCH_01 at {vtx_marker}
+		elsif (miscType == 101)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSE_BENCH_02 at {vtx_marker}
+		elsif (miscType == 102)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_BENCH_01 at {vtx_marker}
+		elsif (miscType == 103)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_BENCH_02 at {vtx_marker}
+		elsif (miscType == 104)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_JAPANESE_BENCH_01 at {vtx_marker}
+		elsif (miscType == 105)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_JAPANESE_BENCH_02 at {vtx_marker}
+		elsif (miscType == 109)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSE_POT_01 at {vtx_marker}
+		elsif (miscType == 110)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSE_POT_02 at {vtx_marker}
+		elsif (miscType == 111)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSE_POT_03 at {vtx_marker}
+		elsif (miscType == 112)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_AZTEC_POT_01 at {vtx_marker}
+		elsif (miscType == 113)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_AZTEC_POT_02 at {vtx_marker}
+		elsif (miscType == 114)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_AZTEC_POT_03 at {vtx_marker}
+		elsif (miscType == 115)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_JAPANESE_POT_01 at {vtx_marker}
+		elsif (miscType == 116)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_JAPANESE_POT_02 at {vtx_marker}
+		elsif (miscType == 117)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_JAPANESE_POT_03 at {vtx_marker}
+		elsif (miscType == 118)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_BARROW at {vtx_marker}
+		elsif (miscType == 119)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_WALL_03_90 at {vtx_marker}
+		elsif (miscType == 120)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_WALL_03_180 at {vtx_marker}
+		elsif (miscType == 121)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_WALL_04_90 at {vtx_marker}
+		elsif (miscType == 122)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_WALL_04_180 at {vtx_marker}
+		elsif (miscType == 123)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_AZTEC_WALL_01_90 at {vtx_marker}
+		elsif (miscType == 124)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_AZTEC_WALL_01_180 at {vtx_marker}
+		elsif (miscType == 125)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_AZTEC_WALL_04_90 at {vtx_marker}
+		elsif (miscType == 126)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_AZTEC_WALL_04_180 at {vtx_marker}
+		elsif (miscType == 127)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_JAPANESE_WALL_01_90 at {vtx_marker}
+		elsif (miscType == 128)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_JAPANESE_WALL_01_180 at {vtx_marker}
+		elsif (miscType == 129)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_JAPANESE_WALL_04_90 at {vtx_marker}
+		elsif (miscType == 130)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_JAPANESE_WALL_04_180 at {vtx_marker}
+		elsif (miscType == 131)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSE_WALL_03_90 at {vtx_marker}
+		elsif (miscType == 132)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSE_WALL_03_180 at {vtx_marker}
+		elsif (miscType == 133)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSE_WALL_04_90 at {vtx_marker}
+		elsif (miscType == 134)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSE_WALL_04_180 at {vtx_marker}
+		elsif (miscType == 135)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_STREETLIGHTWOOD at {vtx_marker}
+		elsif (miscType == 136)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_STREETLIGHTNORSE at {vtx_marker}
+		elsif (miscType == 137)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_STREETLIGHTBRASS at {vtx_marker}
+		elsif (miscType == 138)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_STREETLIGHTJAPANESE at {vtx_marker}
+		elsif (miscType == 140)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSE_PLANT_1 at {vtx_marker}
+		elsif (miscType == 141)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSE_PLANT_2 at {vtx_marker}
+		elsif (miscType == 142)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_GREEK_WASHING_LINE at {vtx_marker}
+		elsif (miscType == 143)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_GREEK_PLANT_1 at {vtx_marker}
+		elsif (miscType == 144)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_PLANT_NORMAL at {vtx_marker}
+		elsif (miscType == 145)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_PALM_STUMP at {vtx_marker}
+		elsif (miscType == 146)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_PALM_SPIKE at {vtx_marker}
+		elsif (miscType == 147)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_PALM_BANANA at {vtx_marker}
+		elsif (miscType == 148)
+			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATC_HAY_BALE at {vtx_marker}
+		end if
+		run background script Vtx_LaunchMisc(obj)
+		wait 0.6 seconds
+		obj = get SCRIPT_OBJECT_TYPE_MOBILE_STATIC at {vtx_marker} radius 5
+		if(obj exists)
+			run background script Vtx_LaunchMisc(obj)
+			wait 1 seconds
+		end if
+		cnt++
+	end while
+end script Vtx_Create_Misc
+
+begin script Vtx_Lead_Villager(vtxObj)
+	tarX = 0
+	tarY = 0
+start
+	tarX = ((30/57.294) * cos(vtx_angle)) + (number from -5 to 5)
+	tarY = ((30/57.294) * sin(vtx_angle)) + (number from -5 to 5)
+	move vtxObj position to {vtx_marker}+{tarX,0,tarY}
+	attach vtxObj to vtx_attachTown
+	wait 9 seconds
+	release vtxObj
+end script Vtx_Lead_Villager
+
+begin script Vtx_Lead_Army(vtxObj)
+	mark = 0
+	tarX = 0
+	tarY = 0
+start
+	tarX = ((30/57.294) * cos(vtx_angle)) + (number from -10 to 10)
+	tarY = ((30/57.294) * sin(vtx_angle)) + (number from -10 to 10)
+	mark = marker at {vtx_marker}+{tarX,0,tarY}
+	wait 1 second
+	add action PLATOON_AGENDA_ACTION_MOVE_TO_POS using {mark} to vtxObj action queue
+	wait 3 seconds
+end script Vtx_Lead_Army
+
+begin script Vtx_Lead_Siege(vtxObj)
+	mark = 0
+start
+	mark = marker at {vtx_marker}+{(30/57.294) * cos(vtx_angle),0,0}
+	wait 1 second
+	add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {mark} to siege weapon vtxObj action queue
+	wait 3 seconds
+end script Vtx_Lead_Siege
+
+begin script Vtx_LaunchObject(obj)
+	tarX = 0
+	tarY = 0
+	tarZ = 0
+	sp = 0
+	deg = 0
+	dist = 0
+	vis = 0
+start 
+	//Some calculations first
+	deg = (vtx_angle)+(number from VTX_DEGREES_MIN to VTX_DEGREES_MAX)
+	dist = number from VTX_DISTANCE_MIN to VTX_DISTANCE_MAX
+	tarX = (get SCRIPT_OBJECT_PROPERTY_TYPE_XPOS of vtx_marker) + (dist/57.294) * cos (deg)
+	tarZ = (get SCRIPT_OBJECT_PROPERTY_TYPE_ZPOS of vtx_marker) + (dist/57.294) * sin (deg)
+	tarY = (land height at {tarX, tarZ}) + (number from VTX_HEIGHT_MIN to VTX_HEIGHT_MAX)
+	sp = number from VTX_SPEED_MIN to VTX_SPEED_MAX
+	
+	//Launch object
+	set obj velocity heading {tarX,tarY,tarZ} speed sp
+end script Vtx_LaunchObject
+
+begin script Vtx_LaunchMisc(obj)
+	tarX = 0
+	tarY = 0
+	tarZ = 0
+	sp = 0
+	deg = 0
+	dist = 0
+	vis = 0
+start 
+	//Some calculations first
+	deg = (vtx_angle)+(number from VTX_DEGREES_MIN to VTX_DEGREES_MAX)
+	dist = number from VTX_DISTANCE_MIN to VTX_DISTANCE_MAX
+	tarX = (get SCRIPT_OBJECT_PROPERTY_TYPE_XPOS of vtx_marker) + (dist/57.294) * cos (deg)
+	tarZ = (get SCRIPT_OBJECT_PROPERTY_TYPE_ZPOS of vtx_marker) + (dist/57.294) * sin (deg)
+	tarY = (land height at {tarX, tarZ}) + (number from VTX_HEIGHT_MIN to VTX_HEIGHT_MAX)
+	sp = number from 30 to 50
+	
+	//Launch object
+	set obj velocity heading {tarX,tarY,tarZ} speed sp
+end script Vtx_LaunchMisc
