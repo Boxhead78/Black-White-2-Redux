@@ -2996,6 +2996,7 @@ start
                 wait until not LC7_Platoon[14] recruiting
                 run background script LC7_StaticPlatoonsActions(PlatoonPos[12],Melee,LC7_Platoon[14],JapaneseTown2)
     
+            //Take over MinorTown4
             elsif LC7_Platoon[33] not exists and size of PlayerTown > 100 and HardMode == 1 and PLAYER of JapaneseTown2 == 1 and not town JapaneseTown2 is under takeover from player 0 and get LC7_RecruitTimer3 time remaining <= 0
                 LC7_Platoon[33] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown2 platoon of size 50 * RecruitSizeModifier
                 LC7_RecruitTimer3 = create timer for (50 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
@@ -3046,7 +3047,7 @@ start
                             elsif get number of type HOUSE ABODE_NUMBER_RANGED_ARMOURY in GenericTown min built 0.0 < 3
                                 run background script AGB_BuildBuilding(GenericTown,AGB_ARMORYRANGED,AGB_JAPANESE)
 
-                            elsif adult capacity of GenericTown < 120
+                            elsif adult capacity of GenericTown < 150
                                 run background script AGB_BuildBuilding(GenericTown,AGB_HOUSE,AGB_JAPANESE)
 
                             end if
@@ -3230,7 +3231,7 @@ start
         end if
 
         if get BuildingDefendersAllowedTimer time remaining <= 0
-            BuildingDefendersAllowedTimer = create timer for 240 * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
+            BuildingDefendersAllowedTimer = create timer for 240 * RecruitModifier seconds
             BuildingDefendersAllowed[0] = 1
             BuildingDefendersAllowed[1] = 1
             BuildingDefendersAllowed[2] = 1
@@ -3262,7 +3263,7 @@ start
 
         if get LargeAttackTimer time remaining <= 0
             if Difficulty >= 4 or HardMode == 1
-                if TownsConverted >= 4 or get army size in town PlayerTown > 60 or size of PlayerTown > 275
+                if TownsConverted >= 4 or get army size in town PlayerTown > 60 or size of PlayerTown > PlayerTownStartSize + 175
                     if TownsConverted >= 2 //If player has a large army, start siege earlier
                         if PLAYER of JapaneseTown1 == 1 and not town JapaneseTown1 is under takeover from player 0 and LC7_LargeSiegeIsRunning == 0 and SiegeCheck == 0
                             SiegeCheck = 1
