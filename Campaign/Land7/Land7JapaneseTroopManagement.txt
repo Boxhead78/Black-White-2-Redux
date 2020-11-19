@@ -123,7 +123,7 @@ start
     PlatoonPos[8] = marker at {1260.50,114.58,1677.73}
     PlatoonPos[9] = marker at {1589.76,44.28,1021.88}
     PlatoonPos[10] = marker at {1629.56,43.99,1116.95}
-    PlatoonPos[11] = marker at {1589.76,44.28,1021.88}
+    PlatoonPos[11] = marker at {1678.44,44.94,972.39}
     PlatoonPos[12] = marker at {961.04,83.25,1087.53}
     PlatoonPos[13] = marker at {1785.09,47.56,1289.00}
     //HardMode
@@ -2090,65 +2090,125 @@ begin loop
     elsif Task == Conqueror
         AttackWPStage = 3
         oTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in NearestSettlement min built 1.0
-        if DefendObject exists
-            if not Platoon can navigate to object oTownCentre
-                AttackingPoint1 = marker at {DefendObject} + {number from 20 to -20,0,number from 20 to -20}
-                clear Platoon action queue 
-                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPoint1} to Platoon action queue
-                wait 10 seconds
-            end if
-        else
-            if Platoon can navigate to object oTownCentre and PLAYER of NearestSettlement != 1
-                a = 0
-                if AttackFocus == Default
-                    clear Platoon action queue
-                    Number = number from 1 to 4
-                    if Number == 2 and HEALTH of MyCreature > 0 //Hunt down platoons or destroy buildings
-                        AttackMode = 1
-                        set Platoon attack NearestSettlement with severity 0.2
-                    elsif Number == 3 or Number == 4 //Destroy value buildings
+        if PLAYER of NearestSettlement != 1 and oTownCentre exists
+            if DefendObject exists
+                if not Platoon can navigate to object oTownCentre
+                    AttackingPoint1 = marker at {DefendObject} + {number from 20 to -20,0,number from 20 to -20}
+                    clear Platoon action queue 
+                    add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPoint1} to Platoon action queue
+                    wait 10 seconds
+                end if
+            else
+                if Platoon can navigate to object oTownCentre and PLAYER of NearestSettlement != 1
+                    a = 0
+                    if AttackFocus == Default
+                        clear Platoon action queue
+                        Number = number from 1 to 4
+                        if Number == 2 and HEALTH of MyCreature > 0 //Hunt down platoons or destroy buildings
+                            AttackMode = 1
+                            set Platoon attack NearestSettlement with severity 0.2
+                        elsif Number == 3 or Number == 4 //Destroy value buildings
+                            AttackMode = 2
+                            Building = 0
+                            Timer = create timer for 2 seconds
+                            begin loop
+                                Number = number from 1 to 8
+                                if Number == 1 or Number == 2 or Number == 3
+                                    Building = get random abode of type ALTAR in town NearestSettlement
+                                    if Building exists and HEALTH of Building >= 0.75
+                                        add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 4
+                                    Building = get random abode of type TEMPLE in town NearestSettlement
+                                    if Building exists and HEALTH of Building >= 0.75
+                                        add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 5
+                                    Building = get random abode of type CREATURE_PEN in town NearestSettlement
+                                    if Building exists and HEALTH of Building >= 0.75
+                                        add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 6
+                                    Building = get random abode of type UNIVERSITY in town NearestSettlement
+                                    if Building exists and HEALTH of Building >= 0.75
+                                        add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 7
+                                    Building = get random abode of type BATHHOUSE in town NearestSettlement
+                                    if Building exists and HEALTH of Building >= 0.75
+                                        add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 8
+                                    Building = get random abode of type AMPITHEATRE in town NearestSettlement
+                                    if Building exists and HEALTH of Building >= 0.75
+                                        add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                end if
+                                until Building != 0 or get Timer time remaining <= 0
+                            end loop
+                        else //Capture Town
+                            AttackMode = 0
+                            if TownCapturePlatoons[0] < 2
+                                TownCapturePlatoons[0]++
+                                set Platoon attack NearestSettlement with severity 0.3 for takeover
+                            end if
+                        end if
+                    elsif AttackFocus == Houses
+                        clear Platoon action queue
                         AttackMode = 2
                         Building = 0
                         Timer = create timer for 2 seconds
                         begin loop
-                            Number = number from 1 to 8
-                            if Number == 1 or Number == 2 or Number == 3
-                                Building = get random abode of type ALTAR in town NearestSettlement
+                            Number = number from 1 to 6
+                            if Number == 1
+                                Building = get random abode of type ABODE_A in town NearestSettlement
+                                if Building exists and HEALTH of Building >= 0.75
+                                    add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                else
+                                    Building = 0
+                                end if
+                            elsif Number == 2
+                                Building = get random abode of type ABODE_B in town NearestSettlement
+                                if Building exists and HEALTH of Building >= 0.75
+                                    add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                else
+                                    Building = 0
+                                end if
+                            elsif Number == 3
+                                Building = get random abode of type ABODE_C in town NearestSettlement
                                 if Building exists and HEALTH of Building >= 0.75
                                     add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
                                 else
                                     Building = 0
                                 end if
                             elsif Number == 4
-                                Building = get random abode of type TEMPLE in town NearestSettlement
+                                Building = get random abode of type ABODE_D in town NearestSettlement
                                 if Building exists and HEALTH of Building >= 0.75
                                     add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
                                 else
                                     Building = 0
                                 end if
                             elsif Number == 5
-                                Building = get random abode of type CREATURE_PEN in town NearestSettlement
+                                Building = get random abode of type ABODE_E in town NearestSettlement
                                 if Building exists and HEALTH of Building >= 0.75
                                     add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
                                 else
                                     Building = 0
                                 end if
                             elsif Number == 6
-                                Building = get random abode of type UNIVERSITY in town NearestSettlement
-                                if Building exists and HEALTH of Building >= 0.75
-                                    add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
-                                else
-                                    Building = 0
-                                end if
-                            elsif Number == 7
-                                Building = get random abode of type BATHHOUSE in town NearestSettlement
-                                if Building exists and HEALTH of Building >= 0.75
-                                    add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
-                                else
-                                    Building = 0
-                                end if
-                            elsif Number == 8
-                                Building = get random abode of type AMPITHEATRE in town NearestSettlement
+                                Building = get random abode of type SKYSCRAPER in town NearestSettlement
                                 if Building exists and HEALTH of Building >= 0.75
                                     add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
                                 else
@@ -2157,202 +2217,144 @@ begin loop
                             end if
                             until Building != 0 or get Timer time remaining <= 0
                         end loop
-                    else //Capture Town
-                        AttackMode = 0
-                        if TownCapturePlatoons[0] < 2
-                            TownCapturePlatoons[0]++
-                            set Platoon attack NearestSettlement with severity 0.3 for takeover
+                        if (get number of type HOUSE ABODE_A in NearestSettlement min built 1.0 + get number of type HOUSE ABODE_B in NearestSettlement min built 1.0 + get number of type HOUSE ABODE_C in NearestSettlement min built 1.0 + get number of type HOUSE ABODE_D in NearestSettlement min built 1.0 + get number of type HOUSE ABODE_E in NearestSettlement min built 1.0 + get number of type HOUSE SKYSCRAPER in NearestSettlement min built 1.0) == 0
+                            AttackFocus = Default
                         end if
-                    end if
-                elsif AttackFocus == Houses
-                    clear Platoon action queue
-                    AttackMode = 2
-                    Building = 0
-                    Timer = create timer for 2 seconds
-                    begin loop
-                        Number = number from 1 to 6
-                        if Number == 1
-                            Building = get random abode of type ABODE_A in town NearestSettlement
-                            if Building exists and HEALTH of Building >= 0.75
-                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
-                            else
-                                Building = 0
-                            end if
-                        elsif Number == 2
-                            Building = get random abode of type ABODE_B in town NearestSettlement
-                            if Building exists and HEALTH of Building >= 0.75
-                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
-                            else
-                                Building = 0
-                            end if
-                        elsif Number == 3
-                            Building = get random abode of type ABODE_C in town NearestSettlement
-                            if Building exists and HEALTH of Building >= 0.75
-                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
-                            else
-                                Building = 0
-                            end if
-                        elsif Number == 4
-                            Building = get random abode of type ABODE_D in town NearestSettlement
-                            if Building exists and HEALTH of Building >= 0.75
-                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
-                            else
-                                Building = 0
-                            end if
-                        elsif Number == 5
-                            Building = get random abode of type ABODE_E in town NearestSettlement
-                            if Building exists and HEALTH of Building >= 0.75
-                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
-                            else
-                                Building = 0
-                            end if
-                        elsif Number == 6
-                            Building = get random abode of type SKYSCRAPER in town NearestSettlement
-                            if Building exists and HEALTH of Building >= 0.75
-                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
-                            else
-                                Building = 0
-                            end if
-                        end if
-                        until Building != 0 or get Timer time remaining <= 0
-                    end loop
-                    if (get number of type HOUSE ABODE_A in NearestSettlement min built 1.0 + get number of type HOUSE ABODE_B in NearestSettlement min built 1.0 + get number of type HOUSE ABODE_C in NearestSettlement min built 1.0 + get number of type HOUSE ABODE_D in NearestSettlement min built 1.0 + get number of type HOUSE ABODE_E in NearestSettlement min built 1.0 + get number of type HOUSE SKYSCRAPER in NearestSettlement min built 1.0) == 0
-                        AttackFocus = Default
-                    end if
-                elsif AttackFocus == Epics
-                    clear Platoon action queue
-                    AttackMode = 2
-                    Building = 0
-                    Timer = create timer for 2 seconds
-                    begin loop
-                        Number = number from 1 to 1
-                        if Number == 1
-                            Building = get WONDER in NearestSettlement
-                            if Building exists and HEALTH of Building >= 0.75 and HEALTH of Building > 0.75
-                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
-                            else
-                                Building = 0
-                            end if
-                        end if
-                        until Building != 0 or get Timer time remaining <= 0
-                    end loop
-                    if (get number of type WONDER WONDER_SIREN in NearestSettlement min built 1.0 + get number of type WONDER WONDER_HURRICANE in NearestSettlement min built 1.0 + get number of type WONDER WONDER_EARTHQUAKE in NearestSettlement min built 1.0 + get number of type WONDER WONDER_VOLCANO in NearestSettlement min built 1.0) == 0
-                        AttackFocus = Default
-                    end if
-                elsif AttackFocus == Altars
-                    clear Platoon action queue
-                    AttackMode = 2
-                    Building = 0
-                    Timer = create timer for 2 seconds
-                    begin loop
-                        Number = number from 1 to 1
-                        if Number == 1
-                            Building = get random abode of type ALTAR in town NearestSettlement
-                            if Building exists and HEALTH of Building >= 0.75
-                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
-                            else
-                                Building = 0
-                            end if
-                        end if
-                        until Building != 0 or get Timer time remaining <= 0
-                    end loop
-                    if (get number of type HOUSE ALTAR in NearestSettlement min built 1.0) == 0
-                        AttackFocus = Default
-                    end if
-                elsif AttackFocus == CreaturePen
-                    clear Platoon action queue
-                    AttackMode = 2
-                    Building = 0
-                    Timer = create timer for 2 seconds
-                    begin loop
-                        Number = number from 1 to 1
-                        if Number == 1
-                            Building = get random abode of type CREATURE_PEN in town NearestSettlement
-                            if Building exists and HEALTH of Building >= 0.75
-                                add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
-                            else
-                                Building = 0
-                            end if
-                        end if
-                        until Building != 0 or get Timer time remaining <= 0
-                    end loop
-                    if (get number of type HOUSE CREATURE_PEN in NearestSettlement min built 1.0) == 0
-                        AttackFocus = Default
-                    end if
-                elsif AttackFocus == TownCenter
-                    clear Platoon action queue
-                    AttackMode = 0
-                    set Platoon attack NearestSettlement with severity 0.3 for takeover
-                elsif AttackFocus == Villagers
-                    clear Platoon action queue
-                    AttackMode = 2
-                    Building = 0
-                    Timer = create timer for 2 seconds
-                    begin loop
-                        Number = number from 1 to 1
-                        if Number == 1
-                            Building = get living villager at {Platoon} radius 250
-                            if Building not exists or PLAYER of Building != 0
-                                Building = get living villager at {NearestSettlement} radius 250
-                            end if
-                            if Building exists
-                                add action PLATOON_AGENDA_ACTION_ATTACK_ANY_ENEMY_IN_AREA using {Building} to Platoon action queue
-                            else
-                                Building = 0
-                            end if
-                        end if
-                        until Building != 0 or get Timer time remaining <= 0
-                    end loop
-                    if size of NearestSettlement <= 60
-                        AttackFocus = Default
-                    end if
-                end if
-                RecalculateTimer = create timer for 40 seconds
-                Number = number from 0 to 99
-                begin loop
-                    PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius AttackRadius
-                    TestCreature2 = get distance from {Platoon} to {MyCreature}
-                    NumPat1 = get number of villagers in platoon Platoon
-                    //if PlayerPlatoon1 exists or TestCreature2 <= AttackRadius or not Platoon can navigate to object PlayerTownCentre
-                        if PlayerPlatoon1 exists and not town NearestSettlement is under takeover from player 1
-                            a = 1
-                        elsif TestCreature2 <= AttackRadius and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of MyCreature > 0.00 and not town NearestSettlement is under takeover from player 1
-                            a = 1
-                        elsif not Platoon can navigate to object oTownCentre
-                            a = 2
-                        elsif Platoon not exists
-                            a = 2
-                        elsif AttackMode == 1 and HEALTH of MyCreature == 0
-                            a = 2
-                        elsif AttackMode == 2 and Building not exists
-                            a = 2
-                        elsif AttackMode == 2 and HEALTH of Building <= 0.0
-                            a = 2
-                        elsif AttackMode == 2 and Building == 0
-                            a = 2
-                        elsif not town NearestSettlement is under takeover from player 1 and get RecalculateTimer time remaining <= 0
-                            a = 2
-                        end if
-                    //end if
-                    until (AbortObjectiveProbability > Number and a == 1) or (a == 2)
-                end loop
-                if AttackMode == 0
-                    TownCapturePlatoons[2]--
-                end if
-                clear Platoon action queue
-            else
-                if not {Platoon} near {AttackingPoint1} radius 25 or get player 0 influence at {AttackingPoint1} > 0
-                    AttackingPoint1 = marker at {NearestSettlement}
-                    clear Platoon action queue
-                    if get player 0 influence at {AttackingPoint1} > 0 or PLAYER of NearestSettlement == 2 or PLAYER of NearestSettlement == 3 or PLAYER of NearestSettlement == 4
+                    elsif AttackFocus == Epics
+                        clear Platoon action queue
+                        AttackMode = 2
+                        Building = 0
+                        Timer = create timer for 2 seconds
                         begin loop
-                            AttackingPoint1 = marker at {AttackingPoint1} + {number from -Threshold to Threshold,number from -Threshold to Threshold}
-                            Threshold += 5
-                            until (Platoon can navigate to {AttackingPoint1} and get player 0 influence at {AttackingPoint1} == 0) or Threshold > 999
+                            Number = number from 1 to 1
+                            if Number == 1
+                                Building = get WONDER in NearestSettlement
+                                if Building exists and HEALTH of Building >= 0.75 and HEALTH of Building > 0.75
+                                    add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                else
+                                    Building = 0
+                                end if
+                            end if
+                            until Building != 0 or get Timer time remaining <= 0
                         end loop
-                        Threshold = 1
+                        if (get number of type WONDER WONDER_SIREN in NearestSettlement min built 1.0 + get number of type WONDER WONDER_HURRICANE in NearestSettlement min built 1.0 + get number of type WONDER WONDER_EARTHQUAKE in NearestSettlement min built 1.0 + get number of type WONDER WONDER_VOLCANO in NearestSettlement min built 1.0) == 0
+                            AttackFocus = Default
+                        end if
+                    elsif AttackFocus == Altars
+                        clear Platoon action queue
+                        AttackMode = 2
+                        Building = 0
+                        Timer = create timer for 2 seconds
+                        begin loop
+                            Number = number from 1 to 1
+                            if Number == 1
+                                Building = get random abode of type ALTAR in town NearestSettlement
+                                if Building exists and HEALTH of Building >= 0.75
+                                    add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                else
+                                    Building = 0
+                                end if
+                            end if
+                            until Building != 0 or get Timer time remaining <= 0
+                        end loop
+                        if (get number of type HOUSE ALTAR in NearestSettlement min built 1.0) == 0
+                            AttackFocus = Default
+                        end if
+                    elsif AttackFocus == CreaturePen
+                        clear Platoon action queue
+                        AttackMode = 2
+                        Building = 0
+                        Timer = create timer for 2 seconds
+                        begin loop
+                            Number = number from 1 to 1
+                            if Number == 1
+                                Building = get random abode of type CREATURE_PEN in town NearestSettlement
+                                if Building exists and HEALTH of Building >= 0.75
+                                    add action PLATOON_AGENDA_ACTION_MELEE_ATTACK_THING using Building to Platoon action queue
+                                else
+                                    Building = 0
+                                end if
+                            end if
+                            until Building != 0 or get Timer time remaining <= 0
+                        end loop
+                        if (get number of type HOUSE CREATURE_PEN in NearestSettlement min built 1.0) == 0
+                            AttackFocus = Default
+                        end if
+                    elsif AttackFocus == TownCenter
+                        clear Platoon action queue
+                        AttackMode = 0
+                        set Platoon attack NearestSettlement with severity 0.3 for takeover
+                    elsif AttackFocus == Villagers
+                        clear Platoon action queue
+                        AttackMode = 2
+                        Building = 0
+                        Timer = create timer for 2 seconds
+                        begin loop
+                            Number = number from 1 to 1
+                            if Number == 1
+                                Building = get living villager at {Platoon} radius 250
+                                if Building not exists or PLAYER of Building != 0
+                                    Building = get living villager at {NearestSettlement} radius 250
+                                end if
+                                if Building exists
+                                    add action PLATOON_AGENDA_ACTION_ATTACK_ANY_ENEMY_IN_AREA using {Building} to Platoon action queue
+                                else
+                                    Building = 0
+                                end if
+                            end if
+                            until Building != 0 or get Timer time remaining <= 0
+                        end loop
+                        if size of NearestSettlement <= 60
+                            AttackFocus = Default
+                        end if
                     end if
-                    add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPoint1} to Platoon action queue
+                    RecalculateTimer = create timer for 40 seconds
+                    Number = number from 0 to 99
+                    begin loop
+                        PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius AttackRadius
+                        TestCreature2 = get distance from {Platoon} to {MyCreature}
+                        NumPat1 = get number of villagers in platoon Platoon
+                        //if PlayerPlatoon1 exists or TestCreature2 <= AttackRadius or not Platoon can navigate to object PlayerTownCentre
+                            if PlayerPlatoon1 exists and not town NearestSettlement is under takeover from player 1
+                                a = 1
+                            elsif TestCreature2 <= AttackRadius and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of MyCreature > 0.00 and not town NearestSettlement is under takeover from player 1
+                                a = 1
+                            elsif not Platoon can navigate to object oTownCentre
+                                a = 2
+                            elsif Platoon not exists
+                                a = 2
+                            elsif AttackMode == 1 and HEALTH of MyCreature == 0
+                                a = 2
+                            elsif AttackMode == 2 and Building not exists
+                                a = 2
+                            elsif AttackMode == 2 and HEALTH of Building <= 0.0
+                                a = 2
+                            elsif AttackMode == 2 and Building == 0
+                                a = 2
+                            elsif not town NearestSettlement is under takeover from player 1 and get RecalculateTimer time remaining <= 0
+                                a = 2
+                            end if
+                        //end if
+                        until (AbortObjectiveProbability > Number and a == 1) or (a == 2)
+                    end loop
+                    if AttackMode == 0
+                        TownCapturePlatoons[2]--
+                    end if
+                    clear Platoon action queue
+                else
+                    if not {Platoon} near {AttackingPoint1} radius 25 or get player 0 influence at {AttackingPoint1} > 0
+                        AttackingPoint1 = marker at {NearestSettlement}
+                        clear Platoon action queue
+                        if get player 0 influence at {AttackingPoint1} > 0 or PLAYER of NearestSettlement == 2 or PLAYER of NearestSettlement == 3 or PLAYER of NearestSettlement == 4
+                            begin loop
+                                AttackingPoint1 = marker at {AttackingPoint1} + {number from -Threshold to Threshold,number from -Threshold to Threshold}
+                                Threshold += 5
+                                until (Platoon can navigate to {AttackingPoint1} and get player 0 influence at {AttackingPoint1} == 0) or Threshold > 999
+                            end loop
+                            Threshold = 1
+                        end if
+                        add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPoint1} to Platoon action queue
+                    end if
                 end if
             end if
         end if
@@ -2395,7 +2397,80 @@ begin loop
         end if
 
     elsif Task == Special
-        if LC7_LargeSiegeLaunchAttack == 1
+        if AttackWPStage == 0
+            if not Platoon can navigate to {AttackWP1}
+                Number = 0
+                begin loop
+                    AttackWP1 = marker at {AttackWP1Persistent} + {number from -66 to 66,number from -66 to 66}
+                    Number++
+                    until Platoon not exists or Platoon can navigate to {AttackWP1} or Number > 10
+                end loop
+            end if
+            if not {Platoon} near {AttackWP1} radius 33
+                clear Platoon action queue
+                if not DefendObject exists
+                    add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackWP1} to Platoon action queue
+                elsif not {Platoon} near {DefendObject} radius 25
+                    add action PLATOON_AGENDA_ACTION_DEFEND_OBJECT using DefendObject to Platoon action queue
+                end if
+            end if
+            if DefendObject exists and {Platoon} near {AttackWP1} radius 200
+                AttackWPStage = 1
+                //say "AttackWPStage = 1"
+            elsif {Platoon} near {AttackWP1} radius 33
+                AttackWPStage = 1
+                //say "AttackWPStage = 1"
+            end if
+        elsif AttackWPStage == 1
+            if not Platoon can navigate to {AttackWP2}
+                Number = 0
+                begin loop
+                    AttackWP2 = marker at {AttackWP2Persistent} + {number from -66 to 66,number from -66 to 66}
+                    Number++
+                    until Platoon not exists or Platoon can navigate to {AttackWP2} or Number > 10
+                end loop
+            end if
+            if not {Platoon} near {AttackWP2} radius 33
+                clear Platoon action queue
+                if not DefendObject exists
+                    add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackWP2} to Platoon action queue
+                elsif not {Platoon} near {DefendObject} radius 25
+                    add action PLATOON_AGENDA_ACTION_DEFEND_OBJECT using DefendObject to Platoon action queue
+                end if
+            end if
+            if DefendObject exists and {Platoon} near {AttackWP2} radius 200
+                AttackWPStage = 2
+                //say "AttackWPStage = 2"
+            elsif {Platoon} near {AttackWP2} radius 33
+                AttackWPStage = 2
+                //say "AttackWPStage = 2"
+            end if
+        elsif AttackWPStage == 2
+            if not Platoon can navigate to {AttackWP3}
+                Number = 0
+                begin loop
+                    AttackWP3 = marker at {AttackWP3Persistent} + {number from -66 to 66,number from -66 to 66}
+                    Number++
+                    until Platoon not exists or Platoon can navigate to {AttackWP3} or Number > 10
+                end loop
+            end if
+            if not {Platoon} near {AttackWP3} radius 33
+                clear Platoon action queue
+                if not DefendObject exists
+                    add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackWP3} to Platoon action queue
+                elsif not {Platoon} near {DefendObject} radius 25
+                    add action PLATOON_AGENDA_ACTION_DEFEND_OBJECT using DefendObject to Platoon action queue
+                end if
+            end if
+            if DefendObject exists and {Platoon} near {AttackWP3} radius 200
+                AttackWPStage = 3
+                //say "AttackWPStage = 3"
+            elsif {Platoon} near {AttackWP3} radius 33
+                AttackWPStage = 3
+                //say "AttackWPStage = 3"
+            end if
+        end if
+        if LC7_LargeSiegeLaunchAttack == 1 and AttackWPStage == 3
             //if get size of Platoon action queue < 1
                 //Targeting
                 //say "PLATOON ATTACKING"
@@ -2684,7 +2759,7 @@ begin loop
                     end if
                 end if
             //end if
-        else
+        elsif AttackWPStage == 3
             if not {Platoon} near {AttackingPoint2} radius 25 or get player 0 influence at {AttackingPoint2} > 0
                 clear Platoon action queue
                 if get player 0 influence at {AttackingPoint2} > 0
@@ -2737,6 +2812,7 @@ begin loop
                 wait 5 seconds
                 MergeDone = 1
                 merge platoon Platoon into platoon NewPlatoon
+                wait until Platoon not exists or NewPlatoon not exists
             end if
         end if
     end if
@@ -2765,6 +2841,7 @@ begin script LC7_MoveCatapultThenAttack(SiegeWeapon,Task,AttackFocus,AttackWP1,A
     Number = 0
     Building = 0
     objSubType = 0
+    Threshold = 1
 
 start
 
@@ -2810,7 +2887,7 @@ start
         begin loop
             if get ActionTimer time remaining <= 0 or get AttackSyncTimer time remaining <= 0
                 if AttackWPStage == 0
-                    wait until get size of SiegeWeapon action queue < 1
+                    wait until get size of siege weapon SiegeWeapon action queue < 1
                     ActionTimer = create timer for 2 seconds
                     if not SiegeWeapon can navigate to {AttackWP1}
                         Number = 0
@@ -2827,7 +2904,7 @@ start
                         AttackWPStage = 1
                     end if
                 elsif AttackWPStage == 1
-                    wait until get size of SiegeWeapon action queue < 1
+                    wait until get size of siege weapon SiegeWeapon action queue < 1
                     ActionTimer = create timer for 2 seconds
                     if not SiegeWeapon can navigate to {AttackWP2}
                         Number = 0
@@ -2844,7 +2921,7 @@ start
                         AttackWPStage = 2
                     end if
                 elsif AttackWPStage == 2
-                    wait until get size of SiegeWeapon action queue < 1
+                    wait until get size of siege weapon SiegeWeapon action queue < 1
                     ActionTimer = create timer for 2 seconds
                     if not SiegeWeapon can navigate to {AttackWP3}
                         Number = 0
@@ -3115,240 +3192,242 @@ start
                 enable siege weapon SiegeWeapon auto attack
                 ActionTimer = create timer for 60 seconds
                 oTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in NearestSettlement min built 1.0
-                if not SiegeWeapon can navigate to object oTownCentre
-                    Number = number from 1 to 3
-                    if Number == 1 or Number == 2
-                        objSubType = number from 33 to 34
-                        GateHouse = get HOUSE constant objSubType at {SiegeWeapon} radius 250
-                        if GateHouse exists and PLAYER of GateHouse == 0
-                            clear siege weapon SiegeWeapon action queue
-                            add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using GateHouse to siege weapon SiegeWeapon action queue
-                        else
-                            GateHouse = get random abode of type constant objSubType in town NearestSettlement
+                if PLAYER of NearestSettlement != 1 and oTownCentre exists
+                    if not SiegeWeapon can navigate to object oTownCentre
+                        Number = number from 1 to 3
+                        if Number == 1 or Number == 2
+                            objSubType = number from 33 to 34
+                            GateHouse = get HOUSE constant objSubType at {SiegeWeapon} radius 250
                             if GateHouse exists and PLAYER of GateHouse == 0
                                 clear siege weapon SiegeWeapon action queue
                                 add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using GateHouse to siege weapon SiegeWeapon action queue
                             else
-                                ActionTimer = create timer for 0.025 seconds
+                                GateHouse = get random abode of type constant objSubType in town NearestSettlement
+                                if GateHouse exists and PLAYER of GateHouse == 0
+                                    clear siege weapon SiegeWeapon action queue
+                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using GateHouse to siege weapon SiegeWeapon action queue
+                                else
+                                    ActionTimer = create timer for 0.025 seconds
+                                end if
                             end if
-                        end if
-                    elsif Number == 3
-                        if number from 1 to 2 == 1
-                            Wall1 = get wall segment nearest {SiegeWeapon} radius 750
-                            if Wall1 exists and PLAYER of Wall1 == 0
-                                clear siege weapon SiegeWeapon action queue
-                                add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Wall1 to siege weapon SiegeWeapon action queue
+                        elsif Number == 3
+                            if number from 1 to 2 == 1
+                                Wall1 = get wall segment nearest {SiegeWeapon} radius 750
+                                if Wall1 exists and PLAYER of Wall1 == 0
+                                    clear siege weapon SiegeWeapon action queue
+                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Wall1 to siege weapon SiegeWeapon action queue
+                                else
+                                    ActionTimer = create timer for 0.025 seconds
+                                end if
+                            
                             else
-                                ActionTimer = create timer for 0.025 seconds
-                            end if
-                        
-                        else
-                            Wall1 = get wall segment nearest {AttackingPoint1} radius 750
-                            if Wall1 exists and PLAYER of Wall1 == 0
-                                clear siege weapon SiegeWeapon action queue
-                                add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Wall1 to siege weapon SiegeWeapon action queue
-                            else
-                                ActionTimer = create timer for 0.025 seconds
+                                Wall1 = get wall segment nearest {AttackingPoint1} radius 750
+                                if Wall1 exists and PLAYER of Wall1 == 0
+                                    clear siege weapon SiegeWeapon action queue
+                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Wall1 to siege weapon SiegeWeapon action queue
+                                else
+                                    ActionTimer = create timer for 0.025 seconds
+                                end if
                             end if
                         end if
-                    end if
-                elsif SiegeWeapon can navigate to object oTownCentre
-                    if AttackFocus == Default
-                        clear siege weapon SiegeWeapon action queue
-                        Building = 0
-                        Timer = create timer for 2 seconds
-                        begin loop
-                            Number = number from 1 to 8
-                            if Number == 1 or Number == 2 or Number == 3
-                                Building = get random abode of type ALTAR in town NearestSettlement
-                                if Building exists and HEALTH of Building > 0.0
-                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
-                                else
-                                    Building = 0
+                    elsif SiegeWeapon can navigate to object oTownCentre
+                        if AttackFocus == Default
+                            clear siege weapon SiegeWeapon action queue
+                            Building = 0
+                            Timer = create timer for 2 seconds
+                            begin loop
+                                Number = number from 1 to 8
+                                if Number == 1 or Number == 2 or Number == 3
+                                    Building = get random abode of type ALTAR in town NearestSettlement
+                                    if Building exists and HEALTH of Building > 0.0
+                                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 4
+                                    Building = get random abode of type TEMPLE in town NearestSettlement
+                                    if Building exists and HEALTH of Building > 0.0
+                                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 5
+                                    Building = get random abode of type CREATURE_PEN in town NearestSettlement
+                                    if Building exists and HEALTH of Building > 0.0
+                                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 6
+                                    Building = get random abode of type UNIVERSITY in town NearestSettlement
+                                    if Building exists and HEALTH of Building > 0.0
+                                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 7
+                                    Building = get random abode of type BATHHOUSE in town NearestSettlement
+                                    if Building exists and HEALTH of Building > 0.0
+                                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 8
+                                    Building = get random abode of type AMPITHEATRE in town NearestSettlement
+                                    if Building exists and HEALTH of Building > 0.0
+                                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
+                                    else
+                                        Building = 0
+                                    end if
                                 end if
-                            elsif Number == 4
-                                Building = get random abode of type TEMPLE in town NearestSettlement
-                                if Building exists and HEALTH of Building > 0.0
-                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
-                                else
-                                    Building = 0
+                                until Building != 0 or get Timer time remaining <= 0
+                            end loop
+                        elsif AttackFocus == Houses
+                            clear siege weapon SiegeWeapon action queue
+                            Building = 0
+                            Timer = create timer for 2 seconds
+                            begin loop
+                                Number = number from 1 to 6
+                                if Number == 1
+                                    Building = get random abode of type ABODE_A in town NearestSettlement
+                                    if Building exists and HEALTH of Building > 0.0
+                                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 2
+                                    Building = get random abode of type ABODE_B in town NearestSettlement
+                                    if Building exists and HEALTH of Building > 0.0
+                                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 3
+                                    Building = get random abode of type ABODE_C in town NearestSettlement
+                                    if Building exists and HEALTH of Building > 0.0
+                                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 4
+                                    Building = get random abode of type ABODE_D in town NearestSettlement
+                                    if Building exists and HEALTH of Building > 0.0
+                                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 5
+                                    Building = get random abode of type ABODE_E in town NearestSettlement
+                                    if Building exists and HEALTH of Building > 0.0
+                                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 6
+                                    Building = get random abode of type SKYSCRAPER in town NearestSettlement
+                                    if Building exists and HEALTH of Building > 0.0
+                                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
+                                    else
+                                        Building = 0
+                                    end if
                                 end if
-                            elsif Number == 5
-                                Building = get random abode of type CREATURE_PEN in town NearestSettlement
-                                if Building exists and HEALTH of Building > 0.0
-                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
-                                else
-                                    Building = 0
-                                end if
-                            elsif Number == 6
-                                Building = get random abode of type UNIVERSITY in town NearestSettlement
-                                if Building exists and HEALTH of Building > 0.0
-                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
-                                else
-                                    Building = 0
-                                end if
-                            elsif Number == 7
-                                Building = get random abode of type BATHHOUSE in town NearestSettlement
-                                if Building exists and HEALTH of Building > 0.0
-                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
-                                else
-                                    Building = 0
-                                end if
-                            elsif Number == 8
-                                Building = get random abode of type AMPITHEATRE in town NearestSettlement
-                                if Building exists and HEALTH of Building > 0.0
-                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
-                                else
-                                    Building = 0
-                                end if
+                                until Building != 0 or get Timer time remaining <= 0
+                            end loop
+                            if (get number of type HOUSE ABODE_A in NearestSettlement min built 1.0 + get number of type HOUSE ABODE_B in NearestSettlement min built 1.0 + get number of type HOUSE ABODE_C in NearestSettlement min built 1.0 + get number of type HOUSE ABODE_D in NearestSettlement min built 1.0 + get number of type HOUSE ABODE_E in NearestSettlement min built 1.0 + get number of type HOUSE SKYSCRAPER in NearestSettlement min built 1.0) == 0
+                                AttackFocus = Default
                             end if
-                            until Building != 0 or get Timer time remaining <= 0
-                        end loop
-                    elsif AttackFocus == Houses
-                        clear siege weapon SiegeWeapon action queue
-                        Building = 0
-                        Timer = create timer for 2 seconds
-                        begin loop
-                            Number = number from 1 to 6
-                            if Number == 1
-                                Building = get random abode of type ABODE_A in town NearestSettlement
-                                if Building exists and HEALTH of Building > 0.0
-                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
-                                else
-                                    Building = 0
+                        elsif AttackFocus == Epics
+                            clear siege weapon SiegeWeapon action queue
+                            Building = 0
+                            Timer = create timer for 2 seconds
+                            begin loop
+                                Number = number from 1 to 1
+                                if Number == 1
+                                    Building = get WONDER in NearestSettlement
+                                    if Building exists and HEALTH of Building > 0.0
+                                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
+                                    else
+                                        Building = 0
+                                    end if
                                 end if
-                            elsif Number == 2
-                                Building = get random abode of type ABODE_B in town NearestSettlement
-                                if Building exists and HEALTH of Building > 0.0
-                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
-                                else
-                                    Building = 0
-                                end if
-                            elsif Number == 3
-                                Building = get random abode of type ABODE_C in town NearestSettlement
-                                if Building exists and HEALTH of Building > 0.0
-                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
-                                else
-                                    Building = 0
-                                end if
-                            elsif Number == 4
-                                Building = get random abode of type ABODE_D in town NearestSettlement
-                                if Building exists and HEALTH of Building > 0.0
-                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
-                                else
-                                    Building = 0
-                                end if
-                            elsif Number == 5
-                                Building = get random abode of type ABODE_E in town NearestSettlement
-                                if Building exists and HEALTH of Building > 0.0
-                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
-                                else
-                                    Building = 0
-                                end if
-                            elsif Number == 6
-                                Building = get random abode of type SKYSCRAPER in town NearestSettlement
-                                if Building exists and HEALTH of Building > 0.0
-                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
-                                else
-                                    Building = 0
-                                end if
+                                until Building != 0 or get Timer time remaining <= 0
+                            end loop
+                            if (get number of type WONDER WONDER_SIREN in NearestSettlement min built 1.0 + get number of type WONDER WONDER_HURRICANE in NearestSettlement min built 1.0 + get number of type WONDER WONDER_EARTHQUAKE in NearestSettlement min built 1.0 + get number of type WONDER WONDER_VOLCANO in NearestSettlement min built 1.0) == 0
+                                AttackFocus = Default
                             end if
-                            until Building != 0 or get Timer time remaining <= 0
-                        end loop
-                        if (get number of type HOUSE ABODE_A in NearestSettlement min built 1.0 + get number of type HOUSE ABODE_B in NearestSettlement min built 1.0 + get number of type HOUSE ABODE_C in NearestSettlement min built 1.0 + get number of type HOUSE ABODE_D in NearestSettlement min built 1.0 + get number of type HOUSE ABODE_E in NearestSettlement min built 1.0 + get number of type HOUSE SKYSCRAPER in NearestSettlement min built 1.0) == 0
-                            AttackFocus = Default
-                        end if
-                    elsif AttackFocus == Epics
-                        clear siege weapon SiegeWeapon action queue
-                        Building = 0
-                        Timer = create timer for 2 seconds
-                        begin loop
-                            Number = number from 1 to 1
-                            if Number == 1
-                                Building = get WONDER in NearestSettlement
-                                if Building exists and HEALTH of Building > 0.0
-                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
-                                else
-                                    Building = 0
+                        elsif AttackFocus == Altars
+                            clear siege weapon SiegeWeapon action queue
+                            Building = 0
+                            Timer = create timer for 2 seconds
+                            begin loop
+                                Number = number from 1 to 1
+                                if Number == 1
+                                    Building = get random abode of type ALTAR in town NearestSettlement
+                                    if Building exists and HEALTH of Building > 0.0
+                                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
+                                    else
+                                        Building = 0
+                                    end if
                                 end if
+                                until Building != 0 or get Timer time remaining <= 0
+                            end loop
+                            if (get number of type HOUSE ALTAR in NearestSettlement min built 1.0) == 0
+                                AttackFocus = Default
                             end if
-                            until Building != 0 or get Timer time remaining <= 0
-                        end loop
-                        if (get number of type WONDER WONDER_SIREN in NearestSettlement min built 1.0 + get number of type WONDER WONDER_HURRICANE in NearestSettlement min built 1.0 + get number of type WONDER WONDER_EARTHQUAKE in NearestSettlement min built 1.0 + get number of type WONDER WONDER_VOLCANO in NearestSettlement min built 1.0) == 0
-                            AttackFocus = Default
-                        end if
-                    elsif AttackFocus == Altars
-                        clear siege weapon SiegeWeapon action queue
-                        Building = 0
-                        Timer = create timer for 2 seconds
-                        begin loop
-                            Number = number from 1 to 1
-                            if Number == 1
-                                Building = get random abode of type ALTAR in town NearestSettlement
-                                if Building exists and HEALTH of Building > 0.0
-                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
-                                else
-                                    Building = 0
+                        elsif AttackFocus == CreaturePen
+                            clear siege weapon SiegeWeapon action queue
+                            Building = 0
+                            Timer = create timer for 2 seconds
+                            begin loop
+                                Number = number from 1 to 1
+                                if Number == 1
+                                    Building = get random abode of type CREATURE_PEN in town NearestSettlement
+                                    if Building exists and HEALTH of Building > 0.0
+                                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
+                                    else
+                                        Building = 0
+                                    end if
                                 end if
+                                until Building != 0 or get Timer time remaining <= 0
+                            end loop
+                            if (get number of type HOUSE CREATURE_PEN in NearestSettlement min built 1.0) == 0
+                                AttackFocus = Default
                             end if
-                            until Building != 0 or get Timer time remaining <= 0
-                        end loop
-                        if (get number of type HOUSE ALTAR in NearestSettlement min built 1.0) == 0
-                            AttackFocus = Default
-                        end if
-                    elsif AttackFocus == CreaturePen
-                        clear siege weapon SiegeWeapon action queue
-                        Building = 0
-                        Timer = create timer for 2 seconds
-                        begin loop
-                            Number = number from 1 to 1
-                            if Number == 1
-                                Building = get random abode of type CREATURE_PEN in town NearestSettlement
-                                if Building exists and HEALTH of Building > 0.0
-                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
-                                else
-                                    Building = 0
+                        elsif AttackFocus == TownCenter
+                            clear siege weapon SiegeWeapon action queue
+                            Building = 0
+                            Timer = create timer for 2 seconds
+                            begin loop
+                                Number = number from 1 to 1
+                                if Number == 1
+                                    Building = get random abode of type TOWN_CENTRE in town NearestSettlement
+                                    if Building exists and HEALTH of Building > 0.0
+                                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
+                                    else
+                                        Building = 0
+                                    end if
                                 end if
-                            end if
-                            until Building != 0 or get Timer time remaining <= 0
-                        end loop
-                        if (get number of type HOUSE CREATURE_PEN in NearestSettlement min built 1.0) == 0
-                            AttackFocus = Default
-                        end if
-                    elsif AttackFocus == TownCenter
-                        clear siege weapon SiegeWeapon action queue
-                        Building = 0
-                        Timer = create timer for 2 seconds
-                        begin loop
-                            Number = number from 1 to 1
-                            if Number == 1
-                                Building = get random abode of type TOWN_CENTRE in town NearestSettlement
-                                if Building exists and HEALTH of Building > 0.0
-                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
-                                else
-                                    Building = 0
+                                until Building != 0 or get Timer time remaining <= 0
+                            end loop
+                        elsif AttackFocus == Villagers
+                            clear siege weapon SiegeWeapon action queue
+                            Building = 0
+                            Timer = create timer for 2 seconds
+                            begin loop
+                                Number = number from 1 to 1
+                                if Number == 1
+                                    Building = get living villager at {NearestSettlement} + {number from -125 to 125,number from -125 to 125} radius 100
+                                    if Building exists and HEALTH of Building > 0.0
+                                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
+                                    else
+                                        Building = 0
+                                    end if
                                 end if
+                                until Building != 0 or get Timer time remaining <= 0
+                            end loop
+                            if size of NearestSettlement <= 60
+                                AttackFocus = Default
                             end if
-                            until Building != 0 or get Timer time remaining <= 0
-                        end loop
-                    elsif AttackFocus == Villagers
-                        clear siege weapon SiegeWeapon action queue
-                        Building = 0
-                        Timer = create timer for 2 seconds
-                        begin loop
-                            Number = number from 1 to 1
-                            if Number == 1
-                                Building = get living villager at {NearestSettlement} + {number from -125 to 125,number from -125 to 125} radius 100
-                                if Building exists and HEALTH of Building > 0.0
-                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
-                                else
-                                    Building = 0
-                                end if
-                            end if
-                            until Building != 0 or get Timer time remaining <= 0
-                        end loop
-                        if size of NearestSettlement <= 60
-                            AttackFocus = Default
                         end if
                     end if
                 end if
@@ -3359,246 +3438,316 @@ start
     elsif Task == Special
         begin loop
             if get ActionTimer time remaining <= 0 or get AttackSyncTimer time remaining <= 0
-                //say "ATTACKING"
-                enable siege weapon SiegeWeapon auto attack
-                ActionTimer = create timer for 60 seconds
-                oTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in PlayerTown min built 1.0
-                if not SiegeWeapon can navigate to object oTownCentre
-                    Number = number from 1 to 3
-                    if Number == 1 or Number == 2
-                        objSubType = number from 33 to 34
-                        GateHouse = get HOUSE constant objSubType at {SiegeWeapon} radius 250
-                        if GateHouse exists and PLAYER of GateHouse == 0
-                            clear siege weapon SiegeWeapon action queue
-                            add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using GateHouse to siege weapon SiegeWeapon action queue
-                        else
-                            GateHouse = get random abode of type constant objSubType in town PlayerTown
+                if AttackWPStage == 0
+                    wait until get size of siege weapon SiegeWeapon action queue < 1
+                    ActionTimer = create timer for 2 seconds
+                    if not SiegeWeapon can navigate to {AttackWP1}
+                        Number = 0
+                        begin loop
+                            AttackWP1 = marker at {AttackWP1Persistent} + {number from -66 to 66,number from -66 to 66}
+                            Number++
+                            until SiegeWeapon not exists or SiegeWeapon can navigate to {AttackWP1} or Number > 10
+                        end loop
+                    end if
+                    if not {SiegeWeapon} near {AttackWP1} radius 33
+                        add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {AttackWP1} to siege weapon SiegeWeapon action queue
+                    end if
+                    if {SiegeWeapon} near {AttackWP1} radius 33
+                        AttackWPStage = 1
+                    end if
+                elsif AttackWPStage == 1
+                    wait until get size of siege weapon SiegeWeapon action queue < 1
+                    ActionTimer = create timer for 2 seconds
+                    if not SiegeWeapon can navigate to {AttackWP2}
+                        Number = 0
+                        begin loop
+                            AttackWP2 = marker at {AttackWP2Persistent} + {number from -66 to 66,number from -66 to 66}
+                            Number++
+                            until SiegeWeapon not exists or SiegeWeapon can navigate to {AttackWP2} or Number > 10
+                        end loop
+                    end if
+                    if not {SiegeWeapon} near {AttackWP2} radius 33
+                        add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {AttackWP2} to siege weapon SiegeWeapon action queue
+                    end if
+                    if {SiegeWeapon} near {AttackWP2} radius 33
+                        AttackWPStage = 2
+                    end if
+                elsif AttackWPStage == 2
+                    wait until get size of siege weapon SiegeWeapon action queue < 1
+                    ActionTimer = create timer for 2 seconds
+                    if not SiegeWeapon can navigate to {AttackWP3}
+                        Number = 0
+                        begin loop
+                            AttackWP3 = marker at {AttackWP3Persistent} + {number from -66 to 66,number from -66 to 66}
+                            Number++
+                            until SiegeWeapon not exists or SiegeWeapon can navigate to {AttackWP3} or Number > 10
+                        end loop
+                    end if
+                    if not {SiegeWeapon} near {AttackWP3} radius 33
+                        add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {AttackWP3} to siege weapon SiegeWeapon action queue
+                    end if
+                    if {SiegeWeapon} near {AttackWP3} radius 33
+                        AttackWPStage = 3
+                    end if
+                end if
+                if LC7_LargeSiegeLaunchAttack == 1 and AttackWPStage == 3
+                    //say "ATTACKING"
+                    enable siege weapon SiegeWeapon auto attack
+                    ActionTimer = create timer for 60 seconds
+                    oTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in PlayerTown min built 1.0
+                    if not SiegeWeapon can navigate to object oTownCentre
+                        Number = number from 1 to 3
+                        if Number == 1 or Number == 2
+                            objSubType = number from 33 to 34
+                            GateHouse = get HOUSE constant objSubType at {SiegeWeapon} radius 250
                             if GateHouse exists and PLAYER of GateHouse == 0
                                 clear siege weapon SiegeWeapon action queue
                                 add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using GateHouse to siege weapon SiegeWeapon action queue
                             else
-                                ActionTimer = create timer for 0.025 seconds
+                                GateHouse = get random abode of type constant objSubType in town PlayerTown
+                                if GateHouse exists and PLAYER of GateHouse == 0
+                                    clear siege weapon SiegeWeapon action queue
+                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using GateHouse to siege weapon SiegeWeapon action queue
+                                else
+                                    ActionTimer = create timer for 0.025 seconds
+                                end if
+                            end if
+                        elsif Number == 3
+                            if number from 1 to 2 == 1
+                                Wall1 = get wall segment nearest {SiegeWeapon} radius 750
+                                if Wall1 exists and PLAYER of Wall1 == 0
+                                    clear siege weapon SiegeWeapon action queue
+                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Wall1 to siege weapon SiegeWeapon action queue
+                                else
+                                    ActionTimer = create timer for 0.025 seconds
+                                end if
+                            
+                            else
+                                Wall1 = get wall segment nearest {AttackingPoint1} radius 750
+                                if Wall1 exists and PLAYER of Wall1 == 0
+                                    clear siege weapon SiegeWeapon action queue
+                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Wall1 to siege weapon SiegeWeapon action queue
+                                else
+                                    ActionTimer = create timer for 0.025 seconds
+                                end if
                             end if
                         end if
-                    elsif Number == 3
-                        if number from 1 to 2 == 1
-                            Wall1 = get wall segment nearest {SiegeWeapon} radius 750
-                            if Wall1 exists and PLAYER of Wall1 == 0
-                                clear siege weapon SiegeWeapon action queue
-                                add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Wall1 to siege weapon SiegeWeapon action queue
-                            else
-                                ActionTimer = create timer for 0.025 seconds
+                    elsif SiegeWeapon can navigate to object oTownCentre
+                        if AttackFocus == Default
+                            clear siege weapon SiegeWeapon action queue
+                            Building = 0
+                            Timer = create timer for 2 seconds
+                            begin loop
+                                Number = number from 1 to 8
+                                if Number == 1 or Number == 2 or Number == 3
+                                    Building = get random abode of type ALTAR in town PlayerTown
+                                    if Building exists and HEALTH of Building > 0.0
+                                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 4
+                                    Building = get random abode of type TEMPLE in town PlayerTown
+                                    if Building exists and HEALTH of Building > 0.0
+                                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 5
+                                    Building = get random abode of type CREATURE_PEN in town PlayerTown
+                                    if Building exists and HEALTH of Building > 0.0
+                                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 6
+                                    Building = get random abode of type UNIVERSITY in town PlayerTown
+                                    if Building exists and HEALTH of Building > 0.0
+                                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 7
+                                    Building = get random abode of type BATHHOUSE in town PlayerTown
+                                    if Building exists and HEALTH of Building > 0.0
+                                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 8
+                                    Building = get random abode of type AMPITHEATRE in town PlayerTown
+                                    if Building exists and HEALTH of Building > 0.0
+                                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                end if
+                                until Building != 0 or get Timer time remaining <= 0
+                            end loop
+                        elsif AttackFocus == Houses
+                            clear siege weapon SiegeWeapon action queue
+                            Building = 0
+                            Timer = create timer for 2 seconds
+                            begin loop
+                                Number = number from 1 to 6
+                                if Number == 1
+                                    Building = get random abode of type ABODE_A in town PlayerTown
+                                    if Building exists and HEALTH of Building > 0.0
+                                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 2
+                                    Building = get random abode of type ABODE_B in town PlayerTown
+                                    if Building exists and HEALTH of Building > 0.0
+                                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 3
+                                    Building = get random abode of type ABODE_C in town PlayerTown
+                                    if Building exists and HEALTH of Building > 0.0
+                                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 4
+                                    Building = get random abode of type ABODE_D in town PlayerTown
+                                    if Building exists and HEALTH of Building > 0.0
+                                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 5
+                                    Building = get random abode of type ABODE_E in town PlayerTown
+                                    if Building exists and HEALTH of Building > 0.0
+                                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                elsif Number == 6
+                                    Building = get random abode of type SKYSCRAPER in town PlayerTown
+                                    if Building exists and HEALTH of Building > 0.0
+                                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                end if
+                                until Building != 0 or get Timer time remaining <= 0
+                            end loop
+                            if (get number of type HOUSE ABODE_A in PlayerTown min built 1.0 + get number of type HOUSE ABODE_B in PlayerTown min built 1.0 + get number of type HOUSE ABODE_C in PlayerTown min built 1.0 + get number of type HOUSE ABODE_D in PlayerTown min built 1.0 + get number of type HOUSE ABODE_E in PlayerTown min built 1.0 + get number of type HOUSE SKYSCRAPER in PlayerTown min built 1.0) == 0
+                                AttackFocus = Default
                             end if
-                        
-                        else
-                            Wall1 = get wall segment nearest {AttackingPoint1} radius 750
-                            if Wall1 exists and PLAYER of Wall1 == 0
-                                clear siege weapon SiegeWeapon action queue
-                                add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Wall1 to siege weapon SiegeWeapon action queue
-                            else
-                                ActionTimer = create timer for 0.025 seconds
+                        elsif AttackFocus == Epics
+                            clear siege weapon SiegeWeapon action queue
+                            Building = 0
+                            Timer = create timer for 2 seconds
+                            begin loop
+                                Number = number from 1 to 1
+                                if Number == 1
+                                    Building = get WONDER in PlayerTown
+                                    if Building exists and HEALTH of Building > 0.0
+                                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                end if
+                                until Building != 0 or get Timer time remaining <= 0
+                            end loop
+                            if (get number of type WONDER WONDER_SIREN in PlayerTown min built 1.0 + get number of type WONDER WONDER_HURRICANE in PlayerTown min built 1.0 + get number of type WONDER WONDER_EARTHQUAKE in PlayerTown min built 1.0 + get number of type WONDER WONDER_VOLCANO in PlayerTown min built 1.0) == 0
+                                AttackFocus = Default
+                            end if
+                        elsif AttackFocus == Altars
+                            clear siege weapon SiegeWeapon action queue
+                            Building = 0
+                            Timer = create timer for 2 seconds
+                            begin loop
+                                Number = number from 1 to 1
+                                if Number == 1
+                                    Building = get random abode of type ALTAR in town PlayerTown
+                                    if Building exists and HEALTH of Building > 0.0
+                                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                end if
+                                until Building != 0 or get Timer time remaining <= 0
+                            end loop
+                            if (get number of type HOUSE ALTAR in PlayerTown min built 1.0) == 0
+                                AttackFocus = Default
+                            end if
+                        elsif AttackFocus == CreaturePen
+                            clear siege weapon SiegeWeapon action queue
+                            Building = 0
+                            Timer = create timer for 2 seconds
+                            begin loop
+                                Number = number from 1 to 1
+                                if Number == 1
+                                    Building = get random abode of type CREATURE_PEN in town PlayerTown
+                                    if Building exists and HEALTH of Building > 0.0
+                                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                end if
+                                until Building != 0 or get Timer time remaining <= 0
+                            end loop
+                            if (get number of type HOUSE CREATURE_PEN in PlayerTown min built 1.0) == 0
+                                AttackFocus = Default
+                            end if
+                        elsif AttackFocus == TownCenter
+                            clear siege weapon SiegeWeapon action queue
+                            Building = 0
+                            Timer = create timer for 2 seconds
+                            begin loop
+                                Number = number from 1 to 1
+                                if Number == 1
+                                    Building = get random abode of type TOWN_CENTRE in town PlayerTown
+                                    if Building exists and HEALTH of Building > 0.0
+                                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                end if
+                                until Building != 0 or get Timer time remaining <= 0
+                            end loop
+                        elsif AttackFocus == Villagers
+                            clear siege weapon SiegeWeapon action queue
+                            Building = 0
+                            Timer = create timer for 2 seconds
+                            begin loop
+                                Number = number from 1 to 1
+                                if Number == 1
+                                    Building = get living villager at {PlayerTown} + {number from -125 to 125,number from -125 to 125} radius 100
+                                    if Building exists and HEALTH of Building > 0.0
+                                        add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
+                                    else
+                                        Building = 0
+                                    end if
+                                end if
+                                until Building != 0 or get Timer time remaining <= 0
+                            end loop
+                            if size of PlayerTown <= 60
+                                AttackFocus = Default
                             end if
                         end if
                     end if
-                elsif SiegeWeapon can navigate to object oTownCentre
-                    if AttackFocus == Default
-                        clear siege weapon SiegeWeapon action queue
-                        Building = 0
-                        Timer = create timer for 2 seconds
-                        begin loop
-                            Number = number from 1 to 8
-                            if Number == 1 or Number == 2 or Number == 3
-                                Building = get random abode of type ALTAR in town PlayerTown
-                                if Building exists and HEALTH of Building > 0.0
-                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
-                                else
-                                    Building = 0
-                                end if
-                            elsif Number == 4
-                                Building = get random abode of type TEMPLE in town PlayerTown
-                                if Building exists and HEALTH of Building > 0.0
-                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
-                                else
-                                    Building = 0
-                                end if
-                            elsif Number == 5
-                                Building = get random abode of type CREATURE_PEN in town PlayerTown
-                                if Building exists and HEALTH of Building > 0.0
-                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
-                                else
-                                    Building = 0
-                                end if
-                            elsif Number == 6
-                                Building = get random abode of type UNIVERSITY in town PlayerTown
-                                if Building exists and HEALTH of Building > 0.0
-                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
-                                else
-                                    Building = 0
-                                end if
-                            elsif Number == 7
-                                Building = get random abode of type BATHHOUSE in town PlayerTown
-                                if Building exists and HEALTH of Building > 0.0
-                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
-                                else
-                                    Building = 0
-                                end if
-                            elsif Number == 8
-                                Building = get random abode of type AMPITHEATRE in town PlayerTown
-                                if Building exists and HEALTH of Building > 0.0
-                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
-                                else
-                                    Building = 0
-                                end if
-                            end if
-                            until Building != 0 or get Timer time remaining <= 0
-                        end loop
-                    elsif AttackFocus == Houses
-                        clear siege weapon SiegeWeapon action queue
-                        Building = 0
-                        Timer = create timer for 2 seconds
-                        begin loop
-                            Number = number from 1 to 6
-                            if Number == 1
-                                Building = get random abode of type ABODE_A in town PlayerTown
-                                if Building exists and HEALTH of Building > 0.0
-                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
-                                else
-                                    Building = 0
-                                end if
-                            elsif Number == 2
-                                Building = get random abode of type ABODE_B in town PlayerTown
-                                if Building exists and HEALTH of Building > 0.0
-                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
-                                else
-                                    Building = 0
-                                end if
-                            elsif Number == 3
-                                Building = get random abode of type ABODE_C in town PlayerTown
-                                if Building exists and HEALTH of Building > 0.0
-                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
-                                else
-                                    Building = 0
-                                end if
-                            elsif Number == 4
-                                Building = get random abode of type ABODE_D in town PlayerTown
-                                if Building exists and HEALTH of Building > 0.0
-                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
-                                else
-                                    Building = 0
-                                end if
-                            elsif Number == 5
-                                Building = get random abode of type ABODE_E in town PlayerTown
-                                if Building exists and HEALTH of Building > 0.0
-                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
-                                else
-                                    Building = 0
-                                end if
-                            elsif Number == 6
-                                Building = get random abode of type SKYSCRAPER in town PlayerTown
-                                if Building exists and HEALTH of Building > 0.0
-                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
-                                else
-                                    Building = 0
-                                end if
-                            end if
-                            until Building != 0 or get Timer time remaining <= 0
-                        end loop
-                        if (get number of type HOUSE ABODE_A in PlayerTown min built 1.0 + get number of type HOUSE ABODE_B in PlayerTown min built 1.0 + get number of type HOUSE ABODE_C in PlayerTown min built 1.0 + get number of type HOUSE ABODE_D in PlayerTown min built 1.0 + get number of type HOUSE ABODE_E in PlayerTown min built 1.0 + get number of type HOUSE SKYSCRAPER in PlayerTown min built 1.0) == 0
-                            AttackFocus = Default
-                        end if
-                    elsif AttackFocus == Epics
-                        clear siege weapon SiegeWeapon action queue
-                        Building = 0
-                        Timer = create timer for 2 seconds
-                        begin loop
-                            Number = number from 1 to 1
-                            if Number == 1
-                                Building = get WONDER in PlayerTown
-                                if Building exists and HEALTH of Building > 0.0
-                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
-                                else
-                                    Building = 0
-                                end if
-                            end if
-                            until Building != 0 or get Timer time remaining <= 0
-                        end loop
-                        if (get number of type WONDER WONDER_SIREN in PlayerTown min built 1.0 + get number of type WONDER WONDER_HURRICANE in PlayerTown min built 1.0 + get number of type WONDER WONDER_EARTHQUAKE in PlayerTown min built 1.0 + get number of type WONDER WONDER_VOLCANO in PlayerTown min built 1.0) == 0
-                            AttackFocus = Default
-                        end if
-                    elsif AttackFocus == Altars
-                        clear siege weapon SiegeWeapon action queue
-                        Building = 0
-                        Timer = create timer for 2 seconds
-                        begin loop
-                            Number = number from 1 to 1
-                            if Number == 1
-                                Building = get random abode of type ALTAR in town PlayerTown
-                                if Building exists and HEALTH of Building > 0.0
-                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
-                                else
-                                    Building = 0
-                                end if
-                            end if
-                            until Building != 0 or get Timer time remaining <= 0
-                        end loop
-                        if (get number of type HOUSE ALTAR in PlayerTown min built 1.0) == 0
-                            AttackFocus = Default
-                        end if
-                    elsif AttackFocus == CreaturePen
-                        clear siege weapon SiegeWeapon action queue
-                        Building = 0
-                        Timer = create timer for 2 seconds
-                        begin loop
-                            Number = number from 1 to 1
-                            if Number == 1
-                                Building = get random abode of type CREATURE_PEN in town PlayerTown
-                                if Building exists and HEALTH of Building > 0.0
-                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
-                                else
-                                    Building = 0
-                                end if
-                            end if
-                            until Building != 0 or get Timer time remaining <= 0
-                        end loop
-                        if (get number of type HOUSE CREATURE_PEN in PlayerTown min built 1.0) == 0
-                            AttackFocus = Default
-                        end if
-                    elsif AttackFocus == TownCenter
-                        clear siege weapon SiegeWeapon action queue
-                        Building = 0
-                        Timer = create timer for 2 seconds
-                        begin loop
-                            Number = number from 1 to 1
-                            if Number == 1
-                                Building = get random abode of type TOWN_CENTRE in town PlayerTown
-                                if Building exists and HEALTH of Building > 0.0
-                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
-                                else
-                                    Building = 0
-                                end if
-                            end if
-                            until Building != 0 or get Timer time remaining <= 0
-                        end loop
-                    elsif AttackFocus == Villagers
-                        clear siege weapon SiegeWeapon action queue
-                        Building = 0
-                        Timer = create timer for 2 seconds
-                        begin loop
-                            Number = number from 1 to 1
-                            if Number == 1
-                                Building = get living villager at {PlayerTown} + {number from -125 to 125,number from -125 to 125} radius 100
-                                if Building exists and HEALTH of Building > 0.0
-                                    add action SIEGEWEAPON_AGENDA_ACTION_ATTACK_THING using Building to siege weapon SiegeWeapon action queue
-                                else
-                                    Building = 0
-                                end if
-                            end if
-                            until Building != 0 or get Timer time remaining <= 0
-                        end loop
-                        if size of PlayerTown <= 60
-                            AttackFocus = Default
+                elsif AttackWPStage == 3
+                    disable siege weapon SiegeWeapon auto attack
+                    if not {SiegeWeapon} near {AttackingPoint2} radius 25 or get player 0 influence at {AttackingPoint2} > 0
+                        ActionTimer = create timer for 2 seconds
+                        if get player 0 influence at {AttackingPoint2} > 0
+                            begin loop
+                                AttackingPoint2 = marker at {AttackingPoint2} + {number from -Threshold to Threshold,number from -Threshold to Threshold}
+                                Threshold += 5
+                                until (SiegeWeapon can navigate to {AttackingPoint2} and get player 0 influence at {AttackingPoint2} == 0) or Threshold > 999
+                            end loop
+                            Threshold = 1
                         end if
                     end if
+                    clear siege weapon SiegeWeapon action queue
+                    wait 2.5 seconds
+                    add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {AttackingPoint2} to siege weapon SiegeWeapon action queue
                 end if
             end if
 
