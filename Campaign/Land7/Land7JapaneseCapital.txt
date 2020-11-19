@@ -3063,11 +3063,13 @@ start
                                         AnotherPlatoon = recruit ARMY_UNIT_TYPE_MELEE_2 town GenericTown platoon of size 30 * RecruitSizeModifier
                                         enable platoon AnotherPlatoon respond to town GenericTown attack
                                         run background script LC7_StaticPlatoonsActions(marker at {GenericTown} + {number from -50 to 50,number from -50 to 50},Melee,AnotherPlatoon,GenericTown)
+                                        wait until not AnotherPlatoon recruiting
                                         run background script PT_CreateBasicJapanesePlatoon(AnotherPlatoon,1)
                                     else
                                         AnotherPlatoon = recruit ARMY_UNIT_TYPE_RANGED_2 town GenericTown platoon of size 30 * RecruitSizeModifier
                                         enable platoon AnotherPlatoon respond to town GenericTown attack
                                         run background script LC7_StaticPlatoonsActions(marker at {GenericTown} + {number from -50 to 50,number from -50 to 50},Melee,AnotherPlatoon,GenericTown)
+                                        wait until not AnotherPlatoon recruiting
                                         run background script PT_CreateBasicJapanesePlatoon(AnotherPlatoon,1)
                                     end if
                                     GenericTownPlatoonTimer = create timer for (30 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
@@ -3106,11 +3108,13 @@ start
                                         AnotherPlatoon = recruit ARMY_UNIT_TYPE_MELEE_2 town GenericTown platoon of size 30 * RecruitSizeModifier
                                         enable platoon AnotherPlatoon respond to town GenericTown attack
                                         run background script LC7_StaticPlatoonsActions(marker at {GenericTown} + {number from -50 to 50,number from -50 to 50},Melee,AnotherPlatoon,GenericTown)
+                                        wait until not AnotherPlatoon recruiting
                                         run background script PT_CreateBasicJapanesePlatoon(AnotherPlatoon,1)
                                     else
                                         AnotherPlatoon = recruit ARMY_UNIT_TYPE_RANGED_2 town GenericTown platoon of size 30 * RecruitSizeModifier
                                         enable platoon AnotherPlatoon respond to town GenericTown attack
                                         run background script LC7_StaticPlatoonsActions(marker at {GenericTown} + {number from -50 to 50,number from -50 to 50},Melee,AnotherPlatoon,GenericTown)
+                                        wait until not AnotherPlatoon recruiting
                                         run background script PT_CreateBasicJapanesePlatoon(AnotherPlatoon,1)
                                     end if
                                     GenericTownPlatoonTimer = create timer for (30 * 2) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
@@ -3431,7 +3435,6 @@ end loop
 
 end script HurricaneResourceManager
 
-//Todo: as soon music is ready
 begin script LC7_LargeSiegeScript
 
 start
@@ -3442,6 +3445,8 @@ start
 
     wait until LC7_LargeSiegeArmyReady == 1 or 600 seconds
     
+    wait 30 seconds
+
     run background script LC7_LargeSiegeMusicManager
     LC7_LargeSiegeLaunchAttack = 1
 
@@ -3466,9 +3471,26 @@ start
 
 begin loop
 
-    if LC7_LargeSiegeArmyReady == 0 and LC7_Platoon[18] exists and LC7_Platoon[19] exists and LC7_Platoon[20] exists and LC7_Platoon[21] exists and LC7_SiegeCatapult[6] exists and LC7_SiegeCatapult[7] exists and LC7_SiegeCatapult[8] exists
-        LC7_LargeSiegeArmyReady = 1
-        ARMYRECRUITDELAY = 15
+    if Difficulty >= 4
+        if LC7_LargeSiegeArmyReady == 0 and LC7_Platoon[18] exists and LC7_Platoon[19] exists and LC7_Platoon[20] exists and LC7_Platoon[21] exists and LC7_SiegeCatapult[6] exists and LC7_SiegeCatapult[7] exists and LC7_SiegeCatapult[8] exists
+            LC7_LargeSiegeArmyReady = 1
+            ARMYRECRUITDELAY = 15
+        end if
+    elsif Difficulty >= 3
+        if LC7_LargeSiegeArmyReady == 0 and LC7_Platoon[18] exists and LC7_Platoon[19] exists and LC7_Platoon[20] exists and LC7_SiegeCatapult[6] exists and LC7_SiegeCatapult[7] exists
+            LC7_LargeSiegeArmyReady = 1
+            ARMYRECRUITDELAY = 15
+        end if
+    elsif Difficulty >= 2
+        if LC7_LargeSiegeArmyReady == 0 and LC7_Platoon[18] exists and LC7_Platoon[19] exists and LC7_SiegeCatapult[6] exists and LC7_SiegeCatapult[7] exists
+            LC7_LargeSiegeArmyReady = 1
+            ARMYRECRUITDELAY = 15
+        end if
+    else
+        if LC7_LargeSiegeArmyReady == 0 and LC7_Platoon[18] exists and LC7_Platoon[19] exists and LC7_SiegeCatapult[6] exists
+            LC7_LargeSiegeArmyReady = 1
+            ARMYRECRUITDELAY = 15
+        end if
     end if
 
     if LC7_Platoon[18] not exists and PLAYER of JapaneseTown1 == 1 and LC7_LargeSiegeIsRunning == 1
@@ -3482,7 +3504,7 @@ begin loop
         run background script LC7_ArmyBehaivours(LC7_Platoon[18],Melee,Special,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,0,0,0,0,0,3)
     end if
 
-    if LC7_Platoon[19] not exists and PLAYER of JapaneseTown1 == 1 and LC7_LargeSiegeIsRunning == 1 and Difficulty >= 2
+    if LC7_Platoon[19] not exists and PLAYER of JapaneseTown1 == 1 and LC7_LargeSiegeIsRunning == 1
         wait ARMYRECRUITDELAY seconds
         LC7_Platoon[19] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseTown1 platoon of size 25 * RecruitSizeModifier
         run background script PT_CreateBasicJapanesePlatoon(LC7_Platoon[19],1)
@@ -3515,7 +3537,7 @@ begin loop
         run background script LC7_ArmyBehaivours(LC7_Platoon[21],Ranged,Special,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,0,0,0,0,0,3)
     end if
 
-    if LC7_SiegeCatapult[6] not exists and PLAYER of JapaneseTown1 == 1 and LC7_LargeSiegeIsRunning == 1 and LC7_LargeSiegeLaunchAttack == 1
+    if LC7_SiegeCatapult[6] not exists and PLAYER of JapaneseTown1 == 1 and LC7_LargeSiegeIsRunning == 1
         wait ARMYRECRUITDELAY * CATAPULTMULTIPLIER seconds
         LC7_SiegeCatapult[6] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseTown1 siege weapon
         disable siege weapon LC7_SiegeCatapult[6] auto attack
@@ -3525,7 +3547,7 @@ begin loop
         run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[6],Special,CatapultTargetingMetricFocusResult,0,0,0,AttackingPosition,AttackingPositionFallBack,3)
     end if
 
-    if LC7_SiegeCatapult[7] not exists and PLAYER of JapaneseTown1 == 1 and LC7_LargeSiegeIsRunning == 1 and LC7_LargeSiegeLaunchAttack == 1 and Difficulty >= 2
+    if LC7_SiegeCatapult[7] not exists and PLAYER of JapaneseTown1 == 1 and LC7_LargeSiegeIsRunning == 1 and Difficulty >= 2
         wait ARMYRECRUITDELAY * CATAPULTMULTIPLIER seconds
         LC7_SiegeCatapult[7] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseTown1 siege weapon
         disable siege weapon LC7_SiegeCatapult[7] auto attack
@@ -3535,7 +3557,7 @@ begin loop
         run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[7],Special,CatapultTargetingMetricFocusResult,0,0,0,AttackingPosition,AttackingPositionFallBack,3)
     end if
 
-    if LC7_SiegeCatapult[8] not exists and PLAYER of JapaneseTown1 == 1 and LC7_LargeSiegeIsRunning == 1 and LC7_LargeSiegeLaunchAttack == 1 and Difficulty >= 4
+    if LC7_SiegeCatapult[8] not exists and PLAYER of JapaneseTown1 == 1 and LC7_LargeSiegeIsRunning == 1 and Difficulty >= 4
         wait ARMYRECRUITDELAY * CATAPULTMULTIPLIER seconds
         LC7_SiegeCatapult[8] = recruit SIEGE_BALANCE_TYPE_CATAPULT_LEVEL_3 town JapaneseTown1 siege weapon
         disable siege weapon LC7_SiegeCatapult[8] auto attack
@@ -3556,7 +3578,7 @@ begin script LC7_LargeSiegeMusicManager
 
 start
 
-    wait 60 seconds
+    wait 30 seconds
     DM_DynamicMusicDisallowed = 1
     CSMixer = create mixer
     set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 0.0 with fadetime 0
@@ -3565,7 +3587,7 @@ start
 
     wait until LC7_LargeSiegeIsRunning == 0
 
-    wait 100 seconds
+    wait 130 seconds
 
     stop music with fadetime 10
     DM_DynamicMusicDisallowed = 0
