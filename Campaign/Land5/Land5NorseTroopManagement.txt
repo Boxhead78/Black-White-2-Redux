@@ -38,7 +38,7 @@ define CHANCE_TO_SPLIT = 20
 define CHANCE_TO_MERGE = 40
 
 define script Waypoints
-define script AttackRndAttackLogic
+define script AttackRndAttackLogic(attackerssentnum)
 define script AttackSyncTimerLogic
 define script PlatoonTargetingMetric(PlatoonSize,TargetTown)
 define script CatapultTargetingMetric(TargetTown)
@@ -55,7 +55,7 @@ global LC5_WallArcher[LC5_NUM_OF_WALL_ARCHERS]
 global LC5_StaticPlatoonCounter = 0
 global PlatoonTargetingMetricFocusResult = 0
 global CatapultTargetingMetricFocusResult = 0
-global AttackersSent = 0
+global AttackersSent[15]
 
 global PlatoonPos[24]
 global AttackPos[4]
@@ -145,7 +145,7 @@ start
 
 end script Waypoints
 
-begin script AttackRndAttackLogic
+begin script AttackRndAttackLogic(attackerssentnum)
 
     RndAttackPrevious = 0
 
@@ -158,15 +158,15 @@ RndAttackPrevious = RndAttack
 //say "RndAttack = $d" with number RndAttack
 
 begin loop
-    if AttackersSent == 1
-        //say "AttackersSent = 1"
+    if AttackersSent[attackerssentnum] == 1
+        //say "AttackersSent[attackerssentnum] = 1"
         wait NORSEDELAYBETWEENATTACK seconds
         begin loop
             RndAttack = number from 1 to 5
             until RndAttack != RndAttackPrevious
         end loop
-        //say "AttackersSent = 0"
-        AttackersSent = 0
+        //say "AttackersSent[attackerssentnum] = 0"
+        AttackersSent[attackerssentnum] = 0
         RndAttackPrevious = RndAttack
     else
         wait 60 seconds
@@ -647,29 +647,29 @@ end if
 //Group Attackers up first
 if Platoon == LC5_Platoon[15] or Platoon == LC5_Platoon[16]
     wait until LC5_Platoon[15] exists and LC5_Platoon[16] exists
-    AttackersSent = 1
+    AttackersSent[0] = 1
 end if
 
 if Platoon == LC5_Platoon[17]
-    AttackersSent = 1
+    AttackersSent[0] = 1
 end if
 
 if Platoon == LC5_Platoon[18]
-    AttackersSent = 1
+    AttackersSent[0] = 1
 end if
 
 if Platoon == LC5_Platoon[19] or Platoon == LC5_Platoon[20] or Platoon == LC5_Platoon[21]
     wait until LC5_Platoon[19] exists and LC5_Platoon[20] exists and LC5_Platoon[21] exists
-    AttackersSent = 1
+    AttackersSent[0] = 1
 end if
 
 if Platoon == LC5_Platoon[22] or Platoon == LC5_Platoon[23]
     wait until LC5_Platoon[22] exists and LC5_Platoon[23] exists
-    AttackersSent = 1
+    AttackersSent[0] = 1
 end if
 
 if Platoon == LC5_Platoon[24]
-    AttackersSent = 1
+    AttackersSent[0] = 1
 end if
 
 begin loop

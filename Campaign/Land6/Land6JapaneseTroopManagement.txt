@@ -39,7 +39,7 @@ define CHANCE_TO_SPLIT = 20
 define CHANCE_TO_MERGE = 40
 
 define script Waypoints
-define script AttackRndAttackLogic
+define script AttackRndAttackLogic(attackerssentnum)
 define script AttackSyncTimerLogic
 define script PlatoonTargetingMetric(PlatoonSize,TargetTown)
 define script CatapultTargetingMetric(TargetTown)
@@ -55,7 +55,7 @@ global LC6_WallArcher[LC6_NUM_OF_WALL_ARCHERS]
 global LC6_StaticPlatoonCounter = 0
 global PlatoonTargetingMetricFocusResult = 0
 global CatapultTargetingMetricFocusResult = 0
-global AttackersSent = 0
+global AttackersSent[15]
 
 global PlatoonPos[11]
 global AttackPos[8]
@@ -199,7 +199,7 @@ start
 
 end script Waypoints
 
-begin script AttackRndAttackLogic
+begin script AttackRndAttackLogic(attackerssentnum)
 
     RndAttackPrevious = 0
 
@@ -211,15 +211,15 @@ RndAttackPrevious = RndAttack
 //say "RndAttack = $d" with number RndAttack
 
 begin loop
-    if AttackersSent == 1
-        //say "AttackersSent = 1"
+    if AttackersSent[attackerssentnum] == 1
+        //say "AttackersSent[attackerssentnum] = 1"
         wait JAPANESEDELAYBETWEENATTACK seconds
         begin loop
             RndAttack = number from 1 to 5
             until RndAttack != RndAttackPrevious
         end loop
-        //say "AttackersSent = 0"
-        AttackersSent = 0
+        //say "AttackersSent[attackerssentnum] = 0"
+        AttackersSent[attackerssentnum] = 0
         RndAttackPrevious = RndAttack
     else
         wait 60 seconds
@@ -1772,27 +1772,27 @@ end if
 
 if Platoon == LC6_Platoon[32]
     wait until LC6_SiegeCatapult[8] exists and LC6_Platoon[32] exists and ({LC6_SiegeCatapult[8]} near {JapaneseCapital} radius 300)
-    AttackersSent = 1
+    AttackersSent[0] = 1
 end if
 
 if Platoon == LC6_Platoon[33]
     wait until LC6_Platoon[33] exists and LC6_SiegeCatapult[9] exists and ({LC6_SiegeCatapult[9]} near {JapaneseCapital} radius 300) and LC6_SiegeCatapult[10] exists and ({LC6_SiegeCatapult[10]} near {JapaneseCapital} radius 300)
-    AttackersSent = 1
+    AttackersSent[0] = 1
 end if
 
 if Platoon == LC6_Platoon[34] or Platoon == LC6_Platoon[35] or Platoon == LC6_Platoon[36] or Platoon == LC6_Platoon[37] or Platoon == LC6_Platoon[38]
     wait until LC6_Platoon[34] exists and LC6_Platoon[35] exists and LC6_Platoon[36] exists and LC6_Platoon[37] exists and LC6_Platoon[38] exists 
-    AttackersSent = 1
+    AttackersSent[0] = 1
 end if
 
 if Platoon == LC6_Platoon[39] or Platoon == LC6_Platoon[40]
     wait until LC6_Platoon[39] exists and LC6_Platoon[40] exists and LC6_SiegeCatapult[11] exists and ({LC6_SiegeCatapult[11]} near {JapaneseCapital} radius 300) and LC6_SiegeCatapult[12] exists and ({LC6_SiegeCatapult[12]} near {JapaneseCapital} radius 300)
-    AttackersSent = 1
+    AttackersSent[0] = 1
 end if
 
 if Platoon == LC6_Platoon[41]
     wait until LC6_Platoon[41] exists and LC6_SiegeCatapult[13] exists and ({LC6_SiegeCatapult[13]} near {JapaneseCapital} radius 300) and LC6_SiegeCatapult[14] exists and ({LC6_SiegeCatapult[14]} near {JapaneseCapital} radius 300) and LC6_SiegeCatapult[15] exists and ({LC6_SiegeCatapult[15]} near {JapaneseCapital} radius 300)
-    AttackersSent = 1
+    AttackersSent[0] = 1
 end if
 
 begin loop
