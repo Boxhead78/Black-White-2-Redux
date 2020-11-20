@@ -2885,6 +2885,20 @@ start
 
     if Task == Attacker
         begin loop
+            if AttackWPStage != 3
+                if get SiegeOnPointTimer time remaining <= 0
+                    SiegeWeaponPoint = marker at {SiegeWeapon}
+                    SiegeOnPointTimer = create timer for 90 seconds
+                elsif get SiegeOnPointTimer time remaining <= 5
+                    if {SiegeWeapon} near {SiegeWeaponPoint} radius 10
+                        clear siege weapon SiegeWeapon action queue
+                        SiegeStucked = 1
+                        wait until not {SiegeWeapon} viewed or 30 seconds
+                        delete SiegeWeapon
+                    end if
+                end if
+            end if
+
             if get ActionTimer time remaining <= 0 or get AttackSyncTimer time remaining <= 0
                 if AttackWPStage == 0
                     wait until get size of siege weapon SiegeWeapon action queue < 1
@@ -3188,6 +3202,20 @@ start
         end loop
     elsif Task == Conqueror
         begin loop
+            if AttackWPStage != 3
+                if get SiegeOnPointTimer time remaining <= 0
+                    SiegeWeaponPoint = marker at {SiegeWeapon}
+                    SiegeOnPointTimer = create timer for 90 seconds
+                elsif get SiegeOnPointTimer time remaining <= 5
+                    if {SiegeWeapon} near {SiegeWeaponPoint} radius 10
+                        clear siege weapon SiegeWeapon action queue
+                        SiegeStucked = 1
+                        wait until not {SiegeWeapon} viewed or 30 seconds
+                        delete SiegeWeapon
+                    end if
+                end if
+            end if
+
             if get ActionTimer time remaining <= 0
                 enable siege weapon SiegeWeapon auto attack
                 ActionTimer = create timer for 60 seconds
@@ -3437,6 +3465,20 @@ start
 
     elsif Task == Special
         begin loop
+            if AttackWPStage != 3
+                if get SiegeOnPointTimer time remaining <= 0
+                    SiegeWeaponPoint = marker at {SiegeWeapon}
+                    SiegeOnPointTimer = create timer for 90 seconds
+                elsif get SiegeOnPointTimer time remaining <= 5
+                    if {SiegeWeapon} near {SiegeWeaponPoint} radius 10
+                        clear siege weapon SiegeWeapon action queue
+                        SiegeStucked = 1
+                        wait until not {SiegeWeapon} viewed or 30 seconds
+                        delete SiegeWeapon
+                    end if
+                end if
+            end if
+
             if get ActionTimer time remaining <= 0 or get AttackSyncTimer time remaining <= 0
                 if AttackWPStage == 0
                     wait until get size of siege weapon SiegeWeapon action queue < 1
