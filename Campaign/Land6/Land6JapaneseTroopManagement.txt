@@ -1728,8 +1728,11 @@ begin script LC6_ArmyBehaivours(Platoon,Type,Task,DefendObject,AttackFocus,Aggre
     SplitDone = 0
     MergeDone = 0
     NewPlatoon = 0
+    AttackingPoint1Initial = 0
 
 start
+
+AttackingPoint1Initial = marker at {AttackingPoint1}
 
 if MergeChance >= SplitUpChance
     SplitUpChance = 0
@@ -2257,11 +2260,34 @@ begin loop
                         clear Platoon action queue
                         add action PLATOON_AGENDA_ACTION_DEFEND_OBJECT using DefendObject to Platoon action queue
                     end if
-                elsif Platoon can navigate to {AttackingPoint1} and get player 0 influence at {AttackingPoint1} == 0
+                elsif Platoon can navigate to {AttackingPoint1Initial} or get player 0 influence at {AttackingPoint1} > 0
                     //say "Platoon can navigate to {AttackingPoint1} and get player 0 influence at {AttackingPoint1} == 0"
-                    if not {Platoon} near {AttackingPoint1} radius 25
-                        clear Platoon action queue
-                        add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPoint1} to Platoon action queue
+                    if Platoon can navigate to {AttackingPoint1Initial}
+                        if not {Platoon} near {AttackingPoint1} radius 25
+                            clear Platoon action queue
+                            if get player 0 influence at {AttackingPoint1} > 0
+                                begin loop
+                                    AttackingPoint1 = marker at {AttackingPoint1} + {number from -Threshold to Threshold,number from -Threshold to Threshold}
+                                    Threshold += 5
+                                    until (Platoon can navigate to {AttackingPoint1} and get player 0 influence at {AttackingPoint1} == 0) or Threshold > 999
+                                end loop
+                                Threshold = 1
+                            end if
+                            add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPoint1} to Platoon action queue
+                        end if
+                    else
+                        if not {Platoon} near {AttackingPoint2} radius 25 or get player 0 influence at {AttackingPoint2} > 0
+                            clear Platoon action queue
+                            if get player 0 influence at {AttackingPoint2} > 0
+                                begin loop
+                                    AttackingPoint2 = marker at {AttackingPoint2} + {number from -Threshold to Threshold,number from -Threshold to Threshold}
+                                    Threshold += 5
+                                    until (Platoon can navigate to {AttackingPoint2} and get player 0 influence at {AttackingPoint2} == 0) or Threshold > 999
+                                end loop
+                                Threshold = 1
+                            end if
+                            add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPoint2} to Platoon action queue
+                        end if
                     end if
                 else
                     //say "else"
