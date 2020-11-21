@@ -2,8 +2,6 @@
 //    Land 8 Creature AI
 //    ~~~~~~~~~~~~~~~~~~~
 //
-//    Start date:  28.03.18            By: Boxhead
-//    Update date: 06.04.18            By: Boxhead
 ///////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
@@ -112,55 +110,42 @@ end script LC8_CreatureAI
 
 begin script LC8_CreatureLogic
 
+
     Number = 0
+    AITown[17]
+    AICounter = -1
     CreatureRollRoleTimer = create timer for 0 seconds
+    Position = 0
     Altar1Pos = marker at {1299.71,132.52,986.85}//PlayerFrontWall
     Altar2Pos = marker at {1695.63,150.56,832.54}//PlayerFlankWall
     Altar1 = 0
     Altar2 = 0
     Altar1Built = 0
     Altar2Built = 0
-    Counter = 0
-    Town[16]
+    CreatureScoutTimer = create timer for 360 seconds
+    CreatureScoutDone = 0
 
 start
 
 begin loop
 
-    while Counter > 14
-        Counter = 0
-    end while
-
-    if HEALTH of LC8_EnemyCreature == 0.00
-        //CreatureKilled = 1
-        wait until HEALTH of LC8_EnemyCreature > 0.00
-        set creature LC8_EnemyCreature role to CR_NONE radius 500 at {CreatureGathererPos[0]}
-        HEALTH of LC8_EnemyCreature = 1.0
+    if AICounter > 16
+        AICounter = -1
+    else
+        AITown[AICounter] = get town with id AICounter
     end if
 
-    if town JapaneseCapital is under takeover from player 0 and HEALTH of LC8_EnemyCreature > 0
+    if HEALTH of LC8_EnemyCreature == 0.00
+        wait until HEALTH of LC8_EnemyCreature > 0.00
+        set creature LC8_EnemyCreature role to CR_NONE radius 500 at {JapaneseCapital}
         HEALTH of LC8_EnemyCreature = 1.0
-        set creature LC8_EnemyCreature role to CR_SOLDIER radius 100 at {JapaneseCapital}
-        
-        wait until HEALTH of LC8_EnemyCreature == 0.00 or not town JapaneseCapital is under takeover from player 0 or 1000 seconds
+    end if
     
-    elsif town JapaneseTown1 is under takeover from player 0 and HEALTH of LC8_EnemyCreature > 0
+    if town AITown[AICounter] is under takeover from player 0 and HEALTH of LC8_EnemyCreature > 0
         HEALTH of LC8_EnemyCreature = 1.0
-        set creature LC8_EnemyCreature role to CR_SOLDIER radius 100 at {JapaneseTown1}
+        set creature LC8_EnemyCreature role to CR_SOLDIER radius 100 at {AITown[AICounter]}
         
-        wait until HEALTH of LC8_EnemyCreature == 0.00 or not town JapaneseTown1 is under takeover from player 0 or 1000 seconds
-
-    elsif town JapaneseTown2 is under takeover from player 0 and HEALTH of LC8_EnemyCreature > 0
-        HEALTH of LC8_EnemyCreature = 1.0
-        set creature LC8_EnemyCreature role to CR_SOLDIER radius 100 at {JapaneseTown2}
-        
-        wait until HEALTH of LC8_EnemyCreature == 0.00 or not town JapaneseTown2 is under takeover from player 0 or 1000 seconds
-
-    elsif town Town[Counter] is under takeover from player 1 and HEALTH of LC8_EnemyCreature > 0
-        HEALTH of LC8_EnemyCreature = 1.0
-        set creature LC8_EnemyCreature role to CR_SOLDIER radius 100 at {Town[Counter]}
-        
-        wait until HEALTH of LC8_EnemyCreature == 0.00 or not town PlayerTown is under takeover from player 0 or 1000 seconds
+        wait until HEALTH of LC8_EnemyCreature == 0.00 or not town AITown[AICounter] is under takeover from player 0 or 1000 seconds
 
     elsif AltarsActivated == 1 and HEALTH of LC8_EnemyCreature > 0.00 and Altar1Built == 0
         Altar1Built = 1
@@ -180,6 +165,7 @@ begin loop
         set creature LC8_EnemyCreature role to CR_SOLDIER radius 100 at {Altar2Pos}
         wait until HEALTH of LC8_EnemyCreature == 0.00 or 180 seconds or HEALTH of Altar2 < 1.0 or Altar2 not exists
 
+    //Large Siege Attacks
     elsif LC8_LargeSiegeIsRunning == 1 and HEALTH of LC8_EnemyCreature > 0.00
         CreatureAttackTimer = create timer for 600 seconds
         HEALTH of LC8_EnemyCreature = 1.0
@@ -196,49 +182,66 @@ begin loop
             end loop
         end if
 
-    elsif Difficulty >= 4 and LC8_Platoon[24] exists and {LC8_Platoon[24]} near {JapaneseTown2} radius 500 and HEALTH of LC8_EnemyCreature > 0.00 and get CreatureAttackTimer time remaining <= 0 and PortalsActivatedGlob == 0
-        CreatureAttackTimer = create timer for 1500 seconds
+    //Scout PlayerTown Early
+    elsif CreatureScoutDone == 0 and get CreatureScoutTimer time remaining <= 0 and HEALTH of LC8_EnemyCreature > 0.00
+        CreatureScoutDone = 1
         HEALTH of LC8_EnemyCreature = 1.0
-        begin loop
-            if LC8_Platoon[24] exists and not {LC8_Platoon[24]} near {AttackPos[0]} radius 350
-                set creature LC8_EnemyCreature role to CR_SOLDIER radius 5 at {LC8_Platoon[24]}
-            else
-                set creature LC8_EnemyCreature role to CR_SOLDIER radius 100 at {CreatureAttackPos[0]}
-            end if
-            until HEALTH of LC8_EnemyCreature == 0.00 or 750 seconds or LC8_LargeSiegeIsRunning == 1 or PLAYER of JapaneseTown2 != 1
-        end loop
+        set creature LC8_EnemyCreature role to CR_NONE radius 100 at {1258.21,123.73,1062.09}
+        wait until HEALTH of LC8_EnemyCreature == 0.00 or 120 seconds
+        set creature LC8_EnemyCreature role to CR_NONE radius 100 at {1051.87,103.25,755.82}
+        wait until HEALTH of LC8_EnemyCreature == 0.00 or 45 seconds
 
-    elsif LC8_Platoon[35] exists and {LC8_Platoon[35]} near {JapaneseTown1} radius 500 and HEALTH of LC8_EnemyCreature > 0.00 and get CreatureAttackTimer time remaining <= 0
-        CreatureAttackTimer = create timer for 1500 seconds
-        HEALTH of LC8_EnemyCreature = 1.0
-        begin loop
-            if LC8_Platoon[35] exists and not {LC8_Platoon[35]} near {AttackPos[0]} radius 350
-                set creature LC8_EnemyCreature role to CR_SOLDIER radius 5 at {LC8_Platoon[35]}
-            else
-                set creature LC8_EnemyCreature role to CR_SOLDIER radius 100 at {CreatureAttackPos[0]}
-            end if
-            until HEALTH of LC8_EnemyCreature == 0.00 or 750 seconds or LC8_LargeSiegeIsRunning == 1 or PLAYER of JapaneseTown1 != 1
-        end loop
+    //Attack PlayerTown Early
+    elsif LC8_Platoon[81] exists and LC8_Platoon[82] exists and LC8_Platoon[83] exists and Difficulty >= 4
+        if HEALTH of LC8_EnemyCreature > 0.00
+            HEALTH of LC8_EnemyCreature = 1.0
+            begin loop
+                if LC8_Platoon[81] exists
+                    set creature LC8_EnemyCreature role to CR_SOLDIER radius 75 at {LC8_Platoon[81]}
+                elsif LC8_Platoon[82] exists
+                    set creature LC8_EnemyCreature role to CR_SOLDIER radius 75 at {LC8_Platoon[82]}
+                elsif LC8_Platoon[83] exists
+                    set creature LC8_EnemyCreature role to CR_SOLDIER radius 75 at {LC8_Platoon[83]}
+                end if
+                until LC8_Platoon[81] not exists and LC8_Platoon[82] not exists and LC8_Platoon[83] not exists or 720 seconds or HEALTH of LC8_EnemyCreature == 0.00
+            end loop
+            set creature LC8_EnemyCreature role to CR_SOLDIER radius 300 at {CreatureAttackPos[2]}
+            wait until HEALTH of LC8_EnemyCreature == 0.00 or 360 seconds
+        end if
+
+    //Attack PlayerTown Late
+    elsif LC8_Platoon[72] exists or LC8_Platoon[73] exists or LC8_Platoon[74] exists
+        if HEALTH of LC8_EnemyCreature > 0.00
+            HEALTH of LC8_EnemyCreature = 1.0
+            begin loop
+                if LC8_Platoon[72] exists
+                    set creature LC8_EnemyCreature role to CR_SOLDIER radius 75 at {LC8_Platoon[72]}
+                elsif LC8_Platoon[73] exists
+                    set creature LC8_EnemyCreature role to CR_SOLDIER radius 75 at {LC8_Platoon[73]}
+                elsif LC8_Platoon[74] exists
+                    set creature LC8_EnemyCreature role to CR_SOLDIER radius 75 at {LC8_Platoon[74]}
+                end if
+                until LC8_Platoon[72] not exists and LC8_Platoon[73] not exists and LC8_Platoon[74] not exists or 720 seconds or HEALTH of LC8_EnemyCreature == 0.00
+            end loop
+            set creature LC8_EnemyCreature role to CR_SOLDIER radius 300 at {CreatureAttackPos[0]}
+            wait until HEALTH of LC8_EnemyCreature == 0.00 or 360 seconds
+        end if
 
     elsif HEALTH of LC8_EnemyCreature > 0.00 and get CreatureRollRoleTimer time remaining <= 0
-        Number = number from 1 to 3
-        if Number == 1 and PLAYER of JapaneseCapital == 1
-            set creature LC8_EnemyCreature role to CR_GATHERER radius 200 at {CreatureGathererPos[0]}
-            CreatureRollRoleTimer = create timer for 360 seconds
-            
-        elsif Number == 2 and PLAYER of JapaneseTown1 == 1
-            set creature LC8_EnemyCreature role to CR_GATHERER radius 200 at {CreatureGathererPos[1]}
-            CreatureRollRoleTimer = create timer for 360 seconds
-
-        elsif Number == 3 and PLAYER of JapaneseTown2 == 1
-            set creature LC8_EnemyCreature role to CR_GATHERER radius 200 at {CreatureGathererPos[2]}
+        if PLAYER of AITown[AICounter] == 1
+            Position = marker at {AITown[AICounter]} + {number from 50 to -50,number from 50 to -50}
+            if number from 1 to 3 == 1
+                set creature LC8_EnemyCreature role to CR_GATHERER radius 200 at {Position}
+            else
+                set creature LC8_EnemyCreature role to CR_NONE radius 200 at {Position}
+            end if
             CreatureRollRoleTimer = create timer for 360 seconds
         
         end if
+        
     end if
 
-    Counter++
-    
+    AICounter += number from 0 to 16
     until LandWon == 1
 end loop
 
