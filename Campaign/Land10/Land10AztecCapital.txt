@@ -1940,48 +1940,41 @@ end script PrisonCondition
 begin script LC10_GetNearestSettlement
 
     NearestTown = 0
+    NearestSettlementPlayerTownSwitch = 0
 
 start
 
 begin loop
-    if HardMode == 0
-        if PLAYER of AztecCapital == 0
-            NearestTown = AztecCapital
+    if PLAYER of AztecCapital != 1
+        NearestTown = AztecCapital
 
-        elsif PLAYER of AztecTown1 == 0
-            NearestTown = AztecTown1
+    elsif PLAYER of AztecTown1 != 1
+        NearestTown = AztecTown1
 
-        elsif PLAYER of AztecTown2 == 0
-            NearestTown = AztecTown2
+    elsif PLAYER of AztecTown2 != 1
+        NearestTown = AztecTown2
 
-        elsif PLAYER of MinorTown1 == 0
-            NearestTown = MinorTown1
-
-        else
+    elsif PLAYER of AztecTown1 == 1 and PLAYER of AztecTown2 == 1 and PLAYER of AztecCapital == 1
+        begin loop
+            NearestTown = get town with id number from 0 to 15
+            if NearestTown exists and get building ABODE_NUMBER_TOWN_CENTRE in NearestTown min built 1.0 exists
+                if variable get town NearestTown status == variable TOWN_STATUS_MIGRATION_STARTED
+                    NearestTown = 0
+                end if
+            end if
+            until PLAYER of NearestTown != 1 and NearestTown exists
+        end loop
+        if NearestSettlementPlayerTownSwitch == 1
+            NearestSettlementPlayerTownSwitch = 0
             NearestTown = PlayerTown
-
-        end if
-    elsif HardMode == 1
-        if PLAYER of AztecCapital != 1
-            NearestTown = AztecCapital
-
-        elsif PLAYER of AztecTown1 != 1
-            NearestTown = AztecTown1
-
-        elsif PLAYER of AztecTown2 != 1
-            NearestTown = AztecTown2
-
-        elsif PLAYER of MinorTown1 != 1
-            NearestTown = MinorTown1
-
         else
-            NearestTown = PlayerTown
-
+            NearestSettlementPlayerTownSwitch = 1
         end if
     end if
-
-    NearestSettlement = NearestTown
-    //wait 45 seconds
+    if NearestTown exists and get building ABODE_NUMBER_TOWN_CENTRE in NearestTown min built 1.0 exists
+        NearestSettlement = NearestTown
+        wait until PLAYER of NearestSettlement == 1 or NearestSettlement not exists or 2400 seconds
+    end if
 end loop
 
 end script LC10_GetNearestSettlement
