@@ -25,6 +25,7 @@ define BI_BARREL_UNMANNED_COLS                        = 2
 //-------------------------------------------
 define script BI_Villagers
 define script BI_TavernExplode
+define script BI_ApplyCrush(myObject,myDuration,secondBarrels)
 //define script BI_Advisors(ID)
 
 //Unmanned barrl event
@@ -222,6 +223,7 @@ start
         force while CLoop < BI_BARREL_RUN_COLS
             ID = (BI_BARREL_RUN_COLS*RLoop) + CLoop
             set Barrels[ID] velocity heading {MovePos} speed 8
+            run background script BI_ApplyCrush(Barrels[ID],5,0)
             CLoop++
         end while
         RLoop++
@@ -786,7 +788,8 @@ start
         force while RLoop < BI_BARREL_UNMANNED_ROWS
             ID = (RLoop * BI_BARREL_UNMANNED_COLS) + CLoop
             ALTITUDE of Barrels[ID] = 0.9
-            set Barrels[ID] velocity heading {MovePos} speed 20            
+            set Barrels[ID] velocity heading {MovePos} speed 20
+            run background script BI_ApplyCrush(Barrels[ID],5,1)
             RLoop++
         end while
         CLoop++
@@ -814,13 +817,39 @@ start
 
 end script BI_UnmannedBarrels
 
+begin script BI_ApplyCrush(myObject,myDuration,secondBarrels)
+
+    CrushTimer = create timer for myDuration seconds
+    objectPos = 0
+    Villager = 0
+
+start
+
+if secondBarrels == 0
+    wait 1.25 seconds
+end if
+
+while get CrushTimer time remaining > 0
+    objectPos = marker at {myObject}
+    wait 0.25 seconds
+    Villager = get living villager at {objectPos} radius 0.33
+    if Villager exists
+        HEALTH of Villager = 0
+    end if
+    add effect EFFECT_TYPE_HIT at {objectPos} strength 4 radius 0.33
+    add effect EFFECT_TYPE_APPLY_FORCE at {objectPos} strength 1.75 radius 0.33
+    add effect EFFECT_TYPE_CRUSH at {objectPos} strength 0.5 radius 0.33
+end while
+
+end script BI_ApplyCrush
+
 //-------------------------------------------
 // Advisors
 //-------------------------------------------
 begin script BI_BarrelPlatoon
     Attackers    = 0
     StartPoint    = marker at {2003.746, 100.677, 934.056}
-    MovePoint    = marker at {2048.040, 102.725, 938.044}
+    MovePoint    = marker at {2048.040, 102.725, 938.044} + {0,5}
     AttackPoint    = marker at {2038.833, 102.240, 962.073}
     platoontoattack=0
 
