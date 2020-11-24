@@ -701,6 +701,7 @@ begin script LC4_ArmyBehaivours(Platoon,Type,Task,DefendObject,AttackFocus,Aggre
     MergeDone = 0
     NewPlatoon = 0
     AttackingPoint1Initial = 0
+    ScriptFirstTime = 1
 
 start
 
@@ -967,7 +968,10 @@ begin loop
             end if
             //Targeting
             if AttackWPStage == 3
-                wait number from 5 to 25 seconds
+                if ScriptFirstTime == 1
+                    ScriptFirstTime = 0
+                    wait number from 5 to 25 seconds
+                end if
                 //say "PLATOON ATTACKING"
                 oTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in PlayerTown min built 1.0
                 if PLAYER of PlayerTown != 0
