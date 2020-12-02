@@ -6,7 +6,7 @@
 
 // Debug switch
 define DEBUG = 0
-define Intro = 1
+define Intro = 0
 
 define script Globals
 define script LC4_DynamicDifficulty
@@ -38,6 +38,7 @@ global StaticPlatoonsActionTimer = 0
 global StaticPlatoonsActive = 0
 global RndAttack[5]
 global ScriptedAttack[5]
+global LC4_LargeSiegeLaunchAttack = 0
 
 global PlayerTown = 0
 global MinorTown1 = 0
@@ -45,17 +46,18 @@ global MinorTown2 = 0
 global MinorTown3 = 0
 global MinorTown4 = 0
 global MinorTown5 = 0
+global MinorTown6 = 0
 global NorseTown1 = 0
 global NorseCapital = 0
-global MissionaryTown = 0
 
-global MINOR_TOWN3_IMPRESSIVENESS = 4500
-global MINOR_TOWN1_IMPRESSIVENESS = 7183
-global MINOR_TOWN4_IMPRESSIVENESS = 9948
-global MINOR_TOWN2_IMPRESSIVENESS = 14948
-global MINOR_TOWN5_IMPRESSIVENESS = 13881
-global NORSE_TOWN1_IMPRESSIVENESS = 13900
-global NORSE_CAPITAL_IMPRESSIVENESS = 15800
+global MINOR_TOWN1_IMPRESSIVENESS = 2000
+global MINOR_TOWN2_IMPRESSIVENESS = 4500
+global MINOR_TOWN3_IMPRESSIVENESS = 6000
+global MINOR_TOWN4_IMPRESSIVENESS = 6500
+global MINOR_TOWN5_IMPRESSIVENESS = 7800
+global MINOR_TOWN6_IMPRESSIVENESS = 9000
+global NORSE_TOWN1_IMPRESSIVENESS = 12500
+global NORSE_CAPITAL_IMPRESSIVENESS = 12000
 
 begin script Globals
 
@@ -73,22 +75,24 @@ start
     NORSE_CAPITAL_IMPRESSIVENESS = NORSE_CAPITAL_IMPRESSIVENESS * ImpressivenessModifier * PLAYEREIMPRESSIVENESSMULTIPLIER
 
     if SecondPlaythrough == 1
-        MINOR_TOWN2_IMPRESSIVENESS += 6000
-        MINOR_TOWN4_IMPRESSIVENESS += 6000
         MINOR_TOWN1_IMPRESSIVENESS += 6000
+        MINOR_TOWN2_IMPRESSIVENESS += 6000
         MINOR_TOWN3_IMPRESSIVENESS += 6000
+        MINOR_TOWN4_IMPRESSIVENESS += 6000
         MINOR_TOWN5_IMPRESSIVENESS += 6000
+        MINOR_TOWN6_IMPRESSIVENESS += 6000
         NORSE_TOWN1_IMPRESSIVENESS += 6000
         NORSE_CAPITAL_IMPRESSIVENESS += 6000
     end if
 
     if HardMode == 1
-        MINOR_TOWN2_IMPRESSIVENESS += 1000
-        MINOR_TOWN4_IMPRESSIVENESS += 2000
-        MINOR_TOWN1_IMPRESSIVENESS += 4000
-        MINOR_TOWN3_IMPRESSIVENESS += 8000
-        MINOR_TOWN5_IMPRESSIVENESS += 12000
-        NORSE_TOWN1_IMPRESSIVENESS += 12000
+        MINOR_TOWN1_IMPRESSIVENESS += 1000
+        MINOR_TOWN2_IMPRESSIVENESS += 2000
+        MINOR_TOWN3_IMPRESSIVENESS += 4000
+        MINOR_TOWN4_IMPRESSIVENESS += 8000
+        MINOR_TOWN5_IMPRESSIVENESS += 10000
+        MINOR_TOWN6_IMPRESSIVENESS += 12000
+        NORSE_TOWN1_IMPRESSIVENESS += 13500
         NORSE_CAPITAL_IMPRESSIVENESS += 14500
     end if
 
@@ -112,14 +116,15 @@ start
 
     GB_PlayerTown = get town with id 0//For Global Script
     PlayerTown = get town with id 0
-    MinorTown1 = get town with id 2
-    MinorTown2 = get town with id 3
-    MinorTown3 = get town with id 5
-    MinorTown4 = get town with id 6
-    MinorTown5 = get town with id 7
+    MinorTown1 = get town with id 9
+    MinorTown2 = get town with id 6
+    MinorTown3 = get town with id 8
+    MinorTown3 = get town with id 2
+    MinorTown4 = get town with id 5
+    MinorTown5 = get town with id 3
+    MinorTown6 = get town with id 7
     NorseTown1 = get town with id 4
     NorseCapital = get town with id 1
-    MissionaryTown = get town with id 8
 
     PlayerAlignmentFinal = get player 0 alignment
     StaticPlatoonsActionTimer = create timer for 1500 seconds

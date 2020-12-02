@@ -1,0 +1,78 @@
+//------------------------------------------------
+//  UNDEAD LEGION
+//------------------------------------------------
+
+//Defines
+define FM_NUM_OF_TOWNS = 15
+
+//Script Defines
+define script PlatoonFinder
+define script CreateMeleePlatoon(Town, Platoon)
+define script CreateRangedPlatoon(Town, Platoon)
+
+run script PlatoonFinder
+
+begin script PlatoonFinder
+
+    Town[FM_NUM_OF_TOWNS]
+    Platoon = 0
+        TownCounter = 0
+
+start
+
+begin loop
+
+    if TownCounter >= FM_NUM_OF_TOWNS - 1
+        TownCounter = 0
+    end if
+
+    Town[TownCounter] = get town with id TownCounter
+    if PLAYER of Town[TownCounter] == 0
+        Platoon = get platoon of tribe TRIBE_TYPE_GREEK nearest {Town[TownCounter]} radius 750
+        if Platoon exists
+            if not Platoon recruiting and platoon Platoon melee
+                  run script CreateMeleePlatoon(Town[TownCounter],Platoon)
+            elsif not Platoon recruiting and platoon Platoon ranged
+                run script CreateRangedPlatoon(Town[TownCounter],Platoon)
+            end if
+        end if
+    end if
+
+    TownCounter++
+end loop
+
+end script PlatoonFinder
+
+begin script CreateMeleePlatoon(Town, Platoon)
+
+NewPlatoonDestination = 0
+PlatoonSize = 0
+NewPlatoon = 0
+
+start
+
+NewPlatoonDestination = marker at {Platoon}
+PlatoonSize = get number of villagers in platoon Platoon
+delete Platoon
+NewPlatoon = create platoon PLATOON_INFO_JAPANESE_MELEE_1 at {NewPlatoonDestination} with PlatoonSize men and 0 women
+PLAYER of NewPlatoon = 0
+attach NewPlatoon to Town
+
+end script CreateMeleePlatoon
+
+begin script CreateRangedPlatoon(Town, Platoon)
+
+NewPlatoonDestination = 0
+PlatoonSize = 0
+NewPlatoon = 0
+
+start
+
+NewPlatoonDestination = marker at {Platoon}
+PlatoonSize = get number of villagers in platoon Platoon
+delete Platoon
+NewPlatoon = create platoon PLATOON_INFO_JAPANESE_RANGED_1 at {NewPlatoonDestination} with PlatoonSize men and 0 women
+PLAYER of NewPlatoon = 0
+attach NewPlatoon to Town
+
+end script CreateRangedPlatoon

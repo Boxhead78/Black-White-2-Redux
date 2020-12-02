@@ -46,22 +46,55 @@ global GL_Skull = 0
 global MoveThoseBadBoys = 0
 
 begin script LC4_Land4UndeadLegion
-Triggered = GL_FALSE
-GoodAdvisorCommentSaid = GL_FALSE
-ScrollPos = marker at {844.34,13.95,473.14}
-Scroll = 0
-AttachedAtmos = 0
-
+    Triggered = GL_FALSE
+    GoodAdvisorCommentSaid = GL_FALSE
+    ScrollPos = marker at {379.66,12.97,531.53}
+    Scroll = 0
+    AttachedAtmos = 0
+    Number = 0
+    NumberTaken[5]
+    PosTaken[5]
 start
 
-GL_Skull = get OBJECT at {876.65,13.78,468.30} radius 5
+GL_Skull = get OBJECT at {388.59,13.22,603.04} radius 5
 
-    //Get the torches
-    Torch[0] = get FEATURE at {886.91,13.81,476.44}
-    Torch[1] = get FEATURE at {866.60,13.84,476.36}
-    Torch[2] = get FEATURE at {886.65,13.76,459.83}
-    Torch[3] = get FEATURE at {866.13,13.81,460.61}
-    Torch[4] = get FEATURE at {876.16,13.77,454.30}
+//Get the torches
+Torch[0] = 0
+Torch[1] = 0
+Torch[2] = 0
+Torch[3] = 0
+Torch[4] = 0
+PosTaken[0] = 0
+PosTaken[1] = 0
+PosTaken[2] = 0
+PosTaken[3] = 0
+PosTaken[4] = 0
+
+begin loop
+    Number = number from 0 to 4
+    if Torch[Number] == 0 and PosTaken[0] == 0
+        PosTaken[0] = 1
+        Torch[Number] = get FEATURE at {397.94,13.26,611.39}
+
+    elsif Torch[Number] == 0 and PosTaken[1] == 0
+        PosTaken[1] = 1
+        Torch[Number] = get FEATURE at {378.21,13.22,611.19}
+
+    elsif Torch[Number] == 0 and PosTaken[2] == 0
+        PosTaken[2] = 1
+        Torch[Number] = get FEATURE at {377.90,13.24,595.41}
+
+    elsif Torch[Number] == 0 and PosTaken[3] == 0
+        PosTaken[3] = 1
+        Torch[Number] = get FEATURE at {387.05,13.26,589.70}
+
+    elsif Torch[Number] == 0 and PosTaken[4] == 0
+        PosTaken[4] = 1
+        Torch[Number] = get FEATURE at {397.58,13.24,594.62}
+
+    end if
+    until Torch[0] != 0 and Torch[1] != 0 and Torch[2] != 0 and Torch[3] != 0 and Torch[4] != 0
+end loop
 
 enable GL_Skull indestructible
 disable GL_Skull pickup
@@ -156,9 +189,7 @@ end script AreTorchesOnFire
 
 //===========================================================================
 begin script CheckSequence
-UndeadPlatoonPos = marker at {1983.483, 51.750, 881.247}
 
-PlatoonFacing = marker at {1966.740, 51.965, 888.466}
 FirstClickCorrect = 0
 
 start
@@ -346,7 +377,7 @@ start
         set fade red 0 green 0 blue 0 time 2
         wait 2 seconds
         set game time 21.00
-        set camera position to {897.15,50.00,505.76}
+        set camera position to {378.28,27.00,633.21}
         set camera focus to {GL_Skull}
         set fade in time 2
         wait 2 seconds
@@ -409,11 +440,6 @@ begin script GL_GhostSuccessOutro
     BrightEffect=0
 
     EffectedDude=0
-
-    Clickedhere = marker at {2107.145, 270.838, 1484.271}
-
-    //UndeadPlatoonPos = marker at {1947.769,52.688,801.049}
-    PlatoonFacing = marker at {2087.145, 270.838, 1484.271}
 
     counter=0
     count=0
@@ -479,28 +505,10 @@ begin cinema
 
     //move game time 21.00 time 5
     //play sound "CHURCHBELL"
-/*
-    GL_GhostLegionStartPos= marker at get world position from GL_Skull to {-0.250, 0.025, -2.750}
-    GL_GhostLegion = create platoon PLATOON_INFO_SKELETON_MELEE at {GL_GhostLegionStartPos} with 12 men and 0 women
-    PLAYER of GL_GhostLegion = 0
-    //run script ResetGL_GhostLegionStats
-    //set GL_GhostLegion ghost alpha 0.4 red 0.1 green 0.2 blue 0.6 specular 0.1
-    set platoon GL_GhostLegion formation to 3 wide by 4 deep with 1 spacing
-    set GL_GhostLegion position to {GL_GhostLegionStartPos}
-    GhostlyDestination = marker at get world position from GL_Skull to {2.502, -0.170, 18.126}
-    set GL_GhostLegion focus to {GhostlyDestination}
-    //set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_MASS of GL_GhostLegion to 2.50
-    set platoon movement value FORMATION_MOVEMENT_STAT_DECELLERATION_DIST of GL_GhostLegion to 1.00
-    set platoon movement value FORMATION_MOVEMENT_STAT_ACCELERATION_MAX of GL_GhostLegion to 1.00
-    set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_SPEED_MAX of GL_GhostLegion to 2.00
-    set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_SPEED_MIN of GL_GhostLegion to 0.20
-    set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_SPEED of GL_GhostLegion to 1.80
-    set platoon movement value FORMATION_MOVEMENT_STAT_POSITION_ACCURACY of GL_GhostLegion to 0.01
-    */
 
     GhostlyDestination = marker at get world position from GL_Skull to {-0.530, 0.037, 16.435}
 
-    GL_GhostLegion = create platoon PLATOON_INFO_SKELETON_MELEE at {875.65,13.84,486.31} with 12 men and 0 women
+    GL_GhostLegion = create platoon PLATOON_INFO_SKELETON_MELEE at {390.08,13.48,639.64} with 12 men and 0 women
     PLAYER of GL_GhostLegion = 0
     run background script PT_CreateBasicGreekPlatoon(GL_GhostLegion,0)
 
@@ -538,17 +546,17 @@ begin cinema
     move camera focus to {RelCamFoc} time 4 easein 0 easeout 0
 
     while count < 4
-    set Ghost[count] position to {877.61,13.78,469.70}
-    set Ghost[count+1] position to {876.03,13.78,469.64}
-    SPEED of Ghost[count] = 0.1
-    SPEED of Ghost[count+1] = 0.1
-    move Ghost[count] position to {876.70,13.81,476.54}
-    override Ghost[count] anim "a_p_l7sevensamurai_soldier_walk"
-    move Ghost[count+1] position to {874.92,13.81,476.39}
-    override Ghost[count+1] anim "a_p_l7sevensamurai_soldier_walk"
-    wait 1 seconds
-    count++
-    count++
+        set Ghost[count] position to {388.85,13.22,602.02}
+        set Ghost[count+1] position to {387.45,13.22,600.99}
+        SPEED of Ghost[count] = 0.1
+        SPEED of Ghost[count+1] = 0.1
+        move Ghost[count] position to {390.56,13.52,640.05}
+        override Ghost[count] anim "a_p_l7sevensamurai_soldier_walk"
+        move Ghost[count+1] position to {388.55,13.37,640.31}
+        override Ghost[count+1] anim "a_p_l7sevensamurai_soldier_walk"
+        wait 1 seconds
+        count++
+        count++
     end while
 
     stop sound "SCRIPT24_CHANTING"
@@ -573,15 +581,9 @@ begin cinema
     //move camera position to {2207.933, 169.789, 1656.279} time 6 easein 0 easeout 0
     //move camera focus to {2290.550, 113.674, 1651.042} time 6 easein 0 easeout 0
     
-    wait 1 seconds    
+    wait 1 seconds
     set fade red 255 green 255 blue 255 time 4
-    wait 2 seconds    
-    ///speed those badboys up here
-    /*set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_SPEED_MAX of GL_GhostLegion to 100.7
-    //set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_SPEED of GL_GhostLegion to 100.7
-    set platoon movement value FORMATION_MOVEMENT_STAT_ACCELERATION_MAX of GL_GhostLegion to 100.7
-    set platoon movement value FORMATION_MOVEMENT_STAT_DECELLERATION_DIST of GL_GhostLegion to 0
-    set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_SPEED_MIN of GL_GhostLegion to 80*/
+    wait 2 seconds
 
     //set platoon movement value FORMATION_MOVEMENT_STAT_POSITION_ACCURACY of GL_GhostLegion to 0
 
@@ -615,9 +617,9 @@ begin cinema
 
     set camera lens 43.000
     set fade in time 5
-    set camera position to {896.91,50.00,499.66}
+    set camera position to {400.62,25.00,644.41}
     set camera focus to {GhostlyDestination}
-    move camera position to {897.69,75.00,538.14} time 10 easein 0 easeout 0
+    move camera position to {392.67,28.00,662.93} time 10 easein 0 easeout 0
     move camera focus to {GhostlyDestination} time 10 easein 0 easeout 0
     
     wait 3 seconds

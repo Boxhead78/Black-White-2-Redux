@@ -20,10 +20,10 @@ begin script LC4_AICreature
 
 start
 
-    CreatureAttackPos[0] = marker at {1713.64,226.25,1170.85}//PlayerTown
-    CreatureAttackPos[1] = marker at {1371.50,217.64,1582.96}//PlayerTown
+    CreatureAttackPos[0] = marker at {1885.98,58.11,1293.16}//PlayerTown
+    CreatureAttackPos[1] = marker at {2343.76,34.17,928.66}//PlayerTown
 
-    LC4_EnemyCreature = create SCRIPT_OBJECT_TYPE_CREATURE CREATURE_TYPE_WOLF at {863.66,160.38,1153.02}
+    LC4_EnemyCreature = create SCRIPT_OBJECT_TYPE_CREATURE CREATURE_TYPE_WOLF at {911.30,231.92,1132.32}
     
     set creature LC4_EnemyCreature happiness to maximum
     
@@ -101,10 +101,12 @@ begin script LC4_CreatureLogic
     CreatureRollRoleTimer = create timer for 0 seconds
     CreatureAttackTimer = create timer for 99999 seconds
     Position = 0
+    oCreature = 0
 
 start
 
 begin loop
+    oCreature = get player 0 creature
 
     if AICounter > 16
         AICounter = -1
@@ -122,6 +124,15 @@ begin loop
         HEALTH of LC4_EnemyCreature = 1.0
         set creature LC4_EnemyCreature role to CR_SOLDIER radius 100 at {AITown[AICounter]}
         
+        wait until HEALTH of LC4_EnemyCreature == 0.00 or not town AITown[AICounter] is under takeover from player 0 or 1000 seconds
+
+    elsif PLAYER of AITown[AICounter] == 1 and get distance from {AITown[AICounter]} to {oCreature} < 300 and HEALTH of LC4_EnemyCreature > 0
+        HEALTH of LC4_EnemyCreature = 1.0
+        while HEALTH of LC4_EnemyCreature > 0.00 and town AITown[AICounter] is under takeover from player 0 and get distance from {AITown[AICounter]} to {oCreature} <= 500
+            wait 15 seconds
+            set creature LC4_EnemyCreature role to CR_SOLDIER radius 33 at {oCreature}
+        end while
+
         wait until HEALTH of LC4_EnemyCreature == 0.00 or not town AITown[AICounter] is under takeover from player 0 or 1000 seconds
 
     elsif ENEMY_CREATURE_ALLOWED_TO_ATTACK == 1 and HEALTH of LC4_EnemyCreature > 0.00 and Difficulty >= 3
