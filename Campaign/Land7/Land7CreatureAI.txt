@@ -137,6 +137,15 @@ begin loop
         
         wait until HEALTH of LC7_EnemyCreature == 0.00 or not town AITown[AICounter] is under takeover from player 0 or 1000 seconds
 
+    elsif PLAYER of AITown[AICounter] == 1 and get distance from {AITown[AICounter]} to {oCreature} < 300 and HEALTH of LC4_EnemyCreature > 0
+        HEALTH of LC4_EnemyCreature = 1.0
+        while HEALTH of LC4_EnemyCreature > 0.00 and town AITown[AICounter] is under takeover from player 0 and get distance from {AITown[AICounter]} to {oCreature} <= 500
+            wait 15 seconds
+            set creature LC4_EnemyCreature role to CR_SOLDIER radius 33 at {oCreature}
+        end while
+
+        wait until HEALTH of LC4_EnemyCreature == 0.00 or not town AITown[AICounter] is under takeover from player 0 or 1000 seconds
+
     elsif LC7_Platoon[17] exists and {LC7_Platoon[17]} near {JapaneseCapital} radius 500 and HEALTH of LC7_EnemyCreature > 0.00 and get CreatureAttackTimer time remaining <= 0
         CreatureAttackTimer = create timer for 1800 * RecruitModifier seconds
         HEALTH of LC7_EnemyCreature = 1.0
