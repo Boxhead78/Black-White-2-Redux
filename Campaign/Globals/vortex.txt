@@ -2,14 +2,26 @@
  * Program:	Vortex for Black and White 2
  * Purpose:	Allows the user to move objects and resources from one land to the next
  * Author:		Willy
- * Version: 	0
- * Date: 		July 23 2018
+ * Version: 	1
+ * Date: 		December 15 2020
+ * Changes:
+ * 				Version 1 Change Log: December 15 2020
+ *					Added the ability to send ore rocks
+ *					Added limit controls for different various item types including:
+ *						Platoons (based on number of villegers)
+ *						Trees
+ *						Ore rocks
+ *						Villegers (children and adults are included in the same count)
+ *						Resources (limited amount of food, wood, and ore)
+ *						Rocks
+ *					Added angle to the entering vortex function
+ *					Fixed a bug [clearing the data after entering]
 **************************************************************************************************/
 //-------------------------------------------Scripts-----------------------------------------------
 //Interface Scripts
 //These are the scripts you use to setup the vortex
 define script Vtx_Create_Exiting(xPos, yPos, zPos)
-define script Vtx_Create_Entering(xPos, yPos, zPos, playerTown)
+define script Vtx_Create_Entering(xPos, yPos, zPos, ang, playerTown)
 define script Vtx_SetScrollType(Scoll_type)
 define script Vtx_SetCloudAttributes(clGeneration, clHeight, clprecipitation, clOvercast)
 define script Vtx_SetVortexAttributes(vtxSize, vtxColourChangeEnabled, vtxColour1_R, vtxColour1_G, vtxColour1_B, vtxHeight, vtxAngle)
@@ -22,7 +34,9 @@ define script Vtx_Click_Check
 define script Vtx_Save_Data
 define script Vtx_Clear_Data
 define script Vtx_Send_Platoon(army1)
+define script Vtx_Send_Recruit(Recruit)
 define script Vtx_Send_Resource(reso)
+define script Vtx_Send_OreRock(oreRock)
 define script Vtx_Send_SiegeWeapon(sieg)
 define script Vtx_Send_Tree(treeObj)
 define script Vtx_Send_Rock(rockObj)
@@ -32,6 +46,7 @@ define script Vtx_Send_Misc(vtxObj)
 
 define script VTX_Read_Data
 define script Vtx_Create_Tree(treeType, num)
+define script Vtx_Create_OreRock(num)
 define script Vtx_Create_Rock(rockType, num)
 define script Vtx_Create_Food(amoun)
 define script Vtx_Create_Wood(amoun)
@@ -46,42 +61,53 @@ define script Vtx_Lead_Army(vtxObj)
 define script Vtx_Lead_Siege(vtxObj)
 define script Vtx_LaunchObject(obj)
 define script Vtx_LaunchMisc(obj)
+
+define script Vtx_Click_Check
 //------------------------------------------Constants----------------------------------------------
-define VTX_TRUE 	= 1
-define VTX_FALSE 	= 0
+define VTX_TRUE 			= 1
+define VTX_FALSE 			= 0
 
 global constant VTX_BRONZE = SCRIPT_HIGHLIGHT_INFO_SCRIPT_BRONZE
 global constant VTX_SILVER = SCRIPT_HIGHLIGHT_INFO_SCRIPT_SILVER
-global constant VTX_GOLD = SCRIPT_HIGHLIGHT_INFO_SCRIPT_GOLD
+global constant VTX_GOLD 	= SCRIPT_HIGHLIGHT_INFO_SCRIPT_GOLD
 
 //Max Settings
-global VTX_MAX_ARMIES = 60 //Do not make any larger then 60
-global VTX_MAX_SIEGES = 20 //Do not make any larger then 20
+define VTX_MAX_ARMIES 		= 60 //Do not make any larger then 60
+define VTX_MAX_ARM_MEN 	= 6000 //Assuming 100 per army
+define VTX_MAX_SIEGES		= 20 //Do not make any larger then 20
+define VTX_MAX_OREROCKS 	= 20 //Do not make any large then 20
+define VTX_MAX_TREES 		= 99999
+define VTX_MAX_ORE 		= 99999999
+define VTX_MAX_WOOD 		= 99999999
+define VTX_MAX_FOOD 		= 99999999
+define VTX_MAX_VILLS 		= 99999
+define VTX_MAX_ROCKS 		= 99999
 
 //Launching Settings
-global VTX_DEGREES_MIN	= 60
-global VTX_DEGREES_MAX	= 300
-global VTX_DISTANCE_MIN = 10
-global VTX_DISTANCE_MAX = 25
-global VTX_HEIGHT_MIN = 25
-global VTX_HEIGHT_MAX = 50
-global VTX_SPEED_MIN = 60
-global VTX_SPEED_MAX = 80
+global VTX_DEGREES_MIN		= 60
+global VTX_DEGREES_MAX		= 300
+global VTX_DISTANCE_MIN 	= 10
+global VTX_DISTANCE_MAX 	= 25
+global VTX_HEIGHT_MIN 		= 25
+global VTX_HEIGHT_MAX 		= 50
+global VTX_SPEED_MIN 		= 60
+global VTX_SPEED_MAX 		= 80
 //-------------------------------------------Globals-----------------------------------------------
 //External communication variables
 //These variables can be read outside this file, but do not set them
 global vtx_created = VTX_FALSE
 global vtx_debug	= VTX_FALSE
+global vtx_messages = VTX_TRUE
 global vtx_scroll_clicked	= VTX_FALSE
 global vtx_exporting = VTX_FALSE
 global vtx_export_complete = VTX_FALSE
 
 //Static variables
 global vtx_vortex	= 0
-global vtx_size	= 4
+global vtx_size	= 2
 global vtx_height = 2
 global vtx_angle = 0
-global vtx_radius	= 50
+global vtx_radius	= 20
 global vtx_Col1_R = 0
 global vtx_Col1_G = 0
 global vtx_Col1_B = 0
@@ -105,17 +131,44 @@ global vtx_cl_rain	= 0
 global vtx_cl_snow	= 0
 global vtx_cl_overcast	= 0.7
 
+global vtx_max_armies = VTX_MAX_ARMIES
 global vtx_num_armies = 0
 global vtx_max_armies_reached = VTX_FALSE
+global vtx_max_arm_men = VTX_MAX_ARM_MEN
+global vtx_num_arm_men = 0
+global vtx_max_arm_men_reached = VTX_FALSE
+global vtx_max_sieges = VTX_MAX_SIEGES
 global vtx_num_sieges = 0
 global vtx_max_sieges_reached = VTX_FALSE
+global	vtx_max_orerocks = VTX_MAX_OREROCKS
+global	vtx_max_orerocks_reached = VTX_FALSE
+
+global vtx_tree_num = 0
+global vtx_tree_max = VTX_MAX_TREES
+global vtx_tree_max_reached = VTX_FALSE
+global vtx_rock_num = 0
+global vtx_rock_max = VTX_MAX_ROCKS
+global vtx_rock_max_reached = VTX_FALSE
+global vtx_ore_num = 0
+global vtx_ore_max = VTX_MAX_ORE
+global vtx_ore_max_reached = VTX_FALSE
+global vtx_food_num = 0
+global vtx_food_max = VTX_MAX_FOOD
+global vtx_food_max_reached = VTX_FALSE
+global vtx_wood_num = 0
+global vtx_wood_max = VTX_MAX_WOOD
+global vtx_wood_max_reached = VTX_FALSE
+
+global vtx_vill_num = 0
+global vtx_vill_max = VTX_MAX_VILLS
+global vtx_vill_max_reached = VTX_FALSE
 
 global vtx_tree_export = 0
 global vtx_rock_export = 0
 
 global vtx_loop_control = VTX_TRUE
 
-global data1[400]
+global data1[421]
 //--------------------------------------------Main-------------------------------------------------
 begin script Vtx_Create_Exiting(xPos, yPos, zPos)
 	land_height	= 0
@@ -159,10 +212,9 @@ start
 	run background script Vtx_MainControl_Out
 	
 	vtx_created = VTX_TRUE
-
 end script Vtx_Create_Exiting
 
-begin script Vtx_Create_Entering(xPos, yPos, zPos, playerTown)
+begin script Vtx_Create_Entering(xPos, yPos, zPos, ang, playerTown)
 	land_height	= 0
 start
 	//Initialize Variables
@@ -172,6 +224,7 @@ start
 	vtx_posY = land_height
 	vtx_posZ = zPos
 	vtx_attachTown = playerTown
+	vtx_angle = ang
 	
 	//Create vortex
 	vtx_vortex = create visual effect VISUAL_EFFECT_TELEPORTER_HOOP at {vtx_marker}+{0,vtx_height,0} time -1
@@ -243,7 +296,7 @@ begin script Vtx_MainControl_Out
 	tree_near = 0
 	tree_near2 = 0
 	rock_near = 0
-	oreRock_near = 0
+	ore_near = 0
 	person_near = 0
 	child_near = 0
 	anim_near = 0
@@ -253,16 +306,15 @@ begin script Vtx_MainControl_Out
 	vals1 = 0
 	vals2 = 0
 	mess1 = 0
+	resoType = 0
+	resoGood = VTX_TRUE
 start
 	while((vtx_loop_control == VTX_TRUE) and (vtx_scroll_clicked != VTX_TRUE))
 		//Platoons
 		plat_near = get platoon nearest {vtx_scroll} radius vtx_radius
-		if ((plat_near exists) and (vtx_max_armies_reached == VTX_FALSE))
+		if ((plat_near exists) and (vtx_max_armies_reached == VTX_FALSE) and (vtx_max_arm_men_reached == VTX_FALSE))
 			run script Vtx_Send_Platoon(plat_near)
-			set lightning strike at {plat_near} from vtx_cloud scale 1
-			wait 0.2 seconds
-			delete plat_near
-			wait 0.1 seconds
+			
 		end if
 		
 		//Siege weapons
@@ -278,10 +330,40 @@ start
 		//Reasources
 		reso_near = get SCRIPT_OBJECT_TYPE_STORE at {vtx_scroll} radius vtx_radius 
 		if (reso_near exists)
-			run script Vtx_Send_Resource(reso_near)
-			set lightning strike at {reso_near} from vtx_cloud scale 1
+			resoType = variable get reso_near sub type
+			resoGood = VTX_TRUE
+			if(resoType == 10)//Food
+				if(vtx_food_max_reached == VTX_TRUE)
+					resoGood = VTX_FALSE
+				end if
+			elsif(resoType == 9)
+				if(vtx_wood_max_reached == VTX_TRUE)
+					resoGood = VTX_FALSE
+				end if
+			elsif(resoType == 23)
+				if(vtx_ore_max_reached == VTX_TRUE)
+					resoGood = VTX_FALSE
+				end if
+			else
+				resoGood = VTX_FALSE
+			end if
+			
+			if(resoGood == VTX_TRUE)
+				run script Vtx_Send_Resource(reso_near)
+				set lightning strike at {reso_near} from vtx_cloud scale 1
+				wait 0.2 seconds
+				delete reso_near
+				wait 0.1 seconds
+			end if
+		end if
+		
+		//Ore Rocks
+		ore_near = get SCRIPT_OBJECT_TYPE_ORE_ROCK at {vtx_scroll} radius vtx_radius
+		if((ore_near exists) and (vtx_max_orerocks_reached == VTX_FALSE))
+			run script Vtx_Send_OreRock(ore_near)
+			set lightning strike at {ore_near} from vtx_cloud scale 1
 			wait 0.2 seconds
-			delete reso_near
+			delete ore_near
 			wait 0.1 seconds
 		end if
 		
@@ -291,11 +373,26 @@ start
 			//Yes SCRIPT_OBJECT_TYPE_DEAD_TREE can find fallen trees
 			tree_near2 = get SCRIPT_OBJECT_TYPE_DEAD_TREE at {vtx_scroll} radius vtx_radius //NOTE: Unable to read sub type of fallen trees, why? because this game SUCKS!
 			if ((tree_near2 exists) and (mess1 == 0))
-				say "Cannot Send Fallen Trees!" //Since I cannot read the sub type of fallen trees, I cannot determine what kind of tree it is, and therefore cannot send it 
+				//Since I cannot read the sub type of fallen trees, I cannot determine what kind of tree it is, and therefore cannot send it 
+				begin dialogue
+					//TODO: Translation
+					if Language == English
+						say "Cannot Send Fallen Trees!"
+					elsif Language == German
+						say "Kann nicht entwurzelte Baeume senden!"
+					elsif Language == Spanish
+						say "Busca por los pergaminos cercanos. Los pergaminos de bronce te explicaran que hacer."
+					elsif Language == Russian
+						say "TRANSLATION"
+					elsif Language == TEMPLATE_LANGUAGE
+						say "TRANSLATION"
+					end if
+					wait 3 seconds
+				end dialogue
 				mess1 = 1
 			end if
 		end if
-		if (tree_near exists)
+		if ((tree_near exists) and (vtx_tree_max_reached == VTX_FALSE))
 			run script Vtx_Send_Tree(tree_near)
 			set lightning strike at {tree_near} from vtx_cloud scale 1
 			wait 0.2 seconds
@@ -305,7 +402,7 @@ start
 		
 		//Rocks
 		rock_near = get SCRIPT_OBJECT_TYPE_ROCK at {vtx_scroll} radius vtx_radius 
-		if (rock_near exists)
+		if ((rock_near exists) and (vtx_rock_max_reached == VTX_FALSE))
 			run script Vtx_Send_Rock(rock_near)
 			set lightning strike at {rock_near} from vtx_cloud scale 1
 			wait 0.2 seconds
@@ -325,7 +422,7 @@ start
 
 		//People
 		person_near = get SCRIPT_OBJECT_TYPE_VILLAGER at {vtx_scroll} radius vtx_radius
-		if (person_near exists)
+		if ((person_near exists) and (vtx_vill_max_reached == VTX_FALSE))
 			run script Vtx_Send_Villager(person_near)
 			set lightning strike at {person_near} from vtx_cloud scale 1
 			wait 0.2 seconds
@@ -335,7 +432,7 @@ start
 		
 		//Children
 		child_near = get SCRIPT_OBJECT_TYPE_VILLAGER_CHILD at {vtx_scroll} radius vtx_radius
-		if (child_near exists)
+		if ((child_near exists) and (vtx_vill_max_reached == VTX_FALSE))
 			run script Vtx_Send_Child(child_near)
 			set lightning strike at {child_near} from vtx_cloud scale 1
 			wait 0.2 seconds
@@ -364,6 +461,11 @@ start
 				end if
 				i++
 			end while
+		end if
+		
+		//Ore Rocks
+		if (data1[311] != 0)
+			run script Vtx_Create_OreRock(data1[311])
 		end if
 		
 		//Rocks
@@ -539,6 +641,8 @@ start
 		end if
 	end if
 	
+	run background script Vtx_Clear_Data //This is new Nov 2020
+	
 	wait 17 seconds	
 	delete vtx_vortex with fade
 	
@@ -552,9 +656,9 @@ begin script Vtx_Click_Check
 start
 	clear right clicked object
 	wait until vtx_scroll right clicked
-	//TODO: ASK AGAIN
+	run script Vtx_DepartueDialogue
+	wait until vtx_scroll right clicked
 
-	say "CLICKED"
 	run script Vtx_Save_Data
 	set persistent data "VTX_SAVED_DATA" to VTX_TRUE
 	vtx_scroll_clicked = VTX_TRUE
@@ -975,13 +1079,36 @@ start
 	set persistent data "VTX_MISC_PALM_SPIKE" to data1[397] 
 	set persistent data "VTX_MISC_PALM_BANANA" to data1[398] 
 	set persistent data "VTX_MISC_HAY_BAL" to data1[399] 
+	
+	set persistent data "VTX_OREROCK_1" to data1[400]
+	set persistent data "VTX_OREROCK_2" to data1[401]
+	set persistent data "VTX_OREROCK_3" to data1[402]
+	set persistent data "VTX_OREROCK_4" to data1[403]
+	set persistent data "VTX_OREROCK_5" to data1[404]
+	set persistent data "VTX_OREROCK_6" to data1[405]
+	set persistent data "VTX_OREROCK_7" to data1[406]
+	set persistent data "VTX_OREROCK_8" to data1[407]
+	set persistent data "VTX_OREROCK_9" to data1[408]
+	set persistent data "VTX_OREROCK_10" to data1[409]
+	set persistent data "VTX_OREROCK_11" to data1[410]
+	set persistent data "VTX_OREROCK_12" to data1[411]
+	set persistent data "VTX_OREROCK_13" to data1[412]
+	set persistent data "VTX_OREROCK_14" to data1[413]
+	set persistent data "VTX_OREROCK_15" to data1[414]
+	set persistent data "VTX_OREROCK_16" to data1[415]
+	set persistent data "VTX_OREROCK_17" to data1[416]
+	set persistent data "VTX_OREROCK_18" to data1[417]
+	set persistent data "VTX_OREROCK_19" to data1[418]
+	set persistent data "VTX_OREROCK_20" to data1[419]
+	set persistent data "VTX_OREROCK_21" to data1[420]
 end script Vtx_Save_Data
 
 begin script Vtx_Clear_Data
 	i = 0
 start
-	while (i < 400)
+	while (i < 421)
 		data1[i] = 0
+		i++
 	end while
 end script Vtx_Clear_Data
 
@@ -990,6 +1117,10 @@ begin script Vtx_Send_Platoon(army1)
 	xp = 0
 	aType = 0 //Assume melee
 	subType = 0
+	part = VTX_FALSE
+	arymen = 0
+	mencnt = 0
+	Recruit = 0
 start
 	//Az (0,1), Jp(2,3), No(4,5), Gr(6,7), 7S(8), Sk(9), 
 	subType = variable get platoon army1 type
@@ -1006,7 +1137,18 @@ start
 	end if
 	
 	//Get the number of men in the platoon
+	//global vtx_max_arm_men = VTX_MAX_ARM_MEN
+	//global vtx_num_arm_men = 0
+	//global vtx_max_arm_men_reached = VTX_FALSE
+	
 	numMen = get number of villagers in platoon army1
+	arymen = numMen
+	//Take the whole army or part?
+	if((numMen + vtx_num_arm_men) >= vtx_max_arm_men)
+		part = VTX_TRUE
+		arymen = vtx_max_arm_men - vtx_num_arm_men
+	end if
+	
 	//Get the experience
 	xp = (get platoon army1 experience)
 	if (platoon army1 melee)
@@ -1039,13 +1181,110 @@ start
 	
 	data1[(128 + (vtx_num_armies * 3)) + 0] = aType
 	data1[(128 + (vtx_num_armies * 3)) + 1] = xp
-	data1[(128 + (vtx_num_armies * 3)) + 2] = numMen
+	data1[(128 + (vtx_num_armies * 3)) + 2] = arymen
 	
 	vtx_num_armies++
-	if (vtx_num_armies == VTX_MAX_ARMIES)
+	if (vtx_num_armies == vtx_max_armies)
 		vtx_max_armies_reached = VTX_TRUE
+		if(vtx_messages == VTX_TRUE)
+			begin dialogue
+				//TODO: Translation
+				if Language == English
+					say "Maximum number of platoons reached!"
+				elsif Language == German
+					say "Maximale Anzahl an Armeen erreicht!"
+				elsif Language == Spanish
+					say "Busca por los pergaminos cercanos. Los pergaminos de bronce te explicaran que hacer."
+				elsif Language == Russian
+					say "TRANSLATION"
+				elsif Language == TEMPLATE_LANGUAGE
+					say "TRANSLATION"
+				end if
+				wait 3 seconds
+			end dialogue
+		end if
+	end if
+	
+	vtx_num_arm_men += arymen
+	if (vtx_num_arm_men >= vtx_max_arm_men)
+		vtx_max_arm_men_reached = VTX_TRUE
+		if(vtx_messages == VTX_TRUE)
+			begin dialogue
+				//TODO: Translation
+				if Language == English
+					say "Maximum number of recruit reached!"
+				elsif Language == German
+					say "Maximale Anzahl an Soldaten erreicht!"
+				elsif Language == Spanish
+					say "Busca por los pergaminos cercanos. Los pergaminos de bronce te explicaran que hacer."
+				elsif Language == Russian
+					say "TRANSLATION"
+				elsif Language == TEMPLATE_LANGUAGE
+					say "TRANSLATION"
+				end if
+				wait 3 seconds
+			end dialogue
+		end if
+	end if
+	
+	if(part == VTX_TRUE)
+		//I need to locate the nearest man to the portal and delete him, loop until the number of men is reached
+		while (mencnt < arymen)
+			Recruit = get villager from platoon army1 nearest {vtx_vortex}
+			remove villager Recruit from platoon
+			run background script Vtx_Send_Recruit(Recruit)
+			mencnt++
+		end while
+	else
+		set lightning strike at {army1} from vtx_cloud scale 1
+		wait 0.2 seconds
+		delete army1
+		wait 0.1 seconds
 	end if
 end script Vtx_Send_Platoon
+
+begin script Vtx_Send_Recruit(Recruit)
+
+start
+	set lightning strike at {Recruit} from vtx_cloud scale 1
+	wait 0.2 seconds
+	delete Recruit
+	wait 0.1 seconds
+end script Vtx_Send_Recruit
+
+begin script Vtx_Send_OreRock(oreRock)
+	idx = 0
+	ov = 0
+start
+	idx = 400 + data1[311]
+	//Get and ave the amount of ore in this particular ore rock
+	ov = get resource RESOURCE_TYPE_ORE in oreRock
+	data1[idx] = ov
+	//Increment the ore rock counter
+	data1[311]++
+	//Check if limit reached
+	if (data1[311] >= VTX_MAX_OREROCKS)
+		vtx_max_orerocks_reached = VTX_TRUE
+		if(vtx_messages == VTX_TRUE)
+			begin dialogue
+				//TODO: Translation
+				if Language == English
+					say "Maximum number of ore rocks reached!"
+				elsif Language == German
+					say "Maximale Anzahl an Erzfelsen erreicht!"
+				elsif Language == Spanish
+					say "Busca por los pergaminos cercanos. Los pergaminos de bronce te explicaran que hacer."
+				elsif Language == Russian
+					say "TRANSLATION"
+				elsif Language == TEMPLATE_LANGUAGE
+					say "TRANSLATION"
+				end if
+				wait 3 seconds
+			end dialogue
+		end if
+	end if
+
+end script Vtx_Send_OreRock
 
 begin script Vtx_Send_SiegeWeapon(sieg)
 	xp = 0
@@ -1056,8 +1295,25 @@ start
 	data1[vtx_num_sieges + 105] = xp
 	
 	vtx_num_sieges++
-	if (vtx_num_sieges == VTX_MAX_SIEGES)
+	if (vtx_num_sieges == vtx_max_sieges)
 		vtx_max_sieges_reached = VTX_TRUE
+		if(vtx_messages == VTX_TRUE)
+			begin dialogue
+				//TODO: Translation
+				if Language == English
+					say "Maximum number of siege weapons reached!"
+				elsif Language == German
+					say "Maximale Anzahl an Katapulten erreicht!"
+				elsif Language == Spanish
+					say "Busca por los pergaminos cercanos. Los pergaminos de bronce te explicaran que hacer."
+				elsif Language == Russian
+					say "TRANSLATION"
+				elsif Language == TEMPLATE_LANGUAGE
+					say "TRANSLATION"
+				end if
+				wait 3 seconds
+			end dialogue
+		end if
 	end if
 end script Vtx_Send_SiegeWeapon
 
@@ -1070,12 +1326,75 @@ start
 	if (resoType == 10) //Food
 		resoAmount = get resource RESOURCE_TYPE_FOOD in reso
 		data1[315] += resoAmount
+		vtx_food_num += resoAmount
+		if(vtx_food_num >= vtx_food_max)
+			vtx_food_max_reached = VTX_TRUE
+			if(vtx_messages == VTX_TRUE)
+				begin dialogue
+					//TODO: Translation
+					if Language == English
+						say "Maximum amount of food reached!"
+					elsif Language == German
+						say "Maximale Nahrung erreicht!"
+					elsif Language == Spanish
+						say "Busca por los pergaminos cercanos. Los pergaminos de bronce te explicaran que hacer."
+					elsif Language == Russian
+						say "TRANSLATION"
+					elsif Language == TEMPLATE_LANGUAGE
+						say "TRANSLATION"
+					end if
+					wait 3 seconds
+				end dialogue
+			end if
+		end if
 	elsif (resoType == 9) //Wood
 		resoAmount = get resource RESOURCE_TYPE_WOOD in reso
 		data1[316] += resoAmount
+		vtx_wood_num += resoAmount
+		if(vtx_wood_num >= vtx_wood_max)
+			vtx_wood_max_reached = VTX_TRUE
+			if(vtx_messages == VTX_TRUE)
+				begin dialogue
+					//TODO: Translation
+					if Language == English
+						say "Maximum amount of wood reached!"
+					elsif Language == German
+						say "Maximales Holz erreicht!"
+					elsif Language == Spanish
+						say "Busca por los pergaminos cercanos. Los pergaminos de bronce te explicaran que hacer."
+					elsif Language == Russian
+						say "TRANSLATION"
+					elsif Language == TEMPLATE_LANGUAGE
+						say "TRANSLATION"
+					end if
+					wait 3 seconds
+				end dialogue
+			end if
+		end if
 	elsif (resoType == 23) //Ore
 		resoAmount = get resource RESOURCE_TYPE_ORE in reso
 		data1[317] += resoAmount
+		vtx_ore_num += resoAmount
+		if(vtx_ore_num >= vtx_ore_max)
+			vtx_ore_max_reached = VTX_TRUE
+			if(vtx_messages == VTX_TRUE)
+				begin dialogue
+					//TODO: Translation
+					if Language == English
+						say "Maximum amount of ore reached!"
+					elsif Language == German
+						say "Maximales Erz erreicht!"
+					elsif Language == Spanish
+						say "Busca por los pergaminos cercanos. Los pergaminos de bronce te explicaran que hacer."
+					elsif Language == Russian
+						say "TRANSLATION"
+					elsif Language == TEMPLATE_LANGUAGE
+						say "TRANSLATION"
+					end if
+					wait 3 seconds
+				end dialogue
+			end if
+		end if
 	end if
 end script Vtx_Send_Resource
 
@@ -1089,6 +1408,27 @@ start
 	idx = treeType + 1
 	if ((idx < 12) and (idx > 0))
 		data1[idx]++
+	end if
+	vtx_tree_num++
+	if(vtx_tree_num >= vtx_tree_max)
+		vtx_tree_max_reached = VTX_TRUE
+		if(vtx_messages == VTX_TRUE)
+			begin dialogue
+				//TODO: Translation
+				if Language == English
+					say "Maximum number of trees reached!"
+				elsif Language == German
+					say "Maximale Anzahl an Baeumen erreicht!"
+				elsif Language == Spanish
+					say "Busca por los pergaminos cercanos. Los pergaminos de bronce te explicaran que hacer."
+				elsif Language == Russian
+					say "TRANSLATION"
+				elsif Language == TEMPLATE_LANGUAGE
+					say "TRANSLATION"
+				end if
+				wait 3 seconds
+			end dialogue
+		end if
 	end if
 end script Vtx_Send_Tree
 
@@ -1124,6 +1464,27 @@ start
 		end if
 	end if
 	
+	vtx_rock_num++
+	if(vtx_rock_num >= vtx_rock_max)
+		vtx_rock_max_reached = VTX_TRUE
+		if(vtx_messages == VTX_TRUE)
+			begin dialogue
+				//TODO: Translation
+				if Language == English
+					say "Maximum number of rocks reached!"
+				elsif Language == German
+					say "Maximale Anzahl an Felsen erreicht!"
+				elsif Language == Spanish
+					say "Busca por los pergaminos cercanos. Los pergaminos de bronce te explicaran que hacer."
+				elsif Language == Russian
+					say "TRANSLATION"
+				elsif Language == TEMPLATE_LANGUAGE
+					say "TRANSLATION"
+				end if
+				wait 3 seconds
+			end dialogue
+		end if
+	end if
 end script Vtx_Send_Rock
 
 begin script Vtx_Send_Villager(vill)
@@ -1143,6 +1504,27 @@ start
 		data1[idx]++
 	end if
 	
+	vtx_vill_num++
+	if(vtx_vill_num >= vtx_vill_max)
+		vtx_vill_max_reached = VTX_TRUE
+		if(vtx_messages == VTX_TRUE)
+			begin dialogue
+				//TODO: Translation
+				if Language == English
+					say "Maximum number of villagers reached!"
+				elsif Language == German
+					say "Maximale Anzahl an Dorfbewohnern erreicht!"
+				elsif Language == Spanish
+					say "Busca por los pergaminos cercanos. Los pergaminos de bronce te explicaran que hacer."
+				elsif Language == Russian
+					say "TRANSLATION"
+				elsif Language == TEMPLATE_LANGUAGE
+					say "TRANSLATION"
+				end if
+				wait 3 seconds
+			end dialogue
+		end if
+	end if
 end script Vtx_Send_Villager
 
 begin script Vtx_Send_Child(chil)
@@ -1161,7 +1543,27 @@ start
 	if ((idx < 104) and (idx > 75))
 		data1[idx]++
 	end if
-	
+	vtx_vill_num++
+	if(vtx_vill_num >= vtx_vill_max)
+		vtx_vill_max_reached = VTX_TRUE
+		if(vtx_messages == VTX_TRUE)
+			begin dialogue
+				//TODO: Translation
+				if Language == English
+					say "Maximum number of villagers reached!"
+				elsif Language == German
+					say "Maximale Anzahl an Dorfbewohnern erreicht!"
+				elsif Language == Spanish
+					say "Busca por los pergaminos cercanos. Los pergaminos de bronce te explicaran que hacer."
+				elsif Language == Russian
+					say "TRANSLATION"
+				elsif Language == TEMPLATE_LANGUAGE
+					say "TRANSLATION"
+				end if
+				wait 3 seconds
+			end dialogue
+		end if
+	end if
 end script Vtx_Send_Child
 
 begin script Vtx_Send_Misc(vtxObj)
@@ -1614,6 +2016,28 @@ start
 	data1[398] = persistent data "VTX_MISC_PALM_BANANA"
 	data1[399] = persistent data "VTX_MISC_HAY_BAL"
 	
+	data1[400] = persistent data "VTX_OREROCK_1"
+	data1[401] = persistent data "VTX_OREROCK_2"
+	data1[402] = persistent data "VTX_OREROCK_3"
+	data1[403] = persistent data "VTX_OREROCK_4"
+	data1[404] = persistent data "VTX_OREROCK_5"
+	data1[405] = persistent data "VTX_OREROCK_6"
+	data1[406] = persistent data "VTX_OREROCK_7"
+	data1[407] = persistent data "VTX_OREROCK_8"
+	data1[408] = persistent data "VTX_OREROCK_9"
+	data1[409] = persistent data "VTX_OREROCK_10"
+	data1[410] = persistent data "VTX_OREROCK_11"
+	data1[411] = persistent data "VTX_OREROCK_12"
+	data1[412] = persistent data "VTX_OREROCK_13"
+	data1[413] = persistent data "VTX_OREROCK_14"
+	data1[414] = persistent data "VTX_OREROCK_15"
+	data1[415] = persistent data "VTX_OREROCK_16"
+	data1[416] = persistent data "VTX_OREROCK_17"
+	data1[417] = persistent data "VTX_OREROCK_18"
+	data1[418] = persistent data "VTX_OREROCK_19"
+	data1[419] = persistent data "VTX_OREROCK_20"
+	data1[420] = persistent data "VTX_OREROCK_21"
+	
 end script VTX_Read_Data
 
 begin script Vtx_Create_Tree(treeType, num)
@@ -1652,6 +2076,47 @@ start
 		cnt++
 	end while
 end script Vtx_Create_Tree
+
+begin script Vtx_Create_OreRock(num)
+	cnt = 0
+	sz = 0
+	idx = 0
+	am = 0
+	obj = 0
+start
+	while (cnt < num)
+		//Ore rocks have three types: Small, medium, and large
+		//	For each the relationship between the amount of ore and size is defined as the following:
+		//		Small: r = 250s
+		//		Medium: r = 500s
+		//		Large: r = 1000s
+		//	The array contains the r value and s is needed
+		//	First based on the amount we need to determine what type of rock fits best
+		idx = cnt + 400
+		am = data1[idx]
+		if(am > 0)
+			if(am < 500) //Use small equation
+				sz = am / 250
+				obj = create with angle 0 and scale sz SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_ORE_ROCK at {vtx_marker}
+			elsif((am >= 500) and (am < 1000)) //Medium equation
+				sz = am / 500
+				obj = create with angle 0 and scale sz SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_ORE_ROCK_MEDIUM at {vtx_marker}
+			else //Large equation
+				sz = am / 1000
+				obj = create with angle 0 and scale sz SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_ORE_ROCK_LARGE at {vtx_marker}
+			end if
+			//Launch
+			run background script Vtx_LaunchObject(obj)
+			wait 1 seconds
+			obj = get SCRIPT_OBJECT_TYPE_ORE_ROCK at {vtx_marker} radius 5
+			if(obj exists)
+				run background script Vtx_LaunchObject(obj)
+				wait 1 seconds
+			end if
+		end if
+		cnt++
+	end while
+end script Vtx_Create_OreRock
 
 begin script Vtx_Create_Rock(rockType, num)
 	cnt = 0
@@ -2233,3 +2698,39 @@ start
 	//Launch object
 	set obj velocity heading {tarX,tarY,tarZ} speed sp
 end script Vtx_LaunchMisc
+
+begin script Vtx_DepartueDialogue
+
+	Number = number from 1 to 2
+
+start
+
+	if Number == 1
+		wait until dialogue ready
+		begin dialogue
+			eject good spirit
+			eject evil spirit
+			//GA: "Are you sure you wish to leave the land?"
+			say "BW2T_SCRIPT_04FINAL_ADVISORS_DEPARTURE_10"
+			wait until read
+			//EA: "Click again to confirm"
+			say "BW2T_SCRIPT_04FINAL_ADVISORS_DEPARTURE_11"
+			wait until read
+			send good spirit home
+			send evil spirit home
+		end dialogue
+	elsif Number == 2
+    	wait until dialogue ready
+		begin dialogue
+			eject good spirit
+			//say "Are you sure you wish to leave the land?"
+			say "BW2T_SCRIPT_03FINAL_ADVISORS_TUT_934"
+			wait until read
+			//say "Click again to confirm"
+			say "BW2T_SCRIPT_03FINAL_ADVISORS_TUT_933"
+			wait until read
+			send good spirit home
+		end dialogue
+	end if
+
+end script Vtx_DepartueDialogue
