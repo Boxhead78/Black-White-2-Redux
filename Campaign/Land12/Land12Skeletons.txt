@@ -2,7 +2,7 @@
 //      Skeletons
 //    ~~~~~~~~~~~~~~
 ///////////////////////////////////////////////////////////////////////////////
-//TODO: Fix hitboxes
+
 define script LC12_Skeletons
 define script LC12_Skeletons_Intro
 define script LC12_Skeletons_Lightning
@@ -218,6 +218,10 @@ begin script LC12_Skeletons_Lightning
 	myWeather = 0
 	Number = 0
 	Villager = 0
+	Marker = 0
+	tarX = 0
+	tarY = 0
+	tarZ = 0
 
 start
 
@@ -229,16 +233,20 @@ disable myWeather affected by wind
 
 while SkeletonLightningActivated == 1
 	if bindable action BINDABLE_ACTION_TYPE_ACTION performed
-		set lightning strike at hand position from myWeather scale 0.25
-		add effect EFFECT_TYPE_BURN at hand position strength 0.8 radius 5
-		add effect EFFECT_TYPE_HIT at hand position strength 0.8 radius 5
-		add effect EFFECT_TYPE_APPLY_FORCE at hand position strength 5 radius 5
-		add effect EFFECT_TYPE_CRUSH at hand position strength 5 radius 5
+		Marker = marker at hand position
+		tarX = SCRIPT_OBJECT_PROPERTY_TYPE_XPOS of Marker
+		tarZ = SCRIPT_OBJECT_PROPERTY_TYPE_ZPOS of Marker
+		tarY = (land height at {tarX, tarZ})
+		set lightning strike at {tarX,tarY,tarZ} from myWeather scale 0.25
+		add effect EFFECT_TYPE_BURN at {tarX,tarY,tarZ} strength 0.8 radius 5
+		add effect EFFECT_TYPE_HIT at {tarX,tarY,tarZ} strength 0.8 radius 5
+		add effect EFFECT_TYPE_APPLY_FORCE at {tarX,tarY,tarZ} strength 5 radius 5
+		add effect EFFECT_TYPE_CRUSH at {tarX,tarY,tarZ} strength 5 radius 5
 		Number = number from 1 to 2
 		if Number == 1
-			play sound "SCRIPT2_EEPIC_HURRICANELIGHTNING1" at hand position
+			play sound "SCRIPT2_EEPIC_HURRICANELIGHTNING1" at {tarX,tarY,tarZ}
 		else 
-			play sound "SCRIPT2_EEPIC_HURRICANELIGHTNING6" at hand position
+			play sound "SCRIPT2_EEPIC_HURRICANELIGHTNING6" at {tarX,tarY,tarZ}
 		end if
 		wait 0.75 seconds
 	end if
