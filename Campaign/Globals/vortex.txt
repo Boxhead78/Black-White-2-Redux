@@ -90,8 +90,8 @@ global VTX_DISTANCE_MIN 	= 10
 global VTX_DISTANCE_MAX 	= 25
 global VTX_HEIGHT_MIN 		= 25
 global VTX_HEIGHT_MAX 		= 50
-global VTX_SPEED_MIN 		= 60
-global VTX_SPEED_MAX 		= 80
+global VTX_SPEED_MIN 		= 40
+global VTX_SPEED_MAX 		= 60
 //-------------------------------------------Globals-----------------------------------------------
 //External communication variables
 //These variables can be read outside this file, but do not set them
@@ -662,6 +662,7 @@ start
 	run script Vtx_Save_Data
 	set persistent data "VTX_SAVED_DATA" to VTX_TRUE
 	vtx_scroll_clicked = VTX_TRUE
+	delete vtx_scroll
 end script Vtx_Click_Check
 
 //------------------------------------------Low Level----------------------------------------------
@@ -670,6 +671,8 @@ end script Vtx_Click_Check
 begin script Vtx_Save_Data
 
 start
+    stop script "SavePersistentDataSetData"
+
 	set persistent data "VTX_NUM_TREE" to data1[0] 
 	set persistent data "VTX_NUM_TREE_BEECH" to data1[1] 
 	set persistent data "VTX_NUM_TREE_SPRUCE" to data1[2] 
@@ -1101,6 +1104,8 @@ start
 	set persistent data "VTX_OREROCK_19" to data1[418]
 	set persistent data "VTX_OREROCK_20" to data1[419]
 	set persistent data "VTX_OREROCK_21" to data1[420]
+
+	run script SavePersistentDataGetData
 end script Vtx_Save_Data
 
 begin script Vtx_Clear_Data
@@ -2049,30 +2054,31 @@ start
 	while (cnt < num)
 		ang = number from 0 to 360
 		if (treeType == 0)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_TREE TREE_INFO_BEECH at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_TREE TREE_INFO_BEECH at {vtx_marker}
 		elsif (treeType == 1)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_TREE TREE_INFO_SPRUCE at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_TREE TREE_INFO_SPRUCE at {vtx_marker}
 		elsif (treeType == 2)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_TREE TREE_INFO_CEDAR at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_TREE TREE_INFO_CEDAR at {vtx_marker}
 		elsif (treeType == 3)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_TREE TREE_INFO_OAK at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_TREE TREE_INFO_OAK at {vtx_marker}
 		elsif (treeType == 4)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_TREE TREE_INFO_OLIVE at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_TREE TREE_INFO_OLIVE at {vtx_marker}
 		elsif (treeType == 5)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_TREE TREE_INFO_PINE at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_TREE TREE_INFO_PINE at {vtx_marker}
 		elsif (treeType == 6)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_TREE TREE_INFO_ACACIA at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_TREE TREE_INFO_ACACIA at {vtx_marker}
 		elsif (treeType == 7)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_TREE TREE_INFO_PALM at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_TREE TREE_INFO_PALM at {vtx_marker}
 		elsif (treeType == 8)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_TREE TREE_INFO_BIG_PALM at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_TREE TREE_INFO_BIG_PALM at {vtx_marker}
 		elsif (treeType == 9)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_TREE TREE_INFO_FIR at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_TREE TREE_INFO_FIR at {vtx_marker}
 		elsif (treeType == 10)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_TREE TREE_INFO_MAPLE at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_TREE TREE_INFO_MAPLE at {vtx_marker}
 		end if
 		run background script Vtx_LaunchObject(obj)
 		wait 0.3 seconds
+		SCRIPT_OBJECT_PROPERTY_TYPE_SCALE of obj = 1.0
 		cnt++
 	end while
 end script Vtx_Create_Tree
@@ -2098,19 +2104,26 @@ start
 			if(am < 500) //Use small equation
 				sz = am / 250
 				obj = create with angle 0 and scale sz SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_ORE_ROCK at {vtx_marker}
+				SCRIPT_OBJECT_PROPERTY_TYPE_SCALE of obj = 0.05
 			elsif((am >= 500) and (am < 1000)) //Medium equation
 				sz = am / 500
 				obj = create with angle 0 and scale sz SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_ORE_ROCK_MEDIUM at {vtx_marker}
+				SCRIPT_OBJECT_PROPERTY_TYPE_SCALE of obj = 0.05
 			else //Large equation
 				sz = am / 1000
 				obj = create with angle 0 and scale sz SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_ORE_ROCK_LARGE at {vtx_marker}
+				SCRIPT_OBJECT_PROPERTY_TYPE_SCALE of obj = 0.05
 			end if
 			//Launch
 			run background script Vtx_LaunchObject(obj)
+			wait 0.3 seconds
+			SCRIPT_OBJECT_PROPERTY_TYPE_SCALE of obj = sz
 			wait 1 seconds
 			obj = get SCRIPT_OBJECT_TYPE_ORE_ROCK at {vtx_marker} radius 5
 			if(obj exists)
 				run background script Vtx_LaunchObject(obj)
+				wait 0.3 seconds
+				SCRIPT_OBJECT_PROPERTY_TYPE_SCALE of obj = sz
 				wait 1 seconds
 			end if
 		end if
@@ -2127,93 +2140,97 @@ start
 	while (cnt < num)
 		ang = number from 0 to 360
 		if (rockType == 9)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK at {vtx_marker}
 		elsif (rockType == 0)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_SMALL_NORSE_ROCK at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_SMALL_NORSE_ROCK at {vtx_marker}
 		elsif (rockType == 1)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_MEDIUM_NORSE_ROCK at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_MEDIUM_NORSE_ROCK at {vtx_marker}
 		elsif (rockType == 2)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_LARGE_NORSE_ROCK at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_LARGE_NORSE_ROCK at {vtx_marker}
 		elsif (rockType == 67)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_BOULDER_SMALL at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_BOULDER_SMALL at {vtx_marker}
 		elsif (rockType == 68)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_BOULDER_BIG at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_BOULDER_BIG at {vtx_marker}
 		elsif (rockType == 69)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_BOULDER_TINY at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_BOULDER_TINY at {vtx_marker}
 		elsif (rockType == 70)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_BOULDER_HUGE at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_BOULDER_HUGE at {vtx_marker}
 		elsif (rockType == 71)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_BOULDER_MASSIVE at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_BOULDER_MASSIVE at {vtx_marker}
 		elsif (rockType == 72)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_ELIPSOID_SMALL at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_ELIPSOID_SMALL at {vtx_marker}
 		elsif (rockType == 73)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_ELIPSOID_MEDIUM at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_ELIPSOID_MEDIUM at {vtx_marker}
 		elsif (rockType == 74)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_ELIPSOID_MASSIVE at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_ELIPSOID_MASSIVE at {vtx_marker}
 		elsif (rockType == 75)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_ELIPSOID_HUGE at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_ELIPSOID_HUGE at {vtx_marker}
 		elsif (rockType == 76)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_ELIPSOID_BIG at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_ELIPSOID_BIG at {vtx_marker}
 		elsif (rockType == 77)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_ELIPSOID_TINY at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_ELIPSOID_TINY at {vtx_marker}
 		elsif (rockType == 78)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_SHARP_SMALL at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_SHARP_SMALL at {vtx_marker}
 		elsif (rockType == 79)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_SHARP_MEDIUM at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_SHARP_MEDIUM at {vtx_marker}
 		elsif (rockType == 80)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_SHARP_TINY at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_SHARP_TINY at {vtx_marker}
 		elsif (rockType == 81)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_SHARP_BIG at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_SHARP_BIG at {vtx_marker}
 		elsif (rockType == 82)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_SHARP_HUGE at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_SHARP_HUGE at {vtx_marker}
 		elsif (rockType == 83)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_SHARP_MASSIVE at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_SHARP_MASSIVE at {vtx_marker}
 		elsif (rockType == 84)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_ERODED_BIG at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_ERODED_BIG at {vtx_marker}
 		elsif (rockType == 85)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_ERODED_MEDIUM at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_ERODED_MEDIUM at {vtx_marker}
 		elsif (rockType == 86)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_ERODED_TINY at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_ERODED_TINY at {vtx_marker}
 		elsif (rockType == 87)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_ERODED_HUGE at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_ERODED_HUGE at {vtx_marker}
 		elsif (rockType == 88)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_ERODED_SMALL at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_ERODED_SMALL at {vtx_marker}
 		elsif (rockType == 89)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_ERODED_MASSIVE at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_ERODED_MASSIVE at {vtx_marker}
 		elsif (rockType == 90)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_BLOCK_TINY at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_BLOCK_TINY at {vtx_marker}
 		elsif (rockType == 91)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_BLOCK_MEDIUM at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_BLOCK_MEDIUM at {vtx_marker}
 		elsif (rockType == 92)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_BLOCK_SMALL at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_BLOCK_SMALL at {vtx_marker}
 		elsif (rockType == 93)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_BLOCK_MASSIVE at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_BLOCK_MASSIVE at {vtx_marker}
 		elsif (rockType == 94)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_BLOCK_HUGE at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_BLOCK_HUGE at {vtx_marker}
 		elsif (rockType == 95)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_BLOCK_BIG at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ROCK_BLOCK_BIG at {vtx_marker}
 		elsif (rockType == 43)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_BOULDER_ROUND at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_BOULDER_ROUND at {vtx_marker}
 		elsif (rockType == 44)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_BOULDER_ROUND_MEDIUM at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_BOULDER_ROUND_MEDIUM at {vtx_marker}
 		elsif (rockType == 45)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_BOULDER_ROUND_LARGE at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_BOULDER_ROUND_LARGE at {vtx_marker}
 		elsif (rockType == 48)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ELOI_ROCK at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_ELOI_ROCK at {vtx_marker}
 		elsif (rockType == 49)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_SIEGE_ROCK at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_SIEGE_ROCK at {vtx_marker}
 		elsif (rockType == 106)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_MOAI_SAD at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_INFO_MOAI_SAD at {vtx_marker}
 		elsif (rockType == 107)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_MOAI_SMILING at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_MOAI_SMILING at {vtx_marker}
 		elsif (rockType == 108)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_MOAI_FUNNY at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_ROCK MOBILE_STATIC_MOAI_FUNNY at {vtx_marker}
 		end if
 		run background script Vtx_LaunchObject(obj)
+		wait 0.3 seconds
+		SCRIPT_OBJECT_PROPERTY_TYPE_SCALE of obj = 1.0
 		wait 1 seconds
 		obj = get SCRIPT_OBJECT_TYPE_ROCK at {vtx_marker} radius 5
 		if(obj exists)
 			run background script Vtx_LaunchObject(obj)
+			wait 0.3 seconds
+			SCRIPT_OBJECT_PROPERTY_TYPE_SCALE of obj = 1.0
 			wait 1 seconds
 		end if
 		cnt++
@@ -2464,159 +2481,164 @@ start
 	while (cnt < num)
 		ang = number from 0 to 360
 		if (miscType == 7)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_STREET_LANTERN at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_STREET_LANTERN at {vtx_marker}
 		elsif (miscType == 18)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_TRIBUTE_BOX at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_TRIBUTE_BOX at {vtx_marker}
 		elsif (miscType == 23)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_TOMBMARKERS at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_TOMBMARKERS at {vtx_marker}
 		elsif (miscType == 25)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_AZTEC_STREETLIGHT at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_AZTEC_STREETLIGHT at {vtx_marker}
 		elsif (miscType == 26)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_JAPANESE_TABLE at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_JAPANESE_TABLE at {vtx_marker}
 		elsif (miscType == 27)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_JAPANESE_LADDER at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_JAPANESE_LADDER at {vtx_marker}
 		elsif (miscType == 28)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_AZTEC_BARREL_01 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_AZTEC_BARREL_01 at {vtx_marker}
 		elsif (miscType == 29)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_AZTEC_BARREL_02 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_AZTEC_BARREL_02 at {vtx_marker}
 		elsif (miscType == 30)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_BARREL_01 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_BARREL_01 at {vtx_marker}
 		elsif (miscType == 31)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_BARREL_02 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_BARREL_02 at {vtx_marker}
 		elsif (miscType == 32)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_JAPANESE_BARREL_01 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_JAPANESE_BARREL_01 at {vtx_marker}
 		elsif (miscType == 33)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_JAPANESE_BARREL_02 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_JAPANESE_BARREL_02 at {vtx_marker}
 		elsif (miscType == 34)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSE_BARREL_01 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSE_BARREL_01 at {vtx_marker}
 		elsif (miscType == 35)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSE_BARREL_02 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSE_BARREL_02 at {vtx_marker}
 		elsif (miscType == 36)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_URN_01 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_URN_01 at {vtx_marker}
 		elsif (miscType == 37)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_URN_02 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_URN_02 at {vtx_marker}
 		elsif (miscType == 38)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_URN_03 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_URN_03 at {vtx_marker}
 		elsif (miscType == 39)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_URN_04 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_URN_04 at {vtx_marker}
 		elsif (miscType == 46)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_LUMP_OF_POO at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_LUMP_OF_POO at {vtx_marker}
 		elsif (miscType == 49)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NUTOIL_BARREL at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NUTOIL_BARREL at {vtx_marker}
 		elsif (miscType == 60)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_SEVEN_SAMURAI_01 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_SEVEN_SAMURAI_01 at {vtx_marker}
 		elsif (miscType == 61)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_SEVEN_SAMURAI_02 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_SEVEN_SAMURAI_02 at {vtx_marker}
 		elsif (miscType == 62)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_SEVEN_SAMURAI_03 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_SEVEN_SAMURAI_03 at {vtx_marker}
 		elsif (miscType == 63)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_SEVEN_SAMURAI_04 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_SEVEN_SAMURAI_04 at {vtx_marker}
 		elsif (miscType == 64)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_SEVEN_SAMURAI_05 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_SEVEN_SAMURAI_05 at {vtx_marker}
 		elsif (miscType == 65)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_SEVEN_SAMURAI_06 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_SEVEN_SAMURAI_06 at {vtx_marker}
 		elsif (miscType == 66)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_SEVEN_SAMURAI_07 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_SEVEN_SAMURAI_07 at {vtx_marker}
 		elsif (miscType == 98)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_CART_01 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_CART_01 at {vtx_marker}
 		elsif (miscType == 99)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_CART_02 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_CART_02 at {vtx_marker}
 		elsif (miscType == 100)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSE_BENCH_01 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSE_BENCH_01 at {vtx_marker}
 		elsif (miscType == 101)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSE_BENCH_02 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSE_BENCH_02 at {vtx_marker}
 		elsif (miscType == 102)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_BENCH_01 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_BENCH_01 at {vtx_marker}
 		elsif (miscType == 103)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_BENCH_02 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_BENCH_02 at {vtx_marker}
 		elsif (miscType == 104)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_JAPANESE_BENCH_01 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_JAPANESE_BENCH_01 at {vtx_marker}
 		elsif (miscType == 105)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_JAPANESE_BENCH_02 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_JAPANESE_BENCH_02 at {vtx_marker}
 		elsif (miscType == 109)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSE_POT_01 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSE_POT_01 at {vtx_marker}
 		elsif (miscType == 110)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSE_POT_02 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSE_POT_02 at {vtx_marker}
 		elsif (miscType == 111)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSE_POT_03 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSE_POT_03 at {vtx_marker}
 		elsif (miscType == 112)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_AZTEC_POT_01 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_AZTEC_POT_01 at {vtx_marker}
 		elsif (miscType == 113)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_AZTEC_POT_02 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_AZTEC_POT_02 at {vtx_marker}
 		elsif (miscType == 114)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_AZTEC_POT_03 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_AZTEC_POT_03 at {vtx_marker}
 		elsif (miscType == 115)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_JAPANESE_POT_01 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_JAPANESE_POT_01 at {vtx_marker}
 		elsif (miscType == 116)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_JAPANESE_POT_02 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_JAPANESE_POT_02 at {vtx_marker}
 		elsif (miscType == 117)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_JAPANESE_POT_03 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_JAPANESE_POT_03 at {vtx_marker}
 		elsif (miscType == 118)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_BARROW at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_BARROW at {vtx_marker}
 		elsif (miscType == 119)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_WALL_03_90 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_WALL_03_90 at {vtx_marker}
 		elsif (miscType == 120)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_WALL_03_180 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_WALL_03_180 at {vtx_marker}
 		elsif (miscType == 121)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_WALL_04_90 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_WALL_04_90 at {vtx_marker}
 		elsif (miscType == 122)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_WALL_04_180 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_GREEK_WALL_04_180 at {vtx_marker}
 		elsif (miscType == 123)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_AZTEC_WALL_01_90 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_AZTEC_WALL_01_90 at {vtx_marker}
 		elsif (miscType == 124)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_AZTEC_WALL_01_180 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_AZTEC_WALL_01_180 at {vtx_marker}
 		elsif (miscType == 125)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_AZTEC_WALL_04_90 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_AZTEC_WALL_04_90 at {vtx_marker}
 		elsif (miscType == 126)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_AZTEC_WALL_04_180 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_AZTEC_WALL_04_180 at {vtx_marker}
 		elsif (miscType == 127)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_JAPANESE_WALL_01_90 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_JAPANESE_WALL_01_90 at {vtx_marker}
 		elsif (miscType == 128)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_JAPANESE_WALL_01_180 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_JAPANESE_WALL_01_180 at {vtx_marker}
 		elsif (miscType == 129)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_JAPANESE_WALL_04_90 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_JAPANESE_WALL_04_90 at {vtx_marker}
 		elsif (miscType == 130)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_JAPANESE_WALL_04_180 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_JAPANESE_WALL_04_180 at {vtx_marker}
 		elsif (miscType == 131)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSE_WALL_03_90 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSE_WALL_03_90 at {vtx_marker}
 		elsif (miscType == 132)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSE_WALL_03_180 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSE_WALL_03_180 at {vtx_marker}
 		elsif (miscType == 133)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSE_WALL_04_90 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSE_WALL_04_90 at {vtx_marker}
 		elsif (miscType == 134)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSE_WALL_04_180 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSE_WALL_04_180 at {vtx_marker}
 		elsif (miscType == 135)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_STREETLIGHTWOOD at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_STREETLIGHTWOOD at {vtx_marker}
 		elsif (miscType == 136)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_STREETLIGHTNORSE at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_STREETLIGHTNORSE at {vtx_marker}
 		elsif (miscType == 137)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_STREETLIGHTBRASS at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_STREETLIGHTBRASS at {vtx_marker}
 		elsif (miscType == 138)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_STREETLIGHTJAPANESE at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_STREETLIGHTJAPANESE at {vtx_marker}
 		elsif (miscType == 140)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSE_PLANT_1 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSE_PLANT_1 at {vtx_marker}
 		elsif (miscType == 141)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSE_PLANT_2 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_INFO_NORSE_PLANT_2 at {vtx_marker}
 		elsif (miscType == 142)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_GREEK_WASHING_LINE at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_GREEK_WASHING_LINE at {vtx_marker}
 		elsif (miscType == 143)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_GREEK_PLANT_1 at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_GREEK_PLANT_1 at {vtx_marker}
 		elsif (miscType == 144)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_PLANT_NORMAL at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_PLANT_NORMAL at {vtx_marker}
 		elsif (miscType == 145)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_PALM_STUMP at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_PALM_STUMP at {vtx_marker}
 		elsif (miscType == 146)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_PALM_SPIKE at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_PALM_SPIKE at {vtx_marker}
 		elsif (miscType == 147)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_PALM_BANANA at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATIC_PALM_BANANA at {vtx_marker}
 		elsif (miscType == 148)
-			obj = create with angle ang and scale 1 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATC_HAY_BALE at {vtx_marker}
+			obj = create with angle ang and scale 0.05 SCRIPT_OBJECT_TYPE_MOBILE_STATIC MOBILE_STATC_HAY_BALE at {vtx_marker}
 		end if
 		run background script Vtx_LaunchMisc(obj)
+		wait 0.3 seconds
+		SCRIPT_OBJECT_PROPERTY_TYPE_SCALE of obj = 1.0
 		wait 0.6 seconds
+
 		obj = get SCRIPT_OBJECT_TYPE_MOBILE_STATIC at {vtx_marker} radius 5
 		if(obj exists)
 			run background script Vtx_LaunchMisc(obj)
+			wait 0.3 seconds
+			SCRIPT_OBJECT_PROPERTY_TYPE_SCALE of obj = 1.0
 			wait 1 seconds
 		end if
 		cnt++
@@ -2705,32 +2727,43 @@ begin script Vtx_DepartueDialogue
 
 start
 
-	if Number == 1
-		wait until dialogue ready
+	if get land number == 14
 		begin dialogue
-			eject good spirit
 			eject evil spirit
-			//GA: "Are you sure you wish to leave the land?"
-			say "BW2T_SCRIPT_04FINAL_ADVISORS_DEPARTURE_10"
-			wait until read
-			//EA: "Click again to confirm"
-			say "BW2T_SCRIPT_04FINAL_ADVISORS_DEPARTURE_11"
-			wait until read
-			send good spirit home
+			say "BW2XT_HELP_TEXT_GUIDANCE_END_EXPANSION_PACK_30"
+			clear dialogue
+			close dialogue
+			wait BW2XT_HELP_TEXT_GUIDANCE_END_EXPANSION_PACK_30 + 1 seconds
 			send evil spirit home
 		end dialogue
-	elsif Number == 2
-    	wait until dialogue ready
-		begin dialogue
-			eject good spirit
-			//say "Are you sure you wish to leave the land?"
-			say "BW2T_SCRIPT_03FINAL_ADVISORS_TUT_934"
-			wait until read
-			//say "Click again to confirm"
-			say "BW2T_SCRIPT_03FINAL_ADVISORS_TUT_933"
-			wait until read
-			send good spirit home
-		end dialogue
+	else
+		if Number == 1
+			wait until dialogue ready
+			begin dialogue
+				eject good spirit
+				eject evil spirit
+				//GA: "Are you sure you wish to leave the land?"
+				say "BW2T_SCRIPT_04FINAL_ADVISORS_DEPARTURE_10"
+				wait until read
+				//EA: "Click again to confirm"
+				say "BW2T_SCRIPT_04FINAL_ADVISORS_DEPARTURE_11"
+				wait until read
+				send good spirit home
+				send evil spirit home
+			end dialogue
+		elsif Number == 2
+			wait until dialogue ready
+			begin dialogue
+				eject good spirit
+				//say "Are you sure you wish to leave the land?"
+				say "BW2T_SCRIPT_03FINAL_ADVISORS_TUT_934"
+				wait until read
+				//say "Click again to confirm"
+				say "BW2T_SCRIPT_03FINAL_ADVISORS_TUT_933"
+				wait until read
+				send good spirit home
+			end dialogue
+		end if
 	end if
 
 end script Vtx_DepartueDialogue
