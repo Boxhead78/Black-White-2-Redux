@@ -652,16 +652,24 @@ end script Vtx_MainControl_In
 
 begin script Vtx_Click_Check
 
-start
-	clear right clicked object
-	wait until vtx_scroll right clicked
-	run script Vtx_DepartueDialogue
-	wait until vtx_scroll right clicked
+	AreYouSureCommentSaid = 0
 
-	run script Vtx_Save_Data
-	set persistent data "VTX_SAVED_DATA" to VTX_TRUE
-	vtx_scroll_clicked = VTX_TRUE
-	delete vtx_scroll
+start
+
+begin loop
+    if vtx_scroll right clicked and AreYouSureCommentSaid == 0
+        clear right clicked object
+		run script Vtx_DepartueDialogue
+        AreYouSureCommentSaid = 1
+    elsif vtx_scroll right clicked and AreYouSureCommentSaid == 1
+        delete vtx_scroll
+    end if
+	until vtx_scroll not exists
+end loop
+
+run script Vtx_Save_Data
+vtx_scroll_clicked = VTX_TRUE
+
 end script Vtx_Click_Check
 
 //------------------------------------------Low Level----------------------------------------------
