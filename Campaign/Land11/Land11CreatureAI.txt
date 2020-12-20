@@ -92,10 +92,10 @@ end script LC11_AICreature
 begin script LC11_CreatureLogic
 
     Number = 0
+    AITown[17]
+    AICounter = -1
     CreatureRollRoleTimer = create timer for 0 seconds
-    WallSegment = 0
-    Counter = 0
-    Town[16]
+    Position = 0
 
 start
 
@@ -114,75 +114,55 @@ wait until HEALTH of LC11_EnemyCreature == 0.00 or 300 seconds
 
 begin loop
 
-    while Counter > 14
-        Counter = 0
-    end while
-
-    if HEALTH of LC11_EnemyCreature == 0.00
-        //CreatureKilled = 1
-        wait until HEALTH of LC11_EnemyCreature > 0.00
-        set creature LC11_EnemyCreature role to CR_NONE radius 500 at {CreatureGathererPos[0]}
-        HEALTH of LC11_EnemyCreature = 1.0
+    if AICounter > 16
+        AICounter = -1
+    else
+        AITown[AICounter] = get town with id AICounter
     end if
 
-    if town AztecCapital is under takeover from player 0 and HEALTH of LC11_EnemyCreature > 0
+    if HEALTH of LC11_EnemyCreature == 0.00
+        wait until HEALTH of LC11_EnemyCreature > 0.00
+        set creature LC11_EnemyCreature role to CR_NONE radius 500 at {AztecCapital}
         HEALTH of LC11_EnemyCreature = 1.0
-        set creature LC11_EnemyCreature role to CR_SOLDIER radius 100 at {AztecCapital}
-        
-        wait until HEALTH of LC11_EnemyCreature == 0.00 or not town AztecCapital is under takeover from player 0 or 1000 seconds
+    end if
     
-    elsif town AztecTown1 is under takeover from player 0 and HEALTH of LC11_EnemyCreature > 0
+    if town AITown[AICounter] is under takeover from player 0 and PLAYER of AITown[AICounter] == 1 and HEALTH of LC11_EnemyCreature > 0
         HEALTH of LC11_EnemyCreature = 1.0
-        set creature LC11_EnemyCreature role to CR_SOLDIER radius 100 at {AztecTown1}
+        set creature LC11_EnemyCreature role to CR_SOLDIER radius 100 at {AITown[AICounter]}
         
-        wait until HEALTH of LC11_EnemyCreature == 0.00 or not town AztecTown1 is under takeover from player 0 or 1000 seconds
+        wait until HEALTH of LC11_EnemyCreature == 0.00 or not town AITown[AICounter] is under takeover from player 0 or 1000 seconds
 
-    elsif town AztecTown2 is under takeover from player 0 and HEALTH of LC11_EnemyCreature > 0
+    elsif PLAYER of AITown[AICounter] == 1 and get distance from {AITown[AICounter]} to {oCreature} < 300 and HEALTH of LC11_EnemyCreature > 0
         HEALTH of LC11_EnemyCreature = 1.0
-        set creature LC11_EnemyCreature role to CR_SOLDIER radius 100 at {AztecTown2}
-        
-        wait until HEALTH of LC11_EnemyCreature == 0.00 or not town AztecTown2 is under takeover from player 0 or 1000 seconds
+        while HEALTH of LC11_EnemyCreature > 0.00 and town AITown[AICounter] is under takeover from player 0 and get distance from {AITown[AICounter]} to {oCreature} <= 500 and HEALTH of oCreature > 0.00
+            wait 15 seconds
+            set creature LC11_EnemyCreature role to CR_SOLDIER radius 33 at {oCreature}
+        end while
 
-    elsif town Town[Counter] is under takeover from player 1 and HEALTH of LC11_EnemyCreature > 0
-        HEALTH of LC11_EnemyCreature = 1.0
-        set creature LC11_EnemyCreature role to CR_SOLDIER radius 100 at {Town[Counter]}
-        
-        wait until HEALTH of LC11_EnemyCreature == 0.00 or not town PlayerTown is under takeover from player 0 or 1000 seconds
+        wait until HEALTH of LC11_EnemyCreature == 0.00 or not town AITown[AICounter] is under takeover from player 0 or 1000 seconds
 
-    elsif LC11_Platoon[36] exists and LC11_Platoon[37] exists
+    elsif LC11_Platoon[70] exists and LC11_Platoon[72] exists and LC11_Platoon[74] exists and LC11_Platoon[76] exists
         if HEALTH of LC11_EnemyCreature > 0.00
             HEALTH of LC11_EnemyCreature = 1.0
             begin loop
-                if LC11_Platoon[36] exists
-                    set creature LC11_EnemyCreature role to CR_SOLDIER radius 400 at {LC11_Platoon[36]}
-                elsif LC11_Platoon[37] exists
-                    set creature LC11_EnemyCreature role to CR_SOLDIER radius 400 at {LC11_Platoon[37]}
+                if LC11_Platoon[70] exists
+                    set creature LC11_EnemyCreature role to CR_SOLDIER radius 400 at {LC11_Platoon[70]}
+                elsif LC11_Platoon[72] exists
+                    set creature LC11_EnemyCreature role to CR_SOLDIER radius 400 at {LC11_Platoon[72]}
+                elsif LC11_Platoon[74] exists
+                    set creature LC11_EnemyCreature role to CR_SOLDIER radius 400 at {LC11_Platoon[74]}
+                elsif LC11_Platoon[76] exists
+                    set creature LC11_EnemyCreature role to CR_SOLDIER radius 400 at {LC11_Platoon[76]}
                 end if
-                until LC11_Platoon[36] not exists and LC11_Platoon[37] not exists or 720 seconds or HEALTH of LC11_EnemyCreature == 0.00
+                until (LC11_Platoon[70] not exists and LC11_Platoon[72] not exists and LC11_Platoon[74] not exists and LC11_Platoon[76] not exists) or 720 seconds or HEALTH of LC11_EnemyCreature == 0.00
             end loop
             set creature LC11_EnemyCreature role to CR_SOLDIER radius 300 at {CreatureAttackPos[0]}
             wait until HEALTH of LC11_EnemyCreature == 0.00 or 360 seconds
         end if
-
-    elsif HEALTH of LC11_EnemyCreature > 0.00 and get CreatureRollRoleTimer time remaining <= 0
-        Number = number from 1 to 4
-        if Number == 1 and PLAYER of AztecCapital == 1
-            set creature LC11_EnemyCreature role to CR_GATHERER radius 200 at {CreatureGathererPos[0]}
-            CreatureRollRoleTimer = create timer for 360 seconds
-            
-        elsif Number == 2 and PLAYER of AztecTown1 == 1
-            set creature LC11_EnemyCreature role to CR_GATHERER radius 200 at {CreatureGathererPos[1]}
-            CreatureRollRoleTimer = create timer for 360 seconds
-
-        elsif Number == 3 and PLAYER of AztecTown2 == 1
-            set creature LC11_EnemyCreature role to CR_GATHERER radius 200 at {CreatureGathererPos[2]}
-            CreatureRollRoleTimer = create timer for 360 seconds
         
-        end if
     end if
 
-    Counter++
-    
+    AICounter += number from 0 to 16
     until LandWon == 1
 end loop
 
