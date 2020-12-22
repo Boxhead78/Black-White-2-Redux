@@ -106,8 +106,6 @@ begin script LC4_CreatureLogic
 start
 
 begin loop
-    oCreature = get player 0 creature
-
     if AICounter > 16
         AICounter = -1
     else
@@ -126,11 +124,11 @@ begin loop
         
         wait until HEALTH of LC4_EnemyCreature == 0.00 or not town AITown[AICounter] is under takeover from player 0 or 1000 seconds
 
-    elsif PLAYER of AITown[AICounter] == 1 and get distance from {AITown[AICounter]} to {oCreature} < 300 and HEALTH of LC4_EnemyCreature > 0
+    elsif PLAYER of AITown[AICounter] == 1 and get distance from {AITown[AICounter]} to {MyCreature} < 300 and HEALTH of MyCreature > 0.00 and HEALTH of LC4_EnemyCreature > 0
         HEALTH of LC4_EnemyCreature = 1.0
-        while HEALTH of LC4_EnemyCreature > 0.00 and town AITown[AICounter] is under takeover from player 0 and get distance from {AITown[AICounter]} to {oCreature} <= 500 and HEALTH of oCreature > 0.00
+        while HEALTH of LC4_EnemyCreature > 0.00 and get distance from {AITown[AICounter]} to {MyCreature} <= 500 and HEALTH of MyCreature > 0.00
             wait 15 seconds
-            set creature LC4_EnemyCreature role to CR_SOLDIER radius 33 at {oCreature}
+            set creature LC4_EnemyCreature role to CR_SOLDIER radius 33 at {MyCreature}
         end while
 
         wait until HEALTH of LC4_EnemyCreature == 0.00 or not town AITown[AICounter] is under takeover from player 0 or 1000 seconds
