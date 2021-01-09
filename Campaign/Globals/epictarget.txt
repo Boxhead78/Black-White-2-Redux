@@ -1,9 +1,9 @@
-define script EpicTargeter(whichTown,EpicPos,Volcano,whichEpic,PlayerID)
+define script EpicTargeter(whichTown,EpicPos,ET_FireEpicLocationForced,whichEpic,PlayerID)
 
 global ET_FireEpicLocation = 0
 global ET_FireCheckTimer = 0
 
-begin script EpicTargeter(whichTown,EpicPos,Volcano,whichEpic,PlayerID)
+begin script EpicTargeter(whichTown,EpicPos,ET_FireEpicLocationForced,whichEpic,PlayerID)
 
     CounterEpic = 0
     Building = 0
@@ -17,55 +17,78 @@ begin script EpicTargeter(whichTown,EpicPos,Volcano,whichEpic,PlayerID)
     myPlatoon = 0
     myCatapult = 0
 
+    Counter = 0
+    EnemyTown = 0
+    TownCentre = 0
+    villagerThreshold = 60
+
 start
 
-if get ET_FireCheckTimer time remaining <= 0
+wait until get ET_FireCheckTimer time remaining <= 0
+
+//If town is city, look for another town to fire at
+if size of whichTown >= 450
     begin loop
-        CounterEpic = 0
-        while CounterEpic < 50 and ExitLoop == 0
-            if Volcano == 0
-                InfluencePos = get player 0 influence at {EpicPos}
-                if InfluencePos < 1
-                    ET_FireEpicLocation = marker at {EpicPos}
-                else
-                    Building = get random abode in town whichTown
-                    if Building not exists
-                        ET_FireEpicLocation = marker at {whichTown} + {number from minNumber to maxNumber, number from minNumber to maxNumber}
-                    else
-                        ET_FireEpicLocation = marker at {Building} + {number from minNumber to maxNumber, number from minNumber to maxNumber}
-                    end if
-                end if
-            else
-                //Try Volcano nearest EpicPos (Due to scripted platoon behaivor in land 11)
-                ET_FireEpicLocation = marker at {EpicPos} + {number from minNumber to maxNumber, number from minNumber to maxNumber}
+        Counter = number from 0 to 16
+        EnemyTown = get town with id Counter
+        TownCentre = get building ABODE_NUMBER_TOWN_CENTRE in EnemyTown min built 1.0
+        if PLAYER of EnemyTown == 0 and TownCentre exists
+            if not town EnemyTown is under takeover from player 1 and size of EnemyTown < villagerThreshold and size of EnemyTown > 0
+                whichTown = EnemyTown
+                ExitLoop = 1
             end if
-            Influence = get player 0 influence at {ET_FireEpicLocation}
-            Villager = create VILLAGER NORSE_HOUSEWIFE at {ET_FireEpicLocation} + {number from -5 to 5, number from -5 to 5}
-            myPlatoon = get platoon of player PlayerID nearest {ET_FireEpicLocation} radius 150
-            myCatapult = get platoon of player PlayerID nearest {ET_FireEpicLocation} radius 150
-            if Influence < 1 and not {ET_FireEpicLocation} under water and ((myPlatoon not exists and myCatapult not exists) or (whichEpic == 1))
-                if whichEpic == 3 or whichEpic == 4
-                    if Villager can navigate to {ET_FireEpicLocation}
-                        ExitLoop = 1
-                    end if
-                else
-                    ExitLoop = 1
-                end if
-            end if
-            play anim "a_p_dead1" on Villager loop 1
-            delete Villager
-            
-            CounterEpic++
-        end while
-        minNumber -= 25
-        maxNumber += 25
-        if minNumber > 999 and maxNumber > 999
-            minNumber = 25
-            maxNumber = 25
+            villagerThreshold += 10
         end if
         until ExitLoop == 1
     end loop
-    ET_FireCheckTimer = create timer for 90 seconds
 end if
+
+ExitLoop = 0
+begin loop
+    CounterEpic = 0
+    while CounterEpic < 50 and ExitLoop == 0
+        if ET_FireEpicLocationForced == 0
+            InfluencePos = get player 0 influence at {EpicPos}
+            if InfluencePos < 1
+                ET_FireEpicLocation = marker at {EpicPos}
+            else
+                Building = get random abode in town whichTown
+                if Building not exists
+                    ET_FireEpicLocation = marker at {whichTown} + {number from minNumber to maxNumber, number from minNumber to maxNumber}
+                else
+                    ET_FireEpicLocation = marker at {Building} + {number from minNumber to maxNumber, number from minNumber to maxNumber}
+                end if
+            end if
+        else
+            //Try Epic nearest EpicPos (Due to scripted platoon behaivor in land 11)
+            ET_FireEpicLocation = marker at {EpicPos} + {number from minNumber to maxNumber, number from minNumber to maxNumber}
+        end if
+        Influence = get player 0 influence at {ET_FireEpicLocation}
+        Villager = create VILLAGER NORSE_HOUSEWIFE at {ET_FireEpicLocation} + {number from -5 to 5, number from -5 to 5}
+        myPlatoon = get platoon of player PlayerID nearest {ET_FireEpicLocation} radius 150
+        myCatapult = get platoon of player PlayerID nearest {ET_FireEpicLocation} radius 150
+        if Influence < 1 and not {ET_FireEpicLocation} under water and ((myPlatoon not exists and myCatapult not exists) or (whichEpic == 1))
+            if whichEpic == 3 or whichEpic == 4
+                if Villager can navigate to {ET_FireEpicLocation}
+                    ExitLoop = 1
+                end if
+            else
+                ExitLoop = 1
+            end if
+        end if
+        play anim "a_p_dead1" on Villager loop 1
+        delete Villager
+        
+        CounterEpic++
+    end while
+    minNumber -= 25
+    maxNumber += 25
+    if minNumber > 999 and maxNumber > 999
+        minNumber = 25
+        maxNumber = 25
+    end if
+    until ExitLoop == 1
+end loop
+ET_FireCheckTimer = create timer for 90 seconds
 
 end script EpicTargeter
