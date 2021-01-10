@@ -26,7 +26,7 @@ run background script LC6_CheckForTemples
 wait 2.5 seconds
 
 while LandWon == 0
-    if MonksCount < 1 and get MonkTimer time remaining <= 0 and MonkTemple[0] exists and HEALTH of MonkTemple[0] > 0.0 and MonkTemple[1] exists and HEALTH of MonkTemple[1] > 0.0
+    if MonksCount < 1 and get MonkTimer time remaining <= 0 and MonkTemple[0] exists and HEALTH of MonkTemple[0] >= 1.0 and MonkTemple[1] exists and HEALTH of MonkTemple[1] >= 1.0
         if FirstPlatoon == 0
             FirstPlatoon = 1
             MonkPlatoon = create platoon PLATOON_INFO_JAPANESE_MELEE_7 at {MonkSpawnPosition} with 20 men and 0 women
@@ -37,13 +37,13 @@ while LandWon == 0
         if MonkPlatoon exists
             MonksCount++
             //set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_MASS of MonkPlatoon to 1.5
-            set platoon movement value FORMATION_MOVEMENT_STAT_ACCELERATION_MAX of MonkPlatoon to 20.0
-            set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_SPEED_MAX of MonkPlatoon to 20.0
-            set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_SPEED_MIN of MonkPlatoon to 15.0
-            set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_CHARGE_SPEED of MonkPlatoon to 16.0
-            set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_FIGHTER_SPEED of MonkPlatoon to 6.0
-            set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_SPEED of MonkPlatoon to 11.0
-            set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_CHARGE_SPEED of MonkPlatoon to 16.0
+            set platoon movement value FORMATION_MOVEMENT_STAT_ACCELERATION_MAX of MonkPlatoon to 30.0
+            set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_SPEED_MAX of MonkPlatoon to 8.0
+            set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_SPEED_MIN of MonkPlatoon to 6.0
+            set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_CHARGE_SPEED of MonkPlatoon to 17.5
+            set platoon movement value FORMATION_MOVEMENT_STAT_AGENT_FIGHTER_SPEED of MonkPlatoon to 10.0
+            set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_SPEED of MonkPlatoon to 10.0
+            set platoon movement value FORMATION_MOVEMENT_STAT_PLATOON_CHARGE_SPEED of MonkPlatoon to 17.5
             run background script LC6_CheckForMonks(MonkPlatoon)
             add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {MonkMoveToPosition} to MonkPlatoon action queue
             //If Player is AI give platoon control to script
@@ -79,27 +79,31 @@ start
 MonkTemple[0] = get HOUSE TEMPLE at {1218.03,65.91,1484.45} radius 25
 MonkTemple[1] = get HOUSE TEMPLE at {1223.93,65.96,1501.60} radius 25
 begin loop
-    //Player 0
-    if get number of platoon of player 0 at {1242.55,65.88,1488.44} radius 40 > 0 and get number of platoon of player 1 at {1242.55,65.88,1488.44} radius 40 == 0 and get number of platoon of player 3 at {1242.55,65.88,1488.44} radius 40 == 0
-        TempleOwnedByPlayer = 0
-        if not InfluenceIndicator exists
-            InfluenceIndicator = create visual effect "gp_s_area.ves" strength 0.6 scale 10 at {1242.55,65.88,1488.44} time -1 
+    if MonkTemple[0] exists and HEALTH of MonkTemple[0] >= 1.0 and MonkTemple[1] exists and HEALTH of MonkTemple[1] >= 1.0
+        //Player 0
+        if get number of platoon of player 0 at {1242.55,65.88,1488.44} radius 40 > 0 and get number of platoon of player 1 at {1242.55,65.88,1488.44} radius 40 == 0 and get number of platoon of player 3 at {1242.55,65.88,1488.44} radius 40 == 0
+            TempleOwnedByPlayer = 0
+            if not InfluenceIndicator exists
+                InfluenceIndicator = create visual effect "gp_s_area.ves" strength 0.6 scale 10 at {1242.55,65.88,1488.44} time -1 
+            end if
+            set InfluenceIndicator colour red 0 green 204 blue 0
+        //Player 1
+        elsif get number of platoon of player 0 at {1242.55,65.88,1488.44} radius 40 == 0 and get number of platoon of player 1 at {1242.55,65.88,1488.44} radius 40 > 0 and get number of platoon of player 3 at {1242.55,65.88,1488.44} radius 40 == 0
+            TempleOwnedByPlayer = 1
+            if not InfluenceIndicator exists
+                InfluenceIndicator = create visual effect "gp_s_area.ves" strength 0.6 scale 10 at {1242.55,65.88,1488.44} time -1 
+            end if
+            set InfluenceIndicator colour red 105 green 0 blue 0
+        //Neutral
+        elsif get number of platoon of player 0 at {1242.55,65.88,1488.44} radius 40 == 0 and get number of platoon of player 1 at {1242.55,65.88,1488.44} radius 40 == 0 and get number of platoon of player 3 at {1242.55,65.88,1488.44} radius 40 == 0
+            TempleOwnedByPlayer = 3
+            if not InfluenceIndicator exists
+                InfluenceIndicator = create visual effect "gp_s_area.ves" strength 0.6 scale 10 at {1242.55,65.88,1488.44} time -1 
+            end if
+            set InfluenceIndicator colour red 200 green 200 blue 230
         end if
-        set InfluenceIndicator colour red 0 green 204 blue 0
-    //Player 1
-    elsif get number of platoon of player 0 at {1242.55,65.88,1488.44} radius 40 == 0 and get number of platoon of player 1 at {1242.55,65.88,1488.44} radius 40 > 0 and get number of platoon of player 3 at {1242.55,65.88,1488.44} radius 40 == 0
-        TempleOwnedByPlayer = 1
-        if not InfluenceIndicator exists
-            InfluenceIndicator = create visual effect "gp_s_area.ves" strength 0.6 scale 10 at {1242.55,65.88,1488.44} time -1 
-        end if
-        set InfluenceIndicator colour red 105 green 0 blue 0
-    //Neutral
-    elsif get number of platoon of player 0 at {1242.55,65.88,1488.44} radius 40 == 0 and get number of platoon of player 1 at {1242.55,65.88,1488.44} radius 40 == 0 and get number of platoon of player 3 at {1242.55,65.88,1488.44} radius 40 == 0
-        TempleOwnedByPlayer = 3
-        if not InfluenceIndicator exists
-            InfluenceIndicator = create visual effect "gp_s_area.ves" strength 0.6 scale 10 at {1242.55,65.88,1488.44} time -1 
-        end if
-        set InfluenceIndicator colour red 200 green 200 blue 230
+    elsif InfluenceIndicator exists
+        delete InfluenceIndicator
     end if
     until LandWon == 1
 end loop
