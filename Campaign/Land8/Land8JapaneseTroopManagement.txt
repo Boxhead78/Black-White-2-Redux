@@ -1474,6 +1474,8 @@ begin script LC8_ArmyBehaivours(Platoon,Type,Task,DefendObject,AttackFocus,Aggre
 
 start
 
+wait until not Platoon recruiting
+
 AttackingPoint1Initial = marker at {AttackingPoint1}
 
 //TODO: Always use AttackingPoint except if can't navigate
@@ -1600,7 +1602,7 @@ begin loop
             clear Platoon action queue
             begin loop
                 PlayerCreature = get distance from {Platoon} to {oCreature}
-                add action PLATOON_AGENDA_ACTION_RANGED_ATTACK_MAINTAINING_DISTANCE using oCreature to Platoon action queue
+                add action PLATOON_AGENDA_ACTION_RANGED_ATTACK using oCreature to Platoon action queue
                 NumPat1 = get number of villagers in platoon Platoon
                 until NumPat1 == 0 or SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature == 0.00 or not Platoon can navigate to {oCreature} or PlayerCreature > AttackRadius * 1.25
             end loop
@@ -1612,7 +1614,7 @@ begin loop
             clear Platoon action queue
             begin loop
                 PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius AttackRadius * 1.25
-                add action PLATOON_AGENDA_ACTION_RANGED_ATTACK_MAINTAINING_DISTANCE using PlayerPlatoon1 to Platoon action queue
+                add action PLATOON_AGENDA_ACTION_RANGED_ATTACK using PlayerPlatoon1 to Platoon action queue
                 NumPat1 = get number of villagers in platoon Platoon
                 HeTeste1 = get number of villagers in platoon PlayerPlatoon1
                 until NumPat1 == 0 or HeTeste1 == 0 or not Platoon can navigate to {PlayerPlatoon1} or PlayerPlatoon1 not exists
@@ -1622,7 +1624,7 @@ begin loop
             a = 0
             begin loop
                 Catapult = get siege weapon of player 0 nearest {Platoon} radius AttackRadiusCatapult * 1.25
-                add action PLATOON_AGENDA_ACTION_RANGED_ATTACK_MAINTAINING_DISTANCE using Catapult to Platoon action queue
+                add action PLATOON_AGENDA_ACTION_RANGED_ATTACK using Catapult to Platoon action queue
                 NumPat1 = get number of villagers in platoon Platoon
                 PlayerPlatoon1 = get platoon of player 0 nearest {Platoon} radius AttackRadius
                 if PlayerPlatoon1 exists and Platoon can navigate to {PlayerPlatoon1}
@@ -1683,7 +1685,7 @@ begin loop
                             begin loop
                                 AttackWP1 = marker at {AttackWP1Persistent} + {number from -66 to 66,number from -66 to 66}
                                 Number++
-                                until Platoon not exists or Platoon can navigate to {AttackWP1} or Number > 10
+                                until Platoon not exists or Platoon can navigate to {AttackWP1}
                             end loop
                         end if
                         if not DefendObject exists
@@ -1710,7 +1712,7 @@ begin loop
                             begin loop
                                 AttackWP2 = marker at {AttackWP2Persistent} + {number from -66 to 66,number from -66 to 66}
                                 Number++
-                                until Platoon not exists or Platoon can navigate to {AttackWP2} or Number > 10
+                                until Platoon not exists or Platoon can navigate to {AttackWP2}
                             end loop
                         end if
                         if not DefendObject exists
@@ -1737,7 +1739,7 @@ begin loop
                             begin loop
                                 AttackWP3 = marker at {AttackWP3Persistent} + {number from -66 to 66,number from -66 to 66}
                                 Number++
-                                until Platoon not exists or Platoon can navigate to {AttackWP3} or Number > 10
+                                until Platoon not exists or Platoon can navigate to {AttackWP3}
                             end loop
                         end if
                         if not DefendObject exists
@@ -2349,7 +2351,7 @@ begin loop
                         begin loop
                             AttackWP1 = marker at {AttackWP1Persistent} + {number from -66 to 66,number from -66 to 66}
                             Number++
-                            until Platoon not exists or Platoon can navigate to {AttackWP1} or Number > 10
+                            until Platoon not exists or Platoon can navigate to {AttackWP1}
                         end loop
                     end if
                     if not DefendObject exists
@@ -2376,7 +2378,7 @@ begin loop
                         begin loop
                             AttackWP2 = marker at {AttackWP2Persistent} + {number from -66 to 66,number from -66 to 66}
                             Number++
-                            until Platoon not exists or Platoon can navigate to {AttackWP2} or Number > 10
+                            until Platoon not exists or Platoon can navigate to {AttackWP2}
                         end loop
                     end if
                     if not DefendObject exists
@@ -2403,7 +2405,7 @@ begin loop
                         begin loop
                             AttackWP3 = marker at {AttackWP3Persistent} + {number from -66 to 66,number from -66 to 66}
                             Number++
-                            until Platoon not exists or Platoon can navigate to {AttackWP3} or Number > 10
+                            until Platoon not exists or Platoon can navigate to {AttackWP3}
                         end loop
                     end if
                     if not DefendObject exists
@@ -2760,20 +2762,22 @@ begin loop
     end if
 
     //Merge with target platoon - Mutually exclusive with splitting
-    if MergeDone == 0 and 100-MergeChance < CHANCE_TO_MERGE and (AttackWPStage == 3 or get number of villagers in platoon Platoon <= 20)
+    if MergeDone == 0 and 100-MergeChance < CHANCE_TO_MERGE and (AttackWPStage == 3 or get number of villagers in platoon Platoon < 10)
         if get number of villagers in platoon Platoon <= 50
             AssumedPlatoonPos = marker at {Platoon} + {number from -100 to 100, number from -100 to 100}
             NewPlatoon = get platoon of player 1 nearest {AssumedPlatoonPos} radius 100
-            if NewPlatoon exists and NewPlatoon != Platoon and ((Type == Melee and platoon NewPlatoon melee) or (Type == Ranged and platoon NewPlatoon ranged))
-                //say "MERGING PLATOON INTO NEWPLATOON NOW"
-                wait 5 seconds
-                MergeDone = 1
-                while Platoon exists and NewPlatoon exists
-                    enable platoon Platoon merge
-                    enable platoon NewPlatoon merge
-                    merge platoon Platoon into platoon NewPlatoon
-                    wait 10 seconds
-                end while
+            if NewPlatoon exists and NewPlatoon != Platoon and not NewPlatoon recruiting and get number of villagers in platoon NewPlatoon < 150
+                if ((Type == Melee and platoon NewPlatoon melee) or (Type == Ranged and platoon NewPlatoon ranged))
+                    //say "MERGING PLATOON INTO NEWPLATOON NOW"
+                    wait 5 seconds
+                    MergeDone = 1
+                    while Platoon exists and NewPlatoon exists
+                        enable platoon Platoon merge
+                        enable platoon NewPlatoon merge
+                        merge platoon Platoon into platoon NewPlatoon
+                        wait 10 seconds
+                    end while
+                end if
             end if
         end if
     end if
@@ -2878,7 +2882,7 @@ start
                             begin loop
                                 AttackWP1 = marker at {AttackWP1Persistent} + {number from -66 to 66,number from -66 to 66}
                                 Number++
-                                until SiegeWeapon not exists or SiegeWeapon can navigate to {AttackWP1} or Number > 10
+                                until SiegeWeapon not exists or SiegeWeapon can navigate to {AttackWP1}
                             end loop
                         end if
                         add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {AttackWP1} to siege weapon SiegeWeapon action queue
@@ -2895,7 +2899,7 @@ start
                             begin loop
                                 AttackWP2 = marker at {AttackWP2Persistent} + {number from -66 to 66,number from -66 to 66}
                                 Number++
-                                until SiegeWeapon not exists or SiegeWeapon can navigate to {AttackWP2} or Number > 10
+                                until SiegeWeapon not exists or SiegeWeapon can navigate to {AttackWP2}
                             end loop
                         end if
                         add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {AttackWP2} to siege weapon SiegeWeapon action queue
@@ -2912,7 +2916,7 @@ start
                             begin loop
                                 AttackWP3 = marker at {AttackWP3Persistent} + {number from -66 to 66,number from -66 to 66}
                                 Number++
-                                until SiegeWeapon not exists or SiegeWeapon can navigate to {AttackWP3} or Number > 10
+                                until SiegeWeapon not exists or SiegeWeapon can navigate to {AttackWP3}
                             end loop
                         end if
                         add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {AttackWP3} to siege weapon SiegeWeapon action queue
@@ -3442,7 +3446,7 @@ start
                             begin loop
                                 AttackWP1 = marker at {AttackWP1Persistent} + {number from -66 to 66,number from -66 to 66}
                                 Number++
-                                until SiegeWeapon not exists or SiegeWeapon can navigate to {AttackWP1} or Number > 10
+                                until SiegeWeapon not exists or SiegeWeapon can navigate to {AttackWP1}
                             end loop
                         end if
                         add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {AttackWP1} to siege weapon SiegeWeapon action queue
@@ -3459,7 +3463,7 @@ start
                             begin loop
                                 AttackWP2 = marker at {AttackWP2Persistent} + {number from -66 to 66,number from -66 to 66}
                                 Number++
-                                until SiegeWeapon not exists or SiegeWeapon can navigate to {AttackWP2} or Number > 10
+                                until SiegeWeapon not exists or SiegeWeapon can navigate to {AttackWP2}
                             end loop
                         end if
                         add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {AttackWP2} to siege weapon SiegeWeapon action queue
@@ -3476,7 +3480,7 @@ start
                             begin loop
                                 AttackWP3 = marker at {AttackWP3Persistent} + {number from -66 to 66,number from -66 to 66}
                                 Number++
-                                until SiegeWeapon not exists or SiegeWeapon can navigate to {AttackWP3} or Number > 10
+                                until SiegeWeapon not exists or SiegeWeapon can navigate to {AttackWP3}
                             end loop
                         end if
                         add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {AttackWP3} to siege weapon SiegeWeapon action queue
