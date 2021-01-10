@@ -32,7 +32,7 @@ begin dialogue
 end dialogue
 GB_DialogueIsRunning = 0
 
-wait until PLAYER of AztecCapital != 1 and PLAYER of AztecTown1 != 1 and PLAYER of AztecTown2 != 1 and PLAYER of PlayerTown != 1
+wait until get player 1 town total == 1
 
 PD_ForcedSaving = 1
 wait until PD_ForcedSaving == 0 or 10 seconds
@@ -122,28 +122,23 @@ start
     WT_SkyTransitionGlobalInfluence = 1
     enable global influence
 
-    Portal = create visual effect VISUAL_EFFECT_TELEPORTER_HOOP at {DepartureScrollPos} + {0, 1.5, 0} time -1
+	vtx_max_armies = 5
+	vtx_max_sieges = 3
+	vtx_max_orerocks = 15
+	vtx_tree_max = 30
+	vtx_rock_max = 20
+	vtx_ore_max = 20000
+	vtx_food_max = 20000
+	vtx_wood_max = 20000
+	vtx_vill_max = 100
+    vtx_max_arm_men = 150
+    vtx_rock_max = 10
+    vtx_size = 2.5
+    vtx_radius = 30
 
-    DepartureScroll = create highlight GOLD name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {DepartureScrollPos}
-    ALTITUDE of DepartureScroll = 3
-
-    wait until DepartureScroll right clicked
-
-    wait until dialogue ready
-    begin dialogue
-        eject good spirit
-        //say "Are you sure you wish to leave the land?"
-        say "BW2T_SCRIPT_03FINAL_ADVISORS_TUT_934"
-        wait until read
-        //say "Click again to confirm"
-        say "BW2T_SCRIPT_03FINAL_ADVISORS_TUT_933"
-        wait until read
-        send good spirit home
-    end dialogue
+    run script Vtx_Create_Exiting(1396.68,37.37,1321.40)
     
-    clear right clicked object
-    wait until DepartureScroll right clicked
-    delete DepartureScroll
+    wait until vtx_scroll_clicked == VTX_TRUE
     
     // Get the dialogue for the enemy and for the advisors
     
@@ -153,9 +148,9 @@ start
         start music "farming_communtiy_land2" loop 10
         wait 2 seconds
     
-        queue camera move with position {978.88,63.34,1575.22} + {10,7.5,10} focus {978.88,63.34,1575.22} + {0,5,0} time 0.0
-        queue camera move with position {978.88,63.34,1575.22} + {7.5,5,7.5} focus {978.88,63.34,1575.22} time 5.0
-        queue camera move with position {978.88,63.34,1575.22} + {1,1.5,1} focus {978.88,63.34,1575.22} time 4.0
+        queue camera move with position {1396.68,37.37,1321.40} + {10,7.5,10} focus {1396.68,37.37,1321.40} + {0,5,0} time 0.0
+        queue camera move with position {1396.68,37.37,1321.40} + {7.5,5,7.5} focus {1396.68,37.37,1321.40} time 5.0
+        queue camera move with position {1396.68,37.37,1321.40} + {1,1.5,1} focus {1396.68,37.37,1321.40} time 4.0
         play camera path with easein 4 easeout 4 method SCRIPT_CAMERAPATH_EQUALDISTANCE
         set fade in time 1
         wait 4 seconds
