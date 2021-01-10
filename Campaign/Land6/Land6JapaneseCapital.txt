@@ -2345,7 +2345,7 @@ begin script LC6_Japanese_Capital
     Platoon = 0
     SirenWarning = 0
     SirenTimer = create timer for 0 seconds
-    SIRENDELAY = 2250
+    SIRENDELAY = 1800
     SirenSpell = 0
 
     MinorJapaneseTown1Buildings = 0
@@ -2557,7 +2557,7 @@ start
                 run background script LC6_StaticPlatoonsActions(PlatoonPos[5],Melee,LC6_Platoon[6],JapaneseCapital)
                 BuildingDefendersAllowed[0] = 0
                 
-            elsif LC6_Platoon[7] not exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and BuildingDefendersAllowed[0] == 1
+            elsif LC6_Platoon[7] not exists and PLAYER of JapaneseCapital == 1 and not town JapaneseCapital is under takeover from player 0 and BuildingDefendersAllowed[0] == 1 and not PLAYER of JapaneseTown2 == 0
                 LC6_Platoon[7] = recruit ARMY_UNIT_TYPE_RANGED_2 town JapaneseCapital platoon of size 30 * RecruitSizeModifier
                 LC6_RecruitTimer1 = create timer for (30 * 2.0) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
                 run background script PT_CreateBasicJapanesePlatoonRanged(LC6_Platoon[7],1)
@@ -2578,7 +2578,7 @@ start
                 BuildingDefendersAllowed[0] = 1
 
             //Capture JapaneseTown1
-            elsif LC6_Platoon[14] not exists and PLAYER of JapaneseCapital == 1 and TownsConverted >= 3 and not town JapaneseCapital is under takeover from player 0 and BuildingDefendersAllowed[0] == 1
+            elsif LC6_Platoon[14] not exists and PLAYER of JapaneseCapital == 1 and TownsConverted >= 3 and not town JapaneseCapital is under takeover from player 0 and BuildingDefendersAllowed[0] == 1 and not PLAYER of JapaneseTown1 == 0
                 LC6_Platoon[14] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 30 * RecruitSizeModifier
                 LC6_RecruitTimer1 = create timer for (30 * 2.0) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
                 run background script PT_CreateChargerJapanesePlatoon(LC6_Platoon[14],1)
@@ -2587,7 +2587,7 @@ start
                 BuildingDefendersAllowed[0] = 0
 
             //Capture JapaneseTown2
-            elsif LC6_Platoon[15] not exists and PLAYER of JapaneseCapital == 1 and TownsAggressiveConverted >= 1 and not town JapaneseCapital is under takeover from player 0 and BuildingDefendersAllowed[0] == 1
+            elsif LC6_Platoon[15] not exists and PLAYER of JapaneseCapital == 1 and TownsAggressiveConverted >= 1 and not town JapaneseCapital is under takeover from player 0 and BuildingDefendersAllowed[0] == 1 and not PLAYER of JapaneseTown2 == 0
                 LC6_Platoon[15] = recruit ARMY_UNIT_TYPE_MELEE_3 town JapaneseCapital platoon of size 30 * RecruitSizeModifier
                 LC6_RecruitTimer1 = create timer for (30 * 2.0) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
                 run background script PT_CreateChargerJapanesePlatoon(LC6_Platoon[15],1)
@@ -3259,7 +3259,7 @@ start
                 if PLAYER of GenericTown == 1
                     if PlayerAlignmentFinal < 0.0
                         //Buildings
-                        if get GenericTownBuildingTimer time remaining <= 0
+                        if get GenericTownBuildingTimer time remaining <= 0 and size of GenericTown > 0
                             if get number of type HOUSE ABODE_NUMBER_STORAGE_PIT in GenericTown min built 0.0 < 1
                                 run background script AGB_BuildBuilding(GenericTown,AGB_STORAGEPIT,AGB_JAPANESE)
 
@@ -3282,17 +3282,17 @@ start
                                 if get army size in town GenericTown < 45 * RecruitModifier
                                     Number = number from 1 to 3
                                     if Number == 1 or Number == 2
-                                        AnotherPlatoon = recruit ARMY_UNIT_TYPE_MELEE_2 town GenericTown platoon of size 30 * RecruitSizeModifier
+                                        AnotherPlatoon = recruit ARMY_UNIT_TYPE_MELEE_3 town GenericTown platoon of size 30 * RecruitSizeModifier
                                         enable platoon AnotherPlatoon respond to town GenericTown attack
                                         run background script LC6_StaticPlatoonsActions(marker at {GenericTown} + {number from -50 to 50,number from -50 to 50},Melee,AnotherPlatoon,GenericTown)
                                         wait until not AnotherPlatoon recruiting
                                         run background script PT_CreateBasicJapanesePlatoon(AnotherPlatoon,1)
                                     else
-                                        AnotherPlatoon = recruit ARMY_UNIT_TYPE_RANGED_2 town GenericTown platoon of size 30 * RecruitSizeModifier
+                                        AnotherPlatoon = recruit ARMY_UNIT_TYPE_RANGED_3 town GenericTown platoon of size 30 * RecruitSizeModifier
                                         enable platoon AnotherPlatoon respond to town GenericTown attack
                                         run background script LC6_StaticPlatoonsActions(marker at {GenericTown} + {number from -50 to 50,number from -50 to 50},Melee,AnotherPlatoon,GenericTown)
                                         wait until not AnotherPlatoon recruiting
-                                        run background script PT_CreateBasicJapanesePlatoon(AnotherPlatoon,1)
+                                        run background script PT_CreateBasicJapanesePlatoonRanged(AnotherPlatoon,1)
                                     end if
                                     GenericTownPlatoonTimer = create timer for (30 * 2.0) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
                                 end if
@@ -3301,7 +3301,7 @@ start
 
                     elsif PlayerAlignmentFinal >= 0.0
                         //Buildings
-                        if get GenericTownBuildingTimer time remaining <= 0
+                        if get GenericTownBuildingTimer time remaining <= 0 and size of GenericTown > 0
                             if get number of type HOUSE ABODE_NUMBER_STORAGE_PIT in GenericTown min built 0.0 < 1
                                 run background script AGB_BuildBuilding(GenericTown,AGB_STORAGEPIT,AGB_JAPANESE)
 
@@ -3327,17 +3327,17 @@ start
                                 if get army size in town GenericTown < 45 * RecruitModifier
                                     Number = number from 1 to 3
                                     if Number == 1 or Number == 2
-                                        AnotherPlatoon = recruit ARMY_UNIT_TYPE_MELEE_2 town GenericTown platoon of size 30 * RecruitSizeModifier
+                                        AnotherPlatoon = recruit ARMY_UNIT_TYPE_MELEE_3 town GenericTown platoon of size 30 * RecruitSizeModifier
                                         enable platoon AnotherPlatoon respond to town GenericTown attack
                                         run background script LC6_StaticPlatoonsActions(marker at {GenericTown} + {number from -50 to 50,number from -50 to 50},Melee,AnotherPlatoon,GenericTown)
                                         wait until not AnotherPlatoon recruiting
                                         run background script PT_CreateBasicJapanesePlatoon(AnotherPlatoon,1)
                                     else
-                                        AnotherPlatoon = recruit ARMY_UNIT_TYPE_RANGED_2 town GenericTown platoon of size 30 * RecruitSizeModifier
+                                        AnotherPlatoon = recruit ARMY_UNIT_TYPE_RANGED_3 town GenericTown platoon of size 30 * RecruitSizeModifier
                                         enable platoon AnotherPlatoon respond to town GenericTown attack
                                         run background script LC6_StaticPlatoonsActions(marker at {GenericTown} + {number from -50 to 50,number from -50 to 50},Melee,AnotherPlatoon,GenericTown)
                                         wait until not AnotherPlatoon recruiting
-                                        run background script PT_CreateBasicJapanesePlatoon(AnotherPlatoon,1)
+                                        run background script PT_CreateBasicJapanesePlatoonRanged(AnotherPlatoon,1)
                                     end if
                                     GenericTownPlatoonTimer = create timer for (30 * 2.0) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
                                 end if
@@ -3892,21 +3892,21 @@ start
 if PlayerAlignmentFinal >= 0.0
     wait 240 * RecruitModifier seconds
 
-    if not get town MinorTown8 is migrating to == PlayerTown and MinorTown8 exists and PLAYER of MinorTown8 != 1 and not town MinorTown8 is under takeover from player 0
+    if not get town MinorTown8 is migrating to == PlayerTown and MinorTown8 exists and PLAYER of MinorTown8 != 1 and PLAYER of MinorTown8 != 0 and not town MinorTown8 is under takeover from player 0
         EnemyMigrations = EnemyMigrations + 1
         start migration from MinorTown8 to JapaneseCapital
     end if
 
     wait 400 * RecruitModifier seconds
 
-    if not get town MinorTown10 is migrating to == PlayerTown and MinorTown10 exists and PLAYER of MinorTown10 != 1 and not town MinorTown10 is under takeover from player 0
+    if not get town MinorTown10 is migrating to == PlayerTown and MinorTown10 exists and PLAYER of MinorTown10 != 1 and PLAYER of MinorTown10 != 0 and not town MinorTown10 is under takeover from player 0
         EnemyMigrations = EnemyMigrations + 1
         start migration from MinorTown10 to JapaneseCapital
     end if
 
     wait 300 * RecruitModifier seconds
 
-    if not get town MinorTown9 is migrating to == PlayerTown and MinorTown9 exists and PLAYER of MinorTown9 != 1 and not town MinorTown9 is under takeover from player 0
+    if not get town MinorTown9 is migrating to == PlayerTown and MinorTown9 exists and PLAYER of MinorTown9 != 1 and PLAYER of MinorTown9 != 0 and not town MinorTown9 is under takeover from player 0
         EnemyMigrations = EnemyMigrations + 1
         start migration from MinorTown9 to JapaneseCapital
     end if
@@ -3918,28 +3918,29 @@ if PlayerAlignmentFinal >= 0.0
 
     wait 400 * RecruitModifier seconds
 
-    if not get town MinorTown7 is migrating to == PlayerTown and MinorTown7 exists and PLAYER of MinorTown7 != 1 and not town MinorTown7 is under takeover from player 0
+    if not get town MinorTown7 is migrating to == PlayerTown and MinorTown7 exists and PLAYER of MinorTown7 != 1 and PLAYER of MinorTown7 != 0 and not town MinorTown7 is under takeover from player 0
         EnemyMigrations = EnemyMigrations + 1
         start migration from MinorTown7 to JapaneseCapital
     end if
+
 elsif PlayerAlignmentFinal < 0.0
     wait 480 * RecruitModifier seconds
 
-    if not get town MinorTown8 is migrating to == PlayerTown and MinorTown8 exists and PLAYER of MinorTown8 != 1 and not town MinorTown8 is under takeover from player 0
+    if not get town MinorTown8 is migrating to == PlayerTown and MinorTown8 exists and PLAYER of MinorTown8 != 1 and PLAYER of MinorTown8 != 0 and not town MinorTown8 is under takeover from player 0
         EnemyMigrations = EnemyMigrations + 1
         start migration from MinorTown8 to JapaneseCapital
     end if
 
     wait 800 * RecruitModifier seconds
 
-    if not get town MinorTown10 is migrating to == PlayerTown and MinorTown10 exists and PLAYER of MinorTown10 != 1 and not town MinorTown10 is under takeover from player 0
+    if not get town MinorTown10 is migrating to == PlayerTown and MinorTown10 exists and PLAYER of MinorTown10 != 1 and PLAYER of MinorTown10 != 0 and not town MinorTown10 is under takeover from player 0
         EnemyMigrations = EnemyMigrations + 1
         start migration from MinorTown10 to JapaneseCapital
     end if
 
     wait 600 * RecruitModifier seconds
 
-    if not get town MinorTown9 is migrating to == PlayerTown and MinorTown9 exists and PLAYER of MinorTown9 != 1 and not town MinorTown9 is under takeover from player 0
+    if not get town MinorTown9 is migrating to == PlayerTown and MinorTown9 exists and PLAYER of MinorTown9 != 1 and PLAYER of MinorTown9 != 0 and not town MinorTown9 is under takeover from player 0
         EnemyMigrations = EnemyMigrations + 1
         start migration from MinorTown9 to JapaneseCapital
     end if
@@ -4120,7 +4121,7 @@ start
 
 begin loop
 
-    wait 1450 * BuilderModifier seconds
+    wait 600 * BuilderModifier seconds
     Counter = 0
 
     if PLAYER of JapaneseCapital == 1
@@ -4154,7 +4155,7 @@ start
 
 begin loop
 
-    wait 1450 * BuilderModifier seconds
+    wait 600 * BuilderModifier seconds
     Counter = 0
 
     if PLAYER of JapaneseTown1 == 1
@@ -4188,7 +4189,7 @@ start
 
 begin loop
 
-    wait 1450 * BuilderModifier seconds
+    wait 600 * BuilderModifier seconds
     Counter = 0
 
     if PLAYER of JapaneseTown2 == 1
@@ -4294,7 +4295,7 @@ start
 
 begin loop
 
-    wait 1450 * BuilderModifier seconds
+    wait 600 * BuilderModifier seconds
     Counter = 0
 
     if PLAYER of MinorTown5 == 1

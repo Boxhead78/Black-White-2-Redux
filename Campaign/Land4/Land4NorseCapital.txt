@@ -1295,7 +1295,7 @@ begin script LC4_Norse_Capital
     VolcanoBuilt = 0
     VolcanoWarning = 0
     VolcanoTimer = create timer for 0 seconds
-    VOLCANODELAY = 2500
+    VOLCANODELAY = 1800
     EpicVolc = 0
     SiegeWaypoint1 = 0
     SiegeWaypoint2 = 0
@@ -1967,7 +1967,7 @@ start
                 if PLAYER of GenericTown == 1
                     if PlayerAlignmentFinal < 0.0
                         //Buildings
-                        if get GenericTownBuildingTimer time remaining <= 0
+                        if get GenericTownBuildingTimer time remaining <= 0 and size of GenericTown > 0
                             if get number of type HOUSE ABODE_NUMBER_STORAGE_PIT in GenericTown min built 0.0 < 1
                                 run background script AGB_BuildBuilding(GenericTown,AGB_STORAGEPIT,AGB_NORSE)
 
@@ -2000,7 +2000,7 @@ start
                                         enable platoon AnotherPlatoon respond to town GenericTown attack
                                         run background script LC4_StaticPlatoonsActions(marker at {GenericTown} + {number from -50 to 50,number from -50 to 50},Melee,AnotherPlatoon,GenericTown)
                                         wait until not AnotherPlatoon recruiting
-                                        run background script PT_CreateBasicNorsePlatoon(AnotherPlatoon,1)
+                                        run background script PT_CreateBasicNorsePlatoonRanged(AnotherPlatoon,1)
                                     end if
                                     GenericTownPlatoonTimer = create timer for (20 * 2.0) * NORSERECRUITMENTMODIFIER * RecruitModifier seconds
                                 end if
@@ -2009,7 +2009,7 @@ start
 
                     elsif PlayerAlignmentFinal >= 0.0
                         //Buildings
-                        if get GenericTownBuildingTimer time remaining <= 0
+                        if get GenericTownBuildingTimer time remaining <= 0 and size of GenericTown > 0
                             if get number of type HOUSE ABODE_NUMBER_STORAGE_PIT in GenericTown min built 0.0 < 1
                                 run background script AGB_BuildBuilding(GenericTown,AGB_STORAGEPIT,AGB_NORSE)
 
@@ -2045,7 +2045,7 @@ start
                                         enable platoon AnotherPlatoon respond to town GenericTown attack
                                         run background script LC4_StaticPlatoonsActions(marker at {GenericTown} + {number from -50 to 50,number from -50 to 50},Melee,AnotherPlatoon,GenericTown)
                                         wait until not AnotherPlatoon recruiting
-                                        run background script PT_CreateBasicNorsePlatoon(AnotherPlatoon,1)
+                                        run background script PT_CreateBasicNorsePlatoonRanged(AnotherPlatoon,1)
                                     end if
                                     GenericTownPlatoonTimer = create timer for (20 * 2.0) * NORSERECRUITMENTMODIFIER * RecruitModifier seconds
                                 end if
@@ -2464,7 +2464,7 @@ start
 
 begin loop
 
-    wait 1450 * BuilderModifier seconds
+    wait 600 * BuilderModifier seconds
     Counter = 0
 
     if PLAYER of NorseCapital == 1
@@ -2498,7 +2498,7 @@ start
 
 begin loop
 
-    wait 1450 * BuilderModifier seconds
+    wait 600 * BuilderModifier seconds
     Counter = 0
 
     if PLAYER of NorseTown1 == 1

@@ -910,7 +910,7 @@ begin script LC11_Aztec_Capital
     EpicWarning = 0
 
     EarthquakeTimer = create timer for 0 seconds
-    EARTHQUAKEDELAY = 2000
+    EARTHQUAKEDELAY = 1800
     EarthquakeWarning = 0
 
     FireRainTimer = create timer for 3000 seconds
@@ -2273,7 +2273,7 @@ start
                     end if
                 end if
 
-                //EA/GA large direct attack #4
+            //EA/GA large direct attack #4
             elsif (RndAttack[0] == 4 or RndAttack[0] == 5) and AttackersSent[0] == 0 and LC11_LargeSiegeOver == 1
                 if LC11_Platoon[77] not exists and PLAYER of AztecCapital == 1 and not town AztecCapital is under takeover from player 0
                     LC11_Platoon[77] = recruit ARMY_UNIT_TYPE_RANGED_5 town AztecCapital platoon of size 200 * RecruitSizeModifier
@@ -2295,7 +2295,7 @@ start
                     LC11_Platoon[78] = recruit ARMY_UNIT_TYPE_MELEE_5 town AztecCapital platoon of size 200 * RecruitSizeModifier
                     LC11_RecruitTimer1 = create timer for (200 * 2.0) * AZTECRECRUITMENTMODIFIER * RecruitModifier seconds
                     AttackingPosition = marker at {AttackPos[0]} + {60,0}
-                    AttackingPositionFallBack = marker at {AttackPos[01]} + {60,0}
+                    AttackingPositionFallBack = marker at {AttackPos[1]} + {60,0}
                     if AttackingPlatoons == 0
                         run script PlatoonTargetingMetric(200 * RecruitSizeModifier,PlayerTown)
                         run background script LC11_ArmyBehaivours(LC11_Platoon[78],Melee,Attacker,0,PlatoonTargetingMetricFocusResult,Alerted,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,0)
@@ -2509,7 +2509,7 @@ start
                 if PLAYER of GenericTown == 1
                     if PlayerAlignmentFinal < 0.0
                         //Buildings
-                        if get GenericTownBuildingTimer time remaining <= 0
+                        if get GenericTownBuildingTimer time remaining <= 0 and size of GenericTown > 0
                             if get number of type HOUSE ABODE_NUMBER_STORAGE_PIT in GenericTown min built 0.0 < 1
                                 run background script AGB_BuildBuilding(GenericTown,AGB_STORAGEPIT,AGB_AZTEC)
 
@@ -2542,7 +2542,7 @@ start
                                         enable platoon AnotherPlatoon respond to town GenericTown attack
                                         run background script LC11_StaticPlatoonsActions(marker at {GenericTown} + {number from -50 to 50,number from -50 to 50},Melee,AnotherPlatoon,GenericTown)
                                         wait until not AnotherPlatoon recruiting
-                                        run background script PT_CreateBasicAztecPlatoon(AnotherPlatoon,1)
+                                        run background script PT_CreateBasicAztecPlatoonRanged(AnotherPlatoon,1)
                                     end if
                                     GenericTownPlatoonTimer = create timer for (45 * 2.0) * AZTECRECRUITMENTMODIFIER * RecruitModifier seconds
                                 end if
@@ -2551,7 +2551,7 @@ start
 
                     elsif PlayerAlignmentFinal >= 0.0
                         //Buildings
-                        if get GenericTownBuildingTimer time remaining <= 0
+                        if get GenericTownBuildingTimer time remaining <= 0 and size of GenericTown > 0
                             if get number of type HOUSE ABODE_NUMBER_STORAGE_PIT in GenericTown min built 0.0 < 2
                                 run background script AGB_BuildBuilding(GenericTown,AGB_STORAGEPIT,AGB_AZTEC)
 
@@ -2587,7 +2587,7 @@ start
                                         enable platoon AnotherPlatoon respond to town GenericTown attack
                                         run background script LC11_StaticPlatoonsActions(marker at {GenericTown} + {number from -50 to 50,number from -50 to 50},Melee,AnotherPlatoon,GenericTown)
                                         wait until not AnotherPlatoon recruiting
-                                        run background script PT_CreateBasicAztecPlatoon(AnotherPlatoon,1)
+                                        run background script PT_CreateBasicAztecPlatoonRanged(AnotherPlatoon,1)
                                     end if
                                     GenericTownPlatoonTimer = create timer for (45 * 2.0) * AZTECRECRUITMENTMODIFIER * RecruitModifier seconds
                                 end if
@@ -4084,7 +4084,7 @@ start
 
 begin loop
 
-    wait 1450 * BuilderModifier seconds
+    wait 600 * BuilderModifier seconds
     Counter = 0
 
     if PLAYER of AztecCapital == 1
@@ -4143,7 +4143,7 @@ start
 
 begin loop
 
-    wait 1450 * BuilderModifier seconds
+    wait 600 * BuilderModifier seconds
     Counter = 0
 
     if PLAYER of AztecTown1 == 1
@@ -4200,7 +4200,7 @@ start
 
 begin loop
 
-    wait 1450 * BuilderModifier seconds
+    wait 600 * BuilderModifier seconds
     Counter = 0
 
     if PLAYER of AztecTown2 == 1

@@ -627,12 +627,12 @@ begin loop
     
     if MigrationsAccepted >= 3 and a == 2
         a = 3
-        increment tribute by 500
+        increment tribute by 5000
     end if
     
     if MigrationsAccepted >= 4 and a == 3
         a = 4
-        increment tribute by 500
+        increment tribute by 5000
     end if
     
     if MigrationsAccepted >= 5 and a == 4
@@ -1755,7 +1755,7 @@ begin script LC7_Japanese_Capital
     CastEpicPos = 0
 
     HurricaneTimer = create timer for 0 seconds
-    HURRICANEDELAY = 2250
+    HURRICANEDELAY = 1800
     HurricaneWarning = 0
     EpicHurr = 0
 
@@ -3029,7 +3029,7 @@ start
                 if PLAYER of GenericTown == 1
                     if PlayerAlignmentFinal < 0.0
                         //Buildings
-                        if get GenericTownBuildingTimer time remaining <= 0
+                        if get GenericTownBuildingTimer time remaining <= 0 and size of GenericTown > 0
                             if get number of type HOUSE ABODE_NUMBER_STORAGE_PIT in GenericTown min built 0.0 < 1
                                 run background script AGB_BuildBuilding(GenericTown,AGB_STORAGEPIT,AGB_JAPANESE)
 
@@ -3052,17 +3052,17 @@ start
                                 if get army size in town GenericTown < 60 * RecruitModifier
                                     Number = number from 1 to 3
                                     if Number == 1 or Number == 2
-                                        AnotherPlatoon = recruit ARMY_UNIT_TYPE_MELEE_2 town GenericTown platoon of size 30 * RecruitSizeModifier
+                                        AnotherPlatoon = recruit ARMY_UNIT_TYPE_MELEE_3 town GenericTown platoon of size 30 * RecruitSizeModifier
                                         enable platoon AnotherPlatoon respond to town GenericTown attack
                                         run background script LC7_StaticPlatoonsActions(marker at {GenericTown} + {number from -50 to 50,number from -50 to 50},Melee,AnotherPlatoon,GenericTown)
                                         wait until not AnotherPlatoon recruiting
                                         run background script PT_CreateBasicJapanesePlatoon(AnotherPlatoon,1)
                                     else
-                                        AnotherPlatoon = recruit ARMY_UNIT_TYPE_RANGED_2 town GenericTown platoon of size 30 * RecruitSizeModifier
+                                        AnotherPlatoon = recruit ARMY_UNIT_TYPE_RANGED_3 town GenericTown platoon of size 30 * RecruitSizeModifier
                                         enable platoon AnotherPlatoon respond to town GenericTown attack
                                         run background script LC7_StaticPlatoonsActions(marker at {GenericTown} + {number from -50 to 50,number from -50 to 50},Melee,AnotherPlatoon,GenericTown)
                                         wait until not AnotherPlatoon recruiting
-                                        run background script PT_CreateBasicJapanesePlatoon(AnotherPlatoon,1)
+                                        run background script PT_CreateBasicJapanesePlatoonRanged(AnotherPlatoon,1)
                                     end if
                                     GenericTownPlatoonTimer = create timer for (30 * 2.0) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
                                 end if
@@ -3071,7 +3071,7 @@ start
 
                     elsif PlayerAlignmentFinal >= 0.0
                         //Buildings
-                        if get GenericTownBuildingTimer time remaining <= 0
+                        if get GenericTownBuildingTimer time remaining <= 0 and size of GenericTown > 0
                             if get number of type HOUSE ABODE_NUMBER_STORAGE_PIT in GenericTown min built 0.0 < 2
                                 run background script AGB_BuildBuilding(GenericTown,AGB_STORAGEPIT,AGB_JAPANESE)
 
@@ -3107,7 +3107,7 @@ start
                                         enable platoon AnotherPlatoon respond to town GenericTown attack
                                         run background script LC7_StaticPlatoonsActions(marker at {GenericTown} + {number from -50 to 50,number from -50 to 50},Melee,AnotherPlatoon,GenericTown)
                                         wait until not AnotherPlatoon recruiting
-                                        run background script PT_CreateBasicJapanesePlatoon(AnotherPlatoon,1)
+                                        run background script PT_CreateBasicJapanesePlatoonRanged(AnotherPlatoon,1)
                                     end if
                                     GenericTownPlatoonTimer = create timer for (30 * 2.0) * JAPANESERECRUITMENTMODIFIER * RecruitModifier seconds
                                 end if
@@ -3259,7 +3259,7 @@ start
 
         if get LargeAttackTimer time remaining <= 0
             if Difficulty >= 4 or HardMode == 1
-                if TownsConverted >= 4 or get army size in town PlayerTown > 60 or size of PlayerTown > PlayerTownStartSize + 150
+                if TownsConverted >= 3 or get army size in town PlayerTown > 60 or size of PlayerTown > PlayerTownStartSize + 150
                     if TownsConverted >= 2 //If player has a large army, start siege earlier
                         if PLAYER of JapaneseTown1 == 1 and not town JapaneseTown1 is under takeover from player 0 and LC7_LargeSiegeIsRunning == 0 and SiegeCheck == 0
                             SiegeCheck = 1
@@ -3282,7 +3282,7 @@ start
         end if
 
         if HEALTH of AIEpic >= 1.0 and get HurricaneTimer time remaining <= 0 and PLAYER of JapaneseCapital == 1 and CinemaIsRunning == 0 and not town PlayerTown is under takeover from player 1 and PLAYER of PlayerTown == 0
-            if TownsConverted >= 5 or PLAYER of JapaneseTown1 != 1 or PLAYER of JapaneseTown2 != 1 or size of PlayerTown > PlayerTownStartSize + 400
+            if TownsConverted >= 5 or PLAYER of JapaneseTown1 != 1 or PLAYER of JapaneseTown2 != 1 or size of PlayerTown > PlayerTownStartSize + 275
 
                 WT_SkyTransitionAllowed = 0
                 enable predefined sky "HURRICANE" time 9
@@ -3448,9 +3448,9 @@ start
 
     LC7_LargeSiegeIsRunning = 0
 
-    LC7_RecruitTimer1 = create timer for 900 seconds
-    LC7_RecruitTimer2 = create timer for 900 seconds
-    LC7_RecruitTimer3 = create timer for 900 seconds
+    LC7_RecruitTimer1 = create timer for 300 seconds
+    LC7_RecruitTimer2 = create timer for 300 seconds
+    LC7_RecruitTimer3 = create timer for 300 seconds
 
 end script LC7_LargeSiegeScript
 
@@ -3495,7 +3495,7 @@ begin loop
         AttackingPosition = marker at {SiegeAttackPos[0]}
         AttackingPositionFallBack = marker at {SiegeAttackPrePos[0]}
         run script PlatoonTargetingMetric(25 * RecruitSizeModifier,PlayerTown)
-        run background script LC7_ArmyBehaivours(LC7_Platoon[18],Melee,Special,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,0,0,0,0,0,3)
+        run background script LC7_ArmyBehaivours(LC7_Platoon[18],Melee,Special,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,2)
     end if
 
     if LC7_Platoon[19] not exists and PLAYER of JapaneseTown1 == 1 and LC7_LargeSiegeIsRunning == 1
@@ -3506,7 +3506,7 @@ begin loop
         AttackingPosition = marker at {SiegeAttackPos[1]}
         AttackingPositionFallBack = marker at {SiegeAttackPrePos[1]}
         run script PlatoonTargetingMetric(25 * RecruitSizeModifier,PlayerTown)
-        run background script LC7_ArmyBehaivours(LC7_Platoon[19],Melee,Special,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,0,0,0,0,0,3)
+        run background script LC7_ArmyBehaivours(LC7_Platoon[19],Melee,Special,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,2)
     end if
 
     if LC7_Platoon[20] not exists and PLAYER of JapaneseTown1 == 1 and LC7_LargeSiegeIsRunning == 1 and Difficulty >= 3
@@ -3517,7 +3517,7 @@ begin loop
         AttackingPosition = marker at {SiegeAttackPos[2]}
         AttackingPositionFallBack = marker at {SiegeAttackPrePos[2]}
         run script PlatoonTargetingMetric(25 * RecruitSizeModifier,PlayerTown)
-        run background script LC7_ArmyBehaivours(LC7_Platoon[20],Ranged,Special,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,0,0,0,0,0,3)
+        run background script LC7_ArmyBehaivours(LC7_Platoon[20],Ranged,Special,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,2)
     end if
 
     if LC7_Platoon[21] not exists and PLAYER of JapaneseTown1 == 1 and LC7_LargeSiegeIsRunning == 1 and Difficulty >= 4
@@ -3528,7 +3528,7 @@ begin loop
         AttackingPosition = marker at {SiegeAttackPos[3]}
         AttackingPositionFallBack = marker at {SiegeAttackPrePos[3]}
         run script PlatoonTargetingMetric(25 * RecruitSizeModifier,PlayerTown)
-        run background script LC7_ArmyBehaivours(LC7_Platoon[21],Ranged,Special,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,0,0,0,0,0,3)
+        run background script LC7_ArmyBehaivours(LC7_Platoon[21],Ranged,Special,0,PlatoonTargetingMetricFocusResult,Neutral,AttackingPosition,AttackingPositionFallBack,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],0,0,2)
     end if
 
     if LC7_SiegeCatapult[6] not exists and PLAYER of JapaneseTown1 == 1 and LC7_LargeSiegeIsRunning == 1
@@ -3538,7 +3538,7 @@ begin loop
         AttackingPosition = marker at {SiegeAttackPos[0]}
         AttackingPositionFallBack = marker at {SiegeAttackPrePos[0]}
         run script CatapultTargetingMetric(PlayerTown)
-        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[6],Special,CatapultTargetingMetricFocusResult,0,0,0,AttackingPosition,AttackingPositionFallBack,3)
+        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[6],Special,CatapultTargetingMetricFocusResult,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],AttackingPosition,AttackingPositionFallBack,2)
     end if
 
     if LC7_SiegeCatapult[7] not exists and PLAYER of JapaneseTown1 == 1 and LC7_LargeSiegeIsRunning == 1 and Difficulty >= 2
@@ -3548,7 +3548,7 @@ begin loop
         AttackingPosition = marker at {SiegeAttackPos[1]}
         AttackingPositionFallBack = marker at {SiegeAttackPrePos[1]}
         run script CatapultTargetingMetric(PlayerTown)
-        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[7],Special,CatapultTargetingMetricFocusResult,0,0,0,AttackingPosition,AttackingPositionFallBack,3)
+        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[7],Special,CatapultTargetingMetricFocusResult,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],AttackingPosition,AttackingPositionFallBack,2)
     end if
 
     if LC7_SiegeCatapult[8] not exists and PLAYER of JapaneseTown1 == 1 and LC7_LargeSiegeIsRunning == 1 and Difficulty >= 4
@@ -3558,7 +3558,7 @@ begin loop
         AttackingPosition = marker at {SiegeAttackPos[3]}
         AttackingPositionFallBack = marker at {SiegeAttackPrePos[3]}
         run script CatapultTargetingMetric(PlayerTown)
-        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[8],Special,CatapultTargetingMetricFocusResult,0,0,0,AttackingPosition,AttackingPositionFallBack,3)
+        run background script LC7_MoveCatapultThenAttack(LC7_SiegeCatapult[8],Special,CatapultTargetingMetricFocusResult,AttackPosFront[0],AttackPosFront[1],AttackPosFront[2],AttackingPosition,AttackingPositionFallBack,2)
     end if
 
     until LC7_LargeSiegeIsRunning == 0
@@ -3576,7 +3576,7 @@ start
     DM_DynamicMusicDisallowed = 1
     CSMixer = create mixer
     set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 0.0 with fadetime 0
-    start music "cut_scene_battle_02 " loop 2
+    start music "cut_scene_battle_02 " loop 1
     set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 1.0 with fadetime 25
 
     wait until LC7_LargeSiegeIsRunning == 0
@@ -3598,7 +3598,7 @@ start
 
 begin loop
 
-    wait 1450 * BuilderModifier seconds
+    wait 600 * BuilderModifier seconds
     Counter = 0
 
     if PLAYER of JapaneseCapital == 1
@@ -3632,7 +3632,7 @@ start
 
 begin loop
 
-    wait 1450 * BuilderModifier seconds
+    wait 600 * BuilderModifier seconds
     Counter = 0
 
     if PLAYER of JapaneseTown1 == 1
@@ -3666,7 +3666,7 @@ start
 
 begin loop
 
-    wait 1450 * BuilderModifier seconds
+    wait 600 * BuilderModifier seconds
     Counter = 0
 
     if PLAYER of JapaneseTown2 == 1
