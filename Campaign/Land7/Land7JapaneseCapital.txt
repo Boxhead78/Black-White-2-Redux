@@ -3,7 +3,7 @@
 //    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 ///////////////////////////////////////////////////////////////////////////////
-
+//TODO: Defender Events
 define script LC7_Japanese_Capital_Impressiveness
 define script LC7_TownConversion
 define script LC7_Tribute
@@ -673,6 +673,7 @@ begin script LC7_GatehouseManager
     GateHouseT31 = 0
     GateHouseT32 = 0
     GateHouseT33 = 0
+    GateHouseT34 = 0
 
     Counter = 0
     Cnt = 0
@@ -708,16 +709,20 @@ begin script LC7_GatehouseManager
     PlayerPlatoonT33 = 0
     CatapultT33 = 0
     TestCreatureT33 = 0
+    PlayerPlatoonT34 = 0
+    CatapultT34 = 0
+    TestCreatureT34 = 0
 
     EnemyNearDoorT31 = 0
     EnemyNearDoorT32 = 0
     EnemyNearDoorT33 = 0
+    EnemyNearDoorT34 = 0
 
 start
 
 begin loop
 
-    GateHouseT11 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {1709.80,44.72,1232.86} radius 15
+    GateHouseT11 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {1199.59,205.98,1092.28} radius 15
     
     oCreature = get player 0 creature
 
@@ -749,15 +754,15 @@ begin loop
 
     end if
 
-    GateHouseT21 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {911.89,76.59,1178.70} radius 15
-    GateHouseT22 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {1121.04,84.63,1066.94} radius 15
-    GateHouseT23 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {1070.39,84.69,814.54} radius 15
+    GateHouseT21 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {1959.94,323.44,1483.60} radius 15
+    GateHouseT22 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {1840.42,311.54,1333.08} radius 15
+    GateHouseT23 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {1915.25,311.91,1263.10} radius 15
     
     oCreature = get player 0 creature
 
-    if PLAYER of JapaneseTown2 == 1
+    if PLAYER of JapaneseTown1 == 1
 
-        if not town JapaneseTown2 is under takeover from player 0
+        if not town JapaneseTown1 is under takeover from player 0
             PlayerPlatoonT21 = get platoon of player 0 nearest {GateHouseT21} radius 100
             CatapultT21 = get siege weapon of player 0 nearest {GateHouseT21} radius 100
             TestCreatureT21 = get distance from {GateHouseT21} to {oCreature}
@@ -793,7 +798,7 @@ begin loop
                 EnemyNearDoorT22 = 0
             end if
             
-            if EnemyNearDoorT22 == 1 and get number of platoon of player 1 at {GateHouseT22} radius 100 < 5
+            if EnemyNearDoorT22 == 1 and get number of platoon of player 1 at {GateHouseT21} radius 100 < 5
                 set gate GateHouseT22 close
             else
                 set gate GateHouseT22 open
@@ -806,9 +811,9 @@ begin loop
             
             if PlayerPlatoonT23 exists
                 EnemyNearDoorT23 = 1
-            elsif CatapultT23 exists
+            elsif CatapultT21 exists
                 EnemyNearDoorT23 = 1
-            elsif TestCreatureT23 < 200 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+            elsif TestCreatureT21 < 200 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
                 EnemyNearDoorT23 = 1
             else
                 EnemyNearDoorT23 = 0
@@ -827,9 +832,10 @@ begin loop
 
     end if
 
-    GateHouseT31 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {1326.68,56.73,1911.45} radius 15
-    GateHouseT32 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {1414.61,67.01,1430.92} radius 15
-    GateHouseT33 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {2022.68,134.10,571.53} radius 15
+    GateHouseT31 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {870.22,378.21,1607.06} radius 15
+    GateHouseT32 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {1152.80,313.37,1460.49} radius 15
+    GateHouseT33 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {1512.31,211.10,954.42} radius 15
+    GateHouseT34 = get SCRIPT_OBJECT_TYPE_ABODE ABODE_NUMBER_GATEHOUSE_F at {1832.68,220.56,833.41} radius 15
     
     oCreature = get player 0 creature
 
@@ -897,10 +903,32 @@ begin loop
             else
                 set gate GateHouseT33 open
             end if
+
+
+            PlayerPlatoonT34 = get platoon of player 0 nearest {GateHouseT34} radius 100
+            CatapultT34 = get siege weapon of player 0 nearest {GateHouseT34} radius 100
+            TestCreatureT34 = get distance from {GateHouseT34} to {oCreature}
+            
+            if PlayerPlatoonT34 exists
+                EnemyNearDoorT34 = 1
+            elsif CatapultT34 exists
+                EnemyNearDoorT34 = 1
+            elsif TestCreatureT34 < 200 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of oCreature > 0.00
+                EnemyNearDoorT34 = 1
+            else
+                EnemyNearDoorT34 = 0
+            end if
+            
+            if EnemyNearDoorT34 == 1 and get number of platoon of player 1 at {GateHouseT34} radius 100 < 5
+                set gate GateHouseT34 close
+            else
+                set gate GateHouseT34 open
+            end if
         else
             set gate GateHouseT31 open
             set gate GateHouseT32 open
             set gate GateHouseT33 open
+            set gate GateHouseT34 open
         end if
 
     end if
@@ -1748,7 +1776,7 @@ begin script LC7_Japanese_Capital
     
     a = 0
 
-    Wall[13]
+    Wall[15]
 
     Number = 0
 
@@ -1835,23 +1863,25 @@ start
     end if
 
     //JapaneseCapital Walls
-    Wall[0] = get wall segment nearest {2014.54,135.62,542.40} radius 15
-    Wall[1] = get wall segment nearest {2012.79,143.57,514.57} radius 15
-    Wall[2] = get wall segment nearest {2084.54,186.76,373.85} radius 15
-    Wall[3] = get wall segment nearest {2186.74,187.16,340.29} radius 15
-    Wall[4] = get wall segment nearest {1422.57,65.95,1391.35} radius 15
-    Wall[5] = get wall segment nearest {1397.80,67.29,1466.61} radius 15
-    Wall[6] = get wall segment nearest {1315.95,56.40,1875.48} radius 15
-    Wall[7] = get wall segment nearest {1325.53,56.18,1945.45} radius 15
+    Wall[0] = get wall segment nearest {879.46,377.74,1656.78} radius 15
+    Wall[1] = get wall segment nearest {862.66,377.18,1578.82} radius 15
+    Wall[2] = get wall segment nearest {705.16,427.34,1720.59} radius 15
+    Wall[3] = get wall segment nearest {597.40,425.48,1714.45} radius 15
+    Wall[4] = get wall segment nearest {1172.43,313.38,1490.86} radius 15
+    Wall[5] = get wall segment nearest {1139.08,309.93,1433.70} radius 15
+    Wall[6] = get wall segment nearest {1489.97,211.98,967.77} radius 15
+    Wall[7] = get wall segment nearest {1555.94,208.41,927.50} radius 15
+    Wall[13] = get wall segment nearest {1799.31,217.82,845.33} radius 15
+    Wall[14] = get wall segment nearest {1876.74,221.41,809.21} radius 15
 
     //JapaneseTown1 Walls
-    Wall[8] = get wall segment nearest {1729.99,44.69,1219.22} radius 15
-    Wall[9] = get wall segment nearest {1682.14,44.66,1238.35} radius 15
+    Wall[8] = get wall segment nearest {1174.00,206.55,1118.30} radius 15
+    Wall[9] = get wall segment nearest {1224.26,206.71,1061.16} radius 15
 
     //JapaneseTown2 Walls
-    Wall[10] = get wall segment nearest {1103.75,85.13,838.40} radius 15
-    Wall[11] = get wall segment nearest {1101.67,84.63,1094.87} radius 15
-    Wall[12] = get wall segment nearest {938.65,76.97,1176.51} radius 15
+    Wall[10] = get wall segment nearest {1874.93,308.89,1298.36} radius 15
+    Wall[11] = get wall segment nearest {1958.68,311.76,1261.20} radius 15
+    Wall[12] = get wall segment nearest {1927.81,321.76,1476.03} radius 15
 
     //----Create town static defenders platoons----//
 
@@ -2030,6 +2060,20 @@ start
     disable platoon LC7_WallArcher[7] respond to town JapaneseCapital attack
     add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[7] to LC7_WallArcher[7] action queue
 
+    LC7_WallArcher[13] = create platoon PLATOON_INFO_JAPANESE_RANGED_3 at {Wall[13]} with 20 * RecruitSizeModifier men and 0 women
+    attach LC7_WallArcher[13] to JapaneseCapital
+    PLAYER of LC7_WallArcher[13] = 1
+    run background script PT_CreateBasicJapanesePlatoonRanged(LC7_WallArcher[13],1)
+    disable platoon LC7_WallArcher[13] respond to town JapaneseCapital attack
+    add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[13] to LC7_WallArcher[13] action queue
+
+    LC7_WallArcher[14] = create platoon PLATOON_INFO_JAPANESE_RANGED_3 at {Wall[14]} with 20 * RecruitSizeModifier men and 0 women
+    attach LC7_WallArcher[14] to JapaneseCapital
+    PLAYER of LC7_WallArcher[14] = 1
+    run background script PT_CreateBasicJapanesePlatoonRanged(LC7_WallArcher[14],1)
+    disable platoon LC7_WallArcher[14] respond to town JapaneseCapital attack
+    add action PLATOON_AGENDA_ACTION_GET_ON_WALL using Wall[14] to LC7_WallArcher[14] action queue
+
 
     LC7_WallArcher[8] = create platoon PLATOON_INFO_JAPANESE_RANGED_3 at {Wall[8]} with 20 * RecruitSizeModifier men and 0 women
     attach LC7_WallArcher[8] to JapaneseTown1
@@ -2202,23 +2246,25 @@ start
     begin loop
         set player 1 alignment 0.0
         //JapaneseCapital Walls
-        Wall[0] = get wall segment nearest {2014.54,135.62,542.40} radius 15
-        Wall[1] = get wall segment nearest {2012.79,143.57,514.57} radius 15
-        Wall[2] = get wall segment nearest {2084.54,186.76,373.85} radius 15
-        Wall[3] = get wall segment nearest {2186.74,187.16,340.29} radius 15
-        Wall[4] = get wall segment nearest {1422.57,65.95,1391.35} radius 15
-        Wall[5] = get wall segment nearest {1397.80,67.29,1466.61} radius 15
-        Wall[6] = get wall segment nearest {1315.95,56.40,1875.48} radius 15
-        Wall[7] = get wall segment nearest {1325.53,56.18,1945.45} radius 15
+        Wall[0] = get wall segment nearest {879.46,377.74,1656.78} radius 15
+        Wall[1] = get wall segment nearest {862.66,377.18,1578.82} radius 15
+        Wall[2] = get wall segment nearest {705.16,427.34,1720.59} radius 15
+        Wall[3] = get wall segment nearest {597.40,425.48,1714.45} radius 15
+        Wall[4] = get wall segment nearest {1172.43,313.38,1490.86} radius 15
+        Wall[5] = get wall segment nearest {1139.08,309.93,1433.70} radius 15
+        Wall[6] = get wall segment nearest {1489.97,211.98,967.77} radius 15
+        Wall[7] = get wall segment nearest {1555.94,208.41,927.50} radius 15
+        Wall[13] = get wall segment nearest {1799.31,217.82,845.33} radius 15
+        Wall[14] = get wall segment nearest {1876.74,221.41,809.21} radius 15
 
         //JapaneseTown1 Walls
-        Wall[8] = get wall segment nearest {1729.99,44.69,1219.22} radius 15
-        Wall[9] = get wall segment nearest {1682.14,44.66,1238.35} radius 15
+        Wall[8] = get wall segment nearest {1174.00,206.55,1118.30} radius 15
+        Wall[9] = get wall segment nearest {1224.26,206.71,1061.16} radius 15
 
         //JapaneseTown2 Walls
-        Wall[10] = get wall segment nearest {1103.75,85.13,838.40} radius 15
-        Wall[11] = get wall segment nearest {1101.67,84.63,1094.87} radius 15
-        Wall[12] = get wall segment nearest {938.65,76.97,1176.51} radius 15
+        Wall[10] = get wall segment nearest {1874.93,308.89,1298.36} radius 15
+        Wall[11] = get wall segment nearest {1958.68,311.76,1261.20} radius 15
+        Wall[12] = get wall segment nearest {1927.81,321.76,1476.03} radius 15
 
         NearestSettlementTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in NearestSettlement min built 1.0
         if get LC7_RecruitTimer1 time remaining <= 0
@@ -3260,7 +3306,7 @@ start
         if get LargeAttackTimer time remaining <= 0
             if Difficulty >= 4 or HardMode == 1
                 if TownsConverted >= 3 or get army size in town PlayerTown > 60 or size of PlayerTown > PlayerTownStartSize + 150
-                    if TownsConverted >= 2 //If player has a large army, start siege earlier
+                    if TownsConverted >= 2
                         if PLAYER of JapaneseTown1 == 1 and not town JapaneseTown1 is under takeover from player 0 and LC7_LargeSiegeIsRunning == 0 and SiegeCheck == 0
                             SiegeCheck = 1
                             wait number from 20 to 30 seconds
@@ -3289,11 +3335,11 @@ start
                 HurricaneFired = 1
                 Number = number from 1 to 3
                 if Number == 1
-                    CastEpicPos = marker at {2316.81,88.55,1641.10}
+                    CastEpicPos = marker at {696.83,267.03,1031.74}
                 elsif Number == 2
-                    CastEpicPos = marker at {2405.45,117.65,1296.47}
+                    CastEpicPos = marker at {584.81,265.38,842.11}
                 else
-                    CastEpicPos = marker at {2171.62,165.70,1175.94}
+                    CastEpicPos = marker at {806.71,211.06,751.68}
                 end if
 
                 run script EpicTargeter(PlayerTown,marker at {CastEpicPos},0,2,1)
@@ -3614,7 +3660,7 @@ begin loop
             
             wait number from 6 to 10 seconds
             Counter++
-            until Counter >= 40 or PLAYER of JapaneseCapital != 1 or (size of JapaneseCapital - get army size in town JapaneseCapital) >= 150
+            until Counter >= 40 or PLAYER of JapaneseCapital != 1 or (size of JapaneseCapital - get army size in town JapaneseCapital) >= 120
         end loop
     end if
 
@@ -3648,7 +3694,7 @@ begin loop
             
             wait number from 6 to 10 seconds
             Counter++
-            until Counter >= 40 or PLAYER of JapaneseTown1 != 1 or (size of JapaneseTown1 - get army size in town JapaneseTown1) >= 100
+            until Counter >= 40 or PLAYER of JapaneseTown1 != 1 or (size of JapaneseTown1 - get army size in town JapaneseTown1) >= 75
         end loop
     end if
 
@@ -3682,7 +3728,7 @@ begin loop
             
             wait number from 6 to 10 seconds
             Counter++
-            until Counter >= 25 or PLAYER of JapaneseTown2 != 1 or (size of JapaneseTown2 - get army size in town JapaneseTown2) >= 75
+            until Counter >= 25 or PLAYER of JapaneseTown2 != 1 or (size of JapaneseTown2 - get army size in town JapaneseTown2) >= 60
         end loop
     end if
 
@@ -3818,6 +3864,8 @@ begin loop
         enable platoon LC7_WallArcher[5] respond to town JapaneseCapital attack
         enable platoon LC7_WallArcher[6] respond to town JapaneseCapital attack
         enable platoon LC7_WallArcher[7] respond to town JapaneseCapital attack
+        enable platoon LC7_WallArcher[13] respond to town JapaneseCapital attack
+        enable platoon LC7_WallArcher[14] respond to town JapaneseCapital attack
     else
         disable platoon LC7_Platoon[0] respond to town JapaneseCapital attack
         disable platoon LC7_Platoon[1] respond to town JapaneseCapital attack
@@ -3833,6 +3881,8 @@ begin loop
         disable platoon LC7_WallArcher[5] respond to town JapaneseCapital attack
         disable platoon LC7_WallArcher[6] respond to town JapaneseCapital attack
         disable platoon LC7_WallArcher[7] respond to town JapaneseCapital attack
+        disable platoon LC7_WallArcher[13] respond to town JapaneseCapital attack
+        disable platoon LC7_WallArcher[14] respond to town JapaneseCapital attack
     end if
     wait number from 5 to 10 seconds
 end loop

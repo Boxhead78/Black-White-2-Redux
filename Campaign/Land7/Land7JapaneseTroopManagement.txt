@@ -11,7 +11,7 @@
 define LC7_NUM_OF_DEFENDERS = 0 //Unused
 define LC7_NUM_OF_PLATOONS = 75
 define LC7_NUM_OF_SIEGE_CATAPULTS = 30
-define LC7_NUM_OF_WALL_ARCHERS = 13
+define LC7_NUM_OF_WALL_ARCHERS = 15
 //Army Types
 define Melee = 0
 define Ranged = 1
@@ -65,11 +65,6 @@ global AttackPosFlank[3]
 global AttackPosBack[3]
 global AttackSyncTimer = 0
 global SiegePlatoonPos[1]
-global SiegeRoute1[7]
-global SiegeRoute2[3]
-global SiegeRoute3[3]
-global SiegeRoute4[3]
-global SiegeRoute5[3]
 global PlayerWallPos = 0
 global StaticPlatoonGoodPos[4]
 global StaticPlatoonGoodWaypoint = 0
@@ -83,10 +78,6 @@ global PatrolRouteA[5]
 global WaypointsA = 0
 global PatrolRouteB[3]
 global WaypointsB = 0
-global PatrolRouteC[2]
-global WaypointsC = 0
-global PatrolRouteD[3]
-global WaypointsD = 0
 
 //-----------------------------------------------------------------------------
 
@@ -100,101 +91,70 @@ begin script Waypoints
 
 start
 
-    SiegeAttackPrePos[0] = marker at {1765.98,44.97,1253.20}
-    SiegeAttackPrePos[1] = marker at {1746.67,44.92,1282.76}
-    SiegeAttackPrePos[2] = marker at {1754.35,45.57,1319.86}
-    SiegeAttackPrePos[3] = marker at {1797.85,49.30,1287.24}
+    SiegeAttackPrePos[0] = marker at {1121.96,202.87,1035.12}
+    SiegeAttackPrePos[1] = marker at {1082.87,202.75,1001.98}
+    SiegeAttackPrePos[2] = marker at {1107.21,202.75,977.54}
+    SiegeAttackPrePos[3] = marker at {1136.35,202.75,1017.19}
 
-    SiegeAttackPos[0] = marker at {2063.16,55.61,1297.50}
-    SiegeAttackPos[1] = marker at {2064.86,54.98,1324.95}
-    SiegeAttackPos[2] = marker at {2018.66,51.89,1392.97}
-    SiegeAttackPos[3] = marker at {2019.76,51.15,1319.57}
+    SiegeAttackPos[0] = marker at {837.62,209.61,937.46}
+    SiegeAttackPos[1] = marker at {882.53,205.37,959.17}
+    SiegeAttackPos[2] = marker at {858.73,207.32,922.52}
+    SiegeAttackPos[3] = marker at {816.10,211.82,985.68}
 
-    PlayerWallPos = marker at {2020.77,52.15,1335.11}
+    PlayerWallPos = marker at {804.45,215.58,909.77}
 
-    PlatoonPos[0] = marker at {2133.28,183.11,347.14}
-    PlatoonPos[1] = marker at {2168.13,160.04,411.45}
-    PlatoonPos[2] = marker at {2195.24,138.28,467.51}
-    PlatoonPos[3] = marker at {1955.59,129.56,561.49}
-    PlatoonPos[4] = marker at {1803.67,119.49,533.81}
-    PlatoonPos[5] = marker at {1782.15,121.93,500.10}
-    PlatoonPos[6] = marker at {1393.90,70.21,1422.38}
-    PlatoonPos[7] = marker at {1309.51,58.46,1906.32}
-    PlatoonPos[8] = marker at {1260.50,114.58,1677.73}
-    PlatoonPos[9] = marker at {1589.76,44.28,1021.88}
-    PlatoonPos[10] = marker at {1629.56,43.99,1116.95}
-    PlatoonPos[11] = marker at {1678.44,44.94,972.39}
-    PlatoonPos[12] = marker at {961.04,83.25,1087.53}
-    PlatoonPos[13] = marker at {1785.09,47.56,1289.00}
+    PlatoonPos[0] = marker at {646.39,458.05,1777.91}
+    PlatoonPos[1] = marker at {648.19,421.13,1699.35}
+    PlatoonPos[2] = marker at {648.40,391.77,1616.48}
+    PlatoonPos[3] = marker at {900.00,372.75,1597.68}
+    PlatoonPos[4] = marker at {1199.23,307.64,1471.42}
+    PlatoonPos[5] = marker at {1170.35,299.40,1419.66}
+    PlatoonPos[6] = marker at {1495.85,203.08,932.25}
+    PlatoonPos[7] = marker at {1819.01,215.10,811.83}
+    PlatoonPos[8] = marker at {1683.51,237.89,891.65}
+    PlatoonPos[9] = marker at {1266.67,216.61,1154.87}
+    PlatoonPos[10] = marker at {1178.19,258.77,1248.82}
+    PlatoonPos[11] = marker at {1274.88,261.95,1329.48}
+    PlatoonPos[12] = marker at {1942.57,316.07,1368.71}
+    PlatoonPos[13] = marker at {1934.85,312.75,1279.82}
     //HardMode
-    PlatoonPos[14] = marker at {2070.71,34.50,1567.93}
-    PlatoonPos[15] = marker at {2077.74,35.13,1591.17}
-    PlatoonPos[16] = marker at {1755.66,44.77,1274.14}
-    PlatoonPos[17] = marker at {1735.41,44.81,1275.13}
-    PlatoonPos[18] = marker at {1752.80,45.45,1290.00}
+    PlatoonPos[14] = marker at {622.42,213.52,1135.98}
+    PlatoonPos[15] = marker at {583.27,212.35,1137.58}
+    PlatoonPos[16] = marker at {888.09,205.02,960.45}
+    PlatoonPos[17] = marker at {1126.19,195.63,881.17}
+    PlatoonPos[18] = marker at {1129.46,195.63,853.35}
     
-    AttackPos[0] = marker at {2055.73,54.27,1316.70}//FrontAttackpos
-    AttackPos[1] = marker at {1805.29,49.78,1292.20}//FallBackAttackPos
-    AttackPos[2] = marker at {2239.44,49.73,1545.36}//BackdoorAttackPos
+    AttackPos[0] = marker at {818.85,212.36,935.69}//FrontAttackpos
+    AttackPos[1] = marker at {1059.37,202.75,947.76}//FallBackAttackPos
+    AttackPos[2] = marker at {787.76,210.82,751.00}//BackdoorAttackPos
     
-    AttackPosFront[0] = marker at {1930.22,129.56,523.84}
-    AttackPosFront[1] = marker at {1622.04,87.84,632.97}
-    AttackPosFront[2] = marker at {1731.61,44.84,1295.22}
-    AttackPosFlank[0] = marker at {1303.49,84.86,739.13}
-    AttackPosFlank[1] = marker at {1245.01,92.02,1402.02}
-    AttackPosFlank[2] = marker at {1728.93,44.71,1298.79}
-    AttackPosBack[0] = marker at {1303.49,84.86,739.13}
-    AttackPosBack[1] = marker at {1215.31,68.20,1922.69}
-    AttackPosBack[2] = marker at {1728.93,44.71,1298.79}
+    AttackPosFront[0] = marker at {1034.45,367.38,1563.08}
+    AttackPosFront[1] = marker at {1269.62,283.24,1402.98}
+    AttackPosFront[2] = marker at {1044.75,202.74,943.96}
+    AttackPosFlank[0] = marker at {1834.70,276.15,1129.63}
+    AttackPosFlank[1] = marker at {1690.28,189.54,697.70}
+    AttackPosFlank[2] = marker at {1044.75,202.74,943.96}
+    AttackPosBack[0] = marker at {1834.70,276.15,1129.63}
+    AttackPosBack[1] = marker at {1690.28,189.54,697.70}
+    AttackPosBack[2] = marker at {1044.75,202.74,943.96}
 
-    SiegeRoute1[0] = marker at {2032.01,134.32,566.29}//Not variable
-    SiegeRoute1[1] = marker at {1805.29,122.75,511.40}
-    SiegeRoute1[2] = marker at {1616.72,70.81,772.60}
-    SiegeRoute1[3] = marker at {1590.34,44.28,1012.90}
-    SiegeRoute1[4] = marker at {1702.68,44.72,1223.19}//Not variable
-    SiegeRoute1[5] = marker at {1792.24,47.89,1298.54}
-    SiegeRoute1[6] = marker at {1992.90,53.69,1311.25}
+    PatrolRouteA[0] = marker at {1672.35,236.15,893.88}
+    PatrolRouteA[1] = marker at {1912.34,271.01,1067.90}
+    PatrolRouteA[2] = marker at {1702.16,294.11,1299.72}
+    PatrolRouteA[3] = marker at {1523.39,270.48,1210.35}
+    PatrolRouteA[4] = marker at {1291.74,231.82,970.29}
+    PatrolRouteB[0] = marker at {1451.87,193.02,840.73}
+    PatrolRouteB[1] = marker at {1233.08,195.81,797.70}
+    PatrolRouteB[2] = marker at {1029.82,202.75,947.87}
 
-    //LargeSiegeRoutes
-    SiegeRoute2[0] = marker at {1706.20,44.72,1224.65}//Not variable
-    SiegeRoute2[1] = marker at {1749.70,45.50,1300.64}
-    SiegeRoute2[2] = marker at {2002.56,52.87,1314.95}
-    SiegeRoute3[0] = marker at {1706.20,44.72,1224.65}//Not variable
-    SiegeRoute3[1] = marker at {1749.70,45.50,1300.64} + {40,0,-40}
-    SiegeRoute3[2] = marker at {2002.56,52.87,1314.95} + {40,0,-40}
-    SiegeRoute4[0] = marker at {1706.20,44.72,1224.65}//Not variable
-    SiegeRoute4[1] = marker at {1749.70,45.50,1300.64} + {-40,0,40}
-    SiegeRoute4[2] = marker at {2002.56,52.87,1314.95} + {-40,0,40}
-    SiegeRoute5[0] = marker at {2030.12,134.30,566.50}//Not variable
-    SiegeRoute5[1] = marker at {1844.71,127.07,487.40}
-    SiegeRoute5[2] = marker at {1696.70,100.34,568.40}
-    
-    SiegePlatoonPos[0] = marker at {2003.39,132.57,573.31}
-
-    PatrolRouteA[0] = marker at {1360.45,85.10,724.91}
-    PatrolRouteA[1] = marker at {1265.54,84.63,790.20}
-    PatrolRouteA[2] = marker at {1210.10,83.68,1098.21}
-    PatrolRouteA[3] = marker at {1157.04,88.35,1603.71}
-    PatrolRouteA[4] = marker at {1047.39,91.69,1731.81}
-    PatrolRouteB[0] = marker at {1730.04,44.84,1275.68}
-    PatrolRouteB[1] = marker at {1473.96,45.95,1482.56}
-    PatrolRouteB[2] = marker at {1439.12,55.17,1877.40}
-    PatrolRouteC[0] = marker at {1988.22,52.02,1364.89}
-    PatrolRouteC[1] = marker at {2124.51,33.75,1579.42}
-    PatrolRouteD[0] = marker at {1842.77,125.96,499.17}
-    PatrolRouteD[1] = marker at {1286.21,84.63,797.53}
-    PatrolRouteD[2] = marker at {1242.41,90.65,1389.15}
-
-    StaticSiegePos[0] = marker at {1715.80,44.66,1202.52}
-    StaticSiegePos[1] = marker at {1680.90,44.62,1216.15}
-    StaticSiegePos[2] = marker at {1308.81,115.10,1665.70}
-    StaticSiegePos[3] = marker at {1299.25,114.78,1709.62}
-    StaticSiegePos[4] = marker at {1014.23,84.54,1073.75}
+    StaticSiegePos[0] = marker at {930.99,219.06,1059.95}
+    StaticSiegePos[1] = marker at {1218.85,217.67,954.42}
+    StaticSiegePos[2] = marker at {1245.77,217.58,925.00}
+    StaticSiegePos[3] = marker at {1646.23,230.01,848.32}
+    StaticSiegePos[4] = marker at {1092.27,330.04,1468.65}
 
     WaypointsA = create SCRIPT_OBJECT_TYPE_WAYPOINTROUTE at {0, 0, 0}
     WaypointsB = create SCRIPT_OBJECT_TYPE_WAYPOINTROUTE at {0, 0, 0}
-    WaypointsC = create SCRIPT_OBJECT_TYPE_WAYPOINTROUTE at {0, 0, 0}
-    WaypointsD = create SCRIPT_OBJECT_TYPE_WAYPOINTROUTE at {0, 0, 0}
 
     add {PatrolRouteA[0]} to waypoint list WaypointsA
     add {PatrolRouteA[1]} to waypoint list WaypointsA
@@ -204,22 +164,16 @@ start
     add {PatrolRouteB[0]} to waypoint list WaypointsB
     add {PatrolRouteB[1]} to waypoint list WaypointsB
     add {PatrolRouteB[2]} to waypoint list WaypointsB
-    add {PatrolRouteC[0]} to waypoint list WaypointsC
-    add {PatrolRouteC[1]} to waypoint list WaypointsC
-    add {PatrolRouteD[0]} to waypoint list WaypointsD
-    add {PatrolRouteD[1]} to waypoint list WaypointsD
-    add {PatrolRouteD[2]} to waypoint list WaypointsD
-    add {PatrolRouteD[3]} to waypoint list WaypointsD
 
     //Waypoints nearby own towns
-    StaticPlatoonGoodPos[0] = marker at {1938.80,129.53,561.22}
-    StaticPlatoonGoodPos[1] = marker at {1370.60,71.64,1403.87}
-    StaticPlatoonGoodPos[2] = marker at {1279.17,63.86,1910.20}
-    StaticPlatoonGoodPos[3] = marker at {955.65,85.71,1777.17}
+    StaticPlatoonGoodPos[0] = marker at {1036.28,355.82,1552.37}
+    StaticPlatoonGoodPos[1] = marker at {1265.78,286.54,1410.59}
+    StaticPlatoonGoodPos[2] = marker at {1303.86,186.28,799.74}
+    StaticPlatoonGoodPos[3] = marker at {1754.26,309.30,1361.37}
     //Waypoints nearby neutral towns which is likely to be taken by player
-    StaticPlatoonEvilPos[0] = marker at {1831.14,128.63,648.65}
-    StaticPlatoonEvilPos[1] = marker at {1542.51,42.91,1426.99}
-    StaticPlatoonEvilPos[2] = marker at {955.65,85.71,1777.17}
+    StaticPlatoonEvilPos[0] = marker at {1269.52,217.43,1155.92}
+    StaticPlatoonEvilPos[1] = marker at {1172.82,372.62,1621.17}
+    StaticPlatoonEvilPos[2] = marker at {2050.71,240.32,887.14}
 
 end script Waypoints
 
@@ -1523,6 +1477,7 @@ begin script LC7_ArmyBehaivours(Platoon,Type,Task,DefendObject,AttackFocus,Aggre
     AttackingPoint1Initial = 0
     ScriptFirstTime = 1
     AssumedPlatoonPos = 0
+    AttackFocusSource = AttackFocus
 
 start
 
@@ -2104,6 +2059,11 @@ begin loop
 
     elsif Task == Conqueror
         AttackWPStage = 3
+        if PLAYER of NearestSettlement != 0
+            AttackFocus = TownCenter
+        else
+            AttackFocus = AttackFocusSource
+        end if
         oTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in NearestSettlement min built 1.0
         if PLAYER of NearestSettlement != 1 and oTownCentre exists
             if not Platoon can navigate to object oTownCentre
