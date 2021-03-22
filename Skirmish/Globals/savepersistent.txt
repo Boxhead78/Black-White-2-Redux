@@ -12,6 +12,7 @@
 
 define script SavePersistentDataGetData
 define script SavePersistentDataSetData
+define script ForceGettingData
 
 global PD_DifficultyID = 0
 global PD_LandID = 0
@@ -42,6 +43,7 @@ global PD_vtx_saved = 0
 global PD_EpicSpells = 0
 
 global PD_FirstTime = 1
+global PD_FirstTimeSet = 1
 
 run script SavePersistentDataGetData
 
@@ -990,9 +992,37 @@ begin loop
 
         set persistent data "VTX_SAVEDDATA" to PD_vtx_saved
 
+        set persistent data "RDX_PERSSAVED" to 1
+
+        if PD_FirstTimeSet == 1
+            PD_FirstTimeSet = 0
+            run background script ForceGettingData
+        end if
+
         PD_ForcedSaving = 0
         wait until PD_ForcedSaving == 1
     //end if
 end loop
 
 end script SavePersistentDataSetData
+
+
+begin script ForceGettingData
+
+    RDX_PersistentDataSaved = 0
+
+start
+
+//Check if persistent data is lost, if it is lost try to get it from local variables
+begin loop
+    RDX_PersistentDataSaved = persistent data "RDX_PERSSAVED"
+    if RDX_PersistentDataSaved != 1 and PD_ForcedSaving == 0
+        PD_ForcedSaving = 1
+        wait until PD_ForcedSaving == 0 or 10 seconds
+        stop script "SavePersistentDataSetData"
+        run script SavePersistentDataGetData
+    end if
+    wait 0.5 seconds
+end loop
+
+end script ForceGettingData
