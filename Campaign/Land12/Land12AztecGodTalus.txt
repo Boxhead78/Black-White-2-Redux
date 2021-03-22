@@ -76,6 +76,7 @@ begin script tal_TalusLoop(GodHandle,rTown,PlayerID)
     townCounter = 0
     whichSpell = 0
     FireBallUsed = 0
+    makeLandDarkTimer = create timer for number from 600 * EpicModifier to 1200 * EpicModifier seconds
 start
     ge_MiracleDelay[godHandle] = create timer for 0 seconds
     while 1 == 1 // make sure godHandle is valid
@@ -200,13 +201,13 @@ start
             run script ge_MoveToRadiusAltitude(godHandle,marker at {ClosestPosInfluenceRing},geGodThrowRadius / 2,geGodThrowAltitude)
             
             wait until GB_DialogueIsRunning == 0
-            run script ge_ThrowMiracle(godHandle, GE_MIRACLE_TYPE_STORM, marker at {1277.97,60.64,1466.99} + {0,15,0} + {number from -23 to 23,number from -5 to 7,number from -23 to 23}, 1)
+            run script ge_ThrowMiracle(godHandle, GE_MIRACLE_TYPE_STORM, marker at {1277.97,60.64,1466.99} + {0,15,0} + {number from -12 to 12,number from -5 to 13,number from -12 to 12}, 1)
             wait number from 2 to 4 seconds
-            run script ge_ThrowMiracle(godHandle, GE_MIRACLE_TYPE_STORM, marker at {1277.97,60.64,1466.99} + {0,15,0} + {number from -23 to 23,number from -5 to 7,number from -23 to 23}, 1)
+            run script ge_ThrowMiracle(godHandle, GE_MIRACLE_TYPE_STORM, marker at {1277.97,60.64,1466.99} + {0,15,0} + {number from -23 to 23,number from -5 to 13,number from -12 to 12}, 1)
             wait number from 2 to 4 seconds
-            run script ge_ThrowMiracle(godHandle, GE_MIRACLE_TYPE_FIRE, marker at {1277.97,60.64,1466.99} + {0,26,0} + {number from -25 to 25,number from -3 to 3,number from -25 to 25}, 1)
+            run script ge_ThrowMiracle(godHandle, GE_MIRACLE_TYPE_FIRE, marker at {1277.97,60.64,1466.99} + {0,26,0} + {number from -12 to 12,number from -3 to 8,number from -12 to 12}, 1)
             wait number from 2 to 4 seconds
-            run script ge_ThrowMiracle(godHandle, GE_MIRACLE_TYPE_FIRE, marker at {1277.97,60.64,1466.99} + {0,26,0} + {number from -25 to 25,number from -3 to 3,number from -25 to 25}, 1)
+            run script ge_ThrowMiracle(godHandle, GE_MIRACLE_TYPE_FIRE, marker at {1277.97,60.64,1466.99} + {0,26,0} + {number from -12 to 12,number from -3 to 8,number from -25 to 25}, 1)
             wait number from 2 to 4 seconds
 
             ge_Busy[godHandle] = 0
@@ -259,9 +260,13 @@ start
                         close dialogue
                         wait BW2XT_LAND02_PLAYER_ACCEPTS_MIGRATION_20 + 1 seconds
                     end if
+                    run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_FIRERAIN,myBuilding,0)
+                    myBuilding = get random abode in town PlayerTown
+                    if get player ge_Player[godHandle] mana > 20000 and number from 1 to 3 == 1 and myBuilding exists
+                        run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_FIRERAIN,myBuilding,0)
+                    end if
                 end dialogue
                 GB_DialogueIsRunning = 0
-                run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_FIRERAIN,myBuilding,0)
                 FireRainTimer = create timer for number from 600 * EpicModifier to 900 * EpicModifier seconds
             end if
             ge_Busy[godHandle] = 0
@@ -312,6 +317,43 @@ start
 
             ge_Busy[godHandle] = 0
             ThrowMeteorTimer = create timer for number from 360 * EpicModifier to 720 * EpicModifier seconds
+        end if
+
+        //Make Land dark
+        if ge_Busy[godHandle] == 0 and get makeLandDarkTimer time remaining <= 0 and GB_DialogueIsRunning == 0 and get game time > 07.00 and get game time < 18.00
+            ge_Busy[godHandle] = 1
+            GB_DialogueIsRunning = 1
+            wait until dialogue ready
+            begin dialogue
+                myRand = number from 1 to 4
+                if myRand == 1
+                    say "BW2XT_LAND02_TALUS_MAKES_LAND_DARK_01"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND02_TALUS_MAKES_LAND_DARK_01 + 1 seconds
+                elsif myRand == 2
+                    say "BW2XT_LAND02_TALUS_MAKES_LAND_DARK_02"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND02_TALUS_MAKES_LAND_DARK_02 + 1 seconds
+                elsif myRand == 3
+                    say "BW2XT_LAND02_TALUS_MAKES_LAND_DARK_03"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND02_TALUS_MAKES_LAND_DARK_03 + 1 seconds
+                elsif myRand == 4
+                    say "BW2XT_LAND02_TALUS_MAKES_LAND_DARK_04"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND02_TALUS_MAKES_LAND_DARK_04 + 1 seconds
+                end if
+            end dialogue
+            GB_DialogueIsRunning = 0
+            
+            move game time 22.00 time 2
+
+            ge_Busy[godHandle] = 0
+            makeLandDarkTimer = create timer for number from 600 * EpicModifier to 900 * EpicModifier seconds
         end if
 
         if townCounter >= 15 or PLAYER of ge_HomeTown[godHandle] != ge_Player[godHandle]
