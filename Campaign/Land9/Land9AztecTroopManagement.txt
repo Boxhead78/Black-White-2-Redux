@@ -722,6 +722,7 @@ begin script LC9_ArmyBehaivours(Platoon,Type,Task,DefendObject,AttackFocus,Aggre
     myTimer = create timer for 0 seconds
     ScriptFirstTime = 1
     AssumedPlatoonPos = 0
+    AttackFocusSource = AttackFocus
 
 start
 
@@ -1271,6 +1272,17 @@ begin loop
 
     elsif Task == Conqueror
         AttackWPStage = 3
+        if PLAYER of NearestSettlement != 0
+            AttackFocus = TownCenter
+        else
+            AttackFocus = AttackFocusSource
+        end if
+        //Just Capture neutral settlements
+        if PLAYER of NearestSettlement != 0
+            AttackFocus = TownCenter
+        else
+            AttackFocus = AttackFocusSource
+        end if
         oTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in NearestSettlement min built 1.0
         if PLAYER of NearestSettlement != 1 and oTownCentre exists
             if not Platoon can navigate to object oTownCentre
