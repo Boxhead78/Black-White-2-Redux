@@ -7,6 +7,7 @@
 define script Land4Script
 define script Land4ScriptManager
 define script LC4_SetupCreature
+define script vtx_FakeData
 
 run script Land4Script
 
@@ -194,6 +195,8 @@ start
     run background script AttackSyncTimerLogic
 
     if AbortedLand4 != 1
+        run script vtx_FakeData //Give the player some starting ressources for land5
+
         process land end objectives
         wait until land end objectives processed
         wait 2 seconds
@@ -321,3 +324,27 @@ start
     release MyCreature
 
 end script LC4_SetupCreature
+
+
+begin script vtx_FakeData
+
+start
+
+    PD_ForcedSaving = 1
+    wait until PD_ForcedSaving == 0 or 10 seconds
+    stop script "SavePersistentDataSetData"
+    set persistent data "VTX_NUMVILLAGERS" to 49
+    set persistent data "VTX_NUMVILLGRFM" to 7
+    set persistent data "VTX_NUMVILLGRML" to 7
+    set persistent data "VTX_NUMVILLGRFIM" to 7
+    set persistent data "VTX_NUMVILLGRFRM" to 7
+    set persistent data "VTX_NUMVILLGRSPM" to 7
+    set persistent data "VTX_NUMVILLGRLM" to 7
+    set persistent data "VTX_NUMVILLGRTM" to 7
+    set persistent data "VTX_FOOD" to 10000
+    set persistent data "VTX_WOOD" to 10000
+    set persistent data "VTX_ORE" to 10000
+    set persistent data "VTX_SAVEDDATA" to VTX_TRUE
+    run script SavePersistentDataGetData
+
+end script vtx_FakeData
