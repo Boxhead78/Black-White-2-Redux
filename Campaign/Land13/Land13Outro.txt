@@ -14,7 +14,7 @@ begin script LC13_Outro
 
 start
 
-wait until PLAYER of AztecCapital != 1 and PLAYER of AztecTown1 != 1 and PLAYER of AztecTown2 != 1 and PLAYER of PlayerTown != 1
+wait until get player 1 town total == 0
 
 PD_ForcedSaving = 1
 wait until PD_ForcedSaving == 0 or 10 seconds
@@ -28,7 +28,6 @@ begin cinema
     //AGC: Moved fade out & wait inside the cinema block
     set fade red 0 green 0 blue 0 time 2
     wait 2 seconds
-    run background script LC13_Departure
     set town PlayerTown capture all enemy towns
     disable dialogue manager
     disable game can be lost
@@ -100,6 +99,8 @@ begin cinema
 
 end cinema
 
+run background script LC13_Departure
+
 end script LC13_Outro
 
 
@@ -114,28 +115,23 @@ start
     WT_SkyTransitionGlobalInfluence = 1
     enable global influence
 
-    Portal = create visual effect VISUAL_EFFECT_TELEPORTER_HOOP at {DepartureScrollPos} + {0, 1.5, 0} time -1
+	vtx_max_armies = 5
+	vtx_max_sieges = 3
+	vtx_max_orerocks = 15
+	vtx_tree_max = 30
+	vtx_rock_max = 20
+	vtx_ore_max = 20000
+	vtx_food_max = 20000
+	vtx_wood_max = 20000
+	vtx_vill_max = 100
+    vtx_max_arm_men = 150
+    vtx_rock_max = 10
+    vtx_size = 2.5
+    vtx_radius = 30
 
-    DepartureScroll = create highlight GOLD name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {DepartureScrollPos}
-    ALTITUDE of DepartureScroll = 3
-
-    wait until DepartureScroll right clicked
-
-    wait until dialogue ready
-    begin dialogue
-        eject good spirit
-        //say "Are you sure you wish to leave the land?"
-        say "BW2T_SCRIPT_03FINAL_ADVISORS_TUT_934"
-        wait until read
-        //say "Click again to confirm"
-        say "BW2T_SCRIPT_03FINAL_ADVISORS_TUT_933"
-        wait until read
-        send good spirit home
-    end dialogue
+    run script Vtx_Create_Exiting(1557.70,262.61,2152.95)
     
-    clear right clicked object
-    wait until DepartureScroll right clicked
-    delete DepartureScroll
+    wait until vtx_scroll_clicked == VTX_TRUE
     
     // Get the dialogue for the enemy and for the advisors
     
@@ -146,9 +142,9 @@ start
         start music "farming_communtiy_land2" loop 10
         wait 2 seconds
     
-        queue camera move with position {1419.26,323.53,1744.70} + {10,7.5,10} focus {1419.26,323.53,1744.70} + {0,5,0} time 0.0
-        queue camera move with position {1419.26,323.53,1744.70} + {7.5,5,7.5} focus {1419.26,323.53,1744.70} time 5.0
-        queue camera move with position {1419.26,323.53,1744.70} + {1,1.5,1} focus {1419.26,323.53,1744.70} time 4.0
+        queue camera move with position {1557.70,262.61,2152.95} + {10,7.5,10} focus {1557.70,262.61,2152.95} + {0,5,0} time 0.0
+        queue camera move with position {1557.70,262.61,2152.95} + {7.5,5,7.5} focus {1557.70,262.61,2152.95} time 5.0
+        queue camera move with position {1557.70,262.61,2152.95} + {1,1.5,1} focus {1557.70,262.61,2152.95} time 4.0
         play camera path with easein 4 easeout 4 method SCRIPT_CAMERAPATH_EQUALDISTANCE
         set fade in time 1
         wait 4 seconds

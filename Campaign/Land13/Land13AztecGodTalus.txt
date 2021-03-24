@@ -78,6 +78,7 @@ begin script tal_TalusLoop(GodHandle,rTown,PlayerID)
     whichSpell = 0
     FirstSkelArmy = 0
     ThunderStormUsed = 0
+    makeLandDarkTimer = create timer for number from 600 * EpicModifier to 3000 * EpicModifier seconds
 start
     ge_MiracleDelay[godHandle] = create timer for 0 seconds
     while 1 == 1 // make sure godHandle is valid
@@ -300,7 +301,7 @@ start
                 GB_DialogueIsRunning = 1
                 wait until dialogue ready
                 begin dialogue
-                    move game time 22.00 time 15
+                    move game time 22.00 time 2
                     myRand = number from 1 to 3
                     if myRand == 1
                         say "BW2XT_LAND02_TALUS_MAKES_LAND_DARK_01"
@@ -333,6 +334,43 @@ start
                 ThunderstormTimer = create timer for number from 1200 * EpicModifier to 1800 * EpicModifier seconds
             end if
             ge_Busy[godHandle] = 0
+        end if
+
+        //Make Land dark
+        if ge_Busy[godHandle] == 0 and get makeLandDarkTimer time remaining <= 0 and GB_DialogueIsRunning == 0 and get game time > 07.00 and get game time < 18.00
+            ge_Busy[godHandle] = 1
+            GB_DialogueIsRunning = 1
+            wait until dialogue ready
+            begin dialogue
+                myRand = number from 1 to 4
+                if myRand == 1
+                    say "BW2XT_LAND02_TALUS_MAKES_LAND_DARK_01"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND02_TALUS_MAKES_LAND_DARK_01 + 1 seconds
+                elsif myRand == 2
+                    say "BW2XT_LAND02_TALUS_MAKES_LAND_DARK_02"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND02_TALUS_MAKES_LAND_DARK_02 + 1 seconds
+                elsif myRand == 3
+                    say "BW2XT_LAND02_TALUS_MAKES_LAND_DARK_03"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND02_TALUS_MAKES_LAND_DARK_03 + 1 seconds
+                elsif myRand == 4
+                    say "BW2XT_LAND02_TALUS_MAKES_LAND_DARK_04"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND02_TALUS_MAKES_LAND_DARK_04 + 1 seconds
+                end if
+            end dialogue
+            GB_DialogueIsRunning = 0
+            
+            move game time 22.00 time 2
+
+            ge_Busy[godHandle] = 0
+            makeLandDarkTimer = create timer for number from 600 * EpicModifier to 3000 * EpicModifier seconds
         end if
 
         if townCounter >= 15 or PLAYER of ge_HomeTown[godHandle] != ge_Player[godHandle]

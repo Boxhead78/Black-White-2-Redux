@@ -8,6 +8,7 @@ define script Land13Script
 define script Land13ScriptManager
 define script LC13_SetupCreature
 define script LC13_SetupGodReq
+define script LC13_AztecTownAttackHint(whichTown)
 
 run script Land13Script
 
@@ -191,6 +192,10 @@ start
     run background script GodsPlaygroundLoader
     run background script talNewTalus(AztecCapital,1)
     run background script LC13_GatehouseManager
+    run background script AttackRndAttackLogic(0)
+    run background script AttackRndAttackLogic(1)
+    run background script AttackRndAttackLogic(2)
+    run background script AttackSyncTimerLogic
 
     wait until IntroFinished == 1
 
@@ -217,6 +222,9 @@ start
     run background script LC13_AIAltarCounter(get HOUSE ALTAR at {1443.29,321.65,1696.16} radius 25)
     run background script LC13_VolcanoWorkaround
     run background script LC13_StaticPlatoonsController
+    run background script LC13_AztecTownAttackHint(MinorTown5)
+    run background script LC13_AztecTownAttackHint(MinorTown6)
+    run background script LC13_AztecTownAttackHint(MinorTown8)
     
     //Bonus Objectives
     run background script Land13ForestAmbush
@@ -333,7 +341,7 @@ start
     set research ARTEFACT_ABODE_NUMBER_GRAVEYARD available to RESEARCH_AVAILABILITY_RESEARCHED player 1
     set research ARTEFACT_ABODE_NUMBER_OLD_PERSONS_HOME available to RESEARCH_AVAILABILITY_RESEARCHED player 1
     set research ARTEFACT_ABODE_NUMBER_BATHHOUSE available to RESEARCH_AVAILABILITY_RESEARCHED player 1
-    set research ARTEFACT_ABODE_NUMBER_WALLTOWER_TECH1 available to RESEARCH_AVAILABILITY_NOT_AVAILABLE
+    set research ARTEFACT_ABODE_NUMBER_WALLTOWER_TECH1 available to RESEARCH_AVAILABILITY_RESEARCHED player 1
     set research ARTEFACT_ABODE_NUMBER_GATEHOUSE available to RESEARCH_AVAILABILITY_RESEARCHED player 1
     set research ARTEFACT_ABODE_NUMBER_GATEHOUSE_F available to RESEARCH_AVAILABILITY_RESEARCHED player 1
     set research ARTEFACT_EPIC_WONDER_NUMBER_HURRICANE available to RESEARCH_AVAILABILITY_RESEARCHED player 1
@@ -398,3 +406,41 @@ start
     set research ARTEFACT_TOME_PROPHECY available to RESEARCH_AVAILABILITY_RESEARCHED player 1
 
 end script LC13_SetupGodReq
+
+
+begin script LC13_AztecTownAttackHint(whichTown)
+
+    ScrollBronze = 0
+
+start
+
+begin loop
+    if ScrollBronze not exists and size of whichTown > 0 and PLAYER of whichTown != 0
+        ScrollBronze = create highlight BRONZE name "BW2T_SCRIPT_GENERIC_DEPART_LAND" remind "BW2T_SCRIPT_GENERIC_DEPART_LAND" at {whichTown} + {0,5,0}
+    end if
+
+    if ScrollBronze exists and (size of whichTown <= 0 or PLAYER of whichTown == 0)
+        delete ScrollBronze
+    end if
+
+    if ScrollBronze right clicked
+        clear right clicked object
+        begin dialogue
+            if Language == English
+                say "This town will be attacked by the Aztec God. Capture it to prevent the attacks."
+            elsif Language == German
+                say "Diese Stadt wird vom aztekischen Gott angegriffen. Erobere sie, um dies zu verhindern."
+            elsif Language == Spanish
+                say "Este pueblo sera atacado por el dios azteca. Capturalo para prevenir los ataques."
+            elsif Language == Russian
+                say "TRANSLATION"
+            elsif Language == TEMPLATE_LANGUAGE
+                say "TRANSLATION"
+            end if
+            wait 4.5 seconds
+        end dialogue
+    end if
+    until LandWon == 1
+end loop
+
+end script LC13_AztecTownAttackHint

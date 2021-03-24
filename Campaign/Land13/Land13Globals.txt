@@ -34,11 +34,12 @@ global AttackingPlatoons = 0
 global GenericCommentTimer = 0
 global UnitDeadTimer = 0
 global AIVolcano = 0
+global AIEarthquake = 0
 global SacrificeAllowed = 0
 global SkeletonsWave = 0
 global SkeletonCatapultRecAllowed = 0
 global LC13_NumberOfSkeletonPlatoons = 0
-global VolcanoFired = 0
+global EpicFired = 0
 global EpicRunning = 0
 global VolcanoStopFireBalls = 0
 global VolcanoActive = 0
@@ -50,6 +51,11 @@ global LandWon = 0
 global PlayerAlignmentFinal = 0
 global StaticPlatoonsActionTimer = 0
 global StaticPlatoonsActive = 0
+global RndAttack[5]
+global ScriptedAttack[5]
+global LC13_LargeSiegeLaunchAttack = 0
+global LC13_LargeSiegeStartAttack = 0
+global LC13_LargeSiegeRetreat = 0
 
 global PlayerTown = 0
 global MinorTown1 = 0
@@ -117,6 +123,12 @@ start
         AZTECTOWN2_IMPRESSIVENESS -= 2000
         AZTECCAPITAL_IMPRESSIVENESS += 4000
     end if
+
+    ScriptedAttack[0] = 0
+    ScriptedAttack[1] = 0
+    ScriptedAttack[2] = 0
+    ScriptedAttack[3] = 0
+    ScriptedAttack[4] = 0
 
     if HardMode == 1
         NORSERECRUITMENTMODIFIER = 0.75
@@ -201,6 +213,7 @@ start
         set myEffect color red 148 green 0 blue 211
         SCALE of myEffect = 0.1
         add villager Ghost[counter] to platoon whichPlatoon
+        disable anim events on Ghost[counter]
         disable Ghost[counter] hurt by fire
         disable Ghost[counter] set on fire
         run background script LC13_GhostScript(Ghost[counter],whichMesh)
@@ -315,7 +328,7 @@ start
 begin loop
     wait 2.5 seconds
     if get DifficultyTimer time remaining <= 0
-        RecruitModifier *= 1.15
+        RecruitModifier *= 1.25
         EpicModifier *= 1.25
         BuilderModifier *= 1.25
         DifficultyTimer = create timer for 1800 seconds
@@ -331,7 +344,7 @@ EpicModifierTemp = EpicModifier
 BuilderModifierTemp = BuilderModifier
 
 //Give the AI a comeback for 30 minutes
-RecruitSizeModifier = 2.0
+RecruitSizeModifier = 1.25
 //RecruitModifier = 1.25
 BuilderModifier = 1.25
 EpicModifier = 1.0
