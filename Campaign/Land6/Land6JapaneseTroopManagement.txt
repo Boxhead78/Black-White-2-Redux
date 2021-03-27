@@ -45,7 +45,7 @@ define script PlatoonTargetingMetric(PlatoonSize,TargetTown)
 define script CatapultTargetingMetric(TargetTown)
 define script LC6_StaticPlatoonsController
 define script LC6_StaticPlatoonsActions(Pos,Type,Platoon,OriginTown)
-define script LC6_ArmyBehaviours(Platoon,Type,Task,DefendObject,AttackFocus,Aggressiveness,AttackingPoint1,AttackingPoint2,AttackWP1,AttackWP2,AttackWP3,PatrolRoute,Town,AttackWPStage)
+define script LC6_ArmyBehaviours(Platoon,Type,Task,DefendObject,AttackFocus,Aggressiveness,AttackingPoint1,AttackingPoint2,AttackWP1,AttackWP2,AttackWP3,PatrolRoute,Town,AttackWPStage,DisableMerge,DisableSplit)
 define script LC6_MoveCatapultThenAttack(SiegeWeapon,Task,AttackFocus,AttackWP1,AttackWP2,AttackWP3,AttackingPoint1,AttackingPoint2,AttackWPStage)
 
 global LC6_Defender[LC6_NUM_OF_DEFENDERS]
@@ -1696,7 +1696,7 @@ LC6_StaticPlatoonCounter--
 
 end script LC6_StaticPlatoonsActions
 
-begin script LC6_ArmyBehaviours(Platoon,Type,Task,DefendObject,AttackFocus,Aggressiveness,AttackingPoint1,AttackingPoint2,AttackWP1,AttackWP2,AttackWP3,PatrolRoute,Town,AttackWPStage)
+begin script LC6_ArmyBehaviours(Platoon,Type,Task,DefendObject,AttackFocus,Aggressiveness,AttackingPoint1,AttackingPoint2,AttackWP1,AttackWP2,AttackWP3,PatrolRoute,Town,AttackWPStage,DisableMerge,DisableSplit)
 
     PlayerCreature = 0
     PlayerPlatoon1 = 0
@@ -3018,7 +3018,7 @@ begin loop
                 add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {Platoon} + {number from -50 to 50,number from -50 to 50} to NewPlatoon action queue
                 wait 5 seconds
                 clear NewPlatoon action queue
-                run background script LC6_ArmyBehaviours(NewPlatoon,Type,Task,0,Default,Neutral,AttackingPoint1,AttackingPoint2,AttackWP1,AttackWP2,AttackWP3,PatrolRoute,Town,3)
+                run background script LC6_ArmyBehaviours(NewPlatoon,Type,Task,0,Default,Neutral,AttackingPoint1,AttackingPoint2,AttackWP1,AttackWP2,AttackWP3,PatrolRoute,Town,3,1,0)
             end while
         end if
     end if
@@ -3034,8 +3034,6 @@ begin loop
                     wait 5 seconds
                     MergeDone = 1
                     while Platoon exists and NewPlatoon exists
-                        enable platoon Platoon merge
-                        enable platoon NewPlatoon merge
                         merge platoon Platoon into platoon NewPlatoon
                         wait 10 seconds
                     end while
