@@ -76,9 +76,11 @@ begin script tal_TalusLoop(GodHandle,rTown,PlayerID)
     Timer = create timer for 0 seconds
     LC14_ThrowMiracleTimer = create timer for 0 seconds
     ScriptedThunderstorm = 0
+    ScriptedThunderstormTimer = create timer for 99999 seconds
     townCounter = 0
     miniEpicTimer = create timer for 2400 * EpicModifier seconds
     whichSpell = 0
+    makeLandDarkTimer = create timer for number from 600 * EpicModifier to 3000 * EpicModifier seconds
 start
     ge_MiracleDelay[godHandle] = create timer for 0 seconds
     while 1 == 1 // make sure godHandle is valid
@@ -203,11 +205,15 @@ start
         end if
 
         //Only used once
-        if ge_Busy[godHandle] == 0 and Difficulty >= 3 and ScriptedThunderstorm == 0 and get player ge_Player[godHandle] mana > 30000 and PLAYER of PlayerTown == 0 and GB_DialogueIsRunning == 0 and ge_EmergencyMode[godHandle] == 0 and ge_Altar[godHandle] == 1
+        if ScriptedThunderstorm == 0 and PLAYER of PlayerTown == 0
+            ScriptedThunderstorm = 1
+            ScriptedThunderstormTimer = create timer for 75 seconds
+        end if
+        if ge_Busy[godHandle] == 0 and Difficulty >= 3 and get ScriptedThunderstormTimer time remaining <= 0 and get player ge_Player[godHandle] mana > 30000 and PLAYER of PlayerTown == 0 and GB_DialogueIsRunning == 0 and ge_EmergencyMode[godHandle] == 0 and ge_Altar[godHandle] == 1
             ge_Busy[godHandle] = 1
             myBuilding = marker at {886.27,120.00,1976.60}
             GB_DialogueIsRunning = 1
-            move game time 22.00 time 15
+            move game time 22.00 time 2
             wait until dialogue ready
             begin dialogue
                 say "BW2XT_LAND05_RETALIATION_LAVA_10"
@@ -387,7 +393,7 @@ start
                 if myRand == 1
                     run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_FIRERAIN,myBuilding,0)
                 else
-                    move game time 22.00 time 15
+                    move game time 22.00 time 2
                     run script ge_ThrowMiracle(godHandle,GE_MIRACLE_TYPE_THUNDERSTORM,myBuilding,0)
                 end if
                 miniEpicTimer = create timer for 1000 * EpicModifier seconds
@@ -399,6 +405,43 @@ start
             tal_EmergencyAllowed = 1
         else
             tal_EmergencyAllowed = 0
+        end if
+
+        //Make Land dark
+        if ge_Busy[godHandle] == 0 and get makeLandDarkTimer time remaining <= 0 and GB_DialogueIsRunning == 0 and get game time > 07.00 and get game time < 18.00
+            ge_Busy[godHandle] = 1
+            GB_DialogueIsRunning = 1
+            wait until dialogue ready
+            begin dialogue
+                myRand = number from 1 to 4
+                if myRand == 1
+                    say "BW2XT_LAND02_TALUS_MAKES_LAND_DARK_01"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND02_TALUS_MAKES_LAND_DARK_01 + 1 seconds
+                elsif myRand == 2
+                    say "BW2XT_LAND02_TALUS_MAKES_LAND_DARK_02"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND02_TALUS_MAKES_LAND_DARK_02 + 1 seconds
+                elsif myRand == 3
+                    say "BW2XT_LAND02_TALUS_MAKES_LAND_DARK_03"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND02_TALUS_MAKES_LAND_DARK_03 + 1 seconds
+                elsif myRand == 4
+                    say "BW2XT_LAND02_TALUS_MAKES_LAND_DARK_04"
+                    clear dialogue
+                    close dialogue
+                    wait BW2XT_LAND02_TALUS_MAKES_LAND_DARK_04 + 1 seconds
+                end if
+            end dialogue
+            GB_DialogueIsRunning = 0
+            
+            move game time 22.00 time 2
+
+            ge_Busy[godHandle] = 0
+            makeLandDarkTimer = create timer for number from 600 * EpicModifier to 3000 * EpicModifier seconds
         end if
 
         if townCounter >= 15 or PLAYER of ge_HomeTown[godHandle] != ge_Player[godHandle]
