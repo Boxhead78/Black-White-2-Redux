@@ -48,10 +48,12 @@ begin loop
         while 0 < myArmySize and myMigration exists
             myPlatoon = get platoon nearest {myMigration} radius 25
             myVillager = get VILLAGER at {myMigration} radius 25
-            if myVillager exists and not myPlatoon exists and not {myVillager} viewed
-                play anim "a_p_dead1" on Villager loop 1
-                delete myVillager
-                myArmySize--
+            if myVillager exists and not myPlatoon exists
+                if not {myVillager} viewed
+                    play anim "a_p_dead1" on myVillager loop 1
+                    delete myVillager
+                    myArmySize--
+                end if
             end if
         end while
         wait until myMigration not exists
