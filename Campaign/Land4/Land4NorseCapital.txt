@@ -1319,6 +1319,7 @@ begin script LC4_Norse_Capital
     BuildingDefendersAllowed[5]
     BuildingDefendersAllowedTimer = create timer for 0 seconds
     Counter = 0
+    LC4Platoon14 = 0
 
 start
 
@@ -1466,11 +1467,12 @@ start
                     BuildingDefendersAllowed[0] = 0
 
                 //Capture NorseTown1
-                elsif LC4_Platoon[14] not exists and PLAYER of NorseCapital == 1 and PLAYER of NorseTown1 != 1 and not town NorseCapital is under takeover from player 0 and BuildingDefendersAllowed[0] == 1
+                elsif LC4_Platoon[14] not exists and LC4Platoon14 == 0 and PLAYER of NorseCapital == 1 and PLAYER of NorseTown1 != 1 and not town NorseCapital is under takeover from player 0 and BuildingDefendersAllowed[0] == 1
                     LC4_Platoon[14] = recruit ARMY_UNIT_TYPE_MELEE_1 town NorseCapital platoon of size 20 * RecruitSizeModifier
                     RecruitTimer1 = create timer for (20 * 2.0) * NORSERECRUITMENTMODIFIER * RecruitModifier seconds
                     run background script PT_CreateChargerNorsePlatoon(LC4_Platoon[14],1)
                     BuildingDefendersAllowed[0] = 0
+                    LC4Platoon14 = 1
 
                 elsif LC4_WallArcher[0] not exists and Wall[1] exists and PLAYER of Wall[1] == 1 and HEALTH of Wall[1] == 1.0 and not town NorseCapital is under takeover from player 0 and BuildingDefendersAllowed[0] == 1
                     LC4_WallArcher[0] = recruit ARMY_UNIT_TYPE_RANGED_2 town NorseCapital platoon of size number from 15 to 20 * RecruitSizeModifier
