@@ -6,9 +6,8 @@ define CAPE = 2
 define CCOW = 3
 define CTIGER = 4
 define CGORILLA = 5
-//Not included since jackal and minotaur seem to be not modable --> both spawn with wolf model
-define CTURTLE = 6//Replace with the jackal creature files (models, sounds etc.)
-define CZOMBIEAPE = 7//Replace with the Minotaur creature files (models, sounds etc.)
+define CTURTLE = 6
+define CZOMBIE_APE = 7 //Zombie ape unlocked on seconds playthrough
 define LAST = 8
 
 define False = 0
@@ -17,8 +16,8 @@ define True = 1
 global RandomNumberLand1 = 0
 global SelectedCreature
 global TempMyCreature
-global MoveOffPos[5]
-global SpecialEdition = True
+global MoveOffPos[6]
+global CreaturesDeleted = 0
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -154,42 +153,40 @@ start
     CreatureArray[CWOLF] = create DUMB_CREATURE CREATURE_TYPE_WOLF at {1573.192, 111.470, 835.167}
     CreatureArray[CAPE] = create DUMB_CREATURE CREATURE_TYPE_APE at {1576.496, 111.441, 843.982}
     CreatureArray[CCOW] = create DUMB_CREATURE CREATURE_TYPE_COW at {1569.293, 111.469, 834.635}
-    if SpecialEdition == True //Always true now
-        CreatureArray[CTIGER] = create DUMB_CREATURE CREATURE_TYPE_TIGER at {1620.378, 102.356, 826.953}
-        set creature CreatureArray[CTIGER] CREATURE_SIZE 0.4 time 0
-        wait until CreatureArray[CTIGER] exists
-        snap creature CreatureArray[CTIGER] focus to {1566.054, 116.043, 843.902}
-        set CreatureArray[CTIGER] focus to {1566.054, 116.043, 843.902}
-        enable CreatureArray[CTIGER] indestructible
-        disable tooltip on creature CreatureArray[CTIGER]
+    
+    CreatureArray[CTIGER] = create DUMB_CREATURE CREATURE_TYPE_TIGER at {1620.378, 102.356, 826.953}
+    set creature CreatureArray[CTIGER] CREATURE_SIZE 0.4 time 0
+    wait until CreatureArray[CTIGER] exists
+    snap creature CreatureArray[CTIGER] focus to {1566.054, 116.043, 843.902}
+    set CreatureArray[CTIGER] focus to {1566.054, 116.043, 843.902}
+    enable CreatureArray[CTIGER] indestructible
+    disable tooltip on creature CreatureArray[CTIGER]
 
-        CreatureArray[CGORILLA] = create DUMB_CREATURE CREATURE_TYPE_GORILLA at {1618.50,103.14,802.91}
-        set creature CreatureArray[CGORILLA] CREATURE_SIZE 0.4 time 0
-        wait until CreatureArray[CGORILLA] exists
-        snap creature CreatureArray[CGORILLA] focus to {1575.46,111.47,836.39}
-        set CreatureArray[CGORILLA] focus to {1575.46,111.47,836.39}
-        enable CreatureArray[CGORILLA] indestructible
-        disable tooltip on creature CreatureArray[CGORILLA]
+    CreatureArray[CGORILLA] = create DUMB_CREATURE CREATURE_TYPE_GORILLA at {1618.50,103.14,802.91}
+    set creature CreatureArray[CGORILLA] CREATURE_SIZE 0.4 time 0
+    wait until CreatureArray[CGORILLA] exists
+    snap creature CreatureArray[CGORILLA] focus to {1575.46,111.47,836.39}
+    set CreatureArray[CGORILLA] focus to {1575.46,111.47,836.39}
+    enable CreatureArray[CGORILLA] indestructible
+    disable tooltip on creature CreatureArray[CGORILLA]
 
-        /*
-        CreatureArray[CTURTLE] = create DUMB_CREATURE CREATURE_TYPE_JACKAL at {1575.928, 111.473, 838.692} + {5,0,5}//Not a jackal, it's a turtle
-        set creature CreatureArray[CTURTLE] CREATURE_SIZE 0.0 time 0
-        wait until CreatureArray[CTURTLE] exists
-        snap creature CreatureArray[CTURTLE] focus to {1575.46,111.47,836.39} + {5,0,5}//TODO
-        set CreatureArray[CTURTLE] focus to {1575.46,111.47,836.39} + {5,0,5}//TODO
-        enable CreatureArray[CTURTLE] indestructible
-        disable tooltip on creature CreatureArray[CTURTLE]
+    CreatureArray[CTURTLE] = create DUMB_CREATURE CREATURE_TYPE_TURTLE at {1557.930, 107.650, 806.840}//{1549.750, 107.130, 816.200}//{1559.71, 111.33, 827.89}
+    set creature CreatureArray[CTURTLE] CREATURE_SCRIPT_TRANSITIONAL_ATTRIBUTE_TYPE_SIZE 0.4 time 0
+    wait until CreatureArray[CTURTLE] exists
+    snap creature CreatureArray[CTURTLE] focus to {1566.054, 116.043, 843.902}
+    set CreatureArray[CTURTLE] focus to {1566.054, 116.043, 843.902}
+    enable CreatureArray[CTURTLE] indestructible
+    disable tooltip on creature CreatureArray[CTURTLE]
 
-        CreatureArray[CZOMBIEAPE] = create DUMB_CREATURE CREATURE_TYPE_MINOTAUR at {1573.192, 111.470, 835.167} + {5,0,5}//Not a minotaur, it's a zombie-ape
-        set creature CreatureArray[CZOMBIEAPE] CREATURE_SIZE 0.0 time 0
-        wait until CreatureArray[CZOMBIEAPE] exists
-        snap creature CreatureArray[CZOMBIEAPE] focus to {1575.46,111.47,836.39} + {5,0,5}//TODO
-        set CreatureArray[CZOMBIEAPE] focus to {1575.46,111.47,836.39} + {5,0,5}//TODO
-        enable CreatureArray[CZOMBIEAPE] indestructible
-        disable tooltip on creature CreatureArray[CZOMBIEAPE]
-        */
-
-    end if 
+    /*
+    CreatureArray[CZOMBIE_APE] = create DUMB_CREATURE CREATURE_TYPE_ZOMBIE_APE at {1573.192, 111.470, 835.167} + {5,0,5}
+    set creature CreatureArray[CZOMBIE_APE] CREATURE_SIZE 0.4 time 0
+    wait until CreatureArray[CZOMBIE_APE] exists
+    snap creature CreatureArray[CZOMBIE_APE] focus to {1575.46,111.47,836.39} + {5,0,5}//TODO
+    set CreatureArray[CZOMBIE_APE] focus to {1575.46,111.47,836.39} + {5,0,5}//TODO
+    enable CreatureArray[CZOMBIE_APE] indestructible
+    disable tooltip on creature CreatureArray[CZOMBIE_APE]
+    */
 
     set creature CreatureArray[CLION] CREATURE_SIZE 0.2 time 0
     set creature CreatureArray[CWOLF] CREATURE_SIZE 0.2 time 0
@@ -643,7 +640,7 @@ start
     end if 
     
     
-        move camera position to {1566.054, 116.043, 843.902} time 8
+        move camera position to {1562.254, 116.043, 845.402} time 8
         move camera focus to {1645.876, 92.784, 788.336} time 8
         wait 1 seconds
         eject good spirit
@@ -655,15 +652,13 @@ start
         
         wait 1 seconds
         make evil spirit fly across 0.25 down 0.15
-           make good spirit fly across 0.7 down 0.15
-           
-           if SpecialEdition == True
-            move CreatureArray[CTIGER] position to {1597.919, 112.711, 835.351}
-            move CreatureArray[CGORILLA] position to {1599.78,114.59,817.51}
-            //move CreatureArray[CTURTLE] position to {1599.78,114.59,817.51} + {5,0,5}//TODO
-            //move CreatureArray[CZOMBIEAPE] position to {1599.78,114.59,817.51} + {5,0,5}//TODO
-        end if
+        make good spirit fly across 0.7 down 0.15
         
+        move CreatureArray[CTIGER] position to {1597.919, 112.711, 835.351}
+        move CreatureArray[CGORILLA] position to {1599.78,114.59,817.51}
+        move CreatureArray[CTURTLE] position to {1566.293, 111.469, 835.635}
+        //move CreatureArray[CZOMBIE_APE] position to {1599.78,114.59,817.51} + {5,0,5}//TODO
+
         set mixer CSMixer channel AUDIO_MIXER_CHANNEL_ASSET_1 to 0.6 // ape
         set mixer CSMixer channel AUDIO_MIXER_CHANNEL_ASSET_2 to 0.6 // cow
         set mixer CSMixer channel AUDIO_MIXER_CHANNEL_ASSET_3 to 0.6 // lion
@@ -709,16 +704,17 @@ start
 
         set fade in time 1
 
-        set camera position to {1566.054, 116.043, 843.902}
+        //set camera position to {1566.054, 116.043, 843.902}
+        //move camera position to {1564.554, 116.043, 843.902} time 4
         set camera focus to {1645.876, 92.784, 788.336}
     
-        if SpecialEdition == True
-            play anim C_INDIVIDUAL_FRIENDLY_WAVE on CreatureArray[CTIGER]
-            wait 2.5 seconds
-            play anim C_INDIVIDUAL_FRIENDLY_WAVE on CreatureArray[CGORILLA]
-            wait 0.5 seconds 
-            //play anim C_INDIVIDUAL_FRIENDLY_WAVE on CreatureArray[CTURTLE]
-        end if
+        wait 5 seconds
+        play anim C_INDIVIDUAL_FRIENDLY_WAVE on CreatureArray[CTIGER]
+
+        play anim C_INDIVIDUAL_LOOK_AT_ME on CreatureArray[CGORILLA]
+
+        play anim C_INDIVIDUAL_HAPPY on CreatureArray[CTURTLE]
+        wait 2.5 seconds
     end cinema
 
     start music "worshipperchant_aztec" loop -1
@@ -727,13 +723,11 @@ start
     run background script LookAfterCreature(CreatureArray[CAPE], variable AUDIO_MIXER_CHANNEL_ASSET_1, CSMixer)
     run background script LookAfterCreature(CreatureArray[CCOW], variable AUDIO_MIXER_CHANNEL_ASSET_2, CSMixer)
     run background script SoundLevelsWhileThereIsNotSelectedCreature(CSMixer)
-    if SpecialEdition == True
-        run background script LookAfterCreature(CreatureArray[CTIGER], variable AUDIO_MIXER_CHANNEL_ASSET_3, CSMixer)
-        run background script LookAfterCreature(CreatureArray[CGORILLA], variable AUDIO_MIXER_CHANNEL_ASSET_5, CSMixer)
-        //run background script LookAfterCreature(CreatureArray[CTURTLE], variable AUDIO_MIXER_CHANNEL_ASSET_6, CSMixer)
-        //run background script LookAfterCreature(CreatureArray[CZOMBIEAPE], variable AUDIO_MIXER_CHANNEL_ASSET_7, CSMixer)
-    end if 
-    
+    run background script LookAfterCreature(CreatureArray[CTIGER], variable AUDIO_MIXER_CHANNEL_ASSET_3, CSMixer)
+    run background script LookAfterCreature(CreatureArray[CGORILLA], variable AUDIO_MIXER_CHANNEL_ASSET_5, CSMixer)
+    run background script LookAfterCreature(CreatureArray[CTURTLE], variable AUDIO_MIXER_CHANNEL_ASSET_6, CSMixer)
+    //run background script LookAfterCreature(CreatureArray[CZOMBIE_APE], variable AUDIO_MIXER_CHANNEL_ASSET_7, CSMixer)
+
     
     set AdvisorTimer time to 5 seconds
     
@@ -785,7 +779,7 @@ start
                 play sound "Script28_Creatureselect1" at {SelectedCreature}
 
                 run script PlaySelectedAnims(SelectedCreature)
-                //play sound "Creatureselect2" at camera position
+                play sound "Creatureselect2" at camera position
                 run script ResolveSoundLevels(SelectedCreature, CSMixer)
                 
                 //run script PlaySelectedAnimation(SelectedCreature)
@@ -833,7 +827,6 @@ start
 
         MoveOffPos[CGORILLA]    = marker at {1629.99,102.76,803.78}
         
-        /*
         if TempMyCreature == CreatureArray[CTURTLE] 
             //SPECIAL CASE TIGER
             play anim C_INDIVIDUAL_FEEL_PLAYFUL on TempMyCreature
@@ -841,16 +834,17 @@ start
             play anim C_INDIVIDUAL_DONE_IT on TempMyCreature
         end if     
 
-        MoveOffPos[CTURTLE]    = marker at {1629.99,102.76,803.78} + {5,0,5}//TODO
+        MoveOffPos[CTURTLE]    = marker at {1535.184, 107.599, 833.138}
 
-        if TempMyCreature == CreatureArray[CZOMBIEAPE] 
+        /*
+        if TempMyCreature == CreatureArray[CZOMBIE_APE] 
             //SPECIAL CASE TIGER
             play anim C_INDIVIDUAL_FEEL_PLAYFUL on TempMyCreature
         else
             play anim C_INDIVIDUAL_DONE_IT on TempMyCreature
         end if     
 
-        MoveOffPos[CZOMBIEAPE]    = marker at {1629.99,102.76,803.78} + {5,0,5}//TODO
+        MoveOffPos[CZOMBIE_APE]    = marker at {1629.99,102.76,803.78} + {5,0,5}//TODO
         */
 
         if TempMyCreature == CreatureArray[CAPE] 
@@ -893,28 +887,28 @@ start
             move camera position to {1566.859, 115.669, 842.688} time 6
             move camera focus to {1603.773, 90.953, 753.094} time 6
 
-        elsif TempMyCreature == CreatureArray[CGORILLA]
+        elsif TempMyCreature == CreatureArray[CGORILLA] 
 
-            MoveOffPos[CLION]    = marker at {1554.050, 106.695, 879.017}
-            MoveOffPos[CWOLF]    = marker at {1550.099, 107.265, 878.137}
-            MoveOffPos[CAPE]    = marker at {1563.581, 105.972, 881.560}
-            MoveOffPos[CCOW]    = marker at {1543.178, 108.348, 838.079}
+            MoveOffPos[CLION]    = marker at {1543.990, 108.790, 848.426}
+            MoveOffPos[CWOLF]    = marker at {1541.501, 107.979, 842.319}
+            MoveOffPos[CAPE]    = marker at {1562.020, 111.105, 865.898}
+            MoveOffPos[CCOW]    = marker at {1535.184, 107.599, 833.138}
 
-            move camera position to {1579.53,115.669,833.42} time 6
-            move camera focus to {1596.42,109.00,820.28} time 6
+            move camera position to {1590.779, 116.008, 837.863} time 6
+            move camera focus to {1642.32, 107.76, 836.67} time 6
+
+        elsif TempMyCreature == CreatureArray[CTURTLE]
+
+            MoveOffPos[CLION]    = marker at {1580.280, 104.640, 878.020}
+            MoveOffPos[CWOLF]    = marker at {1580.280, 104.640, 878.020}
+            MoveOffPos[CAPE]    = marker at {1580.280, 104.640, 878.020}
+            MoveOffPos[CCOW]    = marker at {1580.280, 104.640, 878.020}
+
+            move camera position to {1565.254, 116.043, 841.202} time 6
+            move camera focus to {1566.293, 112.769, 835.635} time 6
 
         /*
-        elsif TempMyCreature == CreatureArray[CTURTLE]//TODO BLOCK
-
-            MoveOffPos[CLION]    = marker at {1554.050, 106.695, 879.017}
-            MoveOffPos[CWOLF]    = marker at {1550.099, 107.265, 878.137}
-            MoveOffPos[CAPE]    = marker at {1563.581, 105.972, 881.560}
-            MoveOffPos[CCOW]    = marker at {1543.178, 108.348, 838.079}
-
-            move camera position to {1579.53,115.669,833.42} time 6
-            move camera focus to {1596.42,109.00,820.28} time 6
-
-        elsif TempMyCreature == CreatureArray[CZOMBIEAPE]//TODO BLOCK
+        elsif TempMyCreature == CreatureArray[CZOMBIE_APE]//TODO BLOCK
 
             MoveOffPos[CLION]    = marker at {1554.050, 106.695, 879.017}
             MoveOffPos[CWOLF]    = marker at {1550.099, 107.265, 878.137}
@@ -970,16 +964,16 @@ start
         //end if
     end if
 
-    /*
     if CreatureArray[CTURTLE] != TempMyCreature
         //if SpecialEdition == True
-            run background script RemoveRejected(CreatureArray[CTURTLE], 5)
+            run background script RemoveRejected(CreatureArray[CTURTLE], 6)
         //end if
     end if
 
-    if CreatureArray[CZOMBIEAPE] != TempMyCreature
+    /*
+    if CreatureArray[CZOMBIE_APE] != TempMyCreature
         //if SpecialEdition == True
-            run background script RemoveRejected(CreatureArray[CZOMBIEAPE], 5)
+            run background script RemoveRejected(CreatureArray[CZOMBIE_APE], 7)
         //end if
     end if
     */
@@ -995,6 +989,8 @@ start
     set player 0 creature to MyCreature
     play anim C_INDIVIDUAL_HAPPY3 on MyCreature
     
+    wait until CreaturesDeleted == True
+
     cancel MyCreature anim override
 
 
@@ -1048,7 +1044,7 @@ start
     while not SelectedCreature exists
         HC=get object hand is over
         
-        if HC exists and (HC == CreatureArray[CWOLF] or HC == CreatureArray[CAPE] or HC == CreatureArray[CCOW] or HC == CreatureArray[CLION] or HC == CreatureArray[CTIGER] or HC == CreatureArray[CGORILLA])// or HC == CreatureArray[CTURTLE] or HC == CreatureArray[CZOMBIEAPE])
+        if HC exists and (HC == CreatureArray[CWOLF] or HC == CreatureArray[CAPE] or HC == CreatureArray[CCOW] or HC == CreatureArray[CLION] or HC == CreatureArray[CTIGER] or HC == CreatureArray[CGORILLA]) or HC == CreatureArray[CTURTLE]// or HC == CreatureArray[CZOMBIE_APE])
             run script ResolveSoundLevels(HC, CSMixer)
         else
             set mixer CSMixer channel AUDIO_MIXER_CHANNEL_ASSET_1 to 0.6 // ape
@@ -1091,7 +1087,7 @@ start
                 DoProcessing = True
             end if 
             
-            if TempHandCreature exists and (TempHandCreature == CreatureArray[CWOLF] or HandCreature == CreatureArray[CAPE] or HandCreature == CreatureArray[CCOW] or HandCreature == CreatureArray[CLION] or HandCreature == CreatureArray[CTIGER]  or HandCreature == CreatureArray[CGORILLA])// or HandCreature == CreatureArray[CTURTLE] or HandCreature == CreatureArray[CZOMBIEAPE])
+            if TempHandCreature exists and (TempHandCreature == CreatureArray[CWOLF] or HandCreature == CreatureArray[CAPE] or HandCreature == CreatureArray[CCOW] or HandCreature == CreatureArray[CLION] or HandCreature == CreatureArray[CTIGER]  or HandCreature == CreatureArray[CGORILLA]) or HandCreature == CreatureArray[CTURTLE]// or HandCreature == CreatureArray[CZOMBIE_APE])
                 enable hand icon draw
                 set bindable hand icon BINDABLE_ACTION_TYPE_ACTION
             else
@@ -1099,7 +1095,7 @@ start
             end if
             
             /*if not SelectedCreature exists
-                if TempHandCreature exists and (TempHandCreature == CreatureArray[CWOLF] or HandCreature == CreatureArray[CAPE] or HandCreature == CreatureArray[CCOW] or HandCreature == CreatureArray[CLION] or HandCreature == CreatureArray[CTIGER] or HandCreature == CreatureArray[CGORILLA])// or HandCreature == CreatureArray[CTURTLE] or HandCreature == CreatureArray[CZOMBIEAPE])
+                if TempHandCreature exists and (TempHandCreature == CreatureArray[CWOLF] or HandCreature == CreatureArray[CAPE] or HandCreature == CreatureArray[CCOW] or HandCreature == CreatureArray[CLION] or HandCreature == CreatureArray[CTIGER] or HandCreature == CreatureArray[CGORILLA]) or HandCreature == CreatureArray[CTURTLE]// or HandCreature == CreatureArray[CZOMBIE_APE])
                     run script ResolveSoundLevels(Creature, CSMixer)
                 else
                     set mixer CSMixer channel AUDIO_MIXER_CHANNEL_ASSET_1 to 0.6 // ape
@@ -1223,6 +1219,8 @@ start
             say "BW2T_SCRIPT_01FINAL_ADVISORS_CHOOSE_CREATURENEW_180"
         elsif Creature == CreatureArray[CWOLF]
             say "BW2T_SCRIPT_01FINAL_ADVISORS_CHOOSE_CREATURENEW_200"
+        elsif Creature == CreatureArray[CTURTLE]
+            say "BW2XT_HELP_TEXT_GUIDANCE_CREATURE_SELECTION_TURTLE_10"
         else 
             say "BW2T_SCRIPT_01FINAL_ADVISORS_CHOOSE_CREATURENEW_PICKUP_44"
         end if 
@@ -1357,10 +1355,10 @@ start
         set mixer CSMixer channel AUDIO_MIXER_CHANNEL_ASSET_1 to 1.0 // ape
     elsif Creature == CreatureArray[CGORILLA]
         set mixer CSMixer channel AUDIO_MIXER_CHANNEL_ASSET_5 to 1.0 // gorilla
-    /*elsif Creature == CreatureArray[CTURTLE]
-        set mixer CSMixer channel AUDIO_MIXER_CHANNEL_ASSET_6 to 1.0 // gorilla
-    elsif Creature == CreatureArray[CZOMBIEAPE]
-        set mixer CSMixer channel AUDIO_MIXER_CHANNEL_ASSET_7 to 1.0*/ // gorilla
+    elsif Creature == CreatureArray[CTURTLE]
+        set mixer CSMixer channel AUDIO_MIXER_CHANNEL_ASSET_6 to 1.0 // turtle
+    /*elsif Creature == CreatureArray[CZOMBIE_APE]
+        set mixer CSMixer channel AUDIO_MIXER_CHANNEL_ASSET_7 to 1.0*/ // zombie ape
     else
         set mixer CSMixer channel AUDIO_MIXER_CHANNEL_ASSET_4 to 1.0 // wolf
     end if 
@@ -1381,8 +1379,10 @@ start
     set creature Creature walk override sad
     move Creature position to {MoveOffPos[ID]}
 
-    wait 7 seconds
+    wait 11 seconds
     delete Creature
+
+    CreaturesDeleted = True
 
 end script RemoveRejected
 ///////////////////////////////////////////////////////////////////////////////////////////////
