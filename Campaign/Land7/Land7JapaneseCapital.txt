@@ -3483,7 +3483,7 @@ start
 
     run background script LC7_LargeSiegePlatoonManager
 
-    wait until LC7_LargeSiegeArmyReady == 1 or 600 seconds
+    wait until LC7_LargeSiegeArmyReady == 1
     
     wait 30 seconds
 
@@ -3506,31 +3506,15 @@ begin script LC7_LargeSiegePlatoonManager
     AttackingPositionFallBack = 0
     ARMYRECRUITDELAY = 75
     CATAPULTMULTIPLIER = 0.25
+    RecruitmentWaitTimer = create timer for 300 seconds
 
 start
 
 begin loop
 
-    if Difficulty >= 4
-        if LC7_LargeSiegeArmyReady == 0 and LC7_Platoon[18] exists and LC7_Platoon[19] exists and LC7_Platoon[20] exists and LC7_Platoon[21] exists and LC7_SiegeCatapult[6] exists and LC7_SiegeCatapult[7] exists and LC7_SiegeCatapult[8] exists
-            LC7_LargeSiegeArmyReady = 1
-            ARMYRECRUITDELAY = 15
-        end if
-    elsif Difficulty >= 3
-        if LC7_LargeSiegeArmyReady == 0 and LC7_Platoon[18] exists and LC7_Platoon[19] exists and LC7_Platoon[20] exists and LC7_SiegeCatapult[6] exists and LC7_SiegeCatapult[7] exists
-            LC7_LargeSiegeArmyReady = 1
-            ARMYRECRUITDELAY = 15
-        end if
-    elsif Difficulty >= 2
-        if LC7_LargeSiegeArmyReady == 0 and LC7_Platoon[18] exists and LC7_Platoon[19] exists and LC7_SiegeCatapult[6] exists and LC7_SiegeCatapult[7] exists
-            LC7_LargeSiegeArmyReady = 1
-            ARMYRECRUITDELAY = 15
-        end if
-    else
-        if LC7_LargeSiegeArmyReady == 0 and LC7_Platoon[18] exists and LC7_Platoon[19] exists and LC7_SiegeCatapult[6] exists
-            LC7_LargeSiegeArmyReady = 1
-            ARMYRECRUITDELAY = 15
-        end if
+    if LC7_LargeSiegeArmyReady == 0 and get RecruitmentWaitTimer time remaining <= 0
+        LC7_LargeSiegeArmyReady = 1
+        ARMYRECRUITDELAY = 15
     end if
 
     if LC7_Platoon[18] not exists and PLAYER of JapaneseTown1 == 1 and LC7_LargeSiegeIsRunning == 1
