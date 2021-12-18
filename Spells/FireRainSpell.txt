@@ -88,13 +88,19 @@ begin script Firerain_Fireballs(PlayerID,FirerainSpell)
     Effect1 = 0
     Fireball = 0
     FireballStartPos = 0
+    FireballStartPosHeight = 145
     FireballDestPos = 0
     FireballDestPosNew = 0
 
 start
-
-    Effect1 = create visual effect VISUAL_EFFECT_WEATHER_SANDSTORM at {FirerainSpell} + {80,145,80} time -1
-    FireballStartPos = marker at {FirerainSpell} + {80,145,80}
+    begin loop
+        FireballStartPos = marker at {FirerainSpell} + {80,FireballStartPosHeight,80}
+        if ({FireballStartPos} is under landscape or {FireballStartPos} under water)
+            FireballStartPosHeight += 20
+        end if
+        until not {FireballStartPos} is under landscape and not {FireballStartPos} under water
+    end loop
+    Effect1 = create visual effect VISUAL_EFFECT_WEATHER_SANDSTORM at {FireballStartPos} time -1
     SCALE of Effect1 = 0.75
     set Effect1 colour red 195 green 5 blue 5
     while Counter < Firerain_MaxCycles 
