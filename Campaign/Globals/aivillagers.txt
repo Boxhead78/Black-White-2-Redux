@@ -1,0 +1,70 @@
+///////////////////////////////////////////////////////////////////////////////
+//               AI Villagers
+//    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+///////////////////////////////////////////////////////////////////////////////
+
+//Races
+define AAV_RNONE = 0
+define AAV_NORSE = 1
+define AAV_JAPANESE = 2
+define AAV_AZTEC = 3
+
+define script AAV_AIVillagers(Race)
+
+define WaitTime = 180
+
+begin script AAV_AIVillagers(Race)
+
+    AITown = 0
+    HowManyVillagers = 0
+    TownCentre = 0
+    TownSize = 0
+    TownCounter = 0
+    Villager = 0
+    VillagerCounter = 0
+    CapacityBonus = 0
+    VillagerMax = 15
+
+start
+
+begin loop
+
+    if TownCounter > 16
+        TownCounter = 0
+    end if
+    AITown = get town with id TownCounter
+    TownCentre = get building ABODE_NUMBER_TOWN_CENTRE in AITown min built 1.0
+    if PLAYER of AITown == 1 and size of AITown < VillagerMax and TownCentre exists and variable get town AITown status != variable TOWN_STATUS_MIGRATION_STARTED
+        TownSize = adult size of AITown
+        VillagerCounter = 0
+        begin loop
+            wait until get distance from camera position to {AITown} > 300
+            if Race == AAV_NORSE
+                Villager = create random villager of tribe TRIBE_TYPE_NORSE at {AITown} + {number from -12 to 12, 0, number from -12 to 12}
+            elsif Race == AAV_JAPANESE
+                Villager = create random villager of tribe TRIBE_TYPE_JAPANESE at {AITown} + {number from -12 to 12, 0, number from -12 to 12}
+            elsif Race == AAV_AZTEC
+                Villager = create random villager of tribe TRIBE_TYPE_AZTEC at {AITown} + {number from -12 to 12, 0, number from -12 to 12}
+            end if
+            attach Villager to AITown
+            release Villager
+            if adult capacity of AITown > TownSize
+                CapacityBonus = size of AITown * 0.15
+                HowManyVillagers = (TownSize / 75) + (CapacityBonus)
+            else
+                CapacityBonus = size of AITown * 0.25
+                HowManyVillagers = (TownSize / 75) - (CapacityBonus)
+            end if
+            wait number from 1 to 3 seconds
+
+            VillagerCounter++
+            until VillagerCounter > HowManyVillagers or size of AITown > adult capacity of AITown or size of AITown > VillagerMax
+        end loop
+        wait WaitTime seconds
+    end if
+
+    TownCounter++
+end loop
+
+end script AAV_AIVillagers
