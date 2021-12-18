@@ -115,16 +115,27 @@ begin script UA_CreateUndeadPlatoon(PlayerID,Graveyard,howManyVillagers)
     ArmySize = 0
     Ghost[999]
     counter = 0
+    maxTries = 0
     myEffect = 0
     myArmy = 0
     RelativePos = 0
     Villager = 0
+    VillagerForNavigation = 0
     VillagerTemp = 0
 
 start
 
     UA_myUsedUndead[PlayerID] += howManyVillagers
-    RelativePos = marker at get world position from Graveyard to {4,0,4}
+    begin loop
+        RelativePos = marker at get world position from Graveyard to {number from -10 to 10,number from -10 to 10}
+        VillagerForNavigation = get living villager at {Graveyard} radius 250
+        maxTries++
+        until Villager can navigate to {RelativePos} or maxTries > 100
+    end loop
+
+    if maxTries > 100
+        RelativePos = marker at get world position from Graveyard to {4,4}
+    end if
 
     myEffect = create visual effect VISUAL_EFFECT_TOWN_TAKEOVER_DEFENDER at {RelativePos} + {0,2,0} time 10
     set myEffect color red 148 green 0 blue 211
