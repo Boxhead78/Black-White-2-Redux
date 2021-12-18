@@ -20,6 +20,7 @@ define script LC13_GenericTalusSpeeches(whichUnit,PlayerOfUnit)
 define script LC13_DeathSpell(PlayerID,SpellPosition,GodPosition)
 define script LC13_DeathSpellScripted(PlayerID,SpellPosition,GodPosition)
 define script LC13_CheckStonehenge(whichPlatoon,whichWeather)
+define script LC13_EarthquakeWorkaround
 define script LC13_VolcanoWorkaround
 
 define TalusPlatoon = 0
@@ -3532,7 +3533,7 @@ start
                                     else
                                         AnotherPlatoon = recruit ARMY_UNIT_TYPE_RANGED_4 town GenericTown platoon of size 45 * RecruitSizeModifier
                                         enable platoon AnotherPlatoon respond to town GenericTown attack
-                                        run background script LC13_StaticPlatoonsActions(marker at {GenericTown} + {number from -50 to 50,number from -50 to 50},Melee,AnotherPlatoon,GenericTown)
+                                        run background script LC13_StaticPlatoonsActions(marker at {GenericTown} + {number from -50 to 50,number from -50 to 50},Ranged,AnotherPlatoon,GenericTown)
                                         wait until not AnotherPlatoon recruiting
                                         run background script PT_CreateBasicAztecPlatoonRanged(AnotherPlatoon,1)
                                     end if
@@ -3577,7 +3578,7 @@ start
                                     else
                                         AnotherPlatoon = recruit ARMY_UNIT_TYPE_RANGED_4 town GenericTown platoon of size 45 * RecruitSizeModifier
                                         enable platoon AnotherPlatoon respond to town GenericTown attack
-                                        run background script LC13_StaticPlatoonsActions(marker at {GenericTown} + {number from -50 to 50,number from -50 to 50},Melee,AnotherPlatoon,GenericTown)
+                                        run background script LC13_StaticPlatoonsActions(marker at {GenericTown} + {number from -50 to 50,number from -50 to 50},Ranged,AnotherPlatoon,GenericTown)
                                         wait until not AnotherPlatoon recruiting
                                         run background script PT_CreateBasicAztecPlatoonRanged(AnotherPlatoon,1)
                                     end if
@@ -4056,7 +4057,7 @@ begin loop
             until PLAYER of NearestTown != 1 and NearestTown exists
         end loop
     end if
-    if NearestTown exists and get building ABODE_NUMBER_TOWN_CENTRE in NearestTown min built 1.0 exists
+    if NearestTown exists and get building ABODE_NUMBER_TOWN_CENTRE in NearestTown min built 1.0 exists and NearestTown != MinorTown5 and NearestTown != MinorTown6 and NearestTown != MinorTown8
         NearestSettlement = NearestTown
         wait until PLAYER of NearestSettlement == 1 or NearestSettlement not exists or 2400 seconds
     end if
@@ -4649,6 +4650,36 @@ wait number from 20 to 40 seconds
 delete whichWeather
 
 end script LC13_CheckStonehenge
+
+begin script LC13_EarthquakeWorkaround
+
+    Angle = 0
+    Pos = 0
+    Counter = 0
+    Tree = 0
+
+start
+
+//Rebuild the epic
+begin loop
+    wait until HEALTH of AIEarthquake < 1.0 and HEALTH of AIEarthquake > 0.8
+    wait 600 seconds
+    if HEALTH of AIEarthquake < 1.0 and HEALTH of AIEarthquake > 0.8
+        wait until get distance from camera position to {AIEarthquake} > 300 and not {AIEarthquake} viewed
+        Angle = ANGLE of AIEarthquake
+        Pos = marker at {AIEarthquake}
+        delete AIEarthquake
+        AIEarthquake = create WONDER EPIC_WONDER_NUMBER_EARTHQUAKE at {Pos}
+        ANGLE of AIEarthquake = Angle
+        PLAYER of AIEarthquake = 1
+        attach AIEarthquake to AztecCapital
+        BUILT of AIEarthquake = 0.75
+        disable AIEarthquake hurt by fire
+        wait until HEALTH of AIEarthquake == 1.0
+    end if
+end loop
+
+end script LC13_EarthquakeWorkaround
 
 begin script LC13_VolcanoWorkaround
 
