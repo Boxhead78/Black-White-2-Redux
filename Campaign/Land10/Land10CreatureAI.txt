@@ -148,6 +148,18 @@ begin loop
             wait until HEALTH of LC10_EnemyCreature == 0.00 or 360 seconds
         end if
         
+    elsif HEALTH of LC10_EnemyCreature > 0.00 and get CreatureRollRoleTimer time remaining <= 0
+        if PLAYER of AITown[AICounter] == 1
+            Position = marker at {AITown[AICounter]} + {number from 50 to -50,number from 50 to -50}
+            if number from 1 to 3 == 1
+                set creature LC10_EnemyCreature role to CR_GATHERER radius 200 at {Position}
+            else
+                set creature LC10_EnemyCreature role to CR_NONE radius 200 at {Position}
+            end if
+            CreatureRollRoleTimer = create timer for 360 seconds
+        
+        end if
+
     end if
 
     AICounter += number from 0 to 16
