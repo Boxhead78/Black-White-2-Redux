@@ -33,17 +33,18 @@ begin loop
     PlayerTownLocal = get town with id TownCounter
     TownCentre = get building ABODE_NUMBER_TOWN_CENTRE in PlayerTownLocal min built 1.0
     if PLAYER of PlayerTownLocal == 0 and TownCentre exists and variable get town PlayerTownLocal status != variable TOWN_STATUS_MIGRATION_STARTED
-        TownSize = adult size of PlayerTownLocal
-        TownCapacity = adult capacity of PlayerTownLocal
+        TownSize = size of PlayerTownLocal
+        TownCapacity = capacity of PlayerTownLocal
         VillagerCounter = 0
         if TownCapacity > TownSize * 1.5
             begin loop
                 TownHouse = get random home in town PlayerTownLocal
-                Villager = create random villager of tribe TRIBE_TYPE_GREEK at {TownHouse}
+                Villager = create CHILD constant from VILLAGER_INFO_GREEK_HOUSEWIFE_FEMALE to VILLAGER_INFO_GREEK_TRADER_MALE at {TownHouse}
                 attach Villager to PlayerTownLocal
                 release Villager
-                wait number from 5 to 7 seconds
-                until VillagerCounter > TownSize * 1.25
+                wait number from 8 to 10 seconds
+                VillagerCounter++
+                until VillagerCounter > TownSize * 1.25 or capacity of PlayerTownLocal < size of PlayerTownLocal
             end loop
             wait PLAYERVILLAGERSDELAY seconds
         end if
