@@ -4,7 +4,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-define PLAYERVILLAGERSDELAY = 30
+define PLAYERVILLAGERSDELAY = 15
 
 define script AAV_PlayerVillagers
 
@@ -39,10 +39,14 @@ begin loop
         if TownCapacity > TownSize * 1.5
             begin loop
                 TownHouse = get random home in town PlayerTownLocal
-                Villager = create CHILD constant from VILLAGER_INFO_GREEK_HOUSEWIFE_FEMALE to VILLAGER_INFO_GREEK_TRADER_MALE at {TownHouse}
+                if TownHouse exists
+                    Villager = create CHILD constant from VILLAGER_INFO_GREEK_HOUSEWIFE_FEMALE to VILLAGER_INFO_GREEK_TRADER_MALE at {TownHouse}
+                else
+                    Villager = create CHILD constant from VILLAGER_INFO_GREEK_HOUSEWIFE_FEMALE to VILLAGER_INFO_GREEK_TRADER_MALE at {TownCentre}
+                end if
                 attach Villager to PlayerTownLocal
                 release Villager
-                wait number from 8 to 10 seconds
+                wait number from 4 to 6 seconds
                 VillagerCounter++
                 until VillagerCounter > TownSize * 1.25 or capacity of PlayerTownLocal < size of PlayerTownLocal
             end loop
