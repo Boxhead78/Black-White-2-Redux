@@ -3082,6 +3082,8 @@ start
                     run background script LC14_MainScript(0)
                 else
                     LC14_LargeSiegeIsRunning = 0
+                    LC14_LargeSiegeRetreat = 0
+                    LC14_LargeSiegeStartAttack = 1
                     LC14_LargeSiegeLaunchAttack = 1
                     LC14_LargeSiegeOver = 1
                     myAttackTimer = create timer for 150 seconds
@@ -3105,6 +3107,12 @@ start
             end if
             if LC14_LargeSiegeLaunchAttack != 1
                 LC14_LargeSiegeLaunchAttack = 1
+            end if
+            if LC14_LargeSiegeStartAttack != 1
+                LC14_LargeSiegeStartAttack = 1
+            end if
+            if LC14_LargeSiegeRetreat != 0
+                LC14_LargeSiegeRetreat = 0
             end if
             if SiegeRan != 1
                 SiegeRan = 1
@@ -3260,6 +3268,7 @@ start
         //Respawn Platoons, are pre-placed already
         GB_DialogueIsRunning = 1
         wait until dialogue ready
+        LC14_LargeSiegeStartAttack = 1
         begin dialogue
             say "BW2XT_LAND02_TALUS_THREATS_60"
             clear dialogue
@@ -3284,7 +3293,9 @@ start
 
         run script LC14_PlayRandomBanter
 
-        wait 60 seconds
+        wait 30 seconds
+        LC14_LargeSiegeLaunchAttack = 1
+        wait 30 seconds
         
         enemyPlatoon[0] = recruit ARMY_UNIT_TYPE_MELEE_6 town AztecTown1 platoon of size 30 * RecruitSizeModifier
         AttackingPosition = marker at {AttackPos[0]} + {45,0}
