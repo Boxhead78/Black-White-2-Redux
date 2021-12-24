@@ -2020,6 +2020,9 @@ begin script LC9_Aztec_Capital
     AttackingPosition = 0
     AttackingPositionFallBack = 0
 
+    LC9_DynamicMusicTimer = create timer for 1200 seconds
+    LC9_DynamicMusicStarted = 0
+
 start
 
     BuildingDefendersAllowed[0] = 1
@@ -3526,6 +3529,11 @@ start
                 end while
 
             end if
+        end if
+
+        if LC9_DynamicMusicStarted == 0 and get LC9_DynamicMusicTimer time remaining <= 0
+            LC9_DynamicMusicStarted = 1
+            run background script DMM_DynamicMusicManager(DMM_MUSIC_PAUSE_ON, DMM_SERVERITY_LEVEL_3)
         end if
 
         if get WallTimer time remaining <= 0

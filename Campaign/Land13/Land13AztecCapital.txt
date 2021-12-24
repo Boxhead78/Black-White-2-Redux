@@ -2150,6 +2150,9 @@ begin script LC13_Aztec_Capital
     BuildingDefendersAllowed[5]
     BuildingDefendersAllowedTimer = create timer for 0 seconds
     Counter = 0
+    LC13_DynamicMusicTimer = create timer for 99999 seconds
+    LC13_DynamicMusicStarted = 0
+
 start
 
     BuildingDefendersAllowed[0] = 1
@@ -3722,6 +3725,18 @@ start
             //Use platoons for PlayerTown
             ConquerorTimer = create timer for 2400 * RecruitModifier seconds
             AttackingPlatoons = 0
+        end if
+
+        LC13_DynamicMusicTimer = create timer for 99999 seconds
+        LC13_DynamicMusicStarted = 0
+        if LC13_DynamicMusicStarted == 0 and EpicFired == 2
+            LC13_DynamicMusicStarted = 1
+            LC13_DynamicMusicTimer = create timer for 180 seconds
+        end if
+
+        if LC13_DynamicMusicStarted == 1 and get LC13_DynamicMusicTimer time remaining <= 0
+            LC13_DynamicMusicStarted = 2
+            run background script DMM_DynamicMusicManager(DMM_MUSIC_PAUSE_ON, DMM_SERVERITY_LEVEL_4)
         end if
 
         if get VolcanoTimer time remaining <= 300 and PLAYER of AztecCapital == 1 and HEALTH of AIVolcano >= 1.0 and CHARGE of AIVolcano != 1.0

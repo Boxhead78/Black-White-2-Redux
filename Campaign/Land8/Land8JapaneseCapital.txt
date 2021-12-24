@@ -1598,6 +1598,8 @@ begin script LC8_Japanese_Capital
     Counter = 0
     AttackingPosition = 0
     AttackingPositionFallBack = 0
+    DynamicMusicTimer = create timer for 99999 seconds
+    LC8_DynamicMusicStarted = 0
     
 start
 
@@ -3124,6 +3126,16 @@ start
                     end if
                 end if
             end if
+        end if
+
+        if LC8_LargeSiegeOver == 1 and LC8_DynamicMusicStarted == 0
+            LC8_DynamicMusicStarted = 1
+            DynamicMusicTimer = create timer for 300 seconds
+        end if
+
+        if LC8_DynamicMusicStarted == 1 and get DynamicMusicTimer time remaining <= 0
+            LC8_DynamicMusicStarted = 2
+            run background script DMM_DynamicMusicManager(DMM_MUSIC_PAUSE_ON, DMM_SERVERITY_LEVEL_2)
         end if
 
         if PLAYER of JapaneseTown1 != 1 or PLAYER of JapaneseTown2 != 1 or PLAYER of JapaneseCapital != 1 or TownsConverted >= 3 or size of PlayerTown > PlayerTownStartSize + 200

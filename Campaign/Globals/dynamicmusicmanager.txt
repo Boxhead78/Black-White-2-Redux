@@ -1,0 +1,360 @@
+///////////////////////////////////////////////////////////////////////////////
+//       Dynamic Music Manager Script
+//    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+///////////////////////////////////////////////////////////////////////////////
+
+define DMM_MAX_PLAYERS = 2 //Max 4, Min 1
+define DMM_CHECKS_DELAY = 5
+define DMM_PAUSE_SECONDS = 150
+define DMM_STOP_MUSIC_SECONDS = 30
+
+define DMM_STOP_MUSIC = 1
+
+define DMM_MUSIC_PAUSE_ON = 1
+define DMM_MUSIC_PAUSE_OFF = 2
+
+define DMM_SERVERITY_LEVEL_1 = 0
+define DMM_SERVERITY_LEVEL_2 = 1
+define DMM_SERVERITY_LEVEL_3 = 2
+define DMM_SERVERITY_LEVEL_4 = 3
+define DMM_SERVERITY_LEVEL_END_BATTLE_1 = 4
+define DMM_SERVERITY_LEVEL_END_BATTLE_2 = 5
+define DMM_SERVERITY_LEVEL_MAX = 6
+
+define script DMM_DynamicMusicManager(battleMusicPause, battleMusicSeverity)
+define script DMM_DynamicMusicManagerPlayMusic(whichTown, playerID, enemyPlayerID)
+
+global DMM_IsRunning = 0
+global DMM_StopMusic = 0
+global DMM_Severity = 0
+global DMM_Pause = 0
+global DMM_MusicIsStopping = 0
+global DMM_HowOftenIsThisScriptActive = 0
+
+begin script DMM_DynamicMusicManager(battleMusicPause, battleMusicSeverity)
+
+    Counter = 0
+    myTown = 0
+    myPlatoon = 0
+    enemyPlatoon = 0
+    numberOfPlatoons = 0
+    numberOfEnemyPlatoons = 0
+    scriptQueueTime = 0
+
+start
+
+DMM_HowOftenIsThisScriptActive++
+scriptQueueTime = DMM_HowOftenIsThisScriptActive
+
+wait until DMM_MusicIsStopping == 0
+
+wait scriptQueueTime seconds //If this script is called multiple times make sure to set the data of the last in queue
+
+DMM_Severity = battleMusicSeverity
+if DMM_Severity >= DMM_SERVERITY_LEVEL_MAX
+    DMM_Severity = DMM_SERVERITY_LEVEL_4
+end if
+
+DMM_Pause = battleMusicPause
+if DMM_Pause != DMM_MUSIC_PAUSE_ON or DMM_Pause != DMM_MUSIC_PAUSE_OFF
+    DMM_Pause = DMM_MUSIC_PAUSE_ON
+end if
+
+DMM_HowOftenIsThisScriptActive--
+
+if DMM_IsRunning == 0
+    DMM_IsRunning = 1
+    begin loop
+        if Counter > 15
+            Counter = 0
+            wait DMM_CHECKS_DELAY seconds
+        end if
+
+        myTown = get town with id Counter
+        myPlatoon = 0
+        enemyPlatoon = 0
+        if myTown exists and size of myTown > 0 and PLAYER of myTown >= 0 and PLAYER of myTown <= DMM_MAX_PLAYERS-1
+            myPlatoon = get platoon of player 0 nearest {myTown} radius 500
+            // Get enemy platoon
+            if DMM_MAX_PLAYERS >= 4
+                if enemyPlatoon == 0 or enemyPlatoon not exists
+                    enemyPlatoon = get platoon of player 3 nearest {myTown} radius 500
+                end if
+            end if
+            if DMM_MAX_PLAYERS >= 3
+                if enemyPlatoon == 0 or enemyPlatoon not exists
+                    enemyPlatoon = get platoon of player 2 nearest {myTown} radius 500
+                end if
+            end if
+            if DMM_MAX_PLAYERS >= 2
+                if enemyPlatoon == 0 or enemyPlatoon not exists
+                    enemyPlatoon = get platoon of player 1 nearest {myTown} radius 500
+                end if
+            end if
+
+            numberOfPlatoons = 0
+            numberOfEnemyPlatoons = 0
+            if myPlatoon exists
+                numberOfPlatoons = get number of platoon of player 0 at {myPlatoon} radius 100
+            end if
+            if enemyPlatoon exists
+                numberOfEnemyPlatoons = get number of platoon of player PLAYER of enemyPlatoon at {enemyPlatoon} radius 100
+            end if
+
+            //Minimum requirements to play music
+            if myPlatoon exists and (get number of villagers in platoon myPlatoon >= 50 or numberOfPlatoons > 3) and PLAYER of myTown >= 1 and PLAYER of myTown <= DMM_MAX_PLAYERS-1 and get player PLAYER of myPlatoon influence at {myPlatoon} == 0
+                run script DMM_DynamicMusicManagerPlayMusic(myTown, 0, 0)
+
+            elsif enemyPlatoon exists and (get number of villagers in platoon enemyPlatoon >= 80 or numberOfEnemyPlatoons > 5) and PLAYER of myTown == 0 and get player PLAYER of enemyPlatoon influence at {enemyPlatoon} == 0
+                run script DMM_DynamicMusicManagerPlayMusic(myTown, 0, PLAYER of enemyPlatoon)
+
+            end if
+        end if
+
+        Counter++
+        until DMM_StopMusic == 1
+    end loop
+    DMM_IsRunning = 0
+end if
+
+end script DMM_DynamicMusicManager
+
+
+begin script DMM_DynamicMusicManagerPlayMusic(whichTown, playerID, enemyPlayerID)
+
+    musicIsRunning = 0
+    musicMixer = 0
+    Number = 0
+    numberOfPlayerPlatoons = 0
+    numberOfEnemyPlatoons = 0
+    myPlatoon = 0
+    enemyPlatoon = 0
+    battleMusicLevel = 0
+    selectedBattleMusicLevel = 0
+    waitTime = 0
+    changeMusicTimer = create timer for 0 seconds
+    conditionTrue = 0
+    conditionActive[9]
+    StopScriptTimer = create timer for 999 seconds
+    FirstTime = 1
+
+start
+
+    musicIsRunning = 1
+    begin loop
+        //INIT
+        myPlatoon = 0
+        enemyPlatoon = 0
+        numberOfPlayerPlatoons = 0
+        numberOfEnemyPlatoons = 0
+        wait DMM_CHECKS_DELAY seconds
+
+        //GET PLATOONS
+        myPlatoon = get platoon of player playerID nearest {whichTown} radius 500
+        numberOfPlayerPlatoons = get number of platoon of player playerID at {myPlatoon} radius 100
+        if enemyPlayerID != 0
+            enemyPlatoon = get platoon of player enemyPlayerID nearest {whichTown} radius 500
+            numberOfEnemyPlatoons = get number of platoon of player enemyPlayerID at {enemyPlatoon} radius 100
+        end if
+
+        //DO CHECKS AND PLAY MUSIC
+        if conditionActive[0] == 0 and myPlatoon exists and get number of villagers in platoon myPlatoon >= 50 and get player playerID influence at {myPlatoon} == 0
+            conditionActive[0] = 1
+            conditionTrue++
+        elsif conditionActive[0] == 1
+            conditionActive[0] = 0
+            conditionTrue--
+        end if
+        if conditionActive[1] == 0 and myPlatoon exists and numberOfPlayerPlatoons > 3 and get player playerID influence at {myPlatoon} == 0
+            conditionActive[1] = 1
+            conditionTrue++
+        elsif conditionActive[1] == 1
+            conditionActive[1] = 0
+            conditionTrue--
+        end if
+        if conditionActive[2] == 0 and enemyPlatoon exists and get number of villagers in platoon enemyPlatoon >= 80 and get player enemyPlayerID influence at {enemyPlatoon} == 0
+            conditionActive[2] = 1
+            conditionTrue++
+        elsif conditionActive[2] == 1
+            conditionActive[2] = 0
+            conditionTrue--
+        end if
+        if conditionActive[3] == 0 and enemyPlatoon exists and numberOfEnemyPlatoons > 5 and get player enemyPlayerID influence at {enemyPlatoon} == 0
+            conditionActive[3] = 1
+            conditionTrue++
+        elsif conditionActive[3] == 1
+            conditionActive[3] = 0
+            conditionTrue--
+        end if
+
+        if conditionTrue >= 1 or battleMusicLevel != selectedBattleMusicLevel
+            while get changeMusicTimer time remaining <= 0
+                if DMM_Severity != DMM_SERVERITY_LEVEL_END_BATTLE_1 and DMM_Severity != DMM_SERVERITY_LEVEL_END_BATTLE_2 
+                    if (FirstTime == 1 or DMM_Severity == DMM_SERVERITY_LEVEL_1 or battleMusicLevel != selectedBattleMusicLevel)
+                        FirstTime = 0
+                        battleMusicLevel = 1
+                        selectedBattleMusicLevel = 1
+                        Number = number from 1 to 2
+                        start dynamic music
+                        if Number == 1
+                            set dynamic music "small" loop -1
+                        elsif Number == 2
+                            set dynamic music "large" loop -1
+                        end if
+
+                        waitTime = number from 15 to 60
+                        changeMusicTimer = create timer for waitTime seconds
+                    end if
+
+                    if battleMusicLevel >= 1 and DMM_Severity == DMM_SERVERITY_LEVEL_2
+                        battleMusicLevel = 2
+                        selectedBattleMusicLevel = 2
+                        Number = number from 1 to 3
+                        if Number == 1
+                            set dynamic music "smallevent4" loop 0 urgent
+                            wait until DMM_StopMusic == 1 or 8 seconds
+                            set dynamic music "medium" loop -1
+
+                        elsif Number == 2
+                            set dynamic music "large" loop -1
+
+                        elsif Number == 3
+                            set dynamic music "large" loop -1
+                            wait until DMM_StopMusic == 1 or 45 seconds
+                            set dynamic music "medium" loop -1
+
+                        end if
+
+                        waitTime = number from 60 to 120
+                        changeMusicTimer = create timer for waitTime seconds
+                    end if
+
+                    if battleMusicLevel >= 1 and DMM_Severity == DMM_SERVERITY_LEVEL_3
+                        battleMusicLevel = 3
+                        selectedBattleMusicLevel = 3
+                        Number = number from 1 to 5
+                        if Number == 1
+                            set dynamic music "smallevent4" loop 0 urgent
+                            wait until DMM_StopMusic == 1 or 8 seconds
+                            set dynamic music "medium" loop -1
+
+                        elsif Number == 2
+                            set dynamic music "medium" loop -1
+
+                        elsif Number == 3
+                            set dynamic music "large" loop -1
+                            wait until DMM_StopMusic == 1 or 45 seconds
+                            set dynamic music "medium" loop -1
+
+                        elsif Number == 4
+                            set dynamic music "smallevent2" loop 0 urgent
+                            wait until DMM_StopMusic == 1 or 8 seconds
+                            set dynamic music "medium" loop -1
+
+                        elsif Number == 5
+                            set dynamic music "smallevent3" loop 0 urgent
+                            wait until DMM_StopMusic == 1 or 8 seconds
+                            set dynamic music "medium" loop -1
+
+                        end if
+
+                        waitTime = number from 60 to 120
+                        changeMusicTimer = create timer for waitTime seconds
+                    end if
+
+                    if battleMusicLevel >= 1 and DMM_Severity == DMM_SERVERITY_LEVEL_4
+                        battleMusicLevel = 4
+                        selectedBattleMusicLevel = 4
+                        Number = number from 1 to 7
+                        if Number == 1
+                            set dynamic music "largeevent1" loop -1 urgent
+                            wait until DMM_StopMusic == 1 or 30 seconds
+                            set dynamic music "medium" loop -1
+
+                        elsif Number == 2
+                            set dynamic music "smallevent4" loop 0 urgent
+                            wait until DMM_StopMusic == 1 or 8 seconds
+                            set dynamic music "medium" loop -1
+
+                        elsif Number == 3
+                            set dynamic music "medium" loop -1
+
+                        elsif Number == 4
+                            set dynamic music "large" loop -1
+                            wait until DMM_StopMusic == 1 or 45 seconds
+                            set dynamic music "medium" loop -1
+
+                        elsif Number == 5
+                            set dynamic music "smallevent2" loop 0 urgent
+                            wait until DMM_StopMusic == 1 or 8 seconds
+                            set dynamic music "medium" loop -1
+
+                        elsif Number == 6
+                            set dynamic music "smallevent3" loop 0 urgent
+                            wait until DMM_StopMusic == 1 or 8 seconds
+                            set dynamic music "medium" loop -1
+
+                        elsif Number == 7
+                            set dynamic music "smallevent6" loop 0 urgent
+                            wait until DMM_StopMusic == 1 or 8 seconds
+                            set dynamic music "medium" loop -1
+
+                        end if
+
+                        waitTime = number from 60 to 120
+                        changeMusicTimer = create timer for waitTime seconds
+                    end if
+                else
+                    if DMM_Severity == DMM_SERVERITY_LEVEL_END_BATTLE_1
+                        battleMusicLevel = 5
+                        selectedBattleMusicLevel = 5
+                        set dynamic music "smallendofbattle2" loop -1 urgent
+                    end if
+
+                    if DMM_Severity == DMM_SERVERITY_LEVEL_END_BATTLE_2
+                        battleMusicLevel = 6
+                        selectedBattleMusicLevel = 6
+                        set dynamic music "smallendofbattle" loop -1 urgent
+                    end if
+
+                    waitTime = 999
+                    StopScriptTimer = create timer for 90+DMM_CHECKS_DELAY seconds
+                    changeMusicTimer = create timer for waitTime seconds
+                end if
+            end while
+            wait 3 seconds
+
+        elsif conditionTrue == 0 //Initiate stop music
+            battleMusicLevel = DMM_SERVERITY_LEVEL_1
+            if get StopScriptTimer time remaining <= 0
+                StopScriptTimer = create timer for DMM_STOP_MUSIC_SECONDS+DMM_CHECKS_DELAY seconds
+            end if
+
+        end if
+
+        if DMM_StopMusic == 1 or get StopScriptTimer time remaining <= DMM_CHECKS_DELAY+1
+            //end music
+            DMM_MusicIsStopping = 1
+            musicMixer = create mixer
+            set mixer musicMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 0.0 with fadetime 10
+            wait 10 seconds
+            stop dynamic music
+            wait 5 seconds
+            destroy mixer musicMixer
+            if DMM_StopMusic == 0
+                if DMM_Pause == DMM_MUSIC_PAUSE_ON
+                    wait until DMM_StopMusic == 1 or DMM_HowOftenIsThisScriptActive >= 1 or DMM_PAUSE_SECONDS seconds
+                    wait 5 seconds
+                elsif DMM_Pause == DMM_MUSIC_PAUSE_OFF
+                    wait until DMM_StopMusic == 1 or 5 seconds
+                end if
+            end if
+            musicIsRunning = 0
+            DMM_MusicIsStopping = 0
+        end if
+
+        until musicIsRunning == 0
+    end loop
+
+end script DMM_DynamicMusicManagerPlayMusic
