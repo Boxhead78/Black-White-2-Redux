@@ -10,7 +10,7 @@ begin script ThunderstormSpell(PlayerID,SpellPosition)
     PlayerMana = 0
     ThunderstormSpell = 0
 
-    BrakeLoop = 0
+    BreakLoop = 0
 
     Effect1 = 0
 
@@ -33,25 +33,25 @@ start
 
         begin loop
             if bindable action BINDABLE_ACTION_TYPE_ACTION performed
-                BrakeLoop = 1  
+                BreakLoop = 1  
                 SpellPosition = marker at hand position
             end if
             if not Rock is HELD
                 delete Rock
                 delete SeedEffect
-                BrakeLoop = 2
+                BreakLoop = 2
             end if
-            until BrakeLoop >= 1
+            until BreakLoop >= 1
         end loop
 
         delete Rock
         delete SeedEffect
     else
         // For AIs
-        BrakeLoop = 1
+        BreakLoop = 1
     end if
 
-    if BrakeLoop == 1
+    if BreakLoop == 1
         //Script here
         Effect1 = create visual effect VISUAL_EFFECT_TOWN_TAKEOVER_AGGRESSOR at {SpellPosition} + {0,10,0} time 40
         set Effect1 colour red 192 green 192 blue 192
@@ -71,7 +71,7 @@ start
         set Effect1 colour red 192 green 192 blue 192
         if camera position near {SpellPosition} radius 2500 / 4 play string sound "SCRIPT1_VEPIC_DECAYCHARGESPELL" end if
         wait 5 seconds
-    elsif BrakeLoop == 2
+    elsif BreakLoop == 2
         PlayerMana = get player PlayerID mana
         set player PlayerID mana PlayerMana + 30000
     end if
