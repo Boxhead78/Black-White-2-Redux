@@ -136,7 +136,8 @@ begin script DMM_DynamicMusicManagerPlayMusic(whichTown, playerID, enemyPlayerID
     changeMusicTimer = create timer for 0 seconds
     conditionTrue = 0
     conditionActive[9]
-    StopScriptTimer = create timer for 999 seconds
+    StopScriptTimer = create timer for 0 seconds
+    StopScriptTImerInitiated = 0
     FirstTime = 1
     MusicIntro = 0
     MusicIntroMax = 2
@@ -161,28 +162,28 @@ start
         end if
 
         //DO CHECKS AND PLAY MUSIC
-        if conditionActive[0] == 0 and myPlatoon exists and get number of villagers in platoon myPlatoon >= 50 and get player playerID influence at {myPlatoon} == 0 and PLAYER of whichTown == enemyPlayerID
+        if conditionActive[0] == 0 and myPlatoon exists and get number of villagers in platoon myPlatoon >= 50 and get player playerID influence at {myPlatoon} == 0
             conditionActive[0] = 1
             conditionTrue++
         elsif conditionActive[0] == 1
             conditionActive[0] = 0
             conditionTrue--
         end if
-        if conditionActive[1] == 0 and myPlatoon exists and numberOfPlayerPlatoons > 3 and get player playerID influence at {myPlatoon} == 0 and PLAYER of whichTown == enemyPlayerID
+        if conditionActive[1] == 0 and myPlatoon exists and numberOfPlayerPlatoons > 3 and get player playerID influence at {myPlatoon} == 0
             conditionActive[1] = 1
             conditionTrue++
         elsif conditionActive[1] == 1
             conditionActive[1] = 0
             conditionTrue--
         end if
-        if conditionActive[2] == 0 and enemyPlatoon exists and get number of villagers in platoon enemyPlatoon >= 80 and get player enemyPlayerID influence at {enemyPlatoon} == 0 and PLAYER of whichTown == enemyPlayerID
+        if conditionActive[2] == 0 and enemyPlatoon exists and get number of villagers in platoon enemyPlatoon >= 80 and get player enemyPlayerID influence at {enemyPlatoon} == 0
             conditionActive[2] = 1
             conditionTrue++
         elsif conditionActive[2] == 1
             conditionActive[2] = 0
             conditionTrue--
         end if
-        if conditionActive[3] == 0 and enemyPlatoon exists and numberOfEnemyPlatoons > 5 and get player enemyPlayerID influence at {enemyPlatoon} == 0 and PLAYER of whichTown == enemyPlayerID
+        if conditionActive[3] == 0 and enemyPlatoon exists and numberOfEnemyPlatoons > 5 and get player enemyPlayerID influence at {enemyPlatoon} == 0
             conditionActive[3] = 1
             conditionTrue++
         elsif conditionActive[3] == 1
@@ -369,12 +370,13 @@ start
         elsif conditionTrue == 0 //Initiate stop music
             battleMusicLevel = DMM_SERVERITY_LEVEL_1
             if get StopScriptTimer time remaining <= 0
+                StopScriptTImerInitiated = 1
                 StopScriptTimer = create timer for DMM_STOP_MUSIC_SECONDS+DMM_CHECKS_DELAY seconds
             end if
 
         end if
 
-        if DMM_StopMusic == 1 or get StopScriptTimer time remaining <= DMM_CHECKS_DELAY+1
+        if DMM_StopMusic == 1 or (get StopScriptTimer time remaining <= DMM_CHECKS_DELAY+1 and StopScriptTImerInitiated == 1)
             //end music
             DMM_MusicIsStopping = 1
             musicMixer = create mixer
