@@ -3483,28 +3483,50 @@ start
 
     wait 150 seconds
 
-    if HEALTH of AIVolcano == 1.0 and VolcanoFired == 0
-        WT_SkyTransitionAllowed = 0
-        enable predefined sky "VOLCANO" time 10
-        CastEpicPos = marker at {1027.72,118.41,1972.32}
-        run script EpicTargeter(PlayerTown,marker at {CastEpicPos},0,4,1)
-        EpicWarning = create visual effect VISUAL_EFFECT_EPIC_TARGET_WARNING at {ET_FireEpicLocation} time 15 target {ET_FireEpicLocation}
-        EpicVolc = create volcano at {ET_FireEpicLocation} player 1
-        VolcanoFired = 1
-        run background script LC14_Volcano(AIVolcano, EpicVolc)
+    if HEALTH of AIVolcano == 1.0 and CHARGE of AIVolcano >= 1.0 and VolcanoFired == 0
+        if PLAYER of AztecTown1 != 0
+            WT_SkyTransitionAllowed = 0
+            enable predefined sky "VOLCANO" time 10
+            ET_FireEpicLocation = marker at {1583.71,143.96,1841.69}
+            VolcanoWarning = create visual effect VISUAL_EFFECT_EPIC_TARGET_WARNING at {ET_FireEpicLocation} time 15 target {ET_FireEpicLocation}
+            EpicVolc = create volcano at {ET_FireEpicLocation} player 1
+            VolcanoFired = 1
+            run background script LC14_Volcano(AIVolcano, EpicVolc)
+        else
+            wait 5 seconds
+            WT_SkyTransitionAllowed = 0
+            enable predefined sky "VOLCANO" time 10
+            CastEpicPos = marker at {PlayerTown}
+            run script EpicTargeter(PlayerTown,marker at {CastEpicPos},0,4,1)
+            EpicWarning = create visual effect VISUAL_EFFECT_EPIC_TARGET_WARNING at {ET_FireEpicLocation} time 15 target {ET_FireEpicLocation}
+            EpicVolc = create volcano at {ET_FireEpicLocation} player 1
+            VolcanoFired = 1
+            run background script LC14_Volcano(AIVolcano, EpicVolc)
+        end if
     end if
 
     wait 150 seconds
 
-    if HEALTH of AIVolcano == 1.0 and VolcanoFired == 0
-        WT_SkyTransitionAllowed = 0
-        enable predefined sky "VOLCANO" time 10
-        CastEpicPos = marker at {1027.72,118.41,1972.32}
-        run script EpicTargeter(PlayerTown,marker at {CastEpicPos},0,4,1)
-        EpicWarning = create visual effect VISUAL_EFFECT_EPIC_TARGET_WARNING at {ET_FireEpicLocation} time 15 target {ET_FireEpicLocation}
-        EpicVolc = create volcano at {ET_FireEpicLocation} player 1
-        VolcanoFired = 1
-        run background script LC14_Volcano(AIVolcano, EpicVolc)
+    if HEALTH of AIVolcano == 1.0 and CHARGE of AIVolcano >= 1.0 and VolcanoFired == 0
+        if PLAYER of AztecTown1 != 0
+            WT_SkyTransitionAllowed = 0
+            enable predefined sky "VOLCANO" time 10
+            ET_FireEpicLocation = marker at {1583.71,143.96,1841.69}
+            VolcanoWarning = create visual effect VISUAL_EFFECT_EPIC_TARGET_WARNING at {ET_FireEpicLocation} time 15 target {ET_FireEpicLocation}
+            EpicVolc = create volcano at {ET_FireEpicLocation} player 1
+            VolcanoFired = 1
+            run background script LC14_Volcano(AIVolcano, EpicVolc)
+        else
+            wait 5 seconds
+            WT_SkyTransitionAllowed = 0
+            enable predefined sky "VOLCANO" time 10
+            CastEpicPos = marker at {PlayerTown}
+            run script EpicTargeter(PlayerTown,marker at {CastEpicPos},0,4,1)
+            EpicWarning = create visual effect VISUAL_EFFECT_EPIC_TARGET_WARNING at {ET_FireEpicLocation} time 15 target {ET_FireEpicLocation}
+            EpicVolc = create volcano at {ET_FireEpicLocation} player 1
+            VolcanoFired = 1
+            run background script LC14_Volcano(AIVolcano, EpicVolc)
+        end if
     end if
 
     wait 330 seconds
@@ -3690,6 +3712,17 @@ start
 
 while LandOver == 0
     if get EpicTimer time remaining <= 0
+        if CHARGE of AIVolcano == 0.0 and CHARGE of AIEarthquake == 0.0 and CHARGE of AIHurricane == 0.0
+            if PLAYER of AIVolcano == 1
+                CHARGE of AIVolcano = 1.0
+            end if
+            if PLAYER of AIEarthquake == 1
+                CHARGE of AIEarthquake = 1.0
+            end if
+            if PLAYER of AIHurricane == 1
+                CHARGE of AIHurricane = 1.0
+            end if
+        end if
         Number = number from 1 to 3
         if Number == 1 and CHARGE of AIVolcano == 1.0 and HEALTH of AIVolcano == 1.0 and VolcanoFired == 1 and PLAYER of AztecTown2 == 1
             if PLAYER of PlayerTown == 0
