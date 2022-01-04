@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------------------------------
 define script AltarEpics
-define script AltarEpicsLogic(Building,PlayerID,whichWonder)
+define script AltarEpicsLogic(Building,PlayerID,whichWonder,AISwitch)
 
 define NONE = 0
 define Regrowth = 1
@@ -68,67 +68,67 @@ if EpicSpellsActivated == 1
                         if get research ARTEFACT_EPIC_WONDER_NUMBER_SIREN available == variable RESEARCH_AVAILABILITY_RESEARCHED or PlayerID >= 1 
                             if RegrowthActivated[Counter] == 0
                                 RegrowthActivated[Counter] = 1
-                                run background script AltarEpicsLogic(TownCentre,PlayerID,Regrowth)
+                                run background script AltarEpicsLogic(TownCentre,PlayerID,Regrowth,1)
                             end if
                         end if
                         if get research ARTEFACT_EPIC_WONDER_NUMBER_HURRICANE available == variable RESEARCH_AVAILABILITY_RESEARCHED or PlayerID >= 1
                             if ThunderStormActivated[Counter] == 0
                                 ThunderStormActivated[Counter] = 1
-                                run background script AltarEpicsLogic(TownCentre,PlayerID,THUNDERSTORM)
+                                run background script AltarEpicsLogic(TownCentre,PlayerID,THUNDERSTORM,1)
                             end if
                         end if
                         if get research ARTEFACT_EPIC_WONDER_NUMBER_EARTHQUAKE available == variable RESEARCH_AVAILABILITY_RESEARCHED or PlayerID >= 1
                             if FireRainActivated[Counter] == 0
                                 FireRainActivated[Counter] = 1
-                                run background script AltarEpicsLogic(TownCentre,PlayerID,FIRERAIN)
+                                run background script AltarEpicsLogic(TownCentre,PlayerID,FIRERAIN,1)
                             end if
                         end if
                         if get research ARTEFACT_EPIC_WONDER_NUMBER_VOLCANO available == variable RESEARCH_AVAILABILITY_RESEARCHED or PlayerID >= 1
                             if MeteorActivated[Counter] == 0
                                 MeteorActivated[Counter] = 1
-                                run background script AltarEpicsLogic(TownCentre,PlayerID,METEOR)
+                                run background script AltarEpicsLogic(TownCentre,PlayerID,METEOR,1)
                             end if
                         end if
                         /*
                         if Altar exists and PLAYER of Altar == PlayerID and ExistingFeature[4] not exists
-                            run background script AltarEpicsLogic(Altar,PlayerID,LIFE)
+                            run background script AltarEpicsLogic(Altar,PlayerID,LIFE,1)
                         end if
                         if Altar exists and PLAYER of Altar == PlayerID and ExistingFeature[5] not exists
-                            run background script AltarEpicsLogic(Altar,PlayerID,DEATHH)
+                            run background script AltarEpicsLogic(Altar,PlayerID,DEATHH,1)
                         end if
                         */
 
                     elsif PlayerID == 0
-                        if get research ARTEFACT_EPIC_WONDER_NUMBER_SIREN available == variable RESEARCH_AVAILABILITY_RESEARCHED or PlayerID >= 1 
+                        if get research ARTEFACT_EPIC_WONDER_NUMBER_SIREN available == variable RESEARCH_AVAILABILITY_RESEARCHED
                             if RegrowthActivated[Counter] == 0
                                 RegrowthActivated[Counter] = 1
-                                run background script AltarEpicsLogic(TownCentre,PlayerID,Regrowth)
+                                run background script AltarEpicsLogic(TownCentre,PlayerID,Regrowth,0)
                             end if
                         end if
-                        if get research ARTEFACT_EPIC_WONDER_NUMBER_HURRICANE available == variable RESEARCH_AVAILABILITY_RESEARCHED or PlayerID >= 1
+                        if get research ARTEFACT_EPIC_WONDER_NUMBER_HURRICANE available == variable RESEARCH_AVAILABILITY_RESEARCHED
                             if ThunderStormActivated[Counter] == 0
                                 ThunderStormActivated[Counter] = 1
-                                run background script AltarEpicsLogic(TownCentre,PlayerID,THUNDERSTORM)
+                                run background script AltarEpicsLogic(TownCentre,PlayerID,THUNDERSTORM,0)
                             end if
                         end if
-                        if get research ARTEFACT_EPIC_WONDER_NUMBER_VOLCANO available == variable RESEARCH_AVAILABILITY_RESEARCHED or PlayerID >= 1
+                        if get research ARTEFACT_EPIC_WONDER_NUMBER_VOLCANO available == variable RESEARCH_AVAILABILITY_RESEARCHED
                             if FireRainActivated[Counter] == 0
                                 FireRainActivated[Counter] = 1
-                                run background script AltarEpicsLogic(TownCentre,PlayerID,FIRERAIN)
+                                run background script AltarEpicsLogic(TownCentre,PlayerID,FIRERAIN,0)
                             end if
                         end if
-                        if get research ARTEFACT_EPIC_WONDER_NUMBER_EARTHQUAKE available == variable RESEARCH_AVAILABILITY_RESEARCHED or PlayerID >= 1
+                        if get research ARTEFACT_EPIC_WONDER_NUMBER_EARTHQUAKE available == variable RESEARCH_AVAILABILITY_RESEARCHED
                             if MeteorActivated[Counter] == 0
                                 MeteorActivated[Counter] = 1
-                                run background script AltarEpicsLogic(TownCentre,PlayerID,METEOR)
+                                run background script AltarEpicsLogic(TownCentre,PlayerID,METEOR,0)
                             end if
                         end if
                         /*
                         if Altar exists and PLAYER of Altar == PlayerID and ExistingFeature[4] not exists
-                            run background script AltarEpicsLogic(Altar,PlayerID,LIFE)
+                            run background script AltarEpicsLogic(Altar,PlayerID,LIFE,0)
                         end if
                         if Altar exists and PLAYER of Altar == PlayerID and ExistingFeature[5] not exists
-                            run background script AltarEpicsLogic(Altar,PlayerID,DEATHH)
+                            run background script AltarEpicsLogic(Altar,PlayerID,DEATHH,0)
                         end if
                         */
                     end if
@@ -143,7 +143,7 @@ end if
 end script AltarEpics
 
 
-begin script AltarEpicsLogic(Building,PlayerID,whichWonder)
+begin script AltarEpicsLogic(Building,PlayerID,whichWonder,AISwitch)
 
     Counter = 0
     RelPos[6]
@@ -226,10 +226,12 @@ begin loop
                 ParticleEffect2[0] = create visual effect VISUAL_EFFECT_MIRACLE_CHARGE at {RelPos[0]} + {0,1,0} time -1 target {RelPos[0]} + {0,50,0}
                 SCALE of ParticleEffect2[0] = 0.5
             end if
-            if bindable action BINDABLE_ACTION_TYPE_ACTION performed and hand position near {Foundation[0]} radius 4
-                delete Tooltip
-                run script RegrowthSpell(0,0)
-                wait 2 seconds
+            if AISwitch == 0
+                if bindable action BINDABLE_ACTION_TYPE_ACTION performed and hand position near {Foundation[0]} radius 4
+                    delete Tooltip
+                    run script RegrowthSpell(0,0)
+                    wait 2 seconds
+                end if
             end if
         else
             if ParticleEffect2[0] exists
@@ -253,10 +255,12 @@ begin loop
                 ParticleEffect2[1] = create visual effect VISUAL_EFFECT_MIRACLE_CHARGE at {RelPos[1]} + {0,1,0} time -1 target {RelPos[1]} + {0,50,0}
                 SCALE of ParticleEffect2[1] = 0.5
             end if
-            if bindable action BINDABLE_ACTION_TYPE_ACTION performed and hand position near {Foundation[1]} radius 4
-                delete Tooltip
-                run script FirerainSpell(0,0)
-                wait 2 seconds
+            if AISwitch == 0
+                if bindable action BINDABLE_ACTION_TYPE_ACTION performed and hand position near {Foundation[1]} radius 4
+                    delete Tooltip
+                    run script FirerainSpell(0,0)
+                    wait 2 seconds
+                end if
             end if
         else
             if ParticleEffect2[1] exists
@@ -276,10 +280,12 @@ begin loop
                 ParticleEffect2[2] = create visual effect VISUAL_EFFECT_MIRACLE_CHARGE at {RelPos[2]} + {0,1,0} time -1 target {RelPos[2]} + {0,50,0}
                 SCALE of ParticleEffect2[2] = 0.5
             end if
-            if bindable action BINDABLE_ACTION_TYPE_ACTION performed and hand position near {Foundation[2]} radius 4
-                delete Tooltip
-                run script ThunderstormSpell(0,0)
-                wait 2 seconds
+            if AISwitch == 0
+                if bindable action BINDABLE_ACTION_TYPE_ACTION performed and hand position near {Foundation[2]} radius 4
+                    delete Tooltip
+                    run script ThunderstormSpell(0,0)
+                    wait 2 seconds
+                end if
             end if
         else
             if ParticleEffect2[2] exists
@@ -299,10 +305,12 @@ begin loop
                 ParticleEffect2[3] = create visual effect VISUAL_EFFECT_MIRACLE_CHARGE at {RelPos[3]} + {0,1,0} time -1 target {RelPos[3]} + {0,50,0}
                 SCALE of ParticleEffect2[3] = 0.5
             end if
-            if bindable action BINDABLE_ACTION_TYPE_ACTION performed and hand position near {Foundation[3]} radius 4
-                delete Tooltip
-                run script MeteorSpell(0,0)
-                wait 2 seconds
+            if AISwitch == 0
+                if bindable action BINDABLE_ACTION_TYPE_ACTION performed and hand position near {Foundation[3]} radius 4
+                    delete Tooltip
+                    run script MeteorSpell(0,0)
+                    wait 2 seconds
+                end if
             end if
         else
             if ParticleEffect2[3] exists
@@ -322,9 +330,11 @@ begin loop
                 ParticleEffect2[4] = create visual effect VISUAL_EFFECT_MIRACLE_CHARGE at {RelPos[4]} + {0,1,0} time -1 target {RelPos[4]} + {0,50,0}
                 SCALE of ParticleEffect2[4] = 0.5
             end if
-            if bindable action BINDABLE_ACTION_TYPE_ACTION performed and hand position near {Foundation[4]} radius 4
-                //run script LifeSpell(0,0)
-                wait 2 seconds
+            if AISwitch == 0
+                if bindable action BINDABLE_ACTION_TYPE_ACTION performed and hand position near {Foundation[4]} radius 4
+                    //run script LifeSpell(0,0)
+                    wait 2 seconds
+                end if
             end if
         else
             if ParticleEffect2[4] exists
@@ -338,9 +348,11 @@ begin loop
                 ParticleEffect2[5] = create visual effect VISUAL_EFFECT_MIRACLE_CHARGE at {RelPos[5]} + {0,1,0} time -1 target {RelPos[5]} + {0,50,0}
                 SCALE of ParticleEffect2[5] = 0.5
             end if
-            if bindable action BINDABLE_ACTION_TYPE_ACTION performed and hand position near {Foundation[5]} radius 4
-                //run script DeathhSpell(0,0)
-                wait 2 seconds
+            if AISwitch == 0
+                if bindable action BINDABLE_ACTION_TYPE_ACTION performed and hand position near {Foundation[5]} radius 4
+                    //run script DeathhSpell(0,0)
+                    wait 2 seconds
+                end if
             end if
         else
             if ParticleEffect2[5] exists
