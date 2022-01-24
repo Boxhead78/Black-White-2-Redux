@@ -259,12 +259,15 @@ begin script SK_SetUpRandomAI(PlayerID,AITown)
     Counter = 0
     Enemy = 0
 
+    myAlignment = 0
+
 start
 
     AIDifficulty = persistent data "SKP_AIDifficulty"
     EpicScriptRunning[PlayerID] = 0
 
     SK_PlayerAmount += 1
+
     run background script SK_ArmyBehaivours(PlayerID,0,0,0,0,0,0,0,0,0,0,0,0,0)
     run background script SK_SiegeWeaponBehaivours(PlayerID,0,0,0,0,0,0,0,0)
 
@@ -297,14 +300,21 @@ start
         Counter++
     end while
 
+    myAlignment = SK_AIDifficulty[PlayerID] / 100
+    if myAlignment > 1
+        myAlignment = 1
+    end if
     if SK_Alignment[PlayerID] == 1
-        set player PlayerID alignment -1.0
+        myAlignment *= -1
+        set player PlayerID alignment myAlignment
         SK_AIPersonality[PlayerID] = 1
     elsif SK_Alignment[PlayerID] == 2
-        set player PlayerID alignment 0.0
+        myAlignment *= 0
+        set player PlayerID alignment myAlignment
         SK_AIPersonality[PlayerID] = 2
     else
-        set player PlayerID alignment 1.0
+        myAlignment *= 1
+        set player PlayerID alignment myAlignment
         SK_AIPersonality[PlayerID] = 3
     end if
 
