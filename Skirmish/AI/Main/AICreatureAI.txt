@@ -25,7 +25,7 @@ begin loop
 
     AITown[Counter] = get town with id Counter
     TownCentre = get building ABODE_NUMBER_TOWN_CENTRE in AITown[Counter] min built 1.0
-    if PLAYER of AITown[Counter] == PlayerID and TownCentre exists
+    if AITown[Counter] exists and TownCentre exists and PLAYER of AITown[Counter] == PlayerID 
         AICHomeTown[PlayerID] = AITown[Counter]
         wait 300 seconds
     end if
@@ -75,15 +75,15 @@ begin loop
             HEALTH of AICreature = 1.0
         end if
 
-        if town AITown[Counter] is under takeover from player PlayerID and HEALTH of AICreature > 0 and PLAYER of AITown[Counter] == PlayerID and TownCentre exists
+        if AITown[Counter] exists and TownCentre exists and town AITown[Counter] is under takeover from player PlayerID and HEALTH of AICreature > 0 and PLAYER of AITown[Counter] == PlayerID
             HEALTH of AICreature = 1.0
             set creature AICreature role to CR_SOLDIER radius 100 at {AITown[Counter]}
             wait until HEALTH of AICreature == 0.00 or not town AITown[Counter] is under takeover from player PlayerID or 360 seconds
 
-        elsif myPlatoon exists and PLAYER of AITown[Counter] == PlayerCounter and TownCentre exists and get CreatureAttackTimer time remaining <= 0
+        elsif SK_ALLOWED_TO_ATTACK[PlayerID] == 1 and AITown[Counter] exists and TownCentre exists and myPlatoon exists and PLAYER of AITown[Counter] == PlayerCounter and get CreatureAttackTimer time remaining <= 0
             begin loop
                 myPlatoon = get platoon of player PlayerID nearest {AITown[Counter]} radius 1000
-                set creature AICreature role to CR_SOLDIER radius number from 50 to 100 at {myPlatoon} + {number from -100 to 100,number from -100 to 100}
+                set creature AICreature role to CR_SOLDIER radius number from 100 to 200 at {myPlatoon}
                 wait 25 seconds
                 until HEALTH of AICreature == 0.00 or myPlatoon not exists or 600 seconds
             end loop
