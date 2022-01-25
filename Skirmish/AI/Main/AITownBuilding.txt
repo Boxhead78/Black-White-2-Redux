@@ -2307,7 +2307,7 @@ end while
     
 end script SK_AIEpicBuild
 
-//This scripts exists because the game crashes when the player gets near to a norse altar. To prevent this the game will play silent music
+//This scripts exists because the game crashes when the player gets near to an AI altar. To prevent this the game will play silent music
 begin script SK_AITownBuildingAltarWorkaround(PlayerID,Altar)
 
 start
@@ -2315,9 +2315,9 @@ start
 wait until BUILT of Altar == 1.0 or Altar not exists or HEALTH of Altar == 1.0
 
 begin loop
-    if SK_MusicIsRunning == 0 and Altar exists and get distance from camera position to {Altar} <= 125
+    if Altar exists and ((get distance from camera position to {Altar} <= 300) or get distance from camera position to {Altar} <= 2000 and {Altar} viewed)
         SK_AltarMusicCounter += 1
-        wait until get distance from camera position to {Altar} > 150
+        wait until ((get distance from camera position to {Altar} > 325 and not {Altar} viewed) or get distance from camera position to {Altar} > 2025)
         SK_AltarMusicCounter -= 1
     end if
     until Altar not exists
