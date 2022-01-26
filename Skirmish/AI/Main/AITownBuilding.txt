@@ -1933,10 +1933,12 @@ end script SK_AITownBuildingFailed
 begin script SK_AITownBuildingBuildBuilding(AITown,Building,PlayerID,Size)
 
     Angle = 0
+    BaseAngle = 0
     NewBuilding = 0
     Cnt = 0
     Number = 0
     NumberOfTowns = 0
+    TownCentre = 0
 
 start
 
@@ -1944,15 +1946,21 @@ start
 
     //say "Create Building"
     //Get the Angle
+    TownCentre = get building ABODE_NUMBER_TOWN_CENTRE in AITown min built 1.0
+    if TownCentre exists
+        BaseAngle = ANGLE of TownCentre
+    else
+        TownCentre = 0
+    end if
     Number = number from 1 to 4
     if Number == 1
-        Angle = 0
+        Angle = BaseAngle
     elsif Number == 2
-        Angle = 90
+        Angle = BaseAngle + 90
     elsif Number == 3
-        Angle = 180
+        Angle = BaseAngle + 180
     else
-        Angle = 270
+        Angle = BaseAngle + 270
     end if
 
     //All buildings a AI is able to build are below | PlayerID 1 = Norse | PlayerID 2 = Japanese | PlayerID 3 = Aztec | PlayerID 4 = Greek
