@@ -583,19 +583,14 @@ begin script SK_ArmyBehaivours(PlayerID,Platoon,Type,Task,AttackFocus,Aggressive
     RandomHome = 0
     PlatoonSize = 0
     PlatoonSizeEnemy = 0
-    PointOn = 0
+    AttackWPStage = 0
     RecalculateTimer = create timer for 0 seconds
-    ResetTimer = create timer for 0 seconds
     Timer = create timer for 0 seconds
     TownCaptureStarted = 0
     TownsTemp = 0
     CurrTowns = 0
     VariableA = 0
     VariableB = 0
-    WaypointNew1 = 0
-    WaypointNew2 = 0
-    WaypointNew3 = 0
-    WaypointNewLast = 0
     WaypointTown = 0
     WaypointTimer = create timer for 0 seconds
 
@@ -608,6 +603,11 @@ begin script SK_ArmyBehaivours(PlayerID,Platoon,Type,Task,AttackFocus,Aggressive
     MergeDone = 0
     NewPlatoon = 0
     AssumedPlatoonPos = 0
+
+    CurrWP1 = 0
+    CurrWP2 = 0
+    CurrWP3 = 0
+    CurrWP4 = 0
 
 start
 
@@ -643,13 +643,13 @@ if DisableSplit == 1
     SplitUpChance = 0
 end if
 
-PointOn = 0
+AttackWPStage = 0
 wait 5 seconds
 TownsTemp = get player PlayerID town total
 
 begin loop
-
     //Group up before Attack
+    /*
     if SK_AIPersonality[PlayerID] == 1 and SK_AIOpeningMoves[PlayerID] == 2 and script1[PlayerID] == 0
         wait until SK_PlatoonCounter[PlayerID] >= 4
         wait 5 seconds
@@ -681,6 +681,7 @@ begin loop
         wait 5 seconds
         script5[PlayerID] = 1
     end if
+    */
 
     if Counter >= SK_MaxPlayers
         Counter = 0
@@ -810,7 +811,7 @@ begin loop
         end if
         if startAttack == 1
             //say "PLATOON ATTACKING"
-            if PointOn != 4
+            if AttackWPStage != 4
                 if Task == 0
                     EnemySettlement = get nearest town at {Platoon} for player Counter radius AttackRadiusTown
                 elsif Task == 1
@@ -886,7 +887,7 @@ begin loop
             CurrTowns = get player PlayerID town total
             //Attack valid towns
             if EnemySettlement exists and EnemyTownCentre exists and Platoon can navigate to object EnemyTownCentre and HEALTH of EnemyTownCentre == 1.0 and PLAYER of EnemySettlement != PlayerID and (CurrTowns <= TownsTemp or (PLAYER of EnemySettlement >= 0 and PLAYER of EnemySettlement <= 5))
-                //say "EnemySettlement exists and EnemyTownCentre exists and Platoon can navigate to object EnemySettlement"
+                say "EnemySettlement exists and EnemyTownCentre exists and Platoon can navigate to object EnemySettlement"
                 VariableB = 0
                 wait 2 seconds
                 if AttackFocus == Default
@@ -1178,36 +1179,27 @@ begin loop
                     EnemyCreature = get player Counter creature
                     EnemyCreatureDist = get distance from {Platoon} to {EnemyCreature}
                     if EnemyPlatoon exists and not town EnemySettlement is under takeover from player PlayerID
-                        say "EnemyPlatoon exists and not town EnemySettlement is under takeover from player PlayerID"
                         VariableB = 1
                     elsif EnemyCreatureDist <= AttackRadius * 1.25 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of EnemyCreature > 0.00 and not town EnemySettlement is under takeover from player PlayerID
-                        say "EnemyCreatureDist <= AttackRadius * 1.25 and SCRIPT_OBJECT_PROPERTY_TYPE_HEALTH of EnemyCreature > 0.00 and not town EnemySettlement is under takeover from player PlayerID"
                         VariableB = 1
                     elsif not Platoon can navigate to object EnemyTownCentre
-                        say "not Platoon can navigate to object EnemyTownCentre"
                         VariableB = 2
                     elsif Platoon not exists
-                        say "Platoon not exists"
                         VariableB = 2
                     elsif AttackMode == 1 and HEALTH of EnemyCreature == 0
-                        say "AttackMode == 1 and HEALTH of EnemyCreature == 0"
                         VariableB = 2
                     elsif AttackMode == 2 and Building not exists
-                        say "AttackMode == 2 and Building not exists"
                         VariableB = 2
                     elsif AttackMode == 2 and HEALTH of Building <= 0.0
-                        say "AttackMode == 2 and HEALTH of Building <= 0.0"
                         VariableB = 2
                     elsif AttackMode == 2 and Building == 0
-                        say "AttackMode == 2 and Building == 0"
                         VariableB = 2
                     elsif not town EnemySettlement is under takeover from player PlayerID and get RecalculateTimer time remaining <= 0
-                        say "not town EnemySettlement is under takeover from player PlayerID and get RecalculateTimer time remaining <= 0"
                         VariableB = 2
                     end if
                     until (AbortObjectiveProbability > Number and VariableB == 1) or (VariableB == 2)
                 end loop
-                //say "until (AbortObjectiveProbability > Number and VariableB == 1) or (VariableB == 2)"
+                say "until (AbortObjectiveProbability > Number and VariableB == 1) or (VariableB == 2)"
                 if AttackMode == 0
                     if Task == 0
                         if PlayerID == 1
@@ -1275,60 +1267,85 @@ begin loop
 
             //Move troops through map
             if get PlatoonMoveTimer1[PlayerID] time remaining <= 0 or get PlatoonMoveTimer2[PlayerID] time remaining <= 0 or get PlatoonMoveTimer3[PlayerID] time remaining <= 0 or get PlatoonMoveTimer4[PlayerID] time remaining <= 0
-                if PointOn != 4 and get PlatoonWaitTimer[PlayerID] time remaining <= 0
-                    if get size of Platoon action queue < 1
-                        //say "Get Waypoint"
-                        if PointOn == 0 and get PlatoonMoveTimer1[PlayerID] time remaining <= 0
-                            begin loop
-                                WaypointNew1 = marker at {Waypoint1} + {number from -50 to 50,number from -50 to 50}
-                                until Platoon can navigate to {WaypointNew1}
-                            end loop
-                            add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {WaypointNew1} to Platoon action queue
-                
-                        elsif PointOn == 1 and get PlatoonMoveTimer2[PlayerID] time remaining <= 0
-                            begin loop
-                                WaypointNew2 = marker at {Waypoint2} + {number from -50 to 50,number from -50 to 50}
-                                until Platoon can navigate to {WaypointNew2}
-                            end loop
-                            add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {WaypointNew2} to Platoon action queue
-
-                        elsif PointOn == 2 and get PlatoonMoveTimer3[PlayerID] time remaining <= 0
-                            begin loop
-                                WaypointNew3 = marker at {Waypoint3} + {number from -50 to 50,number from -50 to 50}
-                                until Platoon can navigate to {WaypointNew3}
-                            end loop
-                            add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {WaypointNew3} to Platoon action queue
-
-                        elsif PointOn == 3 and get PlatoonMoveTimer4[PlayerID] time remaining <= 0
-                            begin loop
-                                WaypointNewLast = marker at {Waypoint4} + {number from -50 to 50,number from -50 to 50}
-                                until Platoon can navigate to {WaypointNewLast}
-                            end loop
-                            add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {WaypointNewLast} to Platoon action queue
-
+                if AttackWPStage != 4 and get PlatoonWaitTimer[PlayerID] time remaining <= 0
+                    if AttackWPStage == 0
+                        if {Platoon} near {CurrWP1} radius 33
+                            AttackWPStage = 1
+                            say "AttackWPStage = 1"
+                        end if
+                        if AttackWPStage == 0
+                            if get size of Platoon action queue < 1
+                                if not Platoon can navigate to {CurrWP1}
+                                    Number = 0
+                                    begin loop
+                                        CurrWP1 = marker at {Waypoint1} + {number from -66 to 66,number from -66 to 66}
+                                        Number++
+                                        until Platoon not exists or Platoon can navigate to {CurrWP1}
+                                    end loop
+                                end if
+                                clear Platoon action queue
+                                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {CurrWP1} to Platoon action queue
+                            end if
+                        end if
+                    elsif AttackWPStage == 1
+                        if {Platoon} near {CurrWP2} radius 33
+                            AttackWPStage = 2
+                            say "AttackWPStage = 2"
+                        end if
+                        if AttackWPStage == 1
+                            if get size of Platoon action queue < 1
+                                if not Platoon can navigate to {CurrWP2}
+                                    Number = 0
+                                    begin loop
+                                        CurrWP2 = marker at {Waypoint2} + {number from -66 to 66,number from -66 to 66}
+                                        Number++
+                                        until Platoon not exists or Platoon can navigate to {CurrWP2}
+                                    end loop
+                                end if
+                                clear Platoon action queue
+                                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {CurrWP2} to Platoon action queue
+                            end if
+                        end if
+                    elsif AttackWPStage == 2
+                        if {Platoon} near {CurrWP3} radius 33
+                            AttackWPStage = 3
+                            say "AttackWPStage = 3"
+                        end if
+                        if AttackWPStage == 2
+                            if get size of Platoon action queue < 1
+                                if not Platoon can navigate to {CurrWP3}
+                                    Number = 0
+                                    begin loop
+                                        CurrWP3 = marker at {Waypoint3} + {number from -66 to 66,number from -66 to 66}
+                                        Number++
+                                        until Platoon not exists or Platoon can navigate to {CurrWP3}
+                                    end loop
+                                end if
+                                clear Platoon action queue
+                                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {CurrWP3} to Platoon action queue
+                            end if
+                        end if
+                    elsif AttackWPStage == 3
+                        if {Platoon} near {CurrWP4} radius 33
+                            AttackWPStage = 4
+                            say "AttackWPStage = 4"
+                        end if
+                        if AttackWPStage == 3
+                            if get size of Platoon action queue < 1
+                                if not Platoon can navigate to {CurrWP4}
+                                    Number = 0
+                                    begin loop
+                                        CurrWP4 = marker at {Waypoint4} + {number from -66 to 66,number from -66 to 66}
+                                        Number++
+                                        until Platoon not exists or Platoon can navigate to {CurrWP4}
+                                    end loop
+                                end if
+                                clear Platoon action queue
+                                add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {CurrWP4} to Platoon action queue
+                            end if
                         end if
                     end if
                 end if
-            end if
-
-            if {Platoon} near {WaypointNew1} radius 30 and PointOn != 1
-                PlatoonWaitTimer[PlayerID] = create timer for PlatoonWaitTime seconds
-                clear Platoon action queue
-                PointOn = 1
-            elsif {Platoon} near {WaypointNew2} radius 30 and PointOn != 2
-                PlatoonWaitTimer[PlayerID] = create timer for PlatoonWaitTime seconds
-                clear Platoon action queue
-                PointOn = 2
-            elsif {Platoon} near {WaypointNew3} radius 30 and PointOn != 3
-                ReadyToAttack[PlayerID] += 1
-                PlatoonWaitTimer[PlayerID] = create timer for PlatoonWaitTime seconds
-                clear Platoon action queue
-                PointOn = 3
-            elsif {Platoon} near {WaypointNewLast} radius 30 and PointOn != 4
-                PlatoonWaitTimer[PlayerID] = create timer for PlatoonWaitTime seconds
-                clear Platoon action queue
-                PointOn = 4
-                ResetTimer = create timer for 600 seconds
             end if
 
         //Move them to idle position in home town
@@ -1354,7 +1371,7 @@ begin loop
         if SplitDone == 0 and 100-SplitUpChance < CHANCE_TO_SPLIT and startAttack == 1
             if get number of villagers in platoon Platoon > 30
                 while get number of villagers in platoon Platoon > 30 and number from 1 to 3 != 1
-                    //say "SPLITTING NOW"
+                    say "SPLITTING NOW"
                     wait 5 seconds
                     SplitDone = 1
                     Number = number from 1 to 4
@@ -1384,7 +1401,7 @@ begin loop
                 NewPlatoon = get platoon of player PlayerID nearest {AssumedPlatoonPos} radius 100
                 if NewPlatoon exists and NewPlatoon != Platoon and not NewPlatoon recruiting and get number of villagers in platoon NewPlatoon < 150
                     if ((Type == Melee and platoon NewPlatoon melee) or (Type == Ranged and platoon NewPlatoon ranged))
-                        //say "MERGING PLATOON INTO NEWPLATOON NOW"
+                        say "MERGING PLATOON INTO NEWPLATOON NOW"
                         wait 5 seconds
                         MergeDone = 1
                         while Platoon exists and NewPlatoon exists
@@ -1400,7 +1417,7 @@ begin loop
     until Platoon not exists
 end loop
 
-//say "Platoon Script Ended"
+say "Platoon Script Ended"
 
 end script SK_ArmyBehaivours
 
@@ -1425,33 +1442,32 @@ begin script SK_SiegeWeaponBehaivours(PlayerID,SiegeWeapon,AttackFocus,AttackImm
     Number = 0
     PlatoonSize = 0
     PlatoonSizeEnemy = 0
-    PointOn = 0
+    AttackWPStage = 0
     Rand = 0
     RandomHome = 0
     RecalculateTimer = create timer for 0 seconds
-    ResetTimer = create timer for 0 seconds
     Target = 0
     Timer = create timer for 0 seconds
     VariableA = 0
     VariableB = 0
     Wall1 = 0
-    WaypointNew1 = 0
-    WaypointNew2 = 0
-    WaypointNew3 = 0
-    WaypointNewLast = 0
     WaypointTown = 0
     WaypointTimer = create timer for 0 seconds
 
     objSubType = 0
 
+    CurrWP1 = 0
+    CurrWP2 = 0
+    CurrWP3 = 0
+    CurrWP4 = 0
+
 start
 
-PointOn = 0
+AttackWPStage = 0
 wait 5 seconds
 disable siege weapon SiegeWeapon auto attack
 
 begin loop
-
     if SK_AIOpeningMoves[PlayerID] == 6 and script3[PlayerID] == 0
         wait until SK_SiegeWeaponCounter[PlayerID] >= 4
         wait 5 seconds
@@ -1474,7 +1490,7 @@ begin loop
         if SK_ALLOWED_TO_ATTACK[PlayerID] == 1 or startAttack == 1
             startAttack = 1
             EnemySettlement = get nearest town at {SiegeWeapon} for player Counter radius AttackRadiusTown
-            if EnemySettlement not exists and PointOn == 4
+            if EnemySettlement not exists and AttackWPStage == 4
                 if EnemyIDFinal[PlayerID] == 0
                     EnemySettlement = PlayerTown1
                 elsif EnemyIDFinal[PlayerID] == 1
@@ -1732,64 +1748,82 @@ begin loop
             end if
 
             if get PlatoonMoveTimer1[PlayerID] time remaining <= 0 or get PlatoonMoveTimer2[PlayerID] time remaining <= 0 or get PlatoonMoveTimer3[PlayerID] time remaining <= 0 or get PlatoonMoveTimer4[PlayerID] time remaining <= 0
-                if PointOn != 4 and get PlatoonWaitTimer[PlayerID] time remaining <= 0
-                    if get size of siege weapon SiegeWeapon action queue < 1
-                        //say "Get Waypoint"
-                        if PointOn == 0 and get PlatoonMoveTimer1[PlayerID] time remaining <= 0
-                            begin loop
-                                WaypointNew1 = marker at {Waypoint1} + {number from -50 to 50,number from -50 to 50}
-                                until SiegeWeapon can navigate to {WaypointNew1}
-                            end loop
-                            add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {WaypointNew1} to siege weapon SiegeWeapon action queue
-                
-                        elsif PointOn == 1 and get PlatoonMoveTimer2[PlayerID] time remaining <= 0
-                            begin loop
-                                WaypointNew2 = marker at {Waypoint2} + {number from -50 to 50,number from -50 to 50}
-                                until SiegeWeapon can navigate to {WaypointNew2}
-                            end loop
-                            add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {WaypointNew2} to siege weapon SiegeWeapon action queue
-
-                        elsif PointOn == 2 and get PlatoonMoveTimer3[PlayerID] time remaining <= 0
-                            begin loop
-                                WaypointNew3 = marker at {Waypoint3} + {number from -50 to 50,number from -50 to 50}
-                                until SiegeWeapon can navigate to {WaypointNew3}
-                            end loop
-                            add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {WaypointNew3} to siege weapon SiegeWeapon action queue
-
-                        elsif PointOn == 3 and get PlatoonMoveTimer4[PlayerID] time remaining <= 0
-                            begin loop
-                                WaypointNewLast = marker at {Waypoint4} + {number from -50 to 50,number from -50 to 50}
-                                until SiegeWeapon can navigate to {WaypointNewLast}
-                            end loop
-                            add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {WaypointNewLast} to siege weapon SiegeWeapon action queue
-
+                if AttackWPStage != 4 and get PlatoonWaitTimer[PlayerID] time remaining <= 0
+                    if AttackWPStage == 0
+                        if {SiegeWeapon} near {CurrWP1} radius 33
+                            AttackWPStage = 1
+                        end if
+                        if AttackWPStage == 0
+                            if get size of siege weapon SiegeWeapon action queue < 1
+                                if not SiegeWeapon can navigate to {CurrWP1}
+                                    Number = 0
+                                    begin loop
+                                        CurrWP1 = marker at {Waypoint1} + {number from -66 to 66,number from -66 to 66}
+                                        Number++
+                                        until SiegeWeapon not exists or SiegeWeapon can navigate to {CurrWP1}
+                                    end loop
+                                end if
+                                add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {CurrWP1} to siege weapon SiegeWeapon action queue
+                            end if
+                        end if
+                    elsif AttackWPStage == 1
+                        if {SiegeWeapon} near {CurrWP2} radius 33
+                            AttackWPStage = 2
+                        end if
+                        if AttackWPStage == 1
+                            if get size of siege weapon SiegeWeapon action queue < 1
+                                if not SiegeWeapon can navigate to {CurrWP2}
+                                    Number = 0
+                                    begin loop
+                                        CurrWP2 = marker at {Waypoint2} + {number from -66 to 66,number from -66 to 66}
+                                        Number++
+                                        until SiegeWeapon not exists or SiegeWeapon can navigate to {CurrWP2}
+                                    end loop
+                                end if
+                                add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {CurrWP2} to siege weapon SiegeWeapon action queue
+                            end if
+                        end if
+                    elsif AttackWPStage == 2
+                        if {SiegeWeapon} near {CurrWP3} radius 33
+                            AttackWPStage = 3
+                        end if
+                        if AttackWPStage == 2
+                            if get size of siege weapon SiegeWeapon action queue < 1
+                                if not SiegeWeapon can navigate to {CurrWP3}
+                                    Number = 0
+                                    begin loop
+                                        CurrWP3 = marker at {Waypoint3} + {number from -66 to 66,number from -66 to 66}
+                                        Number++
+                                        until SiegeWeapon not exists or SiegeWeapon can navigate to {CurrWP3}
+                                    end loop
+                                end if
+                                add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {CurrWP3} to siege weapon SiegeWeapon action queue
+                            end if
+                        end if
+                    elsif AttackWPStage == 3
+                        if {SiegeWeapon} near {CurrWP4} radius 33
+                            AttackWPStage = 4
+                        end if
+                        if AttackWPStage == 3
+                            if get size of siege weapon SiegeWeapon action queue < 1
+                                if not SiegeWeapon can navigate to {CurrWP4}
+                                    Number = 0
+                                    begin loop
+                                        CurrWP4 = marker at {Waypoint4} + {number from -66 to 66,number from -66 to 66}
+                                        Number++
+                                        until SiegeWeapon not exists or SiegeWeapon can navigate to {CurrWP4}
+                                    end loop
+                                end if
+                                add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {CurrWP4} to siege weapon SiegeWeapon action queue
+                            end if
                         end if
                     end if
                 end if
-            end if
-
-            if {SiegeWeapon} near {WaypointNew1} radius 100 and PointOn == 0
-                PlatoonWaitTimer[PlayerID] = create timer for PlatoonWaitTime seconds
-                clear siege weapon SiegeWeapon action queue
-                PointOn = 1
-            elsif {SiegeWeapon} near {WaypointNew2} radius 100 and PointOn == 1
-                PlatoonWaitTimer[PlayerID] = create timer for PlatoonWaitTime seconds
-                clear siege weapon SiegeWeapon action queue
-                PointOn = 2
-            elsif {SiegeWeapon} near {WaypointNew3} radius 100 and PointOn == 2
-                PlatoonWaitTimer[PlayerID] = create timer for PlatoonWaitTime seconds
-                clear siege weapon SiegeWeapon action queue
-                PointOn = 3
-            elsif {SiegeWeapon} near {WaypointNewLast} radius 100 and PointOn == 3
-                PlatoonWaitTimer[PlayerID] = create timer for PlatoonWaitTime seconds
-                clear siege weapon SiegeWeapon action queue
-                PointOn = 4
-                ResetTimer = create timer for 600 seconds
             end if
 
         elsif AttackImmediately == 1
             EnemySettlement = get nearest town at {SiegeWeapon} for player Counter radius AttackRadiusTown
-            if EnemySettlement not exists and PointOn == 4
+            if EnemySettlement not exists and AttackWPStage == 4
                 if EnemyIDFinal[PlayerID] == 0
                     EnemySettlement = PlayerTown1
                 elsif EnemyIDFinal[PlayerID] == 1
@@ -2047,59 +2081,77 @@ begin loop
             end if
 
             if get PlatoonMoveTimer1[PlayerID] time remaining <= 0 or get PlatoonMoveTimer2[PlayerID] time remaining <= 0 or get PlatoonMoveTimer3[PlayerID] time remaining <= 0 or get PlatoonMoveTimer4[PlayerID] time remaining <= 0
-                if PointOn != 4 and get PlatoonWaitTimer[PlayerID] time remaining <= 0
-                    if get size of siege weapon SiegeWeapon action queue < 1
-                        //say "Get Waypoint"
-                        if PointOn == 0 and get PlatoonMoveTimer1[PlayerID] time remaining <= 0
-                            begin loop
-                                WaypointNew1 = marker at {Waypoint1} + {number from -50 to 50,number from -50 to 50}
-                                until SiegeWeapon can navigate to {WaypointNew1}
-                            end loop
-                            add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {WaypointNew1} to siege weapon SiegeWeapon action queue
-                
-                        elsif PointOn == 1 and get PlatoonMoveTimer2[PlayerID] time remaining <= 0
-                            begin loop
-                                WaypointNew2 = marker at {Waypoint2} + {number from -50 to 50,number from -50 to 50}
-                                until SiegeWeapon can navigate to {WaypointNew2}
-                            end loop
-                            add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {WaypointNew2} to siege weapon SiegeWeapon action queue
-
-                        elsif PointOn == 2 and get PlatoonMoveTimer3[PlayerID] time remaining <= 0
-                            begin loop
-                                WaypointNew3 = marker at {Waypoint3} + {number from -50 to 50,number from -50 to 50}
-                                until SiegeWeapon can navigate to {WaypointNew3}
-                            end loop
-                            add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {WaypointNew3} to siege weapon SiegeWeapon action queue
-
-                        elsif PointOn == 3 and get PlatoonMoveTimer4[PlayerID] time remaining <= 0
-                            begin loop
-                                WaypointNewLast = marker at {Waypoint4} + {number from -50 to 50,number from -50 to 50}
-                                until SiegeWeapon can navigate to {WaypointNewLast}
-                            end loop
-                            add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {WaypointNewLast} to siege weapon SiegeWeapon action queue
-
+                if AttackWPStage != 4 and get PlatoonWaitTimer[PlayerID] time remaining <= 0
+                    if AttackWPStage == 0
+                        if {SiegeWeapon} near {CurrWP1} radius 33
+                            AttackWPStage = 1
+                        end if
+                        if AttackWPStage == 0
+                            if get size of siege weapon SiegeWeapon action queue < 1
+                                if not SiegeWeapon can navigate to {CurrWP1}
+                                    Number = 0
+                                    begin loop
+                                        CurrWP1 = marker at {Waypoint1} + {number from -66 to 66,number from -66 to 66}
+                                        Number++
+                                        until SiegeWeapon not exists or SiegeWeapon can navigate to {CurrWP1}
+                                    end loop
+                                end if
+                                add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {CurrWP1} to siege weapon SiegeWeapon action queue
+                            end if
+                        end if
+                    elsif AttackWPStage == 1
+                        if {SiegeWeapon} near {CurrWP2} radius 33
+                            AttackWPStage = 2
+                        end if
+                        if AttackWPStage == 1
+                            if get size of siege weapon SiegeWeapon action queue < 1
+                                if not SiegeWeapon can navigate to {CurrWP2}
+                                    Number = 0
+                                    begin loop
+                                        CurrWP2 = marker at {Waypoint2} + {number from -66 to 66,number from -66 to 66}
+                                        Number++
+                                        until SiegeWeapon not exists or SiegeWeapon can navigate to {CurrWP2}
+                                    end loop
+                                end if
+                                add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {CurrWP2} to siege weapon SiegeWeapon action queue
+                            end if
+                        end if
+                    elsif AttackWPStage == 2
+                        if {SiegeWeapon} near {CurrWP3} radius 33
+                            AttackWPStage = 3
+                        end if
+                        if AttackWPStage == 2
+                            if get size of siege weapon SiegeWeapon action queue < 1
+                                if not SiegeWeapon can navigate to {CurrWP3}
+                                    Number = 0
+                                    begin loop
+                                        CurrWP3 = marker at {Waypoint3} + {number from -66 to 66,number from -66 to 66}
+                                        Number++
+                                        until SiegeWeapon not exists or SiegeWeapon can navigate to {CurrWP3}
+                                    end loop
+                                end if
+                                add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {CurrWP3} to siege weapon SiegeWeapon action queue
+                            end if
+                        end if
+                    elsif AttackWPStage == 3
+                        if {SiegeWeapon} near {CurrWP4} radius 33
+                            AttackWPStage = 4
+                        end if
+                        if AttackWPStage == 3
+                            if get size of siege weapon SiegeWeapon action queue < 1
+                                if not SiegeWeapon can navigate to {CurrWP4}
+                                    Number = 0
+                                    begin loop
+                                        CurrWP4 = marker at {Waypoint4} + {number from -66 to 66,number from -66 to 66}
+                                        Number++
+                                        until SiegeWeapon not exists or SiegeWeapon can navigate to {CurrWP4}
+                                    end loop
+                                end if
+                                add action SIEGEWEAPON_AGENDA_ACTION_MOVE_TO_POS using {CurrWP4} to siege weapon SiegeWeapon action queue
+                            end if
                         end if
                     end if
                 end if
-            end if
-
-            if {SiegeWeapon} near {WaypointNew1} radius 100 and PointOn == 0
-                PlatoonWaitTimer[PlayerID] = create timer for PlatoonWaitTime seconds
-                clear siege weapon SiegeWeapon action queue
-                PointOn = 1
-            elsif {SiegeWeapon} near {WaypointNew2} radius 100 and PointOn == 1
-                PlatoonWaitTimer[PlayerID] = create timer for PlatoonWaitTime seconds
-                clear siege weapon SiegeWeapon action queue
-                PointOn = 2
-            elsif {SiegeWeapon} near {WaypointNew3} radius 100 and PointOn == 2
-                PlatoonWaitTimer[PlayerID] = create timer for PlatoonWaitTime seconds
-                clear siege weapon SiegeWeapon action queue
-                PointOn = 3
-            elsif {SiegeWeapon} near {WaypointNewLast} radius 100 and PointOn == 3
-                PlatoonWaitTimer[PlayerID] = create timer for PlatoonWaitTime seconds
-                clear siege weapon SiegeWeapon action queue
-                PointOn = 4
-                ResetTimer = create timer for 600 seconds
             end if
 
         elsif SK_ALLOWED_TO_ATTACK[PlayerID] == 0 and startAttack == 0 and get WaypointTimer time remaining <= 0
