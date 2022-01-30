@@ -49,6 +49,9 @@ begin script SK_AICreature(PlayerID,AICreature)
     Position = 0
     Villager = 0
     EnemyCreature = 0
+    DoneCreatureHarass = 0
+    CreatureHarass = number from 1 to 5
+    EnemySettlement = 0
 
 start
 
@@ -88,6 +91,23 @@ begin loop
                 wait 15 seconds
                 set creature AICreature role to CR_SOLDIER radius 33 at {EnemyCreature}
             end while
+
+        elsif SK_AIDifficulty[PlayerID] > 66 and CreatureHarass >= 4 and DoneCreatureHarass == 0 and HEALTH of AICreature > 0
+            DoneCreatureHarass = 1
+            if EnemyIDFinal[PlayerID] == 0
+                EnemySettlement = PlayerTown1
+            elsif EnemyIDFinal[PlayerID] == 1
+                EnemySettlement = PlayerTown2
+            elsif EnemyIDFinal[PlayerID] == 2
+                EnemySettlement = PlayerTown3
+            elsif EnemyIDFinal[PlayerID] == 3
+                EnemySettlement = PlayerTown4
+            end if
+            begin loop
+                set creature AICreature role to CR_SOLDIER radius number from 100 to 200 at {EnemySettlement} + {number from -50 to 50,number from -50 to 50}
+                wait 25 seconds
+                until HEALTH of AICreature == 0.00 or myPlatoon not exists or 600 seconds
+            end loop
 
         elsif SK_ALLOWED_TO_ATTACK[PlayerID] == 1 and AITown[Counter] exists and TownCentre exists and myPlatoon exists and PLAYER of AITown[Counter] == PlayerCounter and get CreatureAttackTimer time remaining <= 0
             begin loop
