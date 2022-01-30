@@ -5,7 +5,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 define script SK_AIVillagers(PlayerID,AITown)
-define WaitTime = 180
+define WaitTime = 450
 define WaitTimeMinimum = 120
 
 begin script SK_AIVillagers(PlayerID,AITown)
@@ -16,6 +16,7 @@ begin script SK_AIVillagers(PlayerID,AITown)
     Villager = 0
     VillagerCounter = 0
     CapacityBonus = 0
+    EscalationBonus = 0
     VillagerMax = 0
     TownHouse = 0
     WaitTimeComb = 0
@@ -31,11 +32,20 @@ else
 end if
 
 begin loop
-
     TownCentre = get building ABODE_NUMBER_TOWN_CENTRE in AITown min built 1.0
     if PLAYER of AITown == PlayerID and size of AITown < VillagerMax and TownCentre exists and variable get town AITown status != variable TOWN_STATUS_MIGRATION_STARTED
         TownSize = adult size of AITown
         if PlayerID == 1
+            if adult capacity of AITown > TownSize
+                CapacityBonus = adult capacity of AITown * 0.15
+                if SK_AIDifficulty[PlayerID] > 66
+                    EscalationBonus = SK_Escalation[PlayerID] / 2
+                end if
+                HowManyVillagers = (SK_Escalation[PlayerID] / 10) + (SK_AIDifficulty[PlayerID] / 10) + (TownSize / 40) + (CapacityBonus) + (EscalationBonus)
+            else
+                HowManyVillagers = (SK_Escalation[PlayerID] / 10) + (SK_AIDifficulty[PlayerID] / 10) + (TownSize / 40)
+            end if
+
             VillagerCounter = 0
             begin loop
                 TownHouse = get random home in town AITown
@@ -46,24 +56,29 @@ begin loop
                 end if
                 attach Villager to AITown
                 release Villager
-                if adult capacity of AITown > TownSize
-                    CapacityBonus = adult capacity of AITown * 0.15
-                    HowManyVillagers = (SK_Escalation[PlayerID] / 10) + (SK_AIDifficulty[PlayerID] / 10) + (TownSize / 40) + (CapacityBonus)
-                else
-                    HowManyVillagers = (SK_Escalation[PlayerID] / 10) + (SK_AIDifficulty[PlayerID] / 10) + (TownSize / 40)
-                end if
-                wait number from 1 to 3 seconds
 
+                wait number from 1 to 3 seconds
                 VillagerCounter++
                 until VillagerCounter > HowManyVillagers or size of AITown > VillagerMax
             end loop
-            WaitTimeComb = WaitTime - SK_AIDifficulty[PlayerID]
+
+            WaitTimeComb = WaitTime - (SK_AIDifficulty[PlayerID] * 4)
             if WaitTimeComb < WaitTimeMinimum
                 WaitTimeComb = WaitTimeMinimum
             end if
             wait WaitTimeComb seconds
 
         elsif PlayerID == 2
+            if adult capacity of AITown > TownSize
+                CapacityBonus = adult capacity of AITown * 0.15
+                if SK_AIDifficulty[PlayerID] > 66
+                    EscalationBonus = SK_Escalation[PlayerID] / 2
+                end if
+                HowManyVillagers = (SK_Escalation[PlayerID] / 10) + (SK_AIDifficulty[PlayerID] / 10) + (TownSize / 40) + (CapacityBonus) + (EscalationBonus)
+            else
+                HowManyVillagers = (SK_Escalation[PlayerID] / 10) + (SK_AIDifficulty[PlayerID] / 10) + (TownSize / 40)
+            end if
+
             VillagerCounter = 0
             begin loop
                 TownHouse = get random home in town AITown
@@ -74,24 +89,29 @@ begin loop
                 end if
                 attach Villager to AITown
                 release Villager
-                if adult capacity of AITown > TownSize
-                    CapacityBonus = adult capacity of AITown * 0.15
-                    HowManyVillagers = (SK_Escalation[PlayerID] / 10) + (SK_AIDifficulty[PlayerID] / 10) + (TownSize / 40) + (CapacityBonus)
-                else
-                    HowManyVillagers = (SK_Escalation[PlayerID] / 10) + (SK_AIDifficulty[PlayerID] / 10) + (TownSize / 40)
-                end if
-                wait number from 1 to 3 seconds
 
+                wait number from 1 to 3 seconds
                 VillagerCounter++
                 until VillagerCounter > HowManyVillagers or size of AITown > VillagerMax
             end loop
-            WaitTimeComb = WaitTime - SK_AIDifficulty[PlayerID]
+
+            WaitTimeComb = WaitTime - (SK_AIDifficulty[PlayerID] * 4)
             if WaitTimeComb < WaitTimeMinimum
                 WaitTimeComb = WaitTimeMinimum
             end if
             wait WaitTimeComb seconds
 
         elsif PlayerID == 3
+            if adult capacity of AITown > TownSize
+                CapacityBonus = adult capacity of AITown * 0.15
+                if SK_AIDifficulty[PlayerID] > 66
+                    EscalationBonus = SK_Escalation[PlayerID] / 2
+                end if
+                HowManyVillagers = (SK_Escalation[PlayerID] / 10) + (SK_AIDifficulty[PlayerID] / 10) + (TownSize / 40) + (CapacityBonus) + (EscalationBonus)
+            else
+                HowManyVillagers = (SK_Escalation[PlayerID] / 10) + (SK_AIDifficulty[PlayerID] / 10) + (TownSize / 40)
+            end if
+
             VillagerCounter = 0
             begin loop
                 TownHouse = get random home in town AITown
@@ -102,18 +122,13 @@ begin loop
                 end if
                 attach Villager to AITown
                 release Villager
-                if adult capacity of AITown > TownSize
-                    CapacityBonus = adult capacity of AITown * 0.15
-                    HowManyVillagers = (SK_Escalation[PlayerID] / 10) + (SK_AIDifficulty[PlayerID] / 10) + (TownSize / 40) + (CapacityBonus)
-                else
-                    HowManyVillagers = (SK_Escalation[PlayerID] / 10) + (SK_AIDifficulty[PlayerID] / 10) + (TownSize / 40)
-                end if
-                wait number from 1 to 3 seconds
 
+                wait number from 1 to 3 seconds
                 VillagerCounter++
                 until VillagerCounter > HowManyVillagers or size of AITown > VillagerMax
             end loop
-            WaitTimeComb = WaitTime - SK_AIDifficulty[PlayerID]
+
+            WaitTimeComb = WaitTime - (SK_AIDifficulty[PlayerID] * 4)
             if WaitTimeComb < WaitTimeMinimum
                 WaitTimeComb = WaitTimeMinimum
             end if
@@ -121,7 +136,6 @@ begin loop
 
         end if
     end if
-
 end loop
 
 end script SK_AIVillagers
