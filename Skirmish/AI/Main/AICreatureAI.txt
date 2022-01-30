@@ -48,6 +48,7 @@ begin script SK_AICreature(PlayerID,AICreature)
     TownCentre = 0
     Position = 0
     Villager = 0
+    EnemyCreature = 0
 
 start
 
@@ -69,6 +70,7 @@ begin loop
         AITown[Counter] = get town with id Counter
         TownCentre = get building ABODE_NUMBER_TOWN_CENTRE in AITown[Counter] min built 1.0
         myPlatoon = get platoon of player PlayerID nearest {AITown[Counter]} radius 1000
+        EnemyCreature = get player PlayerCounter creature
 
         if HEALTH of AICreature == 0.00
             wait until HEALTH of AICreature > 0.00
@@ -79,6 +81,13 @@ begin loop
             HEALTH of AICreature = 1.0
             set creature AICreature role to CR_SOLDIER radius 100 at {AITown[Counter]}
             wait until HEALTH of AICreature == 0.00 or not town AITown[Counter] is under takeover from player PlayerID or 360 seconds
+
+        elsif PLAYER of AITown[Counter] == 1 and get distance from {AITown[Counter]} to {EnemyCreature} < 300 and get player 0 influence at {EnemyCreature} <= 0 and HEALTH of MyCreature > 0.00 and HEALTH of AICreature > 0
+            HEALTH of AICreature = 1.0
+            while HEALTH of AICreature > 0.00 and get distance from {AITown[Counter]} to {EnemyCreature} <= 400 and get player 0 influence at {EnemyCreature} <= 0 and HEALTH of MyCreature > 0.00
+                wait 15 seconds
+                set creature AICreature role to CR_SOLDIER radius 33 at {EnemyCreature}
+            end while
 
         elsif SK_ALLOWED_TO_ATTACK[PlayerID] == 1 and AITown[Counter] exists and TownCentre exists and myPlatoon exists and PLAYER of AITown[Counter] == PlayerCounter and get CreatureAttackTimer time remaining <= 0
             begin loop
