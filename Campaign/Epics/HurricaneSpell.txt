@@ -275,7 +275,7 @@ begin interruptible cinema
         end if
 
         run background script BodgingInTheBackground(Hurricane)
-        invoke Hurricane EPIC_ENABLE_TORNADO_DESTRUCTION
+    //    invoke Hurricane EPIC_ENABLE_TORNADO_DESTRUCTION
 
         //wait 3 seconds
         invoke Hurricane EPIC_EXIT_TORNADO
@@ -294,14 +294,22 @@ begin interruptible cinema
         wait 4 seconds
         invoke Hurricane EPIC_EXIT_TORNADO
 
+
         MyHurricanePos = marker at future position of epic miracle Hurricane with time 1 seconds
         MyHurricaneFoc = marker at future focus of epic miracle Hurricane with time 1 seconds
 
+        //wait until get MusicEventTimer time since set >= MusicEvent6
+        //set Hurricane atmos group 9 time 1 seconds
         set camera position follow Hurricane offset {-169.625, 80.674, 125.683}
         set camera focus follow Hurricane offset {-168.884, 80.658, 125.011}
         move follow camera position offset {-145.876, 137.833, 143.560} time 7
         move follow camera focus offset {-145.292, 137.682, 142.763} time 7
         wait 4 seconds//wait until get MusicEventTimer time since set >= MusicEvent7
+
+        /*RelCamPos = marker at get world position from Hurricane to {71.742, 17.985, -22.261}
+        RelCamFoc = marker at get world position from Hurricane to {70.783, 17.759, -22.091}
+        set camera position to {RelCamPos}
+        set camera focus to {RelCamFoc}*/
 
         set camera position follow Hurricane offset {44.482, 46.008, 14.608}
         set camera focus follow Hurricane offset {-3.617, -2.455, -58.452}
@@ -318,9 +326,9 @@ begin interruptible cinema
         invoke Hurricane EPIC_STOP_TORNADO
         invoke Hurricane EPIC_CLEAR_CLOUDS
         invoke Hurricane EPIC_END_TORNADO
+        invoke Wonder EPIC_WONDER_STAGE_LAST
         detach atmos from Hurricane
         stop camera shake
-        invoke Wonder EPIC_WONDER_STAGE_LAST
 
         //reset sky colour 3 seconds
         enable predefined sky "DEFAULT" time 3
@@ -359,6 +367,12 @@ howmanyhousestodestroy=50
 
 start
 
+if EnemyFiringVersion == 1
+    howmanyhousestodestroy=20
+end if
+
+
+
 HOusesThatCanBeDestroyed[0] = variable ABODE_A
 HOusesThatCanBeDestroyed[1] = variable ABODE_B
 HOusesThatCanBeDestroyed[2] = variable ABODE_C
@@ -366,24 +380,17 @@ HOusesThatCanBeDestroyed[3] = variable ABODE_D
 HOusesThatCanBeDestroyed[4] = variable ABODE_E
 
 
-while count != 50
+while count != 20
 
         wait 0.2 seconds
 
-        if EnemyFiringVersion == 0
-
-            ItThisRidiculous[count] = get HOUSE at {Hurricane} radius 100 excluding scripted    
-
-        else
-
-            ItThisRidiculous[count] = get HOUSE constant HOusesThatCanBeDestroyed[whichhouse] at {Hurricane} radius 100 excluding scripted
+        ItThisRidiculous[count] = get HOUSE constant HOusesThatCanBeDestroyed[whichhouse] at {Hurricane} radius 100 excluding scripted
             if whichhouse < 4
                 whichhouse++
             else
                 whichhouse = 0
             end if
 
-        end if
 
         if ItThisRidiculous[count] exists and variable get ItThisRidiculous[count] sub type != variable GATEHOUSE and variable get ItThisRidiculous[count] sub type != variable GATEHOUSE_F and variable get ItThisRidiculous[count] sub type != variable TOWN_CENTRE and variable get ItThisRidiculous[count] sub type != variable MINE
             ThisIs[count] = convert ItThisRidiculous[count] using SCRIPT_CONVERSION_ROCK
