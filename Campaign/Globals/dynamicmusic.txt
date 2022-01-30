@@ -7,27 +7,35 @@
 define DM_Small = 0
 define DM_Medium = 1
 define DM_Large = 2
-define DM_EndOfBattle = 3
+define DM_Huge = 3
+define DM_EndOfBattle = 4
 
 define DM_EndBattle01 = 0
-define DM_EndBattle02 = 0
-define DM_EndBattle03 = 0
-define DM_smallbattle01 = 0
-define DM_smallbattle02 = 0
-define DM_smallbattle03 = 0
-define DM_smallbattle04 = 0
-define DM_smallbattle05 = 0
-define DM_smallbattle06 = 0
-define DM_mediumbattle01 = 0
-define DM_mediumbattle02 = 0
-define DM_mediumbattle03 = 0
-define DM_mediumbattle04 = 0
-define DM_mediumbattle05 = 0
-define DM_mediumbattle06 = 0
-define DM_mediumbattle01aztec = 0
-define DM_largebattle01 = 0
-define DM_largebattle02 = 0
-define DM_largebattle03 = 0
+define DM_EndBattle02 = 1
+define DM_EndBattle03 = 2
+define DM_smallbattle01 = 3
+define DM_smallbattle02 = 4
+define DM_smallbattle03 = 5
+define DM_smallbattle04 = 6
+define DM_smallbattle05 = 7
+define DM_smallbattle06 = 8
+define DM_mediumbattle01 = 9
+define DM_mediumbattle02 = 10
+define DM_mediumbattle03 = 11
+define DM_mediumbattle04 = 12
+define DM_mediumbattle05 = 13
+define DM_mediumbattle06 = 14
+define DM_largebattle01 = 15
+define DM_largebattle02 = 16
+define DM_largebattle03 = 17
+define DM_hugebattle01 = 18
+define DM_hugebattle02 = 19
+
+define DM_Norse = 0
+define DM_Japanese = 1
+define DM_Aztec = 2
+define DM_Talus = 3
+define DM_Normal = 4
 
 define script DM_SetDynamicMusic(section,subsection,isurgent,mintime,maxtime)
 define script DM_WaitForNextMusic(musicLength,howLong,subsection)
@@ -116,7 +124,7 @@ while DM_DynamicMusicBreak == 0 and DM_DynamicMusicDisallowed == 0 and DM_AskSto
 
     elsif section == DM_Medium
         DM_Rand = number from 1 to 5
-        if DM_SubSectionGlobal == DM_mediumbattle01 or DM_SubSectionGlobal == DM_mediumbattle02 or DM_SubSectionGlobal == DM_mediumbattle03 or DM_SubSectionGlobal == DM_mediumbattle04 or DM_SubSectionGlobal == DM_mediumbattle05 or DM_SubSectionGlobal == DM_mediumbattle01aztec
+        if DM_SubSectionGlobal == DM_mediumbattle01 or DM_SubSectionGlobal == DM_mediumbattle02 or DM_SubSectionGlobal == DM_mediumbattle03 or DM_SubSectionGlobal == DM_mediumbattle04 or DM_SubSectionGlobal == DM_mediumbattle05
             DM_Rand = 0
         end if
         if DM_SubSectionGlobal == DM_mediumbattle01 or DM_Rand == 1
@@ -134,9 +142,6 @@ while DM_DynamicMusicBreak == 0 and DM_DynamicMusicDisallowed == 0 and DM_AskSto
         elsif DM_SubSectionGlobal == DM_mediumbattle05 or DM_Rand == 5
             attach music "mediumbattle05" to DM_MusicObject range 99999
             run script DM_WaitForNextMusic(0,number from mintime to maxtime,DM_SubSectionGlobal)
-        elsif DM_SubSectionGlobal == DM_mediumbattle01aztec or DM_Rand == 6
-            attach music "mediumbattle01aztec" to DM_MusicObject range 99999
-            run script DM_WaitForNextMusic(138,number from mintime to maxtime,DM_SubSectionGlobal)
         end if
 
     elsif section == DM_Large
@@ -152,6 +157,19 @@ while DM_DynamicMusicBreak == 0 and DM_DynamicMusicDisallowed == 0 and DM_AskSto
             run script DM_WaitForNextMusic(0,number from mintime to maxtime,DM_SubSectionGlobal)
         elsif DM_SubSectionGlobal == DM_largebattle03 or DM_Rand == 3
             attach music "largebattle03" to DM_MusicObject range 99999
+            run script DM_WaitForNextMusic(0,number from mintime to maxtime,DM_SubSectionGlobal)
+        end if
+
+    elsif section == DM_Huge
+        DM_Rand = number from 1 to 2
+        if DM_SubSectionGlobal == DM_hugebattle01 or DM_SubSectionGlobal == DM_hugebattle02
+            DM_Rand = 0
+        end if
+        if DM_SubSectionGlobal == DM_hugebattle01 or DM_Rand == 1
+            attach music "largebattle01" to DM_MusicObject range 99999
+            run script DM_WaitForNextMusic(0,number from mintime to maxtime,DM_SubSectionGlobal)
+        elsif DM_SubSectionGlobal == DM_hugebattle02 or DM_Rand == 2
+            attach music "largebattle02" to DM_MusicObject range 99999
             run script DM_WaitForNextMusic(0,number from mintime to maxtime,DM_SubSectionGlobal)
         end if
 
