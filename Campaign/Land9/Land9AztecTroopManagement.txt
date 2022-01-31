@@ -723,6 +723,7 @@ begin script LC9_ArmyBehaviours(Platoon,Type,Task,DefendObject,AttackFocus,Aggre
     ScriptFirstTime = 1
     AssumedPlatoonPos = 0
     AttackFocusSource = AttackFocus
+    IgnoreInfluence = 0
 
 start
 
@@ -981,6 +982,13 @@ begin loop
                     wait number from 5 to 10 seconds
                 end if
                 //say "PLATOON ATTACKING"
+                if size of PlayerTown >= 450
+                    IgnoreInfluence = 1
+
+                elsif IgnoreInfluence == 1
+                    IgnoreInfluence = 0
+
+                end if
                 oTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in PlayerTown min built 1.0
                 if PLAYER of PlayerTown != 0
                     //Switch task to conqueror to attack all remaining cities
@@ -1252,9 +1260,15 @@ begin loop
                         clear Platoon action queue
                         add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPoint1} to Platoon action queue
                     end if
+                elsif Platoon can navigate to {AttackingPoint1} and IgnoreInfluence == 1
+                    //say "Platoon can navigate to {AttackingPoint1} and get player 0 influence at {AttackingPoint1} == 0"
+                    if not {Platoon} near {AttackingPoint1} radius 25
+                        clear Platoon action queue
+                        add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPoint1} to Platoon action queue
+                    end if
                 else
                     //say "else"
-                    if get player 0 influence at {AttackingPoint2} > 0
+                    if get player 0 influence at {AttackingPoint2} > 0 and (IgnoreInfluence == 0 or not Platoon can navigate to {AttackingPoint2})
                         begin loop
                             AttackingPoint2 = marker at {AttackingPoint2} + {number from -Threshold to Threshold,number from -Threshold to Threshold}
                             Threshold += 5
@@ -1655,6 +1669,13 @@ begin loop
             //if get size of Platoon action queue < 1
                 //Targeting
                 //say "PLATOON ATTACKING"
+                if size of PlayerTown >= 450
+                    IgnoreInfluence = 1
+
+                elsif IgnoreInfluence == 1
+                    IgnoreInfluence = 0
+
+                end if
                 oTownCentre = get building ABODE_NUMBER_TOWN_CENTRE in PlayerTown min built 1.0
                 if PLAYER of PlayerTown != 0
                     //Switch task to conqueror to attack all remaining cities
@@ -1931,9 +1952,15 @@ begin loop
                         clear Platoon action queue
                         add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPoint1} to Platoon action queue
                     end if
+                elsif Platoon can navigate to {AttackingPoint1} and IgnoreInfluence == 1
+                    //say "Platoon can navigate to {AttackingPoint1} and get player 0 influence at {AttackingPoint1} == 0"
+                    if not {Platoon} near {AttackingPoint1} radius 25
+                        clear Platoon action queue
+                        add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPoint1} to Platoon action queue
+                    end if
                 else
                     //say "else"
-                    if get player 0 influence at {AttackingPoint2} > 0
+                    if get player 0 influence at {AttackingPoint2} > 0 and (IgnoreInfluence == 0 or not Platoon can navigate to {AttackingPoint2})
                         begin loop
                             AttackingPoint2 = marker at {AttackingPoint2} + {number from -Threshold to Threshold,number from -Threshold to Threshold}
                             Threshold += 5
