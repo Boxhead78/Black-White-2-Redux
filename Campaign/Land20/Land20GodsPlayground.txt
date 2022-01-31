@@ -394,6 +394,7 @@ begin script SkirmishLoader
     EpicTemp = 0
     TutorialsTemp = 0
     EpicSpellsTemp = 0
+    AlignmentEffectsTemp = 0
 
 start
 
@@ -419,6 +420,7 @@ start
     SettingScrolls[1] = create highlight SILVER name "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_13" remind "HELP_TEXT_CREATURE_CURRENT_SOURCE_09" at {1796.34,84.01,1229.45} + {0,3,0}
     SettingScrolls[2] = create highlight SILVER name "HELP_TEXT_DIALOG_MULTIPLAYER_MAP_13" remind "HELP_TEXT_CREATURE_CURRENT_SOURCE_09" at {1785.59,76.27,1199.46} + {0,3,0}
     SettingScrolls[3] = create highlight SILVER name "HELP_TEXT_MULTIPLAYER_SETUP_CREATURE_ALLOWED_01" remind "HELP_TEXT_CREATURE_CURRENT_SOURCE_09" at {1656.58,70.75,742.31} + {0,3,0}
+    SettingScrolls[4] = create highlight SILVER name "HELP_TEXT_CREATURE_LESSON_INCREASE_DESIRE_FROM_PLAYER_03" remind "HELP_TEXT_CREATURE_CURRENT_SOURCE_09" at {1658.59,70.75,735.95} + {0,3,0}
     begin loop
         if DescriptionScroll right clicked
             clear right clicked object
@@ -612,6 +614,50 @@ start
             wait until PD_ForcedSaving == 0 or 10 seconds
             stop script "SavePersistentDataSetData"
             set persistent data "EPICSPELLS_CHECK" to EpicSpellsTemp
+            run script SavePersistentDataGetData
+        end if
+
+        if SettingScrolls[4] right clicked
+            clear right clicked object
+            AlignmentEffectsTemp++
+            if AlignmentEffectsTemp == 1 or AlignmentEffectsTemp == 3
+                if AlignmentEffectsTemp == 3
+                    AlignmentEffectsTemp = 1
+                end if
+                begin dialogue
+                    if Language == English
+                        say "Alignment effects enabled."
+                    elsif Language == German
+                        say "Gesinnungseffekte aktiviert ."
+                    elsif Language == Spanish
+                        say "Efectos de alineación Activados."
+                    elsif Language == Russian
+                        say "TRANSLATION"
+                    elsif Language == TEMPLATE_LANGUAGE
+                        say "TRANSLATION"
+                    end if
+                    wait until SettingScrolls[4] right clicked or 2 seconds
+                end dialogue
+            elsif AlignmentEffectsTemp == 2
+                begin dialogue
+                    if Language == English
+                        say "Alignment effects disabled."
+                    elsif Language == German
+                        say "Gesinnungseffekte deaktiviert."
+                    elsif Language == Spanish
+                        say "Efectos de alineación Desactivados."
+                    elsif Language == Russian
+                        say "TRANSLATION"
+                    elsif Language == TEMPLATE_LANGUAGE
+                        say "TRANSLATION"
+                    end if
+                    wait until SettingScrolls[4] right clicked or 2 seconds
+                end dialogue
+            end if
+            PD_ForcedSaving = 1
+            wait until PD_ForcedSaving == 0 or 10 seconds
+            stop script "SavePersistentDataSetData"
+            set persistent data "SKYSETTING_CHANGE" to AlignmentEffectsTemp
             run script SavePersistentDataGetData
         end if
     end loop

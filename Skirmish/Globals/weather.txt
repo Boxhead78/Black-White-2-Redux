@@ -667,300 +667,304 @@ begin script WeatherSkyTransitions
     ChangeSkyTimer = create timer for 0 seconds
     DayTime = 0
     CauseOfChangeIsTime = 0
+    SkySettingsActivated
 start
 
-begin loop
-    if PlayerID >= 4
-        PlayerID = 0
-    end if
-    WT_ChangeSkyTimer = create timer for WT_skyTransitionWaitTime seconds
-    if WT_SkyTransitionAllowed == 1 //Skytransition is disabled during epic or scripted predefined sky
-        PInfluence = get player PlayerID influence at camera position
-        if WT_SkyTransitionGlobalInfluence == 0 and SkySettingsActive != 0 and PInfluence == 0
-            if get player PlayerID influence at camera position == 0
-                wait until get WT_ChangeSkyTimer time remaining <= 0 or get player PlayerID influence at camera position > 0
+SkySettingsActivated = persistent data "SKYSETTING_CHANGE"
+if SkySettingsActivated == 1
+    begin loop
+        if PlayerID >= 4
+            PlayerID = 0
+        end if
+        WT_ChangeSkyTimer = create timer for WT_skyTransitionWaitTime seconds
+        if WT_SkyTransitionAllowed == 1 //Skytransition is disabled during epic or scripted predefined sky
+            PInfluence = get player PlayerID influence at camera position
+            if WT_SkyTransitionGlobalInfluence == 0 and SkySettingsActive != 0 and PInfluence == 0
                 if get player PlayerID influence at camera position == 0
-                    //say "DEFAULT"
-                    SkySettingsActive = 0
-                    WT_ExitLoop = 1
-                    wait until WT_SkySetRunning == 0
-                    WT_ExitLoop = 0
-                    run background script WeatherSetSkySetting(PlayerID,SK_DEFAULT)
-                    wait WT_skyTransitionDuration seconds
+                    wait until get WT_ChangeSkyTimer time remaining <= 0 or get player PlayerID influence at camera position > 0
+                    if get player PlayerID influence at camera position == 0
+                        //say "DEFAULT"
+                        SkySettingsActive = 0
+                        WT_ExitLoop = 1
+                        wait until WT_SkySetRunning == 0
+                        WT_ExitLoop = 0
+                        run background script WeatherSetSkySetting(PlayerID,SK_DEFAULT)
+                        wait WT_skyTransitionDuration seconds
+                    end if
+                end if
+            else
+                if WT_SkyTransitionGlobalInfluence == 1 //If player has won only use him as a base
+                    PlayerID = 0
+                end if
+                if PInfluence > 0 or WT_SkyTransitionGlobalInfluence == 1
+                    wait until get WT_ChangeSkyTimer time remaining <= 0 or get player PlayerID influence at camera position == 0 or WT_SkyTransitionGlobalInfluence == 1 or (DayTime == WT_SUNSET and (get game time < 17.5 or get game time > 20.5)) or (DayTime == WT_DAY and (get game time >= 17.5 or get game time <= 9)) or (DayTime == WT_NIGHT and (get game time <= 20.5 or get game time >= 6))
+                    PInfluence = get player PlayerID influence at camera position
+                    if PInfluence > 0 or WT_SkyTransitionGlobalInfluence == 1
+                        PAlignment = get player PlayerID alignment
+                        if (DayTime == WT_SUNSET and (get game time < 17.5 or get game time > 20.5)) or (DayTime == WT_DAY and (get game time >= 17.5 or get game time <= 9)) or (DayTime == WT_NIGHT and (get game time <= 20.5 or get game time >= 6))
+                            CauseOfChangeIsTime = 1
+                            WT_skyTransitionDuration = 40
+                        end if
+                        if (get game time >= 17.5 and get game time <= 20.5) or (get game time >= 6 and get game time <= 9) //Sunrise, Sunset
+                            DayTime = WT_SUNSET
+                            if PAlignment >= 0.9 and PAlignment <= 1.0
+                                if SkySettingsActive != 1
+                                    //say "ALIGN-GS3"
+                                    SkySettingsActive = 1
+                                    WT_ExitLoop = 1
+                                    wait until WT_SkySetRunning == 0
+                                    WT_ExitLoop = 0
+                                    if get land number != 9
+                                        run background script WeatherSetSkySetting(PlayerID,ALIGNGS3)
+                                    else
+                                        run background script WeatherSetSkySetting(PlayerID,ALIGNGS3L9)
+                                    end if
+                                    wait WT_skyTransitionDuration seconds
+                                end if
+                            elsif PAlignment >= 0.65 and PAlignment < 0.9
+                                if SkySettingsActive != 2
+                                    //say "ALIGN-GS2"
+                                    SkySettingsActive = 2
+                                    WT_ExitLoop = 1
+                                    wait until WT_SkySetRunning == 0
+                                    WT_ExitLoop = 0
+                                    if get land number != 9
+                                        run background script WeatherSetSkySetting(PlayerID,ALIGNGS2)
+                                    else
+                                        run background script WeatherSetSkySetting(PlayerID,ALIGNGS2L9)
+                                    end if
+                                    wait WT_skyTransitionDuration seconds
+                                end if
+                            elsif PAlignment >= 0.3 and PAlignment < 0.65
+                                if SkySettingsActive != 3
+                                    //say "ALIGN-GS1"
+                                    SkySettingsActive = 3
+                                    WT_ExitLoop = 1
+                                    wait until WT_SkySetRunning == 0
+                                    WT_ExitLoop = 0
+                                    if get land number != 9
+                                        run background script WeatherSetSkySetting(PlayerID,ALIGNGS1)
+                                    else
+                                        run background script WeatherSetSkySetting(PlayerID,ALIGNGS1L9)
+                                    end if
+                                    wait WT_skyTransitionDuration seconds
+                                end if
+                            elsif PAlignment <= -0.3 and PAlignment > -0.65
+                                if SkySettingsActive != 4
+                                    //say "ALIGN-ES1"
+                                    SkySettingsActive = 4
+                                    WT_ExitLoop = 1
+                                    wait until WT_SkySetRunning == 0
+                                    WT_ExitLoop = 0
+                                    if get land number != 9
+                                        run background script WeatherSetSkySetting(PlayerID,ALIGNES1)
+                                    else
+                                        run background script WeatherSetSkySetting(PlayerID,ALIGNES1L9)
+                                    end if
+                                    wait WT_skyTransitionDuration seconds
+                                end if
+                            elsif PAlignment <= -0.65 and PAlignment > -0.9
+                                if SkySettingsActive != 5
+                                    //say "ALIGN-ES2"
+                                    SkySettingsActive = 5
+                                    WT_ExitLoop = 1
+                                    wait until WT_SkySetRunning == 0
+                                    WT_ExitLoop = 0
+                                    if get land number != 9
+                                        run background script WeatherSetSkySetting(PlayerID,ALIGNES2)
+                                    else
+                                        run background script WeatherSetSkySetting(PlayerID,ALIGNES2L9)
+                                    end if
+                                    wait WT_skyTransitionDuration seconds
+                                end if
+                            elsif PAlignment <= -0.9 and PAlignment >= -1.0
+                                if SkySettingsActive != 6
+                                    //say "ALIGN-ES3"
+                                    SkySettingsActive = 6
+                                    WT_ExitLoop = 1
+                                    wait until WT_SkySetRunning == 0
+                                    WT_ExitLoop = 0
+                                    if get land number != 9
+                                        run background script WeatherSetSkySetting(PlayerID,ALIGNES3)
+                                    else
+                                        run background script WeatherSetSkySetting(PlayerID,ALIGNES3L9)
+                                    end if
+                                    wait WT_skyTransitionDuration seconds
+                                end if
+                            end if
+                        elsif get game time < 17.5 and get game time > 9 //Day
+                            DayTime = WT_DAY
+                            if PAlignment >= 0.9 and PAlignment <= 1.0
+                                if SkySettingsActive != 7
+                                    //say "ALIGN-G3"
+                                    SkySettingsActive = 7
+                                    WT_ExitLoop = 1
+                                    wait until WT_SkySetRunning == 0
+                                    WT_ExitLoop = 0
+                                    if get land number != 9
+                                        run background script WeatherSetSkySetting(PlayerID,ALIGNG3)
+                                    else
+                                        run background script WeatherSetSkySetting(PlayerID,ALIGNG3L9)
+                                    end if
+                                    wait WT_skyTransitionDuration seconds
+                                end if
+                            elsif PAlignment >= 0.65 and PAlignment < 0.9
+                                if SkySettingsActive != 8
+                                    //say "ALIGN-G2"
+                                    SkySettingsActive = 8
+                                    WT_ExitLoop = 1
+                                    wait until WT_SkySetRunning == 0
+                                    WT_ExitLoop = 0
+                                    if get land number != 9
+                                        run background script WeatherSetSkySetting(PlayerID,ALIGNG2)
+                                    else
+                                        run background script WeatherSetSkySetting(PlayerID,ALIGNG2L9)
+                                    end if
+                                    wait WT_skyTransitionDuration seconds
+                                end if
+                            elsif PAlignment >= 0.3 and PAlignment < 0.65
+                                if SkySettingsActive != 9
+                                    //say "ALIGN-G1"
+                                    SkySettingsActive = 9
+                                    WT_ExitLoop = 1
+                                    wait until WT_SkySetRunning == 0
+                                    WT_ExitLoop = 0
+                                    if get land number != 9
+                                        run background script WeatherSetSkySetting(PlayerID,ALIGNG1)
+                                    else
+                                        run background script WeatherSetSkySetting(PlayerID,ALIGNG1L9)
+                                    end if
+                                    wait WT_skyTransitionDuration seconds
+                                end if
+                            elsif PAlignment <= -0.3 and PAlignment > -0.65
+                                if SkySettingsActive != 10
+                                    //say "ALIGN-E1"
+                                    SkySettingsActive = 10
+                                    WT_ExitLoop = 1
+                                    wait until WT_SkySetRunning == 0
+                                    WT_ExitLoop = 0
+                                    if get land number != 9
+                                        run background script WeatherSetSkySetting(PlayerID,ALIGNE1)
+                                    else
+                                        run background script WeatherSetSkySetting(PlayerID,ALIGNE1L9)
+                                    end if
+                                    wait WT_skyTransitionDuration seconds
+                                end if
+                            elsif PAlignment <= -0.65 and PAlignment > -0.9
+                                if SkySettingsActive != 11
+                                    //say "ALIGN-E2"
+                                    SkySettingsActive = 11
+                                    WT_ExitLoop = 1
+                                    wait until WT_SkySetRunning == 0
+                                    WT_ExitLoop = 0
+                                    if get land number != 9
+                                        run background script WeatherSetSkySetting(PlayerID,ALIGNE2)
+                                    else
+                                        run background script WeatherSetSkySetting(PlayerID,ALIGNE2L9)
+                                    end if
+                                    wait WT_skyTransitionDuration seconds
+                                end if
+                            elsif PAlignment <= -0.9 and PAlignment >= -1.0
+                                if SkySettingsActive != 12
+                                    //say "ALIGN-E3"
+                                    SkySettingsActive = 12
+                                    WT_ExitLoop = 1
+                                    wait until WT_SkySetRunning == 0
+                                    WT_ExitLoop = 0
+                                    if get land number != 9
+                                        run background script WeatherSetSkySetting(PlayerID,ALIGNE3)
+                                    else
+                                        run background script WeatherSetSkySetting(PlayerID,ALIGNE3L9)
+                                    end if
+                                    wait WT_skyTransitionDuration seconds
+                                end if
+                            end if
+                        elsif get game time > 20.5 or get game time < 6 //Night
+                            DayTime = WT_NIGHT
+                            if PAlignment >= 0.9 and PAlignment <= 1.0
+                                if SkySettingsActive != 13
+                                    //say "ALIGN-GN3"
+                                    SkySettingsActive = 13
+                                    WT_ExitLoop = 1
+                                    wait until WT_SkySetRunning == 0
+                                    WT_ExitLoop = 0
+                                    run background script WeatherSetSkySetting(PlayerID,ALIGNGN3)
+                                    wait WT_skyTransitionDuration seconds
+                                end if
+                            elsif PAlignment >= 0.65 and PAlignment < 0.9
+                                if SkySettingsActive != 14
+                                    //say "ALIGN-GN2"
+                                    SkySettingsActive = 14
+                                    WT_ExitLoop = 1
+                                    wait until WT_SkySetRunning == 0
+                                    WT_ExitLoop = 0
+                                    run background script WeatherSetSkySetting(PlayerID,ALIGNGN2)
+                                    wait WT_skyTransitionDuration seconds
+                                end if
+                            elsif PAlignment >= 0.3 and PAlignment < 0.65
+                                if SkySettingsActive != 15
+                                    //say "ALIGN-GN1"
+                                    SkySettingsActive = 15
+                                    WT_ExitLoop = 1
+                                    wait until WT_SkySetRunning == 0
+                                    WT_ExitLoop = 0
+                                    run background script WeatherSetSkySetting(PlayerID,ALIGNGN1)
+                                    wait WT_skyTransitionDuration seconds
+                                end if
+                            elsif PAlignment <= -0.3 and PAlignment > -0.65
+                                if SkySettingsActive != 16
+                                    //say "ALIGN-EN1"
+                                    SkySettingsActive = 16
+                                    WT_ExitLoop = 1
+                                    wait until WT_SkySetRunning == 0
+                                    WT_ExitLoop = 0
+                                    run background script WeatherSetSkySetting(PlayerID,ALIGNEN1)
+                                    wait WT_skyTransitionDuration seconds
+                                end if
+                            elsif PAlignment <= -0.65 and PAlignment > -0.9
+                                if SkySettingsActive != 17
+                                    //say "ALIGN-EN2"
+                                    SkySettingsActive = 17
+                                    WT_ExitLoop = 1
+                                    wait until WT_SkySetRunning == 0
+                                    WT_ExitLoop = 0
+                                    run background script WeatherSetSkySetting(PlayerID,ALIGNEN2)
+                                    wait WT_skyTransitionDuration seconds
+                                end if
+                            elsif PAlignment <= -0.9 and PAlignment >= -1.0
+                                if SkySettingsActive != 18
+                                    //say "ALIGN-EN3"
+                                    SkySettingsActive = 18
+                                    WT_ExitLoop = 1
+                                    wait until WT_SkySetRunning == 0
+                                    WT_ExitLoop = 0
+                                    run background script WeatherSetSkySetting(PlayerID,ALIGNEN3)
+                                    wait WT_skyTransitionDuration seconds
+                                end if
+                            end if
+                        end if
+                        if CauseOfChangeIsTime == 1
+                            CauseOfChangeIsTime = 0
+                            WT_skyTransitionDuration = skyTransitionWaitTime
+                        end if
+                    end if
                 end if
             end if
         else
-            if WT_SkyTransitionGlobalInfluence == 1 //If player has won only use him as a base
-                PlayerID = 0
-            end if
-            if PInfluence > 0 or WT_SkyTransitionGlobalInfluence == 1
-                wait until get WT_ChangeSkyTimer time remaining <= 0 or get player PlayerID influence at camera position == 0 or WT_SkyTransitionGlobalInfluence == 1 or (DayTime == WT_SUNSET and (get game time < 17.5 or get game time > 20.5)) or (DayTime == WT_DAY and (get game time >= 17.5 or get game time <= 9)) or (DayTime == WT_NIGHT and (get game time <= 20.5 or get game time >= 6))
-                PInfluence = get player PlayerID influence at camera position
-                if PInfluence > 0 or WT_SkyTransitionGlobalInfluence == 1
-                    PAlignment = get player PlayerID alignment
-                    if (DayTime == WT_SUNSET and (get game time < 17.5 or get game time > 20.5)) or (DayTime == WT_DAY and (get game time >= 17.5 or get game time <= 9)) or (DayTime == WT_NIGHT and (get game time <= 20.5 or get game time >= 6))
-                        CauseOfChangeIsTime = 1
-                        WT_skyTransitionDuration = 40
-                    end if
-                    if (get game time >= 17.5 and get game time <= 20.5) or (get game time >= 6 and get game time <= 9) //Sunrise, Sunset
-                        DayTime = WT_SUNSET
-                        if PAlignment >= 0.9 and PAlignment <= 1.0
-                            if SkySettingsActive != 1
-                                //say "ALIGN-GS3"
-                                SkySettingsActive = 1
-                                WT_ExitLoop = 1
-                                wait until WT_SkySetRunning == 0
-                                WT_ExitLoop = 0
-                                if get land number != 9
-                                    run background script WeatherSetSkySetting(PlayerID,ALIGNGS3)
-                                else
-                                    run background script WeatherSetSkySetting(PlayerID,ALIGNGS3L9)
-                                end if
-                                wait WT_skyTransitionDuration seconds
-                            end if
-                        elsif PAlignment >= 0.65 and PAlignment < 0.9
-                            if SkySettingsActive != 2
-                                //say "ALIGN-GS2"
-                                SkySettingsActive = 2
-                                WT_ExitLoop = 1
-                                wait until WT_SkySetRunning == 0
-                                WT_ExitLoop = 0
-                                if get land number != 9
-                                    run background script WeatherSetSkySetting(PlayerID,ALIGNGS2)
-                                else
-                                    run background script WeatherSetSkySetting(PlayerID,ALIGNGS2L9)
-                                end if
-                                wait WT_skyTransitionDuration seconds
-                            end if
-                        elsif PAlignment >= 0.3 and PAlignment < 0.65
-                            if SkySettingsActive != 3
-                                //say "ALIGN-GS1"
-                                SkySettingsActive = 3
-                                WT_ExitLoop = 1
-                                wait until WT_SkySetRunning == 0
-                                WT_ExitLoop = 0
-                                if get land number != 9
-                                    run background script WeatherSetSkySetting(PlayerID,ALIGNGS1)
-                                else
-                                    run background script WeatherSetSkySetting(PlayerID,ALIGNGS1L9)
-                                end if
-                                wait WT_skyTransitionDuration seconds
-                            end if
-                        elsif PAlignment <= -0.3 and PAlignment > -0.65
-                            if SkySettingsActive != 4
-                                //say "ALIGN-ES1"
-                                SkySettingsActive = 4
-                                WT_ExitLoop = 1
-                                wait until WT_SkySetRunning == 0
-                                WT_ExitLoop = 0
-                                if get land number != 9
-                                    run background script WeatherSetSkySetting(PlayerID,ALIGNES1)
-                                else
-                                    run background script WeatherSetSkySetting(PlayerID,ALIGNES1L9)
-                                end if
-                                wait WT_skyTransitionDuration seconds
-                            end if
-                        elsif PAlignment <= -0.65 and PAlignment > -0.9
-                            if SkySettingsActive != 5
-                                //say "ALIGN-ES2"
-                                SkySettingsActive = 5
-                                WT_ExitLoop = 1
-                                wait until WT_SkySetRunning == 0
-                                WT_ExitLoop = 0
-                                if get land number != 9
-                                    run background script WeatherSetSkySetting(PlayerID,ALIGNES2)
-                                else
-                                    run background script WeatherSetSkySetting(PlayerID,ALIGNES2L9)
-                                end if
-                                wait WT_skyTransitionDuration seconds
-                            end if
-                        elsif PAlignment <= -0.9 and PAlignment >= -1.0
-                            if SkySettingsActive != 6
-                                //say "ALIGN-ES3"
-                                SkySettingsActive = 6
-                                WT_ExitLoop = 1
-                                wait until WT_SkySetRunning == 0
-                                WT_ExitLoop = 0
-                                if get land number != 9
-                                    run background script WeatherSetSkySetting(PlayerID,ALIGNES3)
-                                else
-                                    run background script WeatherSetSkySetting(PlayerID,ALIGNES3L9)
-                                end if
-                                wait WT_skyTransitionDuration seconds
-                            end if
-                        end if
-                    elsif get game time < 17.5 and get game time > 9 //Day
-                        DayTime = WT_DAY
-                        if PAlignment >= 0.9 and PAlignment <= 1.0
-                            if SkySettingsActive != 7
-                                //say "ALIGN-G3"
-                                SkySettingsActive = 7
-                                WT_ExitLoop = 1
-                                wait until WT_SkySetRunning == 0
-                                WT_ExitLoop = 0
-                                if get land number != 9
-                                    run background script WeatherSetSkySetting(PlayerID,ALIGNG3)
-                                else
-                                    run background script WeatherSetSkySetting(PlayerID,ALIGNG3L9)
-                                end if
-                                wait WT_skyTransitionDuration seconds
-                            end if
-                        elsif PAlignment >= 0.65 and PAlignment < 0.9
-                            if SkySettingsActive != 8
-                                //say "ALIGN-G2"
-                                SkySettingsActive = 8
-                                WT_ExitLoop = 1
-                                wait until WT_SkySetRunning == 0
-                                WT_ExitLoop = 0
-                                if get land number != 9
-                                    run background script WeatherSetSkySetting(PlayerID,ALIGNG2)
-                                else
-                                    run background script WeatherSetSkySetting(PlayerID,ALIGNG2L9)
-                                end if
-                                wait WT_skyTransitionDuration seconds
-                            end if
-                        elsif PAlignment >= 0.3 and PAlignment < 0.65
-                            if SkySettingsActive != 9
-                                //say "ALIGN-G1"
-                                SkySettingsActive = 9
-                                WT_ExitLoop = 1
-                                wait until WT_SkySetRunning == 0
-                                WT_ExitLoop = 0
-                                if get land number != 9
-                                    run background script WeatherSetSkySetting(PlayerID,ALIGNG1)
-                                else
-                                    run background script WeatherSetSkySetting(PlayerID,ALIGNG1L9)
-                                end if
-                                wait WT_skyTransitionDuration seconds
-                            end if
-                        elsif PAlignment <= -0.3 and PAlignment > -0.65
-                            if SkySettingsActive != 10
-                                //say "ALIGN-E1"
-                                SkySettingsActive = 10
-                                WT_ExitLoop = 1
-                                wait until WT_SkySetRunning == 0
-                                WT_ExitLoop = 0
-                                if get land number != 9
-                                    run background script WeatherSetSkySetting(PlayerID,ALIGNE1)
-                                else
-                                    run background script WeatherSetSkySetting(PlayerID,ALIGNE1L9)
-                                end if
-                                wait WT_skyTransitionDuration seconds
-                            end if
-                        elsif PAlignment <= -0.65 and PAlignment > -0.9
-                            if SkySettingsActive != 11
-                                //say "ALIGN-E2"
-                                SkySettingsActive = 11
-                                WT_ExitLoop = 1
-                                wait until WT_SkySetRunning == 0
-                                WT_ExitLoop = 0
-                                if get land number != 9
-                                    run background script WeatherSetSkySetting(PlayerID,ALIGNE2)
-                                else
-                                    run background script WeatherSetSkySetting(PlayerID,ALIGNE2L9)
-                                end if
-                                wait WT_skyTransitionDuration seconds
-                            end if
-                        elsif PAlignment <= -0.9 and PAlignment >= -1.0
-                            if SkySettingsActive != 12
-                                //say "ALIGN-E3"
-                                SkySettingsActive = 12
-                                WT_ExitLoop = 1
-                                wait until WT_SkySetRunning == 0
-                                WT_ExitLoop = 0
-                                if get land number != 9
-                                    run background script WeatherSetSkySetting(PlayerID,ALIGNE3)
-                                else
-                                    run background script WeatherSetSkySetting(PlayerID,ALIGNE3L9)
-                                end if
-                                wait WT_skyTransitionDuration seconds
-                            end if
-                        end if
-                    elsif get game time > 20.5 or get game time < 6 //Night
-                        DayTime = WT_NIGHT
-                        if PAlignment >= 0.9 and PAlignment <= 1.0
-                            if SkySettingsActive != 13
-                                //say "ALIGN-GN3"
-                                SkySettingsActive = 13
-                                WT_ExitLoop = 1
-                                wait until WT_SkySetRunning == 0
-                                WT_ExitLoop = 0
-                                run background script WeatherSetSkySetting(PlayerID,ALIGNGN3)
-                                wait WT_skyTransitionDuration seconds
-                            end if
-                        elsif PAlignment >= 0.65 and PAlignment < 0.9
-                            if SkySettingsActive != 14
-                                //say "ALIGN-GN2"
-                                SkySettingsActive = 14
-                                WT_ExitLoop = 1
-                                wait until WT_SkySetRunning == 0
-                                WT_ExitLoop = 0
-                                run background script WeatherSetSkySetting(PlayerID,ALIGNGN2)
-                                wait WT_skyTransitionDuration seconds
-                            end if
-                        elsif PAlignment >= 0.3 and PAlignment < 0.65
-                            if SkySettingsActive != 15
-                                //say "ALIGN-GN1"
-                                SkySettingsActive = 15
-                                WT_ExitLoop = 1
-                                wait until WT_SkySetRunning == 0
-                                WT_ExitLoop = 0
-                                run background script WeatherSetSkySetting(PlayerID,ALIGNGN1)
-                                wait WT_skyTransitionDuration seconds
-                            end if
-                        elsif PAlignment <= -0.3 and PAlignment > -0.65
-                            if SkySettingsActive != 16
-                                //say "ALIGN-EN1"
-                                SkySettingsActive = 16
-                                WT_ExitLoop = 1
-                                wait until WT_SkySetRunning == 0
-                                WT_ExitLoop = 0
-                                run background script WeatherSetSkySetting(PlayerID,ALIGNEN1)
-                                wait WT_skyTransitionDuration seconds
-                            end if
-                        elsif PAlignment <= -0.65 and PAlignment > -0.9
-                            if SkySettingsActive != 17
-                                //say "ALIGN-EN2"
-                                SkySettingsActive = 17
-                                WT_ExitLoop = 1
-                                wait until WT_SkySetRunning == 0
-                                WT_ExitLoop = 0
-                                run background script WeatherSetSkySetting(PlayerID,ALIGNEN2)
-                                wait WT_skyTransitionDuration seconds
-                            end if
-                        elsif PAlignment <= -0.9 and PAlignment >= -1.0
-                            if SkySettingsActive != 18
-                                //say "ALIGN-EN3"
-                                SkySettingsActive = 18
-                                WT_ExitLoop = 1
-                                wait until WT_SkySetRunning == 0
-                                WT_ExitLoop = 0
-                                run background script WeatherSetSkySetting(PlayerID,ALIGNEN3)
-                                wait WT_skyTransitionDuration seconds
-                            end if
-                        end if
-                    end if
-                    if CauseOfChangeIsTime == 1
-                        CauseOfChangeIsTime = 0
-                        WT_skyTransitionDuration = skyTransitionWaitTime
-                    end if
-                end if
-            end if
+            PAlignment = 0
+            PInfluence = 0
+            PInfluenceCounter = 0
+            PlayerID = 0
+            PTown = 0
+            SkySettingsActive = 0
+            ChangeSkyTimer = create timer for 0 seconds
+            DayTime = 0
+            wait until WT_SkyTransitionAllowed == 1
+            wait WT_skyTransitionDuration seconds
         end if
-    else
-        PAlignment = 0
-        PInfluence = 0
-        PInfluenceCounter = 0
-        PlayerID = 0
-        PTown = 0
-        SkySettingsActive = 0
-        ChangeSkyTimer = create timer for 0 seconds
-        DayTime = 0
-        wait until WT_SkyTransitionAllowed == 1
-        wait WT_skyTransitionDuration seconds
-    end if
-    if SkySettingsActive == 0 PlayerID++ end if
-end loop
+        if SkySettingsActive == 0 PlayerID++ end if
+    end loop
+end if
 
 end script WeatherSkyTransitions
 
