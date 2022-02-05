@@ -10,6 +10,7 @@ define DM_Large = 2
 define DM_Huge = 3
 define DM_EndOfBattle = 4
 
+define DM_Random = 99
 define DM_EndBattle01 = 0
 define DM_EndBattle02 = 1
 define DM_EndBattle03 = 2
@@ -18,205 +19,422 @@ define DM_smallbattle02 = 4
 define DM_smallbattle03 = 5
 define DM_smallbattle04 = 6
 define DM_smallbattle05 = 7
-define DM_smallbattle06 = 8
 define DM_mediumbattle01 = 9
 define DM_mediumbattle02 = 10
 define DM_mediumbattle03 = 11
 define DM_mediumbattle04 = 12
 define DM_mediumbattle05 = 13
-define DM_mediumbattle06 = 14
-define DM_largebattle01 = 15
-define DM_largebattle02 = 16
-define DM_largebattle03 = 17
-define DM_hugebattle01 = 18
-define DM_hugebattle02 = 19
+define DM_largebattle01 = 14
+define DM_largebattle02 = 15
+define DM_largebattle03 = 16
+define DM_hugebattle01 = 17
+define DM_hugebattle02 = 18
 
-define DM_Norse = 0
-define DM_Japanese = 1
-define DM_Aztec = 2
-define DM_Talus = 3
-define DM_Normal = 4
+define DM_RaceNormal = 0
+define DM_RaceNorse = 1
+define DM_RaceJapanese = 2
+define DM_RaceAztec = 3
 
-define script DM_SetDynamicMusic(section,subsection,isurgent,mintime,maxtime)
-define script DM_WaitForNextMusic(musicLength,howLong,subsection)
+define script DM_SetDynamicMusic(section,subsection,race,isurgent)
+define script DM_WaitForNextMusic(musicLength,subsection)
+define script DM_CheckNewData
 define script DM_StopDynamicMusic(fadeouttime)
 
-global DM_DynamicMusicActive = 0
-global DM_DynamicMusicBreak = 0
 global DM_DynamicMusicDisallowed = 0
-global DM_WaitScriptRunning = 0
 global DM_ScriptRunning = 0
 global DM_AskStop = 0
 global DM_MusicObject = 0
+
+global DM_SectionGlobal = 0
 global DM_SubSectionGlobal = 0
+global DM_RaceGlobal = 0
+global DM_IsUrgentGlobal = 0
 
-begin script DM_SetDynamicMusic(section,subsection,isurgent,mintime,maxtime)
+begin script DM_SetDynamicMusic(section,subsection,race,isurgent)
 
+    DM_Number = 0
     DM_Rand = 0
+    DM_WaitTime = 0
+    DM_WaitTimer = 0
 
 start
 
-wait 0.5 seconds
-
-//Check if the script is already running, if yes ask it to stop and wait until it is stopped
-if DM_ScriptRunning == 1
-    DM_AskStop = 1
-end if
-wait until DM_ScriptRunning == 0
-DM_AskStop = 0
-DM_ScriptRunning = 1
+//Fill the new data immediately
+DM_SectionGlobal = section
 DM_SubSectionGlobal = subsection
+DM_RaceGlobal = race
+DM_IsUrgentGlobal = isurgent
 
-//If urgent is set don't wait until current music is finished and stop it immediately
-if isurgent == 1
-    DM_DynamicMusicBreak = 1
-else
-    wait until DM_WaitScriptRunning == 0
-    if DM_DynamicMusicActive == 1
-        DM_DynamicMusicBreak = 1
-    end if
+//Special case, wait until music is stopped to start it again
+if DM_AskStop == 1
+    wait until DM_ScriptRunning == 0
 end if
 
-//Check if everything is ready, randomize it if dynamic music is disallowed
-begin loop
-    if DM_DynamicMusicDisallowed == 1
-        wait number from 1 to 5 seconds
-    end if
-    until DM_DynamicMusicActive == 0 and DM_DynamicMusicDisallowed == 0
-end loop
+//Only run script if it isn't already running
+if DM_ScriptRunning == 0
+    DM_ScriptRunning = 1
+    while DM_DynamicMusicDisallowed == 0 and DM_AskStop == 0
+        //Go into loop if dynamic music is disallowed
+        if DM_DynamicMusicDisallowed == 1
+            //Check if everything is ready, randomize it if dynamic music is disallowed
+            begin loop
+                wait number from 5 to 15 seconds
+                detach music from DM_MusicObject // Make sure there isn't any music on object to avoid weird sounds
+                until DM_DynamicMusicDisallowed == 0
+            end loop
+        end if
 
-DM_DynamicMusicActive = 1
-DM_DynamicMusicBreak = 0
+        //Create MusicObject if it doesn't exist
+        if DM_MusicObject not exists
+            DM_MusicObject = create SCRIPT_OBJECT_TYPE_FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {1000,1000}
+            enable DM_MusicObject indestructible
+            disable DM_MusicObject pickup
+            SCRIPT_OBJECT_PROPERTY_TYPE_SCALE of DM_MusicObject = 0.01
+        end if
 
-if DM_MusicObject not exists
-    DM_MusicObject = create SCRIPT_OBJECT_TYPE_FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {1000,1000}
-    enable DM_MusicObject indestructible
-    disable DM_MusicObject pickup
-    SCRIPT_OBJECT_PROPERTY_TYPE_SCALE of DM_MusicObject = 0.01
+        detach music from DM_MusicObject //This is needed, it fades out the old track
+        if DM_SectionGlobal == DM_Small
+            DM_Rand = number from 1 to 5
+            if DM_SubSectionGlobal == DM_smallbattle01 or DM_SubSectionGlobal == DM_smallbattle02 or DM_SubSectionGlobal == DM_smallbattle03 or DM_SubSectionGlobal == DM_smallbattle04 or DM_SubSectionGlobal == DM_smallbattle05
+                DM_Rand = 0
+            end if
+            if DM_SubSectionGlobal == DM_smallbattle01 or DM_Rand == 1
+                DM_Number = number from 1 to 3
+                if DM_Number == 1
+                    attach music "small_battle_01_01" to DM_MusicObject range 99999
+                elsif DM_Number == 2
+                    attach music "small_battle_01_02" to DM_MusicObject range 99999
+                elsif DM_Number == 3
+                    attach music "small_battle_01_03" to DM_MusicObject range 99999
+                end if
+                run script DM_WaitForNextMusic(300,DM_SubSectionGlobal)
+            elsif DM_SubSectionGlobal == DM_smallbattle02 or DM_Rand == 2
+                DM_Number = number from 1 to 3
+                if DM_Number == 1
+                    attach music "small_battle_02_01" to DM_MusicObject range 99999
+                elsif DM_Number == 2
+                    attach music "small_battle_02_02" to DM_MusicObject range 99999
+                elsif DM_Number == 3
+                    attach music "small_battle_02_03" to DM_MusicObject range 99999
+                end if
+                run script DM_WaitForNextMusic(300,DM_SubSectionGlobal)
+            elsif DM_SubSectionGlobal == DM_smallbattle03 or DM_Rand == 3
+                DM_Number = number from 1 to 2
+                if DM_Number == 1
+                    attach music "small_battle_03_01" to DM_MusicObject range 99999
+                elsif DM_Number == 2
+                    attach music "small_battle_03_02" to DM_MusicObject range 99999
+                end if
+                run script DM_WaitForNextMusic(300,DM_SubSectionGlobal)
+            elsif DM_SubSectionGlobal == DM_smallbattle04 or DM_Rand == 4
+                DM_Number = number from 1 to 2
+                if DM_Number == 1
+                    attach music "small_battle_04_01" to DM_MusicObject range 99999
+                elsif DM_Number == 2
+                    attach music "small_battle_04_02" to DM_MusicObject range 99999
+                end if
+                run script DM_WaitForNextMusic(300,DM_SubSectionGlobal)
+            elsif DM_SubSectionGlobal == DM_smallbattle05 or DM_Rand == 5
+                DM_Number = number from 1 to 2
+                if DM_Number == 1
+                    attach music "small_battle_05_01" to DM_MusicObject range 99999
+                elsif DM_Number == 2
+                    attach music "small_battle_05_02" to DM_MusicObject range 99999
+                end if
+                run script DM_WaitForNextMusic(300,DM_SubSectionGlobal)
+            end if
+
+        elsif DM_SectionGlobal == DM_Medium
+            DM_Rand = number from 1 to 5
+            if DM_SubSectionGlobal == DM_mediumbattle01 or DM_SubSectionGlobal == DM_mediumbattle02 or DM_SubSectionGlobal == DM_mediumbattle03 or DM_SubSectionGlobal == DM_mediumbattle04 or DM_SubSectionGlobal == DM_mediumbattle05
+                DM_Rand = 0
+            end if
+            if DM_SubSectionGlobal == DM_mediumbattle01 or DM_Rand == 1
+                if DM_RaceGlobal == DM_RaceNormal
+                    DM_Number = number from 1 to 3
+                    if DM_Number == 1
+                        attach music "medium_battle_01_01" to DM_MusicObject range 99999
+                    elsif DM_Number == 2
+                        attach music "medium_battle_01_02" to DM_MusicObject range 99999
+                    elsif DM_Number == 3
+                        attach music "medium_battle_01_03" to DM_MusicObject range 99999
+                    end if
+                elsif DM_RaceGlobal == DM_RaceNorse
+                    DM_Number = number from 1 to 3
+                    if DM_Number == 1
+                        attach music "medium_battle_nor_01_01" to DM_MusicObject range 99999
+                    elsif DM_Number == 2
+                        attach music "medium_battle_nor_01_02" to DM_MusicObject range 99999
+                    elsif DM_Number == 3
+                        attach music "medium_battle_nor_01_03" to DM_MusicObject range 99999
+                    end if
+                elsif DM_RaceGlobal == DM_RaceJapanese
+                    DM_Number = number from 1 to 3
+                    if DM_Number == 1
+                        attach music "medium_battle_jap_01_01" to DM_MusicObject range 99999
+                    elsif DM_Number == 2
+                        attach music "medium_battle_jap_01_02" to DM_MusicObject range 99999
+                    elsif DM_Number == 3
+                        attach music "medium_battle_jap_01_03" to DM_MusicObject range 99999
+                    end if
+                elsif DM_RaceGlobal == DM_RaceAztec
+                    DM_Number = number from 1 to 3
+                    if DM_Number == 1
+                        attach music "medium_battle_azc_01_01" to DM_MusicObject range 99999
+                    elsif DM_Number == 2
+                        attach music "medium_battle_azc_01_02" to DM_MusicObject range 99999
+                    elsif DM_Number == 3
+                        attach music "medium_battle_azc_01_03" to DM_MusicObject range 99999
+                    end if
+                end if
+                run script DM_WaitForNextMusic(300,DM_SubSectionGlobal)
+            elsif DM_SubSectionGlobal == DM_mediumbattle02 or DM_Rand == 2
+                if DM_RaceGlobal == DM_RaceNormal
+                    DM_Number = number from 1 to 3
+                    if DM_Number == 1
+                        attach music "medium_battle_02_01" to DM_MusicObject range 99999
+                    elsif DM_Number == 2
+                        attach music "medium_battle_02_02" to DM_MusicObject range 99999
+                    elsif DM_Number == 3
+                        attach music "medium_battle_02_03" to DM_MusicObject range 99999
+                    end if
+                elsif DM_RaceGlobal == DM_RaceNorse
+                    DM_Number = number from 1 to 3
+                    if DM_Number == 1
+                        attach music "medium_battle_nor_02_01" to DM_MusicObject range 99999
+                    elsif DM_Number == 2
+                        attach music "medium_battle_nor_02_02" to DM_MusicObject range 99999
+                    elsif DM_Number == 3
+                        attach music "medium_battle_nor_02_03" to DM_MusicObject range 99999
+                    end if
+                elsif DM_RaceGlobal == DM_RaceJapanese
+                    DM_Number = number from 1 to 3
+                    if DM_Number == 1
+                        attach music "medium_battle_jap_02_01" to DM_MusicObject range 99999
+                    elsif DM_Number == 2
+                        attach music "medium_battle_jap_02_02" to DM_MusicObject range 99999
+                    elsif DM_Number == 3
+                        attach music "medium_battle_jap_02_03" to DM_MusicObject range 99999
+                    end if
+                elsif DM_RaceGlobal == DM_RaceAztec
+                    DM_Number = number from 1 to 3
+                    if DM_Number == 1
+                        attach music "medium_battle_azc_02_01" to DM_MusicObject range 99999
+                    elsif DM_Number == 2
+                        attach music "medium_battle_azc_02_02" to DM_MusicObject range 99999
+                    elsif DM_Number == 3
+                        attach music "medium_battle_azc_02_03" to DM_MusicObject range 99999
+                    end if
+                end if
+                run script DM_WaitForNextMusic(300,DM_SubSectionGlobal)
+            elsif DM_SubSectionGlobal == DM_mediumbattle03 or DM_Rand == 3
+                if DM_RaceGlobal == DM_RaceNormal
+                    DM_Number = number from 1 to 3
+                    if DM_Number == 1
+                        attach music "medium_battle_03_01" to DM_MusicObject range 99999
+                    elsif DM_Number == 2
+                        attach music "medium_battle_03_02" to DM_MusicObject range 99999
+                    elsif DM_Number == 3
+                        attach music "medium_battle_03_03" to DM_MusicObject range 99999
+                    end if
+                elsif DM_RaceGlobal == DM_RaceNorse
+                    DM_Number = number from 1 to 3
+                    if DM_Number == 1
+                        attach music "medium_battle_nor_03_01" to DM_MusicObject range 99999
+                    elsif DM_Number == 2
+                        attach music "medium_battle_nor_03_02" to DM_MusicObject range 99999
+                    elsif DM_Number == 3
+                        attach music "medium_battle_nor_03_03" to DM_MusicObject range 99999
+                    end if
+                elsif DM_RaceGlobal == DM_RaceJapanese
+                    DM_Number = number from 1 to 3
+                    if DM_Number == 1
+                        attach music "medium_battle_jap_03_01" to DM_MusicObject range 99999
+                    elsif DM_Number == 2
+                        attach music "medium_battle_jap_03_02" to DM_MusicObject range 99999
+                    elsif DM_Number == 3
+                        attach music "medium_battle_jap_03_03" to DM_MusicObject range 99999
+                    end if
+                elsif DM_RaceGlobal == DM_RaceAztec
+                    DM_Number = number from 1 to 3
+                    if DM_Number == 1
+                        attach music "medium_battle_azc_03_01" to DM_MusicObject range 99999
+                    elsif DM_Number == 2
+                        attach music "medium_battle_azc_03_02" to DM_MusicObject range 99999
+                    elsif DM_Number == 3
+                        attach music "medium_battle_azc_03_03" to DM_MusicObject range 99999
+                    end if
+                end if
+                run script DM_WaitForNextMusic(300,DM_SubSectionGlobal)
+            elsif DM_SubSectionGlobal == DM_mediumbattle04 or DM_Rand == 4
+                if DM_RaceGlobal == DM_RaceNormal
+                    DM_Number = number from 1 to 3
+                    if DM_Number == 1
+                        attach music "medium_battle_04_01" to DM_MusicObject range 99999
+                    elsif DM_Number == 2
+                        attach music "medium_battle_04_02" to DM_MusicObject range 99999
+                    elsif DM_Number == 3
+                        attach music "medium_battle_04_03" to DM_MusicObject range 99999
+                    end if
+                elsif DM_RaceGlobal == DM_RaceNorse
+                    DM_Number = number from 1 to 3
+                    if DM_Number == 1
+                        attach music "medium_battle_nor_04_01" to DM_MusicObject range 99999
+                    elsif DM_Number == 2
+                        attach music "medium_battle_nor_04_02" to DM_MusicObject range 99999
+                    elsif DM_Number == 3
+                        attach music "medium_battle_nor_04_03" to DM_MusicObject range 99999
+                    end if
+                elsif DM_RaceGlobal == DM_RaceJapanese
+                    DM_Number = number from 1 to 3
+                    if DM_Number == 1
+                        attach music "medium_battle_jap_04_01" to DM_MusicObject range 99999
+                    elsif DM_Number == 2
+                        attach music "medium_battle_jap_04_02" to DM_MusicObject range 99999
+                    elsif DM_Number == 3
+                        attach music "medium_battle_jap_04_03" to DM_MusicObject range 99999
+                    end if
+                elsif DM_RaceGlobal == DM_RaceAztec
+                    DM_Number = number from 1 to 3
+                    if DM_Number == 1
+                        attach music "medium_battle_azc_04_01" to DM_MusicObject range 99999
+                    elsif DM_Number == 2
+                        attach music "medium_battle_azc_04_02" to DM_MusicObject range 99999
+                    elsif DM_Number == 3
+                        attach music "medium_battle_azc_04_03" to DM_MusicObject range 99999
+                    end if
+                end if
+                run script DM_WaitForNextMusic(300,DM_SubSectionGlobal)
+            elsif DM_SubSectionGlobal == DM_mediumbattle05 or DM_Rand == 5
+                if DM_RaceGlobal == DM_RaceNormal
+                    DM_Number = number from 1 to 3
+                    if DM_Number == 1
+                        attach music "medium_battle_05_01" to DM_MusicObject range 99999
+                    elsif DM_Number == 2
+                        attach music "medium_battle_05_02" to DM_MusicObject range 99999
+                    elsif DM_Number == 3
+                        attach music "medium_battle_05_03" to DM_MusicObject range 99999
+                    end if
+                elsif DM_RaceGlobal == DM_RaceNorse
+                    DM_Number = number from 1 to 3
+                    if DM_Number == 1
+                        attach music "medium_battle_nor_05_01" to DM_MusicObject range 99999
+                    elsif DM_Number == 2
+                        attach music "medium_battle_nor_05_02" to DM_MusicObject range 99999
+                    elsif DM_Number == 3
+                        attach music "medium_battle_nor_05_03" to DM_MusicObject range 99999
+                    end if
+                elsif DM_RaceGlobal == DM_RaceJapanese
+                    DM_Number = number from 1 to 3
+                    if DM_Number == 1
+                        attach music "medium_battle_jap_05_01" to DM_MusicObject range 99999
+                    elsif DM_Number == 2
+                        attach music "medium_battle_jap_05_02" to DM_MusicObject range 99999
+                    elsif DM_Number == 3
+                        attach music "medium_battle_jap_05_03" to DM_MusicObject range 99999
+                    end if
+                elsif DM_RaceGlobal == DM_RaceAztec
+                    DM_Number = number from 1 to 3
+                    if DM_Number == 1
+                        attach music "medium_battle_azc_05_01" to DM_MusicObject range 99999
+                    elsif DM_Number == 2
+                        attach music "medium_battle_azc_05_02" to DM_MusicObject range 99999
+                    elsif DM_Number == 3
+                        attach music "medium_battle_azc_05_03" to DM_MusicObject range 99999
+                    end if
+                end if
+                run script DM_WaitForNextMusic(300,DM_SubSectionGlobal)
+            end if
+
+        elsif DM_SectionGlobal == DM_Large
+            DM_Rand = number from 1 to 3
+            if DM_SubSectionGlobal == DM_largebattle01 or DM_SubSectionGlobal == DM_largebattle02 or DM_SubSectionGlobal == DM_largebattle03
+                DM_Rand = 0
+            end if
+            if DM_SubSectionGlobal == DM_largebattle01 or DM_Rand == 1
+                attach music "largebattle01" to DM_MusicObject range 99999
+                run script DM_WaitForNextMusic(300,DM_SubSectionGlobal)
+            elsif DM_SubSectionGlobal == DM_largebattle02 or DM_Rand == 2
+                attach music "largebattle02" to DM_MusicObject range 99999
+                run script DM_WaitForNextMusic(300,DM_SubSectionGlobal)
+            elsif DM_SubSectionGlobal == DM_largebattle03 or DM_Rand == 3
+                attach music "largebattle03" to DM_MusicObject range 99999
+                run script DM_WaitForNextMusic(300,DM_SubSectionGlobal)
+            end if
+
+        elsif DM_SectionGlobal == DM_Huge
+            DM_Rand = number from 1 to 2
+            if DM_SubSectionGlobal == DM_hugebattle01 or DM_SubSectionGlobal == DM_hugebattle02
+                DM_Rand = 0
+            end if
+            if DM_SubSectionGlobal == DM_hugebattle01 or DM_Rand == 1
+                attach music "largebattle01" to DM_MusicObject range 99999
+                run script DM_WaitForNextMusic(300,DM_SubSectionGlobal)
+            elsif DM_SubSectionGlobal == DM_hugebattle02 or DM_Rand == 2
+                attach music "largebattle02" to DM_MusicObject range 99999
+                run script DM_WaitForNextMusic(300,DM_SubSectionGlobal)
+            end if
+
+        elsif DM_SectionGlobal == DM_EndOfBattle
+            DM_Rand = number from 1 to 3
+            if DM_SubSectionGlobal == DM_EndBattle01 or DM_SubSectionGlobal == DM_EndBattle02 or DM_SubSectionGlobal == DM_EndBattle03
+                DM_Rand = 0
+            end if
+            if DM_SubSectionGlobal == DM_EndBattle01 or DM_Rand == 1
+                attach music "endofbattle01" to DM_MusicObject range 99999
+                run script DM_WaitForNextMusic(53,DM_SubSectionGlobal)
+            elsif DM_SubSectionGlobal == DM_EndBattle02 or DM_Rand == 2
+                attach music "endofbattle02" to DM_MusicObject range 99999
+                run script DM_WaitForNextMusic(30,DM_SubSectionGlobal)
+            elsif DM_SubSectionGlobal == DM_EndBattle03 or DM_Rand == 3
+                attach music "endofbattle03" to DM_MusicObject range 99999
+                run script DM_WaitForNextMusic(36,DM_SubSectionGlobal)
+            end if
+        end if
+    end while
+    DM_ScriptRunning = 0
 end if
-
-while DM_DynamicMusicBreak == 0 and DM_DynamicMusicDisallowed == 0 and DM_AskStop == 0
-    detach music from DM_MusicObject
-    if section == DM_Small
-        DM_Rand = number from 1 to 6
-        if DM_SubSectionGlobal == DM_smallbattle01 or DM_SubSectionGlobal == DM_smallbattle02 or DM_SubSectionGlobal == DM_smallbattle03 or DM_SubSectionGlobal == DM_smallbattle04 or DM_SubSectionGlobal == DM_smallbattle05 or DM_SubSectionGlobal == DM_smallbattle06
-            DM_Rand = 0
-        end if
-        if DM_SubSectionGlobal == DM_smallbattle01 or DM_Rand == 1
-            attach music "smallbattle01" to DM_MusicObject range 99999
-            run script DM_WaitForNextMusic(256,number from mintime to maxtime,DM_SubSectionGlobal)
-        elsif DM_SubSectionGlobal == DM_smallbattle02 or DM_Rand == 2
-            attach music "smallbattle02" to DM_MusicObject range 99999
-            run script DM_WaitForNextMusic(0,number from mintime to maxtime,DM_SubSectionGlobal)
-        elsif DM_SubSectionGlobal == DM_smallbattle03 or DM_Rand == 3
-            attach music "smallbattle03" to DM_MusicObject range 99999
-            run script DM_WaitForNextMusic(0,number from mintime to maxtime,DM_SubSectionGlobal)
-        elsif DM_SubSectionGlobal == DM_smallbattle04 or DM_Rand == 4
-            attach music "smallbattle04" to DM_MusicObject range 99999
-            run script DM_WaitForNextMusic(0,number from mintime to maxtime,DM_SubSectionGlobal)
-        elsif DM_SubSectionGlobal == DM_smallbattle05 or DM_Rand == 5
-            attach music "smallbattle05" to DM_MusicObject range 99999
-            run script DM_WaitForNextMusic(0,number from mintime to maxtime,DM_SubSectionGlobal)
-        elsif DM_SubSectionGlobal == DM_smallbattle06 or DM_Rand == 6
-            attach music "smallbattle06" to DM_MusicObject range 99999
-            run script DM_WaitForNextMusic(0,number from mintime to maxtime,DM_SubSectionGlobal)
-        end if
-
-    elsif section == DM_Medium
-        DM_Rand = number from 1 to 5
-        if DM_SubSectionGlobal == DM_mediumbattle01 or DM_SubSectionGlobal == DM_mediumbattle02 or DM_SubSectionGlobal == DM_mediumbattle03 or DM_SubSectionGlobal == DM_mediumbattle04 or DM_SubSectionGlobal == DM_mediumbattle05
-            DM_Rand = 0
-        end if
-        if DM_SubSectionGlobal == DM_mediumbattle01 or DM_Rand == 1
-            attach music "mediumbattle01" to DM_MusicObject range 99999
-            run script DM_WaitForNextMusic(122,number from mintime to maxtime,DM_SubSectionGlobal)
-        elsif DM_SubSectionGlobal == DM_mediumbattle02 or DM_Rand == 2
-            attach music "mediumbattle02" to DM_MusicObject range 99999
-            run script DM_WaitForNextMusic(0,number from mintime to maxtime,DM_SubSectionGlobal)
-        elsif DM_SubSectionGlobal == DM_mediumbattle03 or DM_Rand == 3
-            attach music "mediumbattle03" to DM_MusicObject range 99999
-            run script DM_WaitForNextMusic(0,number from mintime to maxtime,DM_SubSectionGlobal)
-        elsif DM_SubSectionGlobal == DM_mediumbattle04 or DM_Rand == 4
-            attach music "mediumbattle04" to DM_MusicObject range 99999
-            run script DM_WaitForNextMusic(0,number from mintime to maxtime,DM_SubSectionGlobal)
-        elsif DM_SubSectionGlobal == DM_mediumbattle05 or DM_Rand == 5
-            attach music "mediumbattle05" to DM_MusicObject range 99999
-            run script DM_WaitForNextMusic(0,number from mintime to maxtime,DM_SubSectionGlobal)
-        end if
-
-    elsif section == DM_Large
-        DM_Rand = number from 1 to 3
-        if DM_SubSectionGlobal == DM_largebattle01 or DM_SubSectionGlobal == DM_largebattle02 or DM_SubSectionGlobal == DM_largebattle03
-            DM_Rand = 0
-        end if
-        if DM_SubSectionGlobal == DM_largebattle01 or DM_Rand == 1
-            attach music "largebattle01" to DM_MusicObject range 99999
-            run script DM_WaitForNextMusic(0,number from mintime to maxtime,DM_SubSectionGlobal)
-        elsif DM_SubSectionGlobal == DM_largebattle02 or DM_Rand == 2
-            attach music "largebattle02" to DM_MusicObject range 99999
-            run script DM_WaitForNextMusic(0,number from mintime to maxtime,DM_SubSectionGlobal)
-        elsif DM_SubSectionGlobal == DM_largebattle03 or DM_Rand == 3
-            attach music "largebattle03" to DM_MusicObject range 99999
-            run script DM_WaitForNextMusic(0,number from mintime to maxtime,DM_SubSectionGlobal)
-        end if
-
-    elsif section == DM_Huge
-        DM_Rand = number from 1 to 2
-        if DM_SubSectionGlobal == DM_hugebattle01 or DM_SubSectionGlobal == DM_hugebattle02
-            DM_Rand = 0
-        end if
-        if DM_SubSectionGlobal == DM_hugebattle01 or DM_Rand == 1
-            attach music "largebattle01" to DM_MusicObject range 99999
-            run script DM_WaitForNextMusic(0,number from mintime to maxtime,DM_SubSectionGlobal)
-        elsif DM_SubSectionGlobal == DM_hugebattle02 or DM_Rand == 2
-            attach music "largebattle02" to DM_MusicObject range 99999
-            run script DM_WaitForNextMusic(0,number from mintime to maxtime,DM_SubSectionGlobal)
-        end if
-
-    elsif section == DM_EndOfBattle
-        DM_Rand = number from 1 to 3
-        if DM_SubSectionGlobal == DM_EndBattle01 or DM_SubSectionGlobal == DM_EndBattle02 or DM_SubSectionGlobal == DM_EndBattle03
-            DM_Rand = 0
-        end if
-        if DM_SubSectionGlobal == DM_EndBattle01 or DM_Rand == 1
-            attach music "endofbattle01" to DM_MusicObject range 99999
-            run script DM_WaitForNextMusic(53,number from mintime to maxtime,DM_SubSectionGlobal)
-        elsif DM_SubSectionGlobal == DM_EndBattle02 or DM_Rand == 2
-            attach music "endofbattle02" to DM_MusicObject range 99999
-            run script DM_WaitForNextMusic(30,number from mintime to maxtime,DM_SubSectionGlobal)
-        elsif DM_SubSectionGlobal == DM_EndBattle03 or DM_Rand == 3
-            attach music "endofbattle03" to DM_MusicObject range 99999
-            run script DM_WaitForNextMusic(36,number from mintime to maxtime,DM_SubSectionGlobal)
-        end if
-    end if
-end while
-
-DM_DynamicMusicBreak = 0
-DM_DynamicMusicActive = 0
-
-//Restart the music 
-if DM_DynamicMusicDisallowed == 1 and DM_AskStop == 0
-    run background script DM_SetDynamicMusic(section,DM_SubSectionGlobal,isurgent,mintime,maxtime)
-end if
-
-DM_ScriptRunning = 0
 
 end script DM_SetDynamicMusic
 
-begin script DM_WaitForNextMusic(musicLength,howLong,subsection)
+begin script DM_WaitForNextMusic(musicLength,subsection)
 
-    MyTimer = create timer for howLong seconds
+    MyTimer = create timer for 300 seconds
 
 start
 
-while get MyTimer time remaining > 0 and DM_DynamicMusicBreak == 0 and DM_DynamicMusicDisallowed == 0 and DM_AskStop == 0
-    wait until get MyTimer time remaining <= 0 or DM_DynamicMusicBreak == 1 or DM_DynamicMusicDisallowed == 1 or DM_AskStop == 1 or musicLength seconds
-    if get MyTimer time remaining > 0 and DM_DynamicMusicBreak == 0 and DM_DynamicMusicDisallowed == 0 and DM_AskStop == 0
-        restart music on DM_MusicObject
+run background script DM_CheckNewData
+
+while get MyTimer time remaining > 0 and DM_DynamicMusicDisallowed == 0 and DM_AskStop == 0 and DM_IsUrgentGlobal == 0
+    wait until get MyTimer time remaining <= 0 or DM_DynamicMusicDisallowed == 1 or DM_AskStop == 1 or DM_IsUrgentGlobal != 0 or musicLength seconds
+    if get MyTimer time remaining <= 0 and DM_DynamicMusicDisallowed == 0 and DM_AskStop == 0
+        restart music on DM_MusicObject //Most likely it isn't needed because of music length
     end if
 end while
 
+if DM_IsUrgentGlobal != 0
+    DM_IsUrgentGlobal = 0
+end if
+
 end script DM_WaitForNextMusic
+
+begin script DM_CheckNewData
+
+    section = DM_SectionGlobal
+    subSection = DM_SubSectionGlobal
+    race = DM_RaceGlobal
+    isUrgent = DM_IsUrgentGlobal
+
+start
+
+begin loop
+    wait until DM_IsUrgentGlobal != 0 or 30 seconds
+    until section != DM_SectionGlobal or subSection != DM_SubSectionGlobal or race != DM_RaceGlobal or isUrgent != DM_IsUrgentGlobal
+end loop
+
+DM_IsUrgentGlobal = 1 //Use this to break DM_WaitForNextMusic
+
+end script DM_CheckNewData
 
 begin script DM_StopDynamicMusic(fadeouttime)
 
@@ -224,12 +442,14 @@ begin script DM_StopDynamicMusic(fadeouttime)
 
 start
 
-    DM_DynamicMusicBreak = 1
+    DM_AskStop = 1
     DM_MusicMixer = create mixer
     set mixer DM_MusicMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 0.0 with fadetime fadeouttime
     wait fadeouttime seconds
     stop music
     destroy mixer DM_MusicMixer
     delete DM_MusicObject
+    wait until DM_ScriptRunning == 0
+    DM_AskStop = 0
 
 end script DM_StopDynamicMusic
