@@ -1733,6 +1733,7 @@ begin script LC6_ArmyBehaviours(Platoon,Type,Task,DefendObject,AttackFocus,Aggre
     AssumedPlatoonPos = 0
     AttackFocusSource = AttackFocus
     IgnoreInfluence = 0
+    IgnoreInfluenceTimer = create timer for 0 seconds
 
 start
 
@@ -1803,6 +1804,8 @@ if Platoon == LC6_Platoon[41]
     wait until LC6_Platoon[41] exists and LC6_SiegeCatapult[13] exists and ({LC6_SiegeCatapult[13]} near {JapaneseCapital} radius 750) and LC6_SiegeCatapult[14] exists and ({LC6_SiegeCatapult[14]} near {JapaneseCapital} radius 750) and LC6_SiegeCatapult[15] exists and ({LC6_SiegeCatapult[15]} near {JapaneseCapital} radius 750)
     AttackersSent[0] = 1
 end if
+
+IgnoreInfluenceTimer = create timer for 600 seconds
 
 begin loop
     //Attack nearby enemies
@@ -2008,7 +2011,7 @@ begin loop
                     wait number from 5 to 10 seconds
                 end if
                 //say "PLATOON ATTACKING"
-                if size of PlayerTown >= 450
+                if size of PlayerTown >= 450 or get IgnoreInfluenceTimer time remaining <= 0
                     IgnoreInfluence = 1
 
                 elsif IgnoreInfluence == 1
@@ -2698,7 +2701,7 @@ begin loop
             //if get size of Platoon action queue < 1
                 //Targeting
                 //say "PLATOON ATTACKING"
-                if size of PlayerTown >= 450
+                if size of PlayerTown >= 450 or get IgnoreInfluenceTimer time remaining <= 0
                     IgnoreInfluence = 1
 
                 elsif IgnoreInfluence == 1

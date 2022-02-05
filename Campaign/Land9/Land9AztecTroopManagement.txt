@@ -724,6 +724,7 @@ begin script LC9_ArmyBehaviours(Platoon,Type,Task,DefendObject,AttackFocus,Aggre
     AssumedPlatoonPos = 0
     AttackFocusSource = AttackFocus
     IgnoreInfluence = 0
+    IgnoreInfluenceTimer = create timer for 0 seconds
 
 start
 
@@ -777,6 +778,8 @@ end if
 if Platoon == LC9_Platoon[35] or Platoon == LC9_Platoon[36] or Platoon == LC9_Platoon[37] or Platoon == LC9_Platoon[38] or Platoon == LC9_Platoon[39] or Platoon == LC9_Platoon[40]
     wait until ALLOWED_TO_ATTACK == 1
 end if
+
+IgnoreInfluenceTimer = create timer for 600 seconds
 
 begin loop
     //Attack nearby enemies
@@ -982,7 +985,7 @@ begin loop
                     wait number from 5 to 10 seconds
                 end if
                 //say "PLATOON ATTACKING"
-                if size of PlayerTown >= 450
+                if size of PlayerTown >= 450 or get IgnoreInfluenceTimer time remaining <= 0
                     IgnoreInfluence = 1
 
                 elsif IgnoreInfluence == 1
@@ -1669,7 +1672,7 @@ begin loop
             //if get size of Platoon action queue < 1
                 //Targeting
                 //say "PLATOON ATTACKING"
-                if size of PlayerTown >= 450
+                if size of PlayerTown >= 450 or get IgnoreInfluenceTimer time remaining <= 0
                     IgnoreInfluence = 1
 
                 elsif IgnoreInfluence == 1

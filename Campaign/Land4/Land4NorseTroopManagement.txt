@@ -699,6 +699,7 @@ begin script LC4_ArmyBehaviours(Platoon,Type,Task,DefendObject,AttackFocus,Aggre
     AssumedPlatoonPos = 0
     AttackFocusSource = AttackFocus
     IgnoreInfluence = 0
+    IgnoreInfluenceTimer = create timer for 0 seconds
 
 start
 
@@ -769,6 +770,8 @@ if Platoon == LC4_Platoon[33] or Platoon == LC4_Platoon[34]
     wait until LC4_Platoon[33] exists and LC4_Platoon[34] exists and LC4_SiegeCatapult[10] exists and ({LC4_SiegeCatapult[10]} near {NorseCapital} radius 750) and LC4_SiegeCatapult[11] exists and ({LC4_SiegeCatapult[11]} near {NorseCapital} radius 750)
     AttackersSent[0] = 1
 end if
+
+IgnoreInfluenceTimer = create timer for 600 seconds
 
 begin loop
     //Attack nearby enemies
@@ -974,7 +977,7 @@ begin loop
                     wait number from 5 to 10 seconds
                 end if
                 //say "PLATOON ATTACKING"
-                if size of PlayerTown >= 450
+                if size of PlayerTown >= 450 or get IgnoreInfluenceTimer time remaining <= 0
                     IgnoreInfluence = 1
 
                 elsif IgnoreInfluence == 1
@@ -1646,7 +1649,7 @@ begin loop
             //if get size of Platoon action queue < 1
                 //Targeting
                 //say "PLATOON ATTACKING"
-                if size of PlayerTown >= 450
+                if size of PlayerTown >= 450 or get IgnoreInfluenceTimer time remaining <= 0
                     IgnoreInfluence = 1
 
                 elsif IgnoreInfluence == 1
