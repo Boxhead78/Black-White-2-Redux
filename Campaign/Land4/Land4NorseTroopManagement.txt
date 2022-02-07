@@ -1255,15 +1255,21 @@ begin loop
                         clear Platoon action queue
                         add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPoint1} to Platoon action queue
                     end if
-                elsif Platoon can navigate to {AttackingPoint1} and IgnoreInfluence == 1
+                elsif IgnoreInfluence == 1
                     //say "Platoon can navigate to {AttackingPoint1} and get player 0 influence at {AttackingPoint1} == 0"
+                    begin loop
+                        AttackingPoint1 = marker at {AttackingPoint1} + {number from -Threshold to Threshold,number from -Threshold to Threshold}
+                        Threshold += 5
+                        until Platoon can navigate to {AttackingPoint1} or Threshold > 999
+                    end loop
+                    Threshold = 1
                     if not {Platoon} near {AttackingPoint1} radius 25
                         clear Platoon action queue
                         add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPoint1} to Platoon action queue
                     end if
                 else
                     //say "else"
-                    if get player 0 influence at {AttackingPoint2} > 0 and (IgnoreInfluence == 0 or not Platoon can navigate to {AttackingPoint2})
+                    if get player 0 influence at {AttackingPoint2} > 0 or not Platoon can navigate to {AttackingPoint2}
                         begin loop
                             AttackingPoint2 = marker at {AttackingPoint2} + {number from -Threshold to Threshold,number from -Threshold to Threshold}
                             Threshold += 5
@@ -1932,15 +1938,21 @@ begin loop
                         clear Platoon action queue
                         add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPoint1} to Platoon action queue
                     end if
-                elsif Platoon can navigate to {AttackingPoint1} and IgnoreInfluence == 1
+                elsif IgnoreInfluence == 1
                     //say "Platoon can navigate to {AttackingPoint1} and get player 0 influence at {AttackingPoint1} == 0"
+                    begin loop
+                        AttackingPoint1 = marker at {AttackingPoint1} + {number from -Threshold to Threshold,number from -Threshold to Threshold}
+                        Threshold += 5
+                        until Platoon can navigate to {AttackingPoint1} or Threshold > 999
+                    end loop
+                    Threshold = 1
                     if not {Platoon} near {AttackingPoint1} radius 25
                         clear Platoon action queue
                         add action PLATOON_AGENDA_ACTION_MOVE_TO_POS_AGGRESSIVE using {AttackingPoint1} to Platoon action queue
                     end if
                 else
                     //say "else"
-                    if get player 0 influence at {AttackingPoint2} > 0 and (IgnoreInfluence == 0 or not Platoon can navigate to {AttackingPoint2})
+                    if get player 0 influence at {AttackingPoint2} > 0 or not Platoon can navigate to {AttackingPoint2}
                         begin loop
                             AttackingPoint2 = marker at {AttackingPoint2} + {number from -Threshold to Threshold,number from -Threshold to Threshold}
                             Threshold += 5
