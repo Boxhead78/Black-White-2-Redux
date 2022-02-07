@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------------------------------
 define script AltarEpics
-define script AltarEpicsLogic(Building,PlayerID,whichWonder,AISwitch)
+define script AltarEpicsLogic(Building,PlayerID,whichSpell,AISwitch)
 
 define NONE = 0
 define Regrowth = 1
@@ -143,7 +143,7 @@ end if
 end script AltarEpics
 
 
-begin script AltarEpicsLogic(Building,PlayerID,whichWonder,AISwitch)
+begin script AltarEpicsLogic(Building,PlayerID,whichSpell,AISwitch)
 
     Counter = 0
     RelPos[6]
@@ -165,7 +165,7 @@ RelPos[3] = marker at get world position from Building to {0,-19}
 RelPos[4] = marker at get world position from Building to {8,19}
 RelPos[5] = marker at get world position from Building to {-8,19}
 
-if whichWonder == Regrowth
+if whichSpell == Regrowth
     //Regrowth, 10000 mana
     Foundation[0] = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {RelPos[0]}
     ANGLE of Foundation[0] = ANGLE of Building
@@ -174,7 +174,7 @@ if whichWonder == Regrowth
     set ParticleEffect[0] colour red 30 green 195 blue 30
     SCALE of ParticleEffect[0] = 0.75
 
-elsif whichWonder == FIRERAIN
+elsif whichSpell == FIRERAIN
     //FireRain 20000 mana
     Foundation[1] = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {RelPos[1]}
     ANGLE of Foundation[1] = ANGLE of Building
@@ -182,7 +182,7 @@ elsif whichWonder == FIRERAIN
     ParticleEffect[1] = create visual effect VISUAL_MIRACLE_FIRE_SEED at {RelPos[1]} + {0,6,0} time -1 target {RelPos[1]} + {0,50,0}
     SCALE of ParticleEffect[1] = 0.75
 
-elsif whichWonder == THUNDERSTORM
+elsif whichSpell == THUNDERSTORM
     //ThunderStorm 30000 mana
     Foundation[2] = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {RelPos[2]}
     ANGLE of Foundation[2] = ANGLE of Building
@@ -190,7 +190,7 @@ elsif whichWonder == THUNDERSTORM
     ParticleEffect[2] = create visual effect VISUAL_MIRACLE_TORNODO_SEED at {RelPos[2]} + {0,6,0} time -1 target {RelPos[2]} + {0,50,0}
     SCALE of ParticleEffect[2] = 0.75
 
-elsif whichWonder == METEOR
+elsif whichSpell == METEOR
     //MeteorSpell 60000 mana
     Foundation[3] = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {RelPos[3]}
     ANGLE of Foundation[3] = ANGLE of Building
@@ -198,7 +198,7 @@ elsif whichWonder == METEOR
     ParticleEffect[3] = create visual effect VISUAL_MIRACLE_METEOR_SEED at {RelPos[3]} + {0,6,0} time -1 target {RelPos[3]} + {0,50,0}
     SCALE of ParticleEffect[3] = 0.75
 
-elsif whichWonder == LIFE
+elsif whichSpell == LIFE
     //Life 6000 mana
     Foundation[4] = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {RelPos[4]}
     ANGLE of Foundation[4] = ANGLE of Building
@@ -207,7 +207,7 @@ elsif whichWonder == LIFE
     set ParticleEffect[4] colour red 255 green 255 blue 40
     SCALE of ParticleEffect[4] = 0.75
 
-elsif whichWonder == DEATHH
+elsif whichSpell == DEATHH
     //DEATHH 10000 mana
     Foundation[5] = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {RelPos[5]}
     ANGLE of Foundation[5] = ANGLE of Building
@@ -220,7 +220,7 @@ end if
 
 //Check if useable
 begin loop
-    if whichWonder == Regrowth
+    if whichSpell == Regrowth
         if get player PlayerID mana >= 10000
             if ParticleEffect2[0] not exists
                 ParticleEffect2[0] = create visual effect VISUAL_EFFECT_MIRACLE_CHARGE at {RelPos[0]} + {0,1,0} time -1 target {RelPos[0]} + {0,50,0}
@@ -252,7 +252,7 @@ begin loop
             delete Tooltip
         end if
 
-    elsif whichWonder == FIRERAIN
+    elsif whichSpell == FIRERAIN
         if get player PlayerID mana >= 20000
             if ParticleEffect2[1] not exists
                 ParticleEffect2[1] = create visual effect VISUAL_EFFECT_MIRACLE_CHARGE at {RelPos[1]} + {0,1,0} time -1 target {RelPos[1]} + {0,50,0}
@@ -280,7 +280,7 @@ begin loop
             delete Tooltip
         end if
 
-    elsif whichWonder == THUNDERSTORM
+    elsif whichSpell == THUNDERSTORM
         if get player PlayerID mana >= 30000
             if ParticleEffect2[2] not exists
                 ParticleEffect2[2] = create visual effect VISUAL_EFFECT_MIRACLE_CHARGE at {RelPos[2]} + {0,1,0} time -1 target {RelPos[2]} + {0,50,0}
@@ -308,7 +308,7 @@ begin loop
             delete Tooltip
         end if
 
-    elsif whichWonder == METEOR
+    elsif whichSpell == METEOR
         if get player PlayerID mana >= 60000
             if ParticleEffect2[3] not exists
                 ParticleEffect2[3] = create visual effect VISUAL_EFFECT_MIRACLE_CHARGE at {RelPos[3]} + {0,1,0} time -1 target {RelPos[3]} + {0,50,0}
@@ -336,7 +336,7 @@ begin loop
             delete Tooltip
         end if
 
-    elsif whichWonder == LIFE
+    elsif whichSpell == LIFE
         if get player PlayerID mana >= 6000
             if ParticleEffect2[4] not exists
                 ParticleEffect2[4] = create visual effect VISUAL_EFFECT_MIRACLE_CHARGE at {RelPos[4]} + {0,1,0} time -1 target {RelPos[4]} + {0,50,0}
@@ -357,7 +357,7 @@ begin loop
             end if
         end if
 
-    elsif whichWonder == DEATHH
+    elsif whichSpell == DEATHH
         if get player PlayerID mana >= 10000
             if ParticleEffect2[5] not exists
                 ParticleEffect2[5] = create visual effect VISUAL_EFFECT_MIRACLE_CHARGE at {RelPos[5]} + {0,1,0} time -1 target {RelPos[5]} + {0,50,0}
