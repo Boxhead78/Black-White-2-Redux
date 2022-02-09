@@ -3107,7 +3107,7 @@ start
 
     wait 5 seconds
 
-    start dynamic music
+    start dynamic music //TODO: Change
     set dynamic music "small" loop -1 urgent
 
     wait 10 seconds
@@ -3132,7 +3132,7 @@ start
         empty player hand
         wait 3 seconds
 
-        set dynamic music "largeevent1" loop 0 urgent
+        set dynamic music "largeevent1" loop 0 urgent //TODO: Change
 
         set camera position to {TeleportCentre} + {-30,30,-30}
         set camera focus to {TeleportCentre}
@@ -3224,9 +3224,15 @@ start
 
     wait 17 seconds
 
-    run background script DMM_DynamicMusicManager(DMM_MUSIC_PAUSE_ON, DMM_SERVERITY_LEVEL_2, DM_RaceAztec)
+    run background script DM_SetDynamicMusic(DM_Small,DM_smallbattle04,DM_RaceAztec,1)
 
-    wait 150 seconds
+    wait 30 seconds
+
+    stop dynamic music //TODO: Remove as soon as music is finished
+
+    run background script DM_SetDynamicMusic(DM_Medium,DM_Random,DM_RaceAztec,1) //TODO: Change to large with drums
+
+    wait 120 seconds
 
     GB_DialogueIsRunning = 1
     if HEALTH of AIVolcano == 1.0 and VolcanoFired == 0
@@ -3258,15 +3264,9 @@ start
         run background script LC11_Volcano(AIVolcano, EpicVolc)
     end if
 
-    wait 150 seconds
+    run background script DMM_DynamicMusicManager(DMM_MUSIC_PAUSE_ON, DMM_SERVERITY_LEVEL_2, DM_RaceAztec)
 
-    if PLAYER of AztecTown1 != 0 and PLAYER of AztecTown2 != 0 and PLAYER of AztecCapital != 0
-        land11mixer = create mixer
-        set mixer land11mixer channel AUDIO_MIXER_CHANNEL_MUSIC to 0.0 with fadetime 10
-        wait 10 seconds 
-        stop dynamic music
-        destroy mixer land11mixer with fadetime 3
-    end if
+    wait 150 seconds
 
     wait until VolcanoActive == 0
 
@@ -3280,13 +3280,6 @@ start
     end dialogue 
 
     wait 260 seconds
-
-    //Always kill the music here
-    land11mixer = create mixer
-    set mixer land11mixer channel AUDIO_MIXER_CHANNEL_MUSIC to 0.0 with fadetime 10
-    wait 10 seconds 
-    stop dynamic music
-    destroy mixer land11mixer with fadetime 3
 
     WaitTimer = create timer for 180 seconds
 
@@ -3337,9 +3330,10 @@ start
         
         set fade red 0 green 0 blue 0 time 2
 
+        DMM_HaltScript = 1
         wait 2 seconds
 
-        start music "cut_scene_battle_04" loop 1
+        run background script DM_SetDynamicMusic(DM_Small,DM_smallbattle04,DM_RaceAztec,1)
 
         FX = create visual effect VISUAL_EFFECT_TELEPORTER_HOOP at {1916.91,147.26,691.08} + {0.000,1.000,0.000} time 10
         SCALE of FX = 2.0
@@ -3406,7 +3400,11 @@ start
         set fade in time 3
     end cinema
 
-    wait 120 seconds
+    wait 30 seconds
+
+    DMM_HaltScript = 0
+
+    wait 90 seconds
 
     wait until HEALTH of AIVolcano == 1.0
     GB_DialogueIsRunning = 1
@@ -3477,12 +3475,24 @@ begin loop
 
     if MusicPlayed == 0
         if PLAYER of AztecTown1 == 0 or PLAYER of AztecTown2 == 0 or PLAYER of AztecCapital == 0
-            run background script DMM_DynamicMusicManager(DMM_MUSIC_PAUSE_ON, DMM_SERVERITY_LEVEL_END_BATTLE_1, DM_RaceAztec)
+            DMM_HaltScript = 1
+            wait 2 seconds
+            run background script DM_SetDynamicMusic(DM_EndOfBattle,DM_EndBattle01,DM_RaceAztec,1)
             MusicPlayed = 1
+            StopMusicTimer = create timer for 60 seconds
         elsif get town AztecTown1 is migrating to == PlayerTown or get town AztecTown2 is migrating to == PlayerTown or get town AztecCapital is migrating to == PlayerTown
-            run background script DMM_DynamicMusicManager(DMM_MUSIC_PAUSE_ON, DMM_SERVERITY_LEVEL_END_BATTLE_2, DM_RaceAztec)
+            DMM_HaltScript = 1
+            wait 2 seconds
+            run background script DM_SetDynamicMusic(DM_EndOfBattle,DM_EndBattle02,DM_RaceAztec,1)
             MusicPlayed = 1
+            StopMusicTimer = create timer for 60 seconds
         end if
+    end if
+
+    if get StopMusicTimer time remaining <= 0
+        run background script DM_StopDynamicMusic(10)
+        wait 10 seconds
+        DMM_HaltScript = 0
     end if
 
     if NorsePlatoon[0] exists or NorsePlatoon[1] exists or NorsePlatoon[2] exists
