@@ -3615,23 +3615,23 @@ end script LC7_LargeSiegePlatoonManager
 
 begin script LC7_LargeSiegeMusicManager
 
-    CSMixer = 0
-
 start
 
     wait 30 seconds
-    DM_DynamicMusicDisallowed = 1
-    CSMixer = create mixer
-    set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 0.0 with fadetime 0
-    start music "cut_scene_battle_02 " loop 1
-    set mixer CSMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 1.0 with fadetime 25
+    run background script DM_SetDynamicMusic(DM_Small,DM_Random,DM_RaceJapanese,1)
+
+    wait 30 seconds
+    run background script DM_SetDynamicMusic(DM_Medium,DM_mediumbattle02,DM_RaceJapanese,1)
+
+    wait 75 seconds
+    run background script DM_SetDynamicMusic(DM_Medium,DM_mediumbattle01,DM_RaceJapanese,1)
 
     wait until LC7_LargeSiegeIsRunning == 0
+    wait 15 seconds
+    run background script DM_SetDynamicMusic(DM_Small,DM_Random,DM_RaceJapanese,1)
 
-    wait 130 seconds
-
-    stop music with fadetime 10
-    DM_DynamicMusicDisallowed = 0
+    wait 120 seconds
+    run background script DM_StopDynamicMusic(10)
 
 end script LC7_LargeSiegeMusicManager
 

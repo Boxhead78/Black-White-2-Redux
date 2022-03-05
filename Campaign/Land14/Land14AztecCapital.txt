@@ -3088,7 +3088,7 @@ start
                     LC14_LargeSiegeOver = 1
                     myAttackTimer = create timer for 150 seconds
                     AIAttacksAllowed = 1
-                    run background script DMM_DynamicMusicManager(DMM_MUSIC_PAUSE_ON, DMM_SERVERITY_LEVEL_2, DM_RaceNormal)
+                    run background script DMM_DynamicMusicManager(DMM_MUSIC_PAUSE_ON, DMM_SERVERITY_LEVEL_3, DM_RaceNormal)
                     run background script LC14_Epics
                 end if
             end if
@@ -3285,8 +3285,7 @@ start
 
         wait 30 seconds
 
-        start dynamic music
-        set dynamic music "small" loop -1
+        run background script DM_SetDynamicMusic(DM_Small,DM_Random,DM_RaceNormal,1)
 
         LC14_LargeSiegeIsRunning = 1
         run background script LC14_LargeSiegePlatoons
@@ -3312,7 +3311,7 @@ start
         run background script PT_CreateArtyAztecPlatoonRanged(enemyPlatoon[1],1)
 
         wait until dialogue ready
-        set dynamic music "medium" loop -1
+        run background script DM_SetDynamicMusic(DM_Big,DM_bigbattle04,DM_RaceNormal,0)
 
         LC14_LargeSiegeLaunchAttack = 1
         GB_DialogueIsRunning = 1
@@ -3369,15 +3368,9 @@ start
 
         run script LC14_PlayRandomBanter
 
-        set dynamic music "small" loop -1
-        wait 15 seconds
-        set dynamic music "largeevent1" loop -1 urgent
-        wait 35 seconds
-        set dynamic music "smallevent6" loop 0
-        wait 24 seconds
-        set dynamic music "medium" loop -1
+        run background script DM_SetDynamicMusic(DM_Big,DM_bigbattle03,DM_RaceNormal,1)
 
-        wait 14 seconds
+        wait 75 seconds
 
         run script LC14_PlayRandomBanter
 
@@ -3421,7 +3414,7 @@ start
         LC14_LargeSiegeOver = 1
         SiegeRan = 1
 
-        set dynamic music "small" loop -1
+        run background script DM_SetDynamicMusic(DM_Small,DM_Random,DM_RaceNormal,1)
 
         wait 90 seconds
 
@@ -3430,17 +3423,14 @@ start
         wait until PLAYER of AztecTown1 != 1 or 30 seconds
     end if
 
-    set dynamic music "smallendofbattle" loop -1 urgent
+    run background script DM_SetDynamicMusic(DM_EndOfBattle,DM_EndBattle02,DM_RaceNormal,1)
     if PLAYER of AztecTown1 == 1
         wait 60 seconds
     else
         wait 15 seconds
     end if
-    land14mixer = create mixer
-    set mixer land14mixer channel AUDIO_MIXER_CHANNEL_MUSIC to 0.0 with fadetime 7
-    wait 7 seconds 
-    stop dynamic music
-    destroy mixer land14mixer with fadetime 3
+    run background script DM_StopDynamicMusic(7)
+    wait 7 seconds
 
     enable migration from AztecCapital to PlayerTown
     enable migration from AztecTown1 to PlayerTown
@@ -3448,7 +3438,7 @@ start
 
     wait until PLAYER of AztecTown1 != 1 or 600 seconds
     AIAttacksAllowed = 1
-    run background script DMM_DynamicMusicManager(DMM_MUSIC_PAUSE_ON, DMM_SERVERITY_LEVEL_2, DM_RaceNormal)
+    run background script DMM_DynamicMusicManager(DMM_MUSIC_PAUSE_ON, DMM_SERVERITY_LEVEL_3, DM_RaceNormal)
     wait until PLAYER of AztecTown1 != 1
     wait 0.5 seconds
 

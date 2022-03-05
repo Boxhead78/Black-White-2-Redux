@@ -4094,65 +4094,47 @@ begin script LC8_LargeSiegeMusicManager
 
 start
 
-    wait 87 seconds
-
-    csMixer = create mixer
-    set mixer csMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 0.0 with fadetime 1
-    wait 2 seconds
+    wait 89 seconds
     
-    start dynamic music
-    set dynamic music "small" loop -1 urgent
+    run background script DM_SetDynamicMusic(DM_Small,DM_Random,DM_RaceJapanese,1)
     
-    csMixer = create mixer
-    set mixer csMixer channel AUDIO_MIXER_CHANNEL_MUSIC to 1.0 with fadetime 10
     wait 10 seconds
-    destroy mixer csMixer with fadetime 0.0
-    
     wait until LC8_LargeSiegeLaunchAttack == 1
 
     wait 30 seconds
-    set dynamic music "medium" loop -1 urgent
+    run background script DM_SetDynamicMusic(DM_Big,DM_bigbattle05,DM_RaceJapanese,1)
     
     if Difficulty >= 4
         wait until LC8_LargeSiegeLaunchAttack == 0
 
         play string sound "JAPANESEWARNINGHORN"
         wait 3 seconds
-        set dynamic music "smallendofbattle" loop 0 urgent
+        run background script DM_SetDynamicMusic(DM_EndOfBattle,DM_EndBattle02,DM_RaceJapanese,1)
         wait 20 seconds
         play string sound "JAPANESEWARNINGHORN"
-        wait 20 seconds
+        wait 28 seconds
         
-        cdmixer = create mixer
-        set mixer cdmixer channel AUDIO_MIXER_CHANNEL_MUSIC to 0.0 with fadetime 8
-        wait 8 seconds 
-        stop dynamic music
-        destroy mixer cdmixer with fadetime 3
+        run background script DM_StopDynamicMusic(10)
 
         wait until FireHurricane == 1 and LC8_LargeSiegeLaunchAttack == 1
 
         wait 3 seconds
-        start dynamic music
-        set dynamic music "small" loop -1 urgent
+        run background script DM_SetDynamicMusic(DM_Small,DM_Random,DM_RaceJapanese,1)
     end if
     
     wait 40 seconds
-    set dynamic music "smallevent4" loop 0 urgent
+    run background script DM_SetDynamicMusic(DM_Big,DM_bigbattle03,DM_RaceJapanese,1)
 
-    wait 8 seconds
-
-    set dynamic music "medium" loop -1
+    wait 68 seconds
+    run background script DM_SetDynamicMusic(DM_Big,DM_bigbattle05,DM_RaceJapanese,1)
     
-    wait 180 seconds
-    set dynamic music "small" loop -1
+    wait 120 seconds
+    run background script DM_SetDynamicMusic(DM_Small,DM_Random,DM_RaceJapanese,1)
     
     wait 40 seconds
     
-    cdmixer = create mixer
-    set mixer cdmixer channel AUDIO_MIXER_CHANNEL_MUSIC to 0.0 with fadetime 8
-    wait 8 seconds 
-    stop dynamic music
-    destroy mixer cdmixer with fadetime 3
+    run background script DM_StopDynamicMusic(10)
+    wait 10 seconds
 
     LC8_LargeSiegeOver = 1
  
