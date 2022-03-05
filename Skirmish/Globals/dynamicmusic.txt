@@ -585,7 +585,7 @@ end script DM_SetDynamicMusic
 
 begin script DM_WaitForNextMusic(musicLength,subsection)
 
-    MyTimer = create timer for 300 seconds
+    MyTimer = create timer for musicLength seconds
 
 start
 
@@ -593,9 +593,6 @@ run background script DM_CheckNewData
 
 while get MyTimer time remaining > 0 and DM_DynamicMusicDisallowed == 0 and DM_AskStop == 0 and DM_IsUrgentGlobal == 0
     wait until get MyTimer time remaining <= 0 or DM_DynamicMusicDisallowed == 1 or DM_AskStop == 1 or DM_IsUrgentGlobal != 0 or musicLength seconds
-    if get MyTimer time remaining <= 0 and DM_DynamicMusicDisallowed == 0 and DM_AskStop == 0
-        restart music on DM_MusicObject //Most likely it isn't needed because of music length
-    end if
 end while
 
 if DM_IsUrgentGlobal != 0
