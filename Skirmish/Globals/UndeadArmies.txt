@@ -4,20 +4,18 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-define script UA_GraveyardCheck(PlayerID)
-define script UA_SpawnUndeadPlatoonCheck(PlayerID,Graveyard,Flag,Foundation)
-define script UA_CreateUndeadPlatoon(PlayerID,Graveyard,howManyVillagers)
-define script UA_GhostScript(PlayerID,myGhost,myArmy)
+define script UA_GraveyardCheck
+define script UA_SpawnUndeadPlatoonCheck(Graveyard,Flag,Foundation)
+define script UA_CreateUndeadPlatoon(Graveyard,howManyVillagers)
+define script UA_GhostScript(myGhost,myArmy)
 
-global UA_myTempDeath[9]
-global UA_myUsedUndead[9]
+global UA_myUsedUndead = 0
 
-begin script UA_GraveyardCheck(PlayerID)
+begin script UA_GraveyardCheck
 
     FlagObject = 0
     myCounter = 0
     myGraveyard = 0
-    myDeadPeople = 0
     myFlag = 0
     myFoundation = 0
     myTown[22]
@@ -26,31 +24,31 @@ begin script UA_GraveyardCheck(PlayerID)
 start
 
 begin loop
-    if get player PlayerID alignment < -0.75
+    if get player 0 alignment < -0.75
         if Counter > 20
             Counter = 0
         end if
         
-        myDeadPeople = get total of stat STATS_EVT_SACRIFICES
         myTown[Counter] = get town with id Counter
-        myGraveyard = get random abode of type ABODE_NUMBER_GRAVEYARD in town myTown[Counter]
-        UA_myTempDeath[PlayerID] = (myDeadPeople * 1.5) - UA_myUsedUndead[PlayerID]
-        FlagObject = get FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myGraveyard} radius 10
-        if HEALTH of myGraveyard >= 1.0 and FlagObject not exists and PLAYER of myGraveyard == PlayerID
-            myFlag = create MOBILE_OBJECT ARMY_FLAG_INFO_GREEK_MELEE at {myGraveyard}
-            override mesh for myFlag with "..\models\m_bannerundead"
-            ALTITUDE of myFlag = 1.0
-            ANGLE of myFlag = ANGLE of myGraveyard + 180
-            SCALE of myFlag = 3.0
-            disable myFlag pickup
-            disable myFlag moveable
-            enable myFlag indestructible
-            myFoundation = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myGraveyard}
-            SCALE of myFoundation = 0.01
-            disable myFoundation pickup
-            disable myFoundation moveable
-            enable myFoundation indestructible
-            run background script UA_SpawnUndeadPlatoonCheck(PlayerID,myGraveyard,myFlag,myFoundation)
+        if myTown[Counter] exists and PLAYER of myTown[Counter] == 0
+            myGraveyard = get random abode of type ABODE_NUMBER_GRAVEYARD in town myTown[Counter]
+            FlagObject = get FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myGraveyard} radius 10
+            if HEALTH of myGraveyard >= 1.0 and FlagObject not exists
+                myFlag = create MOBILE_OBJECT ARMY_FLAG_INFO_GREEK_MELEE at {myGraveyard}
+                override mesh for myFlag with "..\models\m_bannerundead"
+                ALTITUDE of myFlag = 1.0
+                ANGLE of myFlag = ANGLE of myGraveyard + 180
+                SCALE of myFlag = 3.0
+                disable myFlag pickup
+                disable myFlag moveable
+                enable myFlag indestructible
+                myFoundation = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myGraveyard}
+                SCALE of myFoundation = 0.01
+                disable myFoundation pickup
+                disable myFoundation moveable
+                enable myFoundation indestructible
+                run background script UA_SpawnUndeadPlatoonCheck(myGraveyard,myFlag,myFoundation)
+            end if
         end if
         Counter++
     else
@@ -61,15 +59,19 @@ end loop
 end script UA_GraveyardCheck
 
 
-begin script UA_SpawnUndeadPlatoonCheck(PlayerID,Graveyard,Flag,Foundation)
+begin script UA_SpawnUndeadPlatoonCheck(Graveyard,Flag,Foundation)
 
     myArmySize = 0
+    myDeadPeople = 0
+    myTempDeath = 0
     Tooltip[2]
 
 start
 
-while HEALTH of Graveyard >= 1.0 and Graveyard exists and Flag exists and get player PlayerID alignment < -0.75
-    if UA_myTempDeath[PlayerID] >= 30
+while HEALTH of Graveyard >= 1.0 and Graveyard exists and Flag exists and get player 0 alignment < -0.75
+    myDeadPeople = get total of stat STATS_EVT_SACRIFICES
+    myTempDeath = (myDeadPeople * 1.5) - UA_myUsedUndead
+    if myTempDeath >= 30
         if hand position near {Flag} radius 4 and Tooltip[0] not exists
             Tooltip[0] = create tooltip on Flag with text "HELP_TEXT_PAUSE_STATS_95"
         end if
@@ -85,20 +87,20 @@ while HEALTH of Graveyard >= 1.0 and Graveyard exists and Flag exists and get pl
         delete Tooltip[1]
     end if
 
-    if UA_myTempDeath[PlayerID] >= 30
-        if UA_myTempDeath[PlayerID] >= 150
+    if myTempDeath >= 30
+        if myTempDeath >= 150
             myArmySize = 150
-        elsif UA_myTempDeath[PlayerID] >= 120
+        elsif myTempDeath >= 120
             myArmySize = 120
-        elsif UA_myTempDeath[PlayerID] >= 90
+        elsif myTempDeath >= 90
             myArmySize = 90
-        elsif UA_myTempDeath[PlayerID] >= 60
+        elsif myTempDeath >= 60
             myArmySize = 60
-        elsif UA_myTempDeath[PlayerID] >= 30
+        elsif myTempDeath >= 30
             myArmySize = 30
         end if
         if (bindable action BINDABLE_ACTION_TYPE_ACTION performed or bindable action BINDABLE_ACTION_TYPE_MOVE performed) and hand position near {Flag} radius 4
-            run script UA_CreateUndeadPlatoon(PlayerID,Graveyard,myArmySize)
+            run script UA_CreateUndeadPlatoon(Graveyard,myArmySize)
         end if
     end if
 end while
@@ -109,7 +111,7 @@ delete Foundation
 end script UA_SpawnUndeadPlatoonCheck
 
 
-begin script UA_CreateUndeadPlatoon(PlayerID,Graveyard,howManyVillagers)
+begin script UA_CreateUndeadPlatoon(Graveyard,howManyVillagers)
 
     ArmyFlag = 0
     ArmySize = 0
@@ -125,7 +127,7 @@ begin script UA_CreateUndeadPlatoon(PlayerID,Graveyard,howManyVillagers)
 
 start
 
-    UA_myUsedUndead[PlayerID] += howManyVillagers
+    UA_myUsedUndead += howManyVillagers
     begin loop
         RelativePos = marker at get world position from Graveyard to {number from -10 to 10,number from -10 to 10}
         VillagerForNavigation = get living villager at {Graveyard} radius 250
@@ -151,7 +153,7 @@ start
     wait 3.33 seconds
     myArmy = create platoon PLATOON_INFO_GREEK_MELEE_5 at {RelativePos} with howManyVillagers men and 0 women
     attach 3d sound "SCRIPT24_SPOOKYLOOP" to myArmy with volume 1.0
-    PLAYER of myArmy = PlayerID
+    PLAYER of myArmy = 0
     attach atmos "ghost_legion" to myArmy range 40
     disable platoon myArmy merge
     disable platoon myArmy split
@@ -182,7 +184,7 @@ start
     while counter < howManyVillagers and counter < ArmySize
         //Create ghosts
         Ghost[counter] = create VILLAGER AZTEC_FORESTER at {myArmy} + {number from -10 to 10,number from -10 to 10}
-        run background script UA_GhostScript(PlayerID,Ghost[counter],myArmy)
+        run background script UA_GhostScript(Ghost[counter],myArmy)
         myEffect = create visual effect VISUAL_EFFECT_WEATHER_LIGHTNING_EXPLOSION at {Ghost[counter]} + {0,1,0} time 1.5
         set myEffect color red 148 green 0 blue 211
         SCALE of myEffect = 0.1
@@ -202,7 +204,7 @@ start
 end script UA_CreateUndeadPlatoon
 
 
-begin script UA_GhostScript(PlayerID,myGhost,myArmy)
+begin script UA_GhostScript(myGhost,myArmy)
 
     myEffect = 0
     PlayerAlignment = 0
