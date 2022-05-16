@@ -7,7 +7,6 @@
 define script UA_GraveyardCheck
 define script UA_SpawnUndeadPlatoonCheck(Graveyard,Flag,Foundation)
 define script UA_CreateUndeadPlatoon(Graveyard,howManyVillagers)
-define script UA_GhostScript(myGhost,myArmy)
 
 global UA_myUsedUndead = 0
 
@@ -70,7 +69,7 @@ start
 
 while HEALTH of Graveyard >= 1.0 and Graveyard exists and Flag exists and get player 0 alignment < -0.75
     myDeadPeople = get total of stat STATS_EVT_SACRIFICES
-    myTempDeath = (myDeadPeople * 1.5) - UA_myUsedUndead
+    myTempDeath = myDeadPeople - UA_myUsedUndead
     if myTempDeath >= 30
         if hand position near {Flag} radius 4 and Tooltip[0] not exists
             Tooltip[0] = create tooltip on Flag with text "HELP_TEXT_PAUSE_STATS_95"
@@ -89,15 +88,15 @@ while HEALTH of Graveyard >= 1.0 and Graveyard exists and Flag exists and get pl
 
     if myTempDeath >= 30
         if myTempDeath >= 150
-            myArmySize = 150
+            myArmySize = 50
         elsif myTempDeath >= 120
-            myArmySize = 120
+            myArmySize = 40
         elsif myTempDeath >= 90
-            myArmySize = 90
-        elsif myTempDeath >= 60
-            myArmySize = 60
-        elsif myTempDeath >= 30
             myArmySize = 30
+        elsif myTempDeath >= 60
+            myArmySize = 20
+        elsif myTempDeath >= 30
+            myArmySize = 10
         end if
         if (bindable action BINDABLE_ACTION_TYPE_ACTION performed or bindable action BINDABLE_ACTION_TYPE_MOVE performed) and hand position near {Flag} radius 4
             run script UA_CreateUndeadPlatoon(Graveyard,myArmySize)
@@ -151,8 +150,9 @@ start
     SCALE of myEffect = 2
 
     wait 3.33 seconds
-    myArmy = create platoon PLATOON_INFO_GREEK_MELEE_5 at {RelativePos} with howManyVillagers men and 0 women
-    attach 3d sound "SCRIPT24_SPOOKYLOOP" to myArmy with volume 1.0
+    myArmy = create platoon PLATOON_INFO_SKELETON_MELEE at {RelativePos} with howManyVillagers men and 0 women
+    attach atmos "ghost_legion" to myArmy// range 30
+    set myArmy atmos group 5 time 1.5 seconds
     PLAYER of myArmy = 0
     attach atmos "ghost_legion" to myArmy range 40
     disable platoon myArmy merge
@@ -173,74 +173,4 @@ start
     override mesh for ArmyFlag with "..\models\m_bannerundead"
     disable platoon myArmy camp
 
-    ArmySize = get number of villagers in platoon myArmy
-    force while get number of villagers in platoon myArmy > 1
-        Villager = get villager from platoon myArmy nearest {myArmy}
-        play anim "a_p_dead1" on Villager loop 1
-        delete Villager
-    end while
-    Villager = get villager from platoon myArmy nearest {myArmy}
-    SCALE of Villager = 0.01
-    while counter < howManyVillagers and counter < ArmySize
-        //Create ghosts
-        Ghost[counter] = create VILLAGER AZTEC_FORESTER at {myArmy} + {number from -10 to 10,number from -10 to 10}
-        run background script UA_GhostScript(Ghost[counter],myArmy)
-        myEffect = create visual effect VISUAL_EFFECT_WEATHER_LIGHTNING_EXPLOSION at {Ghost[counter]} + {0,1,0} time 1.5
-        set myEffect color red 148 green 0 blue 211
-        SCALE of myEffect = 0.1
-        add villager Ghost[counter] to platoon myArmy
-        disable anim events on Ghost[counter]
-        disable Ghost[counter] hurt by fire
-        disable Ghost[counter] set on fire
-        counter++
-    end while
-
-    myEffect = create visual effect VISUAL_EFFECT_WEATHER_LIGHTNING_EXPLOSION at {Villager} + {0,1,0} time 1.5
-    set myEffect color red 148 green 0 blue 211
-    SCALE of myEffect = 0.1
-    play anim "a_p_dead1" on Villager loop 1
-    delete Villager
-
 end script UA_CreateUndeadPlatoon
-
-
-begin script UA_GhostScript(myGhost,myArmy)
-
-    myEffect = 0
-    PlayerAlignment = 0
-
-start
-
-    while myGhost exists and HEALTH of myGhost > 0.00 and PLAYER of myGhost == 0
-        if SPEED of myGhost < 1.0
-            SPEED of myGhost = 1.0
-        end if
-        override myGhost anim "a_p_run_male_miserable"
-        //set anim speed of myGhost to 0.5
-        override mesh for myGhost with "..\skins\s_skeletonadultland2"
-        set myGhost carrying CARRIED_OBJECT_NONE
-        set myGhost carrying CARRIED_OBJECT_NORSE_SWORD
-        wait until HEALTH of myGhost == 0 or 60 seconds
-    end while
-
-    myEffect = create visual effect VISUAL_EFFECT_WEATHER_LIGHTNING_EXPLOSION at {myGhost} + {0,1,0} time 1.5
-    set myEffect color red 148 green 0 blue 211
-    SCALE of myEffect = 0.1
-    HEALTH of myGhost = 0.00
-
-    begin loop
-        //set anim speed of myGhost to 0.5
-        override mesh for myGhost with "..\skins\s_skeletonadultland2"
-        set myGhost carrying CARRIED_OBJECT_NONE
-        set myGhost carrying CARRIED_OBJECT_NORSE_SWORD
-        wait until HEALTH of myGhost == 0 or 60 seconds
-        until not myGhost exists
-    end loop
-
-    //In case it gets disbanded, delete the ghost
-    if myGhost exists
-        play anim "a_p_dead1" on myGhost loop 1
-        delete myGhost
-    end if
-
-end script UA_GhostScript
