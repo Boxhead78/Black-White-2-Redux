@@ -3134,6 +3134,8 @@ begin script LC6_MoveCatapultThenAttack(SiegeWeapon,Task,AttackFocus,AttackWP1,A
     Building = 0
     objSubType = 0
     Threshold = 1
+    oldNumberOfTowns = get player 1 town total
+    newNumberOfTowns = 0
 
 start
 
@@ -3163,6 +3165,25 @@ start
     disable siege weapon SiegeWeapon auto attack
 
     begin loop
+        //Set task to Attacker if conqueror captured a town
+        newNumberOfTowns = get player 1 town total
+        if Task == Conqueror and newNumberOfTowns > oldNumberOfTowns
+            Task = Attacker
+            AttackFocus = Default
+            //Use as fall back
+            if AttackWP1 == 0 or AttackWP2 == 0 or AttackWP3 == 0
+                AttackWP1 = AttackPosFront[0]
+                AttackWP2 = AttackPosFront[1]
+                AttackWP3 = AttackPosFront[2]
+            end if
+            if AttackingPoint1 == 0
+                AttackingPoint1 = marker at {PlayerTown}
+            end if
+            if AttackingPoint2 == 0
+                AttackingPoint2 = marker at {PlayerTown}
+            end if
+        end if
+
         if Task == Attacker
             if AttackWPStage != 3
                 if get SiegeOnPointTimer time remaining <= 0
