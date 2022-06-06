@@ -3219,17 +3219,18 @@ start
         wait until read
     end dialogue
 
-    run background script CheckPlayerRoute
-
-    wait 17 seconds
-
     run background script DM_SetDynamicMusic(DM_Small,DM_smallbattle06,DM_RaceAztec,1)
 
-    wait 30 seconds
+    run background script CheckPlayerRoute
+
+    wait 47 seconds
 
     run background script DM_SetDynamicMusic(DM_Big,DM_Random,DM_RaceAztec,1)
 
     wait 120 seconds
+
+    run background script DM_StopDynamicMusic(10)
+    wait 10 seconds
 
     GB_DialogueIsRunning = 1
     if HEALTH of AIVolcano == 1.0 and VolcanoFired == 0
@@ -3261,9 +3262,11 @@ start
         run background script LC11_Volcano(AIVolcano, EpicVolc)
     end if
 
+    wait 40 seconds
+
     run background script DMM_DynamicMusicManager(DMM_MUSIC_PAUSE_ON, DMM_SERVERITY_LEVEL_3, DM_RaceAztec)
 
-    wait 150 seconds
+    wait 110 seconds
 
     wait until VolcanoActive == 0
 
@@ -3400,6 +3403,9 @@ start
     wait 30 seconds
 
     DMM_HaltScript = 0
+    if DMM_MusicIsRunning == 0
+        run background script DM_StopDynamicMusic(10)
+    end if
 
     wait 90 seconds
 
