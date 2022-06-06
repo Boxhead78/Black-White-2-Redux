@@ -41,6 +41,7 @@ begin script DMM_DynamicMusicManager(battleMusicPause, battleMusicSeverity, race
     myTown = 0
     myPlatoon = 0
     enemyPlatoon = 0
+    enemyBuilding = 0
     numberOfPlatoons = 0
     numberOfEnemyPlatoons = 0
     scriptQueueTime = 0
@@ -107,6 +108,15 @@ if DMM_IsRunning == 0
             end if
             if enemyPlatoon exists
                 numberOfEnemyPlatoons = get number of platoon of player PLAYER of enemyPlatoon at {enemyPlatoon} radius DMM_ACTIVE_RADIUS/4
+                //Only get platoons if no enemy building is nearby
+                enemyBuilding = get HOUSE at {enemyPlatoon} radius 25
+                if enemyBuilding exists and PLAYER of enemyBuilding != PLAYER of enemyPlatoon
+                    enemyBuilding = 0
+                end if
+                if enemyBuilding exists and PLAYER of enemyBuilding == PLAYER of enemyPlatoon
+                    enemyPlatoon = 0
+                    numberOfEnemyPlatoons = 0
+                end if
             end if
 
             //Minimum requirements to play music
@@ -136,6 +146,8 @@ begin script DMM_DynamicMusicManagerPlayMusic(whichTown, playerID, enemyPlayerID
     numberOfPlayerPlatoons = 0
     numberOfEnemyPlatoons = 0
     myPlatoon = 0
+    enemyBuildingNearPlatoon = 0
+    enemyBuildingNearSiege = 0
     enemyPlatoon = 0
     mySiegeWeapon = 0
     enemySiegeWeapon = 0
@@ -181,12 +193,29 @@ start
         if enemyPlayerID != 0
             enemyPlatoon = get platoon of player enemyPlayerID nearest {whichTown} radius DMM_ACTIVE_RADIUS*1.25
             numberOfEnemyPlatoons = get number of platoon of player enemyPlayerID at {enemyPlatoon} radius DMM_ACTIVE_RADIUS/4*1.25
+            //Only get platoons if no enemy building is nearby
+            enemyBuildingNearPlatoon = get HOUSE at {enemyPlatoon} radius 25
+            if enemyBuildingNearPlatoon exists and PLAYER of enemyBuildingNearPlatoon != PLAYER of enemyPlatoon
+                enemyBuildingNearPlatoon = 0
+            end if
+            if enemyBuildingNearPlatoon exists and PLAYER of enemyBuildingNearPlatoon == PLAYER of enemyPlatoon
+                enemyPlatoon = 0
+                numberOfEnemyPlatoons = 0
+            end if
         end if
 
         //GET SIEGE WEAPONS
         mySiegeWeapon = get siege weapon of player playerID nearest {whichTown} radius DMM_ACTIVE_RADIUS*1.25
         if enemyPlayerID != 0
             enemySiegeWeapon = get siege weapon of player enemyPlayerID nearest {whichTown} radius DMM_ACTIVE_RADIUS*1.25
+            //Only get siege if no enemy building is nearby
+            enemyBuildingNearSiege = get HOUSE at {enemySiegeWeapon} radius 25
+            if enemyBuildingNearSiege exists and PLAYER of enemyBuildingNearSiege != PLAYER of enemySiegeWeapon
+                enemyBuildingNearSiege = 0
+            end if
+            if enemyBuildingNearSiege exists and PLAYER of enemyBuildingNearSiege == PLAYER of enemySiegeWeapon
+                enemySiegeWeapon = 0
+            end if
         end if
 
         //DO CHECKS AND PLAY MUSIC
