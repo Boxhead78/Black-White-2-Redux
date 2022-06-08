@@ -164,6 +164,7 @@ begin script DMM_DynamicMusicManagerPlayMusic(whichTown, playerID, enemyPlayerID
     StopMusicTimer = create timer for 0 seconds
     SkipMusic = number from 1 to 5
     SkipSet = 0
+    MaximumPlayTimer = create timer for 300 seconds
     MinimumPlayTimer = create timer for 45 seconds
     whichTownPlayer = PLAYER of whichTown
 
@@ -288,6 +289,17 @@ start
         elsif conditionActive[6] == 1
             conditionActive[6] = 0
             conditionTrue--
+        end if
+        //Stop music if enemy is attacking and maximum play timer is reached
+        if get MaximumPlayTimer time remaining <= 0 and enemyPlayerID != 0
+            conditionActive[0] = 0
+            conditionActive[1] = 0
+            conditionActive[2] = 0
+            conditionActive[3] = 0
+            conditionActive[4] = 0
+            conditionActive[5] = 0
+            conditionActive[6] = 0
+            conditionTrue = 0
         end if
 
         if conditionTrue >= 1 and get StopMusicTimer time remaining < 60
