@@ -290,17 +290,6 @@ start
             conditionActive[6] = 0
             conditionTrue--
         end if
-        //Stop music if enemy is attacking and maximum play timer is reached
-        if get MaximumPlayTimer time remaining <= 0 and enemyPlayerID != 0
-            conditionActive[0] = 0
-            conditionActive[1] = 0
-            conditionActive[2] = 0
-            conditionActive[3] = 0
-            conditionActive[4] = 0
-            conditionActive[5] = 0
-            conditionActive[6] = 0
-            conditionTrue = 0
-        end if
 
         if conditionTrue >= 1 and get StopMusicTimer time remaining < 60
             StopMusicTimer = create timer for 999 seconds
@@ -386,8 +375,19 @@ start
             end while
         end if
 
+        //Stop music if enemy is attacking and maximum play timer is reached
+        if DMM_HaltScript == 0 and DMM_StopMusic == 0 and get MaximumPlayTimer time remaining <= 0 and enemyPlayerID != 0
+            battleMusicLevel = DMM_SERVERITY_LEVEL_1
+            if get StopScriptTimer time remaining <= 0
+                run background script DM_SetDynamicMusic(DM_Small,DM_Random,raceID,0)
+                StopScriptTimerInitiated = 1
+                StopScriptTimer = create timer for DMM_STOP_MUSIC_SECONDS+DMM_CHECKS_DELAY seconds
+            end if
+        end if
+
         //Fade out music if town is captured
         if DMM_HaltScript == 0 and DMM_StopMusic == 0 and PLAYER of whichTown != whichTownPlayer
+            battleMusicLevel = DMM_SERVERITY_LEVEL_1
             if get StopScriptTimer time remaining <= 0
                 run background script DM_SetDynamicMusic(DM_Small,DM_Random,raceID,0)
                 StopScriptTimerInitiated = 1
