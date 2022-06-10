@@ -498,7 +498,7 @@ if DM_ScriptRunning == 0
                         start music "big_battle_05_02" with fadetime 0
                     end if
                 elsif DM_RaceGlobal == DM_RaceJapanese
-                    DM_Number = number from 1 to 3
+                    DM_Number = number from 1 to 2
                     if DM_Number == 1
                         start music "big_battle_jap_05_01" with fadetime 0
                     elsif DM_Number == 2
@@ -628,15 +628,12 @@ begin script DM_WaitForNextMusic(musicLength,subsection)
 
 start
 
+DM_IsUrgentGlobal = 0
 run background script DM_CheckNewData
 
 while get MyTimer time remaining > 0 and DM_DynamicMusicDisallowed == 0 and DM_AskStop == 0 and DM_IsUrgentGlobal == 0
     wait until get MyTimer time remaining <= 0 or DM_DynamicMusicDisallowed == 1 or DM_AskStop == 1 or DM_IsUrgentGlobal != 0 or musicLength seconds
 end while
-
-if DM_IsUrgentGlobal != 0
-    DM_IsUrgentGlobal = 0
-end if
 
 end script DM_WaitForNextMusic
 
@@ -650,11 +647,13 @@ begin script DM_CheckNewData
 start
 
 begin loop
-    wait until DM_IsUrgentGlobal != 0 or 30 seconds
+    wait until DM_IsUrgentGlobal != 0 or DM_DynamicMusicDisallowed == 1 or DM_AskStop == 1 or DM_ScriptRunning == 0 or 30 seconds
     until section != DM_SectionGlobal or subSection != DM_SubSectionGlobal or race != DM_RaceGlobal or isUrgent != DM_IsUrgentGlobal
 end loop
 
-DM_IsUrgentGlobal = 1 //Use this to break DM_WaitForNextMusic
+if DM_DynamicMusicDisallowed != 1 and DM_AskStop != 1 and DM_ScriptRunning == 1
+    DM_IsUrgentGlobal = 1 //Use this to break DM_WaitForNextMusic
+end if
 
 end script DM_CheckNewData
 
