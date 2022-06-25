@@ -64,62 +64,84 @@ begin loop
     end if
     myTown[Counter] = get town with id Counter
 
-    //Check melee armories
+    //Check melee armories 1
     myArmory = 0
     FlagObject = 0
     myArmory = get random abode of type ABODE_NUMBER_MELEE_ARMOURY in town myTown[Counter]
-    FlagObject = get FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myArmory} radius 10
-    if HEALTH of myArmory >= 1.0 and FlagObject not exists and PLAYER of myArmory == PlayerID
-        myFoundation = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myArmory}
-        SCALE of myFoundation = 0.01
-        disable myFoundation pickup
-        disable myFoundation moveable
-        enable myFoundation indestructible
-        run background script PT_RecruitPlatoon(PlayerID,myArmory,myFoundation,0)
+    if myArmory exists
+        FlagObject = get FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myArmory} radius 10
+        if HEALTH of myArmory >= 1.0 and FlagObject not exists and PLAYER of myArmory == PlayerID
+            myFoundation = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myArmory}
+            SCALE of myFoundation = 0.01
+            disable myFoundation pickup
+            disable myFoundation moveable
+            enable myFoundation indestructible
+            run background script PT_RecruitPlatoon(PlayerID,myArmory,myFoundation,0)
+        end if
     end if
 
-    //Check ranged armories
+    //Check ranged armories 1
     myArmory = 0
     FlagObject = 0
     myArmory = get random abode of type ABODE_NUMBER_RANGED_ARMOURY in town myTown[Counter]
-    FlagObject = get FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myArmory} radius 10
-    if HEALTH of myArmory >= 1.0 and FlagObject not exists and PLAYER of myArmory == PlayerID
-        myFoundation = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myArmory}
-        SCALE of myFoundation = 0.01
-        disable myFoundation pickup
-        disable myFoundation moveable
-        enable myFoundation indestructible
-        run background script PT_RecruitPlatoon(PlayerID,myArmory,myFoundation,1)
+    if myArmory exists
+        FlagObject = get FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myArmory} radius 10
+        if HEALTH of myArmory >= 1.0 and FlagObject not exists and PLAYER of myArmory == PlayerID
+            myFoundation = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myArmory}
+            SCALE of myFoundation = 0.01
+            disable myFoundation pickup
+            disable myFoundation moveable
+            enable myFoundation indestructible
+            run background script PT_RecruitPlatoon(PlayerID,myArmory,myFoundation,1)
+        end if
     end if
 
-    /*
-    //Check workshops
+    //Check melee armories 2 || Make sure player can't recruit platoons from armories without flag
     myArmory = 0
     FlagObject = 0
-    myArmory = get random abode of type ABODE_NUMBER_WORKSHOP in town myTown[Counter]
-    FlagObject = get FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myArmory} radius 10
-    if HEALTH of myArmory >= 1.0 and FlagObject not exists and PLAYER of myArmory == PlayerID
-        myFoundation = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myArmory}
-        SCALE of myFoundation = 0.01
-        disable myFoundation pickup
-        disable myFoundation moveable
-        enable myFoundation indestructible
-        run background script PT_RecruitPlatoon(PlayerID,myArmory,myFoundation,2)
+    myArmory = get HOUSE ABODE_NUMBER_MELEE_ARMOURY at hand position radius 250
+    if myArmory exists
+        FlagObject = get FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myArmory} radius 10
+        if HEALTH of myArmory >= 1.0 and FlagObject not exists and PLAYER of myArmory == PlayerID
+            myFoundation = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myArmory}
+            SCALE of myFoundation = 0.01
+            disable myFoundation pickup
+            disable myFoundation moveable
+            enable myFoundation indestructible
+            run background script PT_RecruitPlatoon(PlayerID,myArmory,myFoundation,0)
+        end if
     end if
-    */
+
+    //Check ranged armories 2 || Make sure player can't recruit platoons from armories without flag
+    myArmory = 0
+    FlagObject = 0
+    myArmory = get HOUSE ABODE_NUMBER_RANGED_ARMOURY at hand position radius 250
+    if myArmory exists
+        FlagObject = get FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myArmory} radius 10
+        if HEALTH of myArmory >= 1.0 and FlagObject not exists and PLAYER of myArmory == PlayerID
+            myFoundation = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myArmory}
+            SCALE of myFoundation = 0.01
+            disable myFoundation pickup
+            disable myFoundation moveable
+            enable myFoundation indestructible
+            run background script PT_RecruitPlatoon(PlayerID,myArmory,myFoundation,1)
+        end if
+    end if
 
     //Check town centres
     myArmory = 0
     FlagObject = 0
     myArmory = get random abode of type ABODE_NUMBER_TOWN_CENTRE in town myTown[Counter]
-    FlagObject = get FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myArmory} radius 10
-    if HEALTH of myArmory >= 1.0 and FlagObject not exists and PLAYER of myArmory == PlayerID
-        myFoundation = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myArmory}
-        SCALE of myFoundation = 0.01
-        disable myFoundation pickup
-        disable myFoundation moveable
-        enable myFoundation indestructible
-        run background script PT_RecruitPlatoon(PlayerID,myArmory,myFoundation,3)
+    if myArmory exists
+        FlagObject = get FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myArmory} radius 10
+        if HEALTH of myArmory >= 1.0 and FlagObject not exists and PLAYER of myArmory == PlayerID
+            myFoundation = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {myArmory}
+            SCALE of myFoundation = 0.01
+            disable myFoundation pickup
+            disable myFoundation moveable
+            enable myFoundation indestructible
+            run background script PT_RecruitPlatoon(PlayerID,myArmory,myFoundation,3)
+        end if
     end if
 
     Counter++
