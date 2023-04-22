@@ -116,7 +116,7 @@ begin loop
     end if
 
     if HEALTH of LC4_EnemyCreature == 0.00
-        wait until HEALTH of LC4_EnemyCreature > 0.00
+        wait until HEALTH of LC4_EnemyCreature > 0.00 or LandWon == 1
         set creature LC4_EnemyCreature role to CR_NONE radius 500 at {NorseCapital}
         HEALTH of LC4_EnemyCreature = 1.0
     end if
@@ -125,7 +125,7 @@ begin loop
         HEALTH of LC4_EnemyCreature = 1.0
         set creature LC4_EnemyCreature role to CR_SOLDIER radius 100 at {AITown[AICounter]}
         
-        wait until HEALTH of LC4_EnemyCreature == 0.00 or not town AITown[AICounter] is under takeover from player 0 or 1000 seconds
+        wait until HEALTH of LC4_EnemyCreature == 0.00 or not town AITown[AICounter] is under takeover from player 0 or 1000 seconds or LandWon == 1
 
     elsif PLAYER of AITown[AICounter] == 1 and get distance from {AITown[AICounter]} to {MyCreature} < 300 and get player 0 influence at {MyCreature} <= 0 and HEALTH of MyCreature > 0.00 and HEALTH of LC4_EnemyCreature > 0
         HEALTH of LC4_EnemyCreature = 1.0
@@ -142,7 +142,7 @@ begin loop
             else
                 set creature LC4_EnemyCreature role to CR_SOLDIER radius 150 at {CreatureAttackPos[0]}
             end if
-            until HEALTH of LC4_EnemyCreature == 0.00 or 1000 seconds
+            until HEALTH of LC4_EnemyCreature == 0.00 or 1000 seconds or LandWon == 1
         end loop
         ENEMY_CREATURE_ALLOWED_TO_ATTACK = 0
 
