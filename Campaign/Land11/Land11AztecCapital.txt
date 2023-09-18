@@ -2829,19 +2829,12 @@ start
                     EarthquakeFirstTime = 1
                 end if
 
-                Number = number from 1 to 2
-                if PLAYER of AztecTown1 != 0
-                    if Number <= 1
-                        CastEpicPos = marker at {1275.69,303.14,935.88}
-                    else
-                        CastEpicPos = marker at {1495.01,318.49,1368.07}
-                    end if
+                if PLAYER of AztecTown1 == 0
+                    CastEpicPos = marker at {AztecTown1}
+                elsif PLAYER of AztecTown2 == 0
+                    CastEpicPos = marker at {AztecTown2}
                 else
-                    if Number <= 1
-                        CastEpicPos = marker at {1532.52,308.28,1630.56}
-                    else
-                        CastEpicPos = marker at {1495.01,318.49,1368.07}
-                    end if
+                    CastEpicPos = marker at {PlayerTown}
                 end if
 
                 run script EpicTargeter(PlayerTown,marker at {CastEpicPos},0,3,1)
@@ -3453,8 +3446,7 @@ start
             wait until HEALTH of AIVolcano == 1.0
             WT_SkyTransitionAllowed = 0
             enable predefined sky "VOLCANO" time 10
-            CastEpicPos = marker at {1270.59,307.26,1014.82}
-            run script EpicTargeter(PlayerTown,marker at {CastEpicPos},0,4,1)
+            run script EpicTargeter(PlayerTown,marker at {PlayerTown},0,4,1)
             EpicWarning = create visual effect VISUAL_EFFECT_EPIC_TARGET_WARNING at {ET_FireEpicLocation} time 15 target {ET_FireEpicLocation}
             EpicVolc = create volcano at {ET_FireEpicLocation} player 1
             run background script LC11_Volcano(AIVolcano, EpicVolc)
