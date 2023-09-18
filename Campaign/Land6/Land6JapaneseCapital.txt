@@ -4441,20 +4441,13 @@ MINOR_JAPCAPITAL_IMPRESSIVENESS = MINOR_JAPCAPITAL_IMPRESSIVENESS + 2275
 
 //Rebuild the epic
 begin loop
-    wait until HEALTH of AIEpic < 1.0 and HEALTH of AIEpic > 0.8
-    wait 600 seconds
-    if HEALTH of AIEpic < 1.0 and HEALTH of AIEpic > 0.8
-        wait until get distance from camera position to {AIEpic} > 300 and not {AIEpic} viewed
-        Angle = ANGLE of AIEpic
-        Pos = marker at {AIEpic}
-        delete AIEpic
-        AIEpic = create WONDER EPIC_WONDER_NUMBER_SIREN at {Pos}
-        ANGLE of AIEpic = Angle
-        PLAYER of AIEpic = 1
-        attach AIEpic to JapaneseCapital
-        BUILT of AIEpic = 0.75
-        disable AIEpic hurt by fire
-        wait until HEALTH of AIEpic == 1.0
+    wait 900 seconds
+    if AIEpic exists and HEALTH of AIEpic < 1.0 and PLAYER of AIEpic == 1
+        wait until not AIEpic exists or (get distance from camera position to {AIEpic} > 300 and not {AIEpic} viewed)
+        if AIEpic exists
+            HEALTH of AIEpic = 1.0
+            BUILT of AIEpic = 1.0
+        end if
     end if
 end loop
 
