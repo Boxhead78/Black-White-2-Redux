@@ -8,6 +8,12 @@ define script UA_GraveyardCheck
 define script UA_SpawnUndeadPlatoonCheck(Graveyard,Flag,Foundation)
 define script UA_CreateUndeadPlatoon(Graveyard,howManyVillagers)
 
+define UA_ARMY_SIZE_1 = 22
+define UA_ARMY_SIZE_2 = 44
+define UA_ARMY_SIZE_3 = 66
+define UA_ARMY_SIZE_4 = 88
+define UA_ARMY_SIZE_5 = 110
+
 global UA_myUsedUndead = 0
 
 begin script UA_GraveyardCheck
@@ -70,7 +76,7 @@ start
 while HEALTH of Graveyard >= 1.0 and Graveyard exists and Flag exists and get player 0 alignment < -0.75
     myDeadPeople = get total of stat STATS_EVT_SACRIFICES
     myTempDeath = myDeadPeople - UA_myUsedUndead
-    if myTempDeath >= 50
+    if myTempDeath >= UA_ARMY_SIZE_1
         if hand position near {Flag} radius 4 and Tooltip[0] not exists
             Tooltip[0] = create tooltip on Flag with text "HELP_TEXT_PAUSE_STATS_95"
         end if
@@ -86,16 +92,16 @@ while HEALTH of Graveyard >= 1.0 and Graveyard exists and Flag exists and get pl
         delete Tooltip[1]
     end if
 
-    if myTempDeath >= 50
-        if myTempDeath >= 250
+    if myTempDeath >= UA_ARMY_SIZE_1
+        if myTempDeath >= UA_ARMY_SIZE_5
             myArmySize = 50
-        elsif myTempDeath >= 200
+        elsif myTempDeath >= UA_ARMY_SIZE_4
             myArmySize = 40
-        elsif myTempDeath >= 150
+        elsif myTempDeath >= UA_ARMY_SIZE_3
             myArmySize = 30
-        elsif myTempDeath >= 100
+        elsif myTempDeath >= UA_ARMY_SIZE_2
             myArmySize = 20
-        elsif myTempDeath >= 50
+        elsif myTempDeath >= UA_ARMY_SIZE_1
             myArmySize = 10
         end if
         if (bindable action BINDABLE_ACTION_TYPE_ACTION performed or bindable action BINDABLE_ACTION_TYPE_MOVE performed) and hand position near {Flag} radius 4
@@ -114,11 +120,12 @@ begin script UA_CreateUndeadPlatoon(Graveyard,howManyVillagers)
 
     ArmyFlag = 0
     ArmySize = 0
-    Ghost[999]
     counter = 0
     maxTries = 0
     myEffect = 0
     myArmy = 0
+    myDeadPeople = 0
+    myTempDeath = 0
     RelativePos = 0
     Villager = 0
     VillagerForNavigation = 0
@@ -126,7 +133,9 @@ begin script UA_CreateUndeadPlatoon(Graveyard,howManyVillagers)
 
 start
 
-    UA_myUsedUndead += howManyVillagers
+    myDeadPeople = get total of stat STATS_EVT_SACRIFICES
+    myTempDeath = myDeadPeople - UA_myUsedUndead
+    UA_myUsedUndead += myTempDeath
     begin loop
         RelativePos = marker at get world position from Graveyard to {number from -10 to 10,number from -10 to 10}
         VillagerForNavigation = get living villager at {Graveyard} radius 250
