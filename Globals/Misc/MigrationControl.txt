@@ -12,7 +12,7 @@ run script MigrationControlGetTowns
 
 begin script MigrationControlGetTowns
 
-AITownScript[20]
+AITownScript[MAX_TOWNS]
 scriptCounter = 0
 
 start
@@ -22,7 +22,7 @@ start
         run background script MigrationControl(AITownScript[scriptCounter])
 
         scriptCounter++
-        until scriptCounter >= 19
+        until scriptCounter >= MAX_TOWNS
     end loop
 
 end script MigrationControlGetTowns
@@ -30,7 +30,7 @@ end script MigrationControlGetTowns
 
 begin script MigrationControl(MigrationTown)
 
-    myArmySize = 0
+    myMigrationSize = 0
     myMigration = 0
     myPlatoon = 0
     myVillager = 0
@@ -45,21 +45,21 @@ begin loop
             myMigrationTarget = get town MigrationTown is migrating to
             myMigration = get migration from MigrationTown to myMigrationTarget
         end while
-        while 0 < myArmySize and myMigration exists
+        while 0 < myMigrationSize and myMigration exists
             myPlatoon = get platoon nearest {myMigration} radius 25
             myVillager = get VILLAGER at {myMigration} radius 25
             if myVillager exists and not myPlatoon exists
                 if not {myVillager} viewed
                     play anim "a_p_dead1" on myVillager loop 1
                     delete myVillager
-                    myArmySize--
+                    myMigrationSize--
                 end if
             end if
         end while
         wait until myMigration not exists
     else
         if get army size in town MigrationTown > 0
-            myArmySize = get army size in town MigrationTown
+            myMigrationSize = get army size in town MigrationTown
         end if
     end if
 end loop

@@ -20,6 +20,7 @@ begin script Fisting
     FistingActive = 1
     ManaTimer = create timer for 0 seconds
     PlayerMana = 0
+    PlayerPos = 0
     Town = get town with id 0
 
 start
@@ -31,18 +32,16 @@ begin loop
     end if
 
     PlayerMana = get player 0 mana
-
     if PlayerMana > 75 and FistingBought == 1 and FistingActive == 0
         FistingActive = 1
         enable interface action MANACOST_BALANCE_TYPE_INITIATEFIST
     elsif PlayerMana <= 75 and FistingBought == 1 and FistingActive == 1
         FistingActive = 0
-        
-        AntiInfluence = create anti influence on Town radius 999999 //Interrupts player's fisting
+        PlayerPos = marker at hand position
+        AntiInfluence = create anti influence on PlayerPos radius 50 //Interrupts player's fisting
         disable interface action MANACOST_BALANCE_TYPE_INITIATEFIST
         wait 1.5 seconds
         delete AntiInfluence
-
     end if
 
     if PlayerMana > 0
