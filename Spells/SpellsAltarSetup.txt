@@ -59,29 +59,21 @@ if EpicSpellsActivated == 1
                         PlayerID = 3
                     end if
                     if PlayerID >= 1 and AISpellsActivated != 0
-                        if get research ARTEFACT_EPIC_WONDER_NUMBER_SIREN available == variable RESEARCH_AVAILABILITY_RESEARCHED or PlayerID >= 1 
-                            if RegrowthActivated[Counter] == 0
-                                RegrowthActivated[Counter] = 1
-                                run background script AltarEpicsLogic(TownCentre,PlayerID,SPELLS_REGROWTH,1)
-                            end if
+                        if RegrowthActivated[Counter] == 0
+                            RegrowthActivated[Counter] = 1
+                            run background script AltarEpicsLogic(TownCentre,PlayerID,SPELLS_REGROWTH,1)
                         end if
-                        if get research ARTEFACT_EPIC_WONDER_NUMBER_HURRICANE available == variable RESEARCH_AVAILABILITY_RESEARCHED or PlayerID >= 1
-                            if ThunderStormActivated[Counter] == 0
-                                ThunderStormActivated[Counter] = 1
-                                run background script AltarEpicsLogic(TownCentre,PlayerID,SPELLS_THUNDERSTORM,1)
-                            end if
+                        if ThunderStormActivated[Counter] == 0
+                            ThunderStormActivated[Counter] = 1
+                            run background script AltarEpicsLogic(TownCentre,PlayerID,SPELLS_THUNDERSTORM,1)
                         end if
-                        if get research ARTEFACT_EPIC_WONDER_NUMBER_EARTHQUAKE available == variable RESEARCH_AVAILABILITY_RESEARCHED or PlayerID >= 1
-                            if FireRainActivated[Counter] == 0
-                                FireRainActivated[Counter] = 1
-                                run background script AltarEpicsLogic(TownCentre,PlayerID,SPELLS_FIRERAIN,1)
-                            end if
+                        if FireRainActivated[Counter] == 0
+                            FireRainActivated[Counter] = 1
+                            run background script AltarEpicsLogic(TownCentre,PlayerID,SPELLS_FIRERAIN,1)
                         end if
-                        if get research ARTEFACT_EPIC_WONDER_NUMBER_VOLCANO available == variable RESEARCH_AVAILABILITY_RESEARCHED or PlayerID >= 1
-                            if MeteorActivated[Counter] == 0
-                                MeteorActivated[Counter] = 1
-                                run background script AltarEpicsLogic(TownCentre,PlayerID,SPELLS_METEOR,1)
-                            end if
+                        if MeteorActivated[Counter] == 0
+                            MeteorActivated[Counter] = 1
+                            run background script AltarEpicsLogic(TownCentre,PlayerID,SPELLS_METEOR,1)
                         end if
 
                     elsif PlayerID == 0
@@ -136,161 +128,181 @@ start
 // Test = create visual effect VISUAL_EFFECT_TOWN_TAKEOVER_AGGRESSOR at {Building} + {30,40,30} time -1 PRE EFFECT
 // Test = create visual effect VISUAL_EFFECT_WEATHER_SANDSTORM at {Building} + {30,40,30} time -1 
 
-RelPos[0] = marker at get world position from Building to {19,0}
-RelPos[1] = marker at get world position from Building to {-19,0}
-RelPos[2] = marker at get world position from Building to {0,19}
-RelPos[3] = marker at get world position from Building to {0,-19}
+RelPos[SPELLS_REGROWTH] = marker at get world position from Building to {19,0}
+RelPos[SPELLS_FIRERAIN] = marker at get world position from Building to {-19,0}
+RelPos[SPELLS_THUNDERSTORM] = marker at get world position from Building to {0,19}
+RelPos[SPELLS_METEOR] = marker at get world position from Building to {0,-19}
 
 if whichSpell == SPELLS_REGROWTH
     //Regrowth, 10000 mana
-    Foundation[0] = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {RelPos[0]}
-    ANGLE of Foundation[0] = ANGLE of Building
-    SCALE of Foundation[0] = 3.25
-    ParticleEffect[0] = create visual effect VISUAL_MIRACLE_FIRE_SEED at {RelPos[0]} + {0,6,0} time -1 target {RelPos[0]} + {0,50,0}
-    set ParticleEffect[0] colour red 30 green 195 blue 30
-    SCALE of ParticleEffect[0] = 0.75
+    Foundation[SPELLS_REGROWTH] = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {RelPos[SPELLS_REGROWTH]}
+    ANGLE of Foundation[SPELLS_REGROWTH] = ANGLE of Building
+    SCALE of Foundation[SPELLS_REGROWTH] = 3.25
+    ParticleEffect[SPELLS_REGROWTH] = create visual effect VISUAL_MIRACLE_FIRE_SEED at {RelPos[SPELLS_REGROWTH]} + {0,6,0} time -1 target {RelPos[SPELLS_REGROWTH]} + {0,50,0}
+    set ParticleEffect[SPELLS_REGROWTH] colour red 30 green 195 blue 30
+    SCALE of ParticleEffect[SPELLS_REGROWTH] = 0.75
 
 elsif whichSpell == SPELLS_FIRERAIN
     //FireRain 20000 mana
-    Foundation[1] = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {RelPos[1]}
-    ANGLE of Foundation[1] = ANGLE of Building
-    SCALE of Foundation[1] = 3.25
-    ParticleEffect[1] = create visual effect VISUAL_MIRACLE_FIRE_SEED at {RelPos[1]} + {0,6,0} time -1 target {RelPos[1]} + {0,50,0}
-    SCALE of ParticleEffect[1] = 0.75
+    Foundation[SPELLS_FIRERAIN] = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {RelPos[SPELLS_FIRERAIN]}
+    ANGLE of Foundation[SPELLS_FIRERAIN] = ANGLE of Building
+    SCALE of Foundation[SPELLS_FIRERAIN] = 3.25
+    ParticleEffect[SPELLS_FIRERAIN] = create visual effect VISUAL_MIRACLE_FIRE_SEED at {RelPos[SPELLS_FIRERAIN]} + {0,6,0} time -1 target {RelPos[SPELLS_FIRERAIN]} + {0,50,0}
+    SCALE of ParticleEffect[SPELLS_FIRERAIN] = 0.75
 
 elsif whichSpell == SPELLS_THUNDERSTORM
     //ThunderStorm 30000 mana
-    Foundation[2] = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {RelPos[2]}
-    ANGLE of Foundation[2] = ANGLE of Building
-    SCALE of Foundation[2] = 3.25
-    ParticleEffect[2] = create visual effect VISUAL_MIRACLE_TORNODO_SEED at {RelPos[2]} + {0,6,0} time -1 target {RelPos[2]} + {0,50,0}
+    Foundation[SPELLS_THUNDERSTORM] = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {RelPos[SPELLS_THUNDERSTORM]}
+    ANGLE of Foundation[SPELLS_THUNDERSTORM] = ANGLE of Building
+    SCALE of Foundation[SPELLS_THUNDERSTORM] = 3.25
+    ParticleEffect[SPELLS_THUNDERSTORM] = create visual effect VISUAL_MIRACLE_TORNODO_SEED at {RelPos[SPELLS_THUNDERSTORM]} + {0,6,0} time -1 target {RelPos[SPELLS_THUNDERSTORM]} + {0,50,0}
     SCALE of ParticleEffect[2] = 0.75
 
 elsif whichSpell == SPELLS_METEOR
     //MeteorSpell 60000 mana
-    Foundation[3] = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {RelPos[3]}
-    ANGLE of Foundation[3] = ANGLE of Building
-    SCALE of Foundation[3] = 3.25
-    ParticleEffect[3] = create visual effect VISUAL_MIRACLE_METEOR_SEED at {RelPos[3]} + {0,6,0} time -1 target {RelPos[3]} + {0,50,0}
-    SCALE of ParticleEffect[3] = 0.75
+    Foundation[SPELLS_METEOR] = create FEATURE FEATURE_INFO_SEVEN_SAMURAI_BASE at {RelPos[SPELLS_METEOR]}
+    ANGLE of Foundation[SPELLS_METEOR] = ANGLE of Building
+    SCALE of Foundation[SPELLS_METEOR] = 3.25
+    ParticleEffect[SPELLS_METEOR] = create visual effect VISUAL_MIRACLE_METEOR_SEED at {RelPos[SPELLS_METEOR]} + {0,6,0} time -1 target {RelPos[SPELLS_METEOR]} + {0,50,0}
+    SCALE of ParticleEffect[SPELLS_METEOR] = 0.75
 
 end if
 
 //Check if useable
 begin loop
     if whichSpell == SPELLS_REGROWTH
+        // Spawn Charged Particle Effect
         if get player PlayerID mana >= SPELLS_MANACOST_REGROWTH
-            if ParticleEffect2[0] not exists
-                ParticleEffect2[0] = create visual effect VISUAL_EFFECT_MIRACLE_CHARGE at {RelPos[0]} + {0,1,0} time -1 target {RelPos[0]} + {0,50,0}
-                SCALE of ParticleEffect2[0] = 0.5
+            if ParticleEffect2[SPELLS_REGROWTH] not exists
+                ParticleEffect2[SPELLS_REGROWTH] = create visual effect VISUAL_EFFECT_MIRACLE_CHARGE at {RelPos[SPELLS_REGROWTH]} + {0,1,0} time -1 target {RelPos[SPELLS_REGROWTH]} + {0,50,0}
+                SCALE of ParticleEffect2[SPELLS_REGROWTH] = 0.5
             end if
+
+            // Spawn Miracle if clicked
             if AISwitch == 0
-                if bindable action BINDABLE_ACTION_TYPE_ACTION performed and not hand position near {Foundation[0]} radius 4
+                if bindable action BINDABLE_ACTION_TYPE_ACTION performed and not hand position near {Foundation[SPELLS_REGROWTH]} radius 4
                     wait until not bindable action BINDABLE_ACTION_TYPE_ACTION performed //Fix for using spell while holding down mouse button
                 end if
-                if bindable action BINDABLE_ACTION_TYPE_ACTION performed and hand position near {Foundation[0]} radius 4
+                if bindable action BINDABLE_ACTION_TYPE_ACTION performed and hand position near {Foundation[SPELLS_REGROWTH]} radius 4
                     delete Tooltip
                     run script RegrowthSpell(0,0)
                     wait 2 seconds
                 end if
             end if
-        else
-            if ParticleEffect2[0] exists
-                delete ParticleEffect2[0]
-            end if
+        elsif ParticleEffect2[SPELLS_REGROWTH] exists
+            delete ParticleEffect2[SPELLS_REGROWTH]
         end if
-        if hand position near {Foundation[0]} radius 4 and Tooltip not exists
+
+        // Show Message
+        if hand position near {Foundation[SPELLS_REGROWTH]} radius 4 and Tooltip not exists
             if Language == German or Language == Spanish
-                Tooltip = create tooltip on Foundation[0] with text "BW2T_VILLAGERMUMBLES_MANONFIREDIE_04"
+                Tooltip = create tooltip on Foundation[SPELLS_REGROWTH] with text "BW2T_VILLAGERMUMBLES_MANONFIREDIE_04"
             elsif Language == English
-                Tooltip = create tooltip on Foundation[0] with text "HELP_TEXT_MULTIPLAYER_SETUP_SPELL_10"
+                Tooltip = create tooltip on Foundation[SPELLS_REGROWTH] with text "HELP_TEXT_MULTIPLAYER_SETUP_SPELL_10"
             end if
         end if
-        if hand position not near {Foundation[0]} radius 4 + 1 and Tooltip exists
+
+        // Delete Message
+        if hand position not near {Foundation[SPELLS_REGROWTH]} radius 4 + 1 and Tooltip exists
             delete Tooltip
         end if
 
     elsif whichSpell == SPELLS_FIRERAIN
+        // Spawn Charged Particle Effect
         if get player PlayerID mana >= SPELLS_MANACOST_FIRERAIN
-            if ParticleEffect2[1] not exists
-                ParticleEffect2[1] = create visual effect VISUAL_EFFECT_MIRACLE_CHARGE at {RelPos[1]} + {0,1,0} time -1 target {RelPos[1]} + {0,50,0}
-                SCALE of ParticleEffect2[1] = 0.5
+            if ParticleEffect2[SPELLS_FIRERAIN] not exists
+                ParticleEffect2[SPELLS_FIRERAIN] = create visual effect VISUAL_EFFECT_MIRACLE_CHARGE at {RelPos[SPELLS_FIRERAIN]} + {0,1,0} time -1 target {RelPos[SPELLS_FIRERAIN]} + {0,50,0}
+                SCALE of ParticleEffect2[SPELLS_FIRERAIN] = 0.5
             end if
+
+            // Spawn Miracle if clicked
             if AISwitch == 0
-                if bindable action BINDABLE_ACTION_TYPE_ACTION performed and not hand position near {Foundation[1]} radius 4
+                if bindable action BINDABLE_ACTION_TYPE_ACTION performed and not hand position near {Foundation[SPELLS_FIRERAIN]} radius 4
                     wait until not bindable action BINDABLE_ACTION_TYPE_ACTION performed //Fix for using spell while holding down mouse button
                 end if
-                if bindable action BINDABLE_ACTION_TYPE_ACTION performed and hand position near {Foundation[1]} radius 4
+                if bindable action BINDABLE_ACTION_TYPE_ACTION performed and hand position near {Foundation[SPELLS_FIRERAIN]} radius 4
                     delete Tooltip
                     run script FirerainSpell(0,0)
                     wait 2 seconds
                 end if
             end if
-        else
-            if ParticleEffect2[1] exists
-                delete ParticleEffect2[1]
-            end if
+        elsif ParticleEffect2[SPELLS_FIRERAIN] exists
+            delete ParticleEffect2[SPELLS_FIRERAIN]
         end if
-        if hand position near {Foundation[1]} radius 4 and Tooltip not exists
-            Tooltip = create tooltip on Foundation[1] with text "BW2_TEXT_CREATURE_ACTION_TEXT_1100"
+
+        // Show Message
+        if hand position near {Foundation[SPELLS_FIRERAIN]} radius 4 and Tooltip not exists
+            Tooltip = create tooltip on Foundation[SPELLS_FIRERAIN] with text "BW2_TEXT_CREATURE_ACTION_TEXT_1100"
         end if
-        if hand position not near {Foundation[1]} radius 4 + 1 and Tooltip exists
+
+        // Delete Message
+        if hand position not near {Foundation[SPELLS_FIRERAIN]} radius 4 + 1 and Tooltip exists
             delete Tooltip
         end if
 
-    elsif whichSpell == SPELLS_MANACOST_THUNDERSTORM
-        if get player PlayerID mana >= 30000
-            if ParticleEffect2[2] not exists
-                ParticleEffect2[2] = create visual effect VISUAL_EFFECT_MIRACLE_CHARGE at {RelPos[2]} + {0,1,0} time -1 target {RelPos[2]} + {0,50,0}
-                SCALE of ParticleEffect2[2] = 0.5
+    elsif whichSpell == SPELLS_THUNDERSTORM
+        // Spawn Charged Particle Effect
+        if get player PlayerID mana >= SPELLS_MANACOST_THUNDERSTORM
+            if ParticleEffect2[SPELLS_THUNDERSTORM] not exists
+                ParticleEffect2[SPELLS_THUNDERSTORM] = create visual effect VISUAL_EFFECT_MIRACLE_CHARGE at {RelPos[SPELLS_THUNDERSTORM]} + {0,1,0} time -1 target {RelPos[SPELLS_THUNDERSTORM]} + {0,50,0}
+                SCALE of ParticleEffect2[SPELLS_THUNDERSTORM] = 0.5
             end if
+
+            // Spawn Miracle if clicked
             if AISwitch == 0
-                if bindable action BINDABLE_ACTION_TYPE_ACTION performed and not hand position near {Foundation[2]} radius 4
+                if bindable action BINDABLE_ACTION_TYPE_ACTION performed and not hand position near {Foundation[SPELLS_THUNDERSTORM]} radius 4
                     wait until not bindable action BINDABLE_ACTION_TYPE_ACTION performed //Fix for using spell while holding down mouse button
                 end if
-                if bindable action BINDABLE_ACTION_TYPE_ACTION performed and hand position near {Foundation[2]} radius 4
+                if bindable action BINDABLE_ACTION_TYPE_ACTION performed and hand position near {Foundation[SPELLS_THUNDERSTORM]} radius 4
                     delete Tooltip
                     run script ThunderstormSpell(0,0)
                     wait 2 seconds
                 end if
             end if
-        else
-            if ParticleEffect2[2] exists
-                delete ParticleEffect2[2]
-            end if
+        elsif ParticleEffect2[SPELLS_THUNDERSTORM] exists
+            delete ParticleEffect2[SPELLS_THUNDERSTORM]
         end if
-        if hand position near {Foundation[2]} radius 4 and Tooltip not exists
-            Tooltip = create tooltip on Foundation[2] with text "BW2_TEXT_CREATURE_LEARNING_LESSON_2540"
+
+        // Show Message
+        if hand position near {Foundation[SPELLS_THUNDERSTORM]} radius 4 and Tooltip not exists
+            Tooltip = create tooltip on Foundation[SPELLS_THUNDERSTORM] with text "BW2_TEXT_CREATURE_LEARNING_LESSON_2540"
         end if
-        if hand position not near {Foundation[2]} radius 4 + 1 and Tooltip exists
+
+        // Delete Message
+        if hand position not near {Foundation[SPELLS_THUNDERSTORM]} radius 4 + 1 and Tooltip exists
             delete Tooltip
         end if
 
     elsif whichSpell == SPELLS_METEOR
+        // Spawn Charged Particle Effect
         if get player PlayerID mana >= SPELLS_MANACOST_METEOR
-            if ParticleEffect2[3] not exists
-                ParticleEffect2[3] = create visual effect VISUAL_EFFECT_MIRACLE_CHARGE at {RelPos[3]} + {0,1,0} time -1 target {RelPos[3]} + {0,50,0}
-                SCALE of ParticleEffect2[3] = 0.5
+            if ParticleEffect2[SPELLS_METEOR] not exists
+                ParticleEffect2[SPELLS_METEOR] = create visual effect VISUAL_EFFECT_MIRACLE_CHARGE at {RelPos[SPELLS_METEOR]} + {0,1,0} time -1 target {RelPos[SPELLS_METEOR]} + {0,50,0}
+                SCALE of ParticleEffect2[SPELLS_METEOR] = 0.5
             end if
+
+            // Spawn Miracle if clicked
             if AISwitch == 0
-                if bindable action BINDABLE_ACTION_TYPE_ACTION performed and not hand position near {Foundation[3]} radius 4
+                if bindable action BINDABLE_ACTION_TYPE_ACTION performed and not hand position near {Foundation[SPELLS_METEOR]} radius 4
                     wait until not bindable action BINDABLE_ACTION_TYPE_ACTION performed //Fix for using spell while holding down mouse button
                 end if
-                if bindable action BINDABLE_ACTION_TYPE_ACTION performed and hand position near {Foundation[3]} radius 4
+                if bindable action BINDABLE_ACTION_TYPE_ACTION performed and hand position near {Foundation[SPELLS_METEOR]} radius 4
                     delete Tooltip
                     run script MeteorSpell(0,0)
                     wait 2 seconds
                 end if
             end if
-        else
-            if ParticleEffect2[3] exists
-                delete ParticleEffect2[3]
-            end if
+        elsif ParticleEffect2[SPELLS_METEOR] exists
+            delete ParticleEffect2[SPELLS_METEOR]
         end if
-        if hand position near {Foundation[3]} radius 4 and Tooltip not exists
-            Tooltip = create tooltip on Foundation[3] with text "BW2_TEXT_MAKE_SCARED_STIFF"
+
+        // Show Message
+        if hand position near {Foundation[SPELLS_METEOR]} radius 4 and Tooltip not exists
+            Tooltip = create tooltip on Foundation[SPELLS_METEOR] with text "BW2_TEXT_MAKE_SCARED_STIFF"
         end if
-        if hand position not near {Foundation[3]} radius 4 + 1 and Tooltip exists
+
+        // Delete Message
+        if hand position not near {Foundation[SPELLS_METEOR]} radius 4 + 1 and Tooltip exists
             delete Tooltip
         end if
 
@@ -299,7 +311,7 @@ begin loop
     until Building not exists
 end loop
 
-while Counter < 6
+while Counter < SPELLS_MAX
     if Foundation[Counter] exists
         delete Foundation[Counter]
     end if
