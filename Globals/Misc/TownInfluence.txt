@@ -31,12 +31,13 @@ end script TownInfluenceScriptmanager
 
 begin script TownInfluenceExtender
 
-    Triggers[9]
+    InfluenceBuildingsLevel = 0
     PlayerThreshold = 0
     PlayerThresholdPrev = 0
     TownCounter = 0
     InfluenceMultiplicator[MAX_TOWNS]
-    Town[MAX_TOWNS]//15 Towns max. supported
+    InfluenceDivider = 1.5 // Nerf it since buildings extend influence again
+    Town[MAX_TOWNS]
     TownInfluence[MAX_TOWNS]
     TownEnemyInfluence[MAX_TOWNS]
     TownSize = 0
@@ -49,134 +50,134 @@ begin loop
         TownCounter = 0
     end if
 
-    if get total of stat STATS_EVT_BUILDINGS_BUILT > 5 and Triggers[0] == 0
-        Triggers[0] = 1
+    if get total of stat STATS_EVT_BUILDINGS_BUILT > 5 and InfluenceBuildingsLevel == 0
+        InfluenceBuildingsLevel = 1
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 10 and Triggers[0] == 1
-        Triggers[0] = 2
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 10 and InfluenceBuildingsLevel == 1
+        InfluenceBuildingsLevel = 2
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 15 and Triggers[0] == 2
-        Triggers[0] = 3
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 15 and InfluenceBuildingsLevel == 2
+        InfluenceBuildingsLevel = 3
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 20 and Triggers[0] == 3
-        Triggers[0] = 4
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 20 and InfluenceBuildingsLevel == 3
+        InfluenceBuildingsLevel = 4
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 25 and Triggers[0] == 4
-        Triggers[0] = 5
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 25 and InfluenceBuildingsLevel == 4
+        InfluenceBuildingsLevel = 5
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 30 and Triggers[0] == 5
-        Triggers[0] = 6
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 30 and InfluenceBuildingsLevel == 5
+        InfluenceBuildingsLevel = 6
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 35 and Triggers[0] == 6
-        Triggers[0] = 7
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 35 and InfluenceBuildingsLevel == 6
+        InfluenceBuildingsLevel = 7
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 40 and Triggers[0] == 7
-        Triggers[0] = 8
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 40 and InfluenceBuildingsLevel == 7
+        InfluenceBuildingsLevel = 8
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 45 and Triggers[0] == 8
-        Triggers[0] = 9
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 45 and InfluenceBuildingsLevel == 8
+        InfluenceBuildingsLevel = 9
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 50 and Triggers[0] == 9
-        Triggers[0] = 10
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 50 and InfluenceBuildingsLevel == 9
+        InfluenceBuildingsLevel = 10
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 55 and Triggers[0] == 10
-        Triggers[0] = 11
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 55 and InfluenceBuildingsLevel == 10
+        InfluenceBuildingsLevel = 11
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 60 and Triggers[0] == 11
-        Triggers[0] = 12
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 60 and InfluenceBuildingsLevel == 11
+        InfluenceBuildingsLevel = 12
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 65 and Triggers[0] == 12
-        Triggers[0] = 13
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 65 and InfluenceBuildingsLevel == 12
+        InfluenceBuildingsLevel = 13
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 70 and Triggers[0] == 13
-        Triggers[0] = 14
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 70 and InfluenceBuildingsLevel == 13
+        InfluenceBuildingsLevel = 14
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 75 and Triggers[0] == 14
-        Triggers[0] = 15
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 75 and InfluenceBuildingsLevel == 14
+        InfluenceBuildingsLevel = 15
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 80 and Triggers[0] == 15
-        Triggers[0] = 16
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 80 and InfluenceBuildingsLevel == 15
+        InfluenceBuildingsLevel = 16
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 85 and Triggers[0] == 16
-        Triggers[0] = 17
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 85 and InfluenceBuildingsLevel == 16
+        InfluenceBuildingsLevel = 17
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 90 and Triggers[0] == 17
-        Triggers[0] = 18
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 90 and InfluenceBuildingsLevel == 17
+        InfluenceBuildingsLevel = 18
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 95 and Triggers[0] == 18
-        Triggers[0] = 19
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 95 and InfluenceBuildingsLevel == 18
+        InfluenceBuildingsLevel = 19
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 100 and Triggers[0] == 19
-        Triggers[0] = 20
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 100 and InfluenceBuildingsLevel == 19
+        InfluenceBuildingsLevel = 20
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 105 and Triggers[0] == 20
-        Triggers[0] = 21
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 105 and InfluenceBuildingsLevel == 20
+        InfluenceBuildingsLevel = 21
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 110 and Triggers[0] == 21
-        Triggers[0] = 22
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 110 and InfluenceBuildingsLevel == 21
+        InfluenceBuildingsLevel = 22
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 115 and Triggers[0] == 22
-        Triggers[0] = 23
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 115 and InfluenceBuildingsLevel == 22
+        InfluenceBuildingsLevel = 23
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 120 and Triggers[0] == 23
-        Triggers[0] = 24
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 120 and InfluenceBuildingsLevel == 23
+        InfluenceBuildingsLevel = 24
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 125 and Triggers[0] == 24
-        Triggers[0] = 25
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 125 and InfluenceBuildingsLevel == 24
+        InfluenceBuildingsLevel = 25
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 130 and Triggers[0] == 25
-        Triggers[0] = 26
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 130 and InfluenceBuildingsLevel == 25
+        InfluenceBuildingsLevel = 26
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 135 and Triggers[0] == 26
-        Triggers[0] = 27
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 135 and InfluenceBuildingsLevel == 26
+        InfluenceBuildingsLevel = 27
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 140 and Triggers[0] == 27
-        Triggers[0] = 28
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 140 and InfluenceBuildingsLevel == 27
+        InfluenceBuildingsLevel = 28
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 145 and Triggers[0] == 28
-        Triggers[0] = 29
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 145 and InfluenceBuildingsLevel == 28
+        InfluenceBuildingsLevel = 29
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 150 and Triggers[0] == 29
-        Triggers[0] = 30
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 150 and InfluenceBuildingsLevel == 29
+        InfluenceBuildingsLevel = 30
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 155 and Triggers[0] == 30
-        Triggers[0] = 31
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 155 and InfluenceBuildingsLevel == 30
+        InfluenceBuildingsLevel = 31
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 160 and Triggers[0] == 31
-        Triggers[0] = 32
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 160 and InfluenceBuildingsLevel == 31
+        InfluenceBuildingsLevel = 32
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 165 and Triggers[0] == 32
-        Triggers[0] = 33
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 165 and InfluenceBuildingsLevel == 32
+        InfluenceBuildingsLevel = 33
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 170 and Triggers[0] == 33
-        Triggers[0] = 34
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 170 and InfluenceBuildingsLevel == 33
+        InfluenceBuildingsLevel = 34
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 175 and Triggers[0] == 34
-        Triggers[0] = 35
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 175 and InfluenceBuildingsLevel == 34
+        InfluenceBuildingsLevel = 35
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 180 and Triggers[0] == 35
-        Triggers[0] = 36
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 180 and InfluenceBuildingsLevel == 35
+        InfluenceBuildingsLevel = 36
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 185 and Triggers[0] == 36
-        Triggers[0] = 37
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 185 and InfluenceBuildingsLevel == 36
+        InfluenceBuildingsLevel = 37
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 190 and Triggers[0] == 37
-        Triggers[0] = 38
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 190 and InfluenceBuildingsLevel == 37
+        InfluenceBuildingsLevel = 38
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 195 and Triggers[0] == 38
-        Triggers[0] = 39
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 195 and InfluenceBuildingsLevel == 38
+        InfluenceBuildingsLevel = 39
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 200 and Triggers[0] == 39
-        Triggers[0] = 40
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 200 and InfluenceBuildingsLevel == 39
+        InfluenceBuildingsLevel = 40
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 205 and Triggers[0] == 40
-        Triggers[0] = 41
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 205 and InfluenceBuildingsLevel == 40
+        InfluenceBuildingsLevel = 41
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 210 and Triggers[0] == 41
-        Triggers[0] = 42
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 210 and InfluenceBuildingsLevel == 41
+        InfluenceBuildingsLevel = 42
         PlayerThreshold += 1.25
-    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 215 and Triggers[0] == 42
-        Triggers[0] = 43
+    elsif get total of stat STATS_EVT_BUILDINGS_BUILT > 215 and InfluenceBuildingsLevel == 42
+        InfluenceBuildingsLevel = 43
         PlayerThreshold += 1.25
     end if
 
@@ -186,18 +187,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += 1
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 15) and TownInfluence[TownCounter] == 1
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= 1
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -206,18 +207,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel1
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 30) and TownInfluence[TownCounter] == 2
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel1
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -226,18 +227,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel1
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 45) and TownInfluence[TownCounter] == 3
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel1
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -246,18 +247,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel1
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 60) and TownInfluence[TownCounter] == 4
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel1
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -266,18 +267,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel1
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 75) and TownInfluence[TownCounter] == 5
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel1
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -286,18 +287,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel2
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 90) and TownInfluence[TownCounter] == 6
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel2
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -306,18 +307,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel2
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 105) and TownInfluence[TownCounter] == 7
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel2
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -326,18 +327,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel2
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 120) and TownInfluence[TownCounter] == 8
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel2
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -346,18 +347,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel2
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 135) and TownInfluence[TownCounter] == 9
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel2
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -366,18 +367,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel2
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 150) and TownInfluence[TownCounter] == 10
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel2
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -386,18 +387,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel2
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 165) and TownInfluence[TownCounter] == 11
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel2
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -406,18 +407,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel3
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 180) and TownInfluence[TownCounter] == 12
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel3
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -426,18 +427,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel3
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 195) and TownInfluence[TownCounter] == 13
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel3
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -446,18 +447,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel3
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 210) and TownInfluence[TownCounter] == 14
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel3
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -466,18 +467,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel3
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 225) and TownInfluence[TownCounter] == 15
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel3
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -486,18 +487,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel3
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 240) and TownInfluence[TownCounter] == 16
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel3
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -506,18 +507,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel3
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 255) and TownInfluence[TownCounter] == 17
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel3
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -526,18 +527,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel3
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 270) and TownInfluence[TownCounter] == 18
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel3
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -546,18 +547,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel3
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 285) and TownInfluence[TownCounter] == 19
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel3
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -566,18 +567,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel4
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 300) and TownInfluence[TownCounter] == 20
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel4
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -586,18 +587,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel4
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 315) and TownInfluence[TownCounter] == 21
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel4
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -606,18 +607,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel4
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 330) and TownInfluence[TownCounter] == 22
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel4
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -626,18 +627,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel4
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 345) and TownInfluence[TownCounter] == 23
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel4
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -646,18 +647,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel4
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 360) and TownInfluence[TownCounter] == 24
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel4
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -666,18 +667,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel4
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 375) and TownInfluence[TownCounter] == 25
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel4
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -686,18 +687,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel4
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 390) and TownInfluence[TownCounter] == 26
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel4
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -706,18 +707,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel4
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 405) and TownInfluence[TownCounter] == 27
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel4
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -726,18 +727,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel4
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 420) and TownInfluence[TownCounter] == 28
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel4
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -746,18 +747,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel4
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 435) and TownInfluence[TownCounter] == 29
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel4
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -766,18 +767,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel5
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 450) and TownInfluence[TownCounter] == 30
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel5
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -786,18 +787,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel5
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 465) and TownInfluence[TownCounter] == 31
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel5
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -806,18 +807,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel5
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 480) and TownInfluence[TownCounter] == 32
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel5
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -826,18 +827,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel5
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 495) and TownInfluence[TownCounter] == 33
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel5
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -846,18 +847,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel5
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 510) and TownInfluence[TownCounter] == 34
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel5
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -866,18 +867,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel5
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 525) and TownInfluence[TownCounter] == 35
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel5
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -886,18 +887,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel5
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 540) and TownInfluence[TownCounter] == 36
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel5
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -906,18 +907,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel5
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 555) and TownInfluence[TownCounter] == 37
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel5
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -926,18 +927,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel5
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 570) and TownInfluence[TownCounter] == 38
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel5
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -946,18 +947,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel5
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 585) and TownInfluence[TownCounter] == 39
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel5
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -966,18 +967,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel5
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 600) and TownInfluence[TownCounter] == 40
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel5
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -986,18 +987,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel5
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 615) and TownInfluence[TownCounter] == 41
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel5
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -1006,18 +1007,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel5
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 630) and TownInfluence[TownCounter] == 42
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel5
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -1026,18 +1027,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel5
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 645) and TownInfluence[TownCounter] == 43
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel5
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -1046,18 +1047,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel5
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 660) and TownInfluence[TownCounter] == 44
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel5
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -1066,18 +1067,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel5
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 675) and TownInfluence[TownCounter] == 45
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel5
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -1086,18 +1087,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel5
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 690) and TownInfluence[TownCounter] == 46
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel5
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -1106,18 +1107,18 @@ begin loop
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel5
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 705) and TownInfluence[TownCounter] == 47
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel5
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -1127,18 +1128,18 @@ begin loop
             TownInfluence[TownCounter] = 48
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel5
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         elsif (size of Town[TownCounter] < 720) and TownInfluence[TownCounter] == 48
             TownInfluence[TownCounter] = 47
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel5
             if CH_InfluenceCheatActivated == 0
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 1
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 1
             elsif CH_InfluenceCheatActivated == 1
-                extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / 0.5
+                extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter] + PlayerThreshold) / InfluenceDivider) / 0.5
             end if
 
         end if
@@ -1146,576 +1147,576 @@ begin loop
         if size of Town[TownCounter] >= 15 and TownInfluence[TownCounter] == 0 //1
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += 1
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 15) and TownInfluence[TownCounter] == 1
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= 1
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 30  and TownInfluence[TownCounter] == 1 //2
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel1
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 30) and TownInfluence[TownCounter] == 2
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel1
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 45 and TownInfluence[TownCounter] == 2 //3
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel1
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 45) and TownInfluence[TownCounter] == 3
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel1
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 60 and TownInfluence[TownCounter] == 3 //4
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel1
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 60) and TownInfluence[TownCounter] == 4
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel1
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 75 and TownInfluence[TownCounter] == 4 //5
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel1
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 75) and TownInfluence[TownCounter] == 5
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel1
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 90 and TownInfluence[TownCounter] == 5 //6
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel2
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 90) and TownInfluence[TownCounter] == 6
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel2
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
     
         if size of Town[TownCounter] >= 105 and TownInfluence[TownCounter] == 6 //7
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel2
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 105) and TownInfluence[TownCounter] == 7
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel2
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 120 and TownInfluence[TownCounter] == 7 //8
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel2
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 120) and TownInfluence[TownCounter] == 8
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel2
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 135 and TownInfluence[TownCounter] == 8 //9
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel2
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 135) and TownInfluence[TownCounter] == 9
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel2
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 150 and TownInfluence[TownCounter] == 9 //10
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel2
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 150) and TownInfluence[TownCounter] == 10
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel2
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 165 and TownInfluence[TownCounter] == 10 //11
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel2
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 165) and TownInfluence[TownCounter] == 11
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel2
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 180 and TownInfluence[TownCounter] == 11 //12
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel3
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 180) and TownInfluence[TownCounter] == 12
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel3
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 195 and TownInfluence[TownCounter] == 12 //13
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel3
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 195) and TownInfluence[TownCounter] == 13
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel3
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 210 and TownInfluence[TownCounter] == 13 //14
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel3
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 210) and TownInfluence[TownCounter] == 14
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel3
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 225 and TownInfluence[TownCounter] == 14 //15
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel3
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 225) and TownInfluence[TownCounter] == 15
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel3
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
     
         if size of Town[TownCounter] >= 240 and TownInfluence[TownCounter] == 15 //16
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel3
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 240) and TownInfluence[TownCounter] == 16
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel3
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 255 and TownInfluence[TownCounter] == 16 //17
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel3
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 255) and TownInfluence[TownCounter] == 17
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel3
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 270 and TownInfluence[TownCounter] == 17 //18
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel3
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 270) and TownInfluence[TownCounter] == 18
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel3
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 285 and TownInfluence[TownCounter] == 18 //19
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel3
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 285) and TownInfluence[TownCounter] == 19
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel3
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 300 and TownInfluence[TownCounter] == 19 //20
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel4
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 300) and TownInfluence[TownCounter] == 20
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel4
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 315 and TownInfluence[TownCounter] == 20 //21
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel4
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 315) and TownInfluence[TownCounter] == 21
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel4
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 330 and TownInfluence[TownCounter] == 21 //22
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel4
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 330) and TownInfluence[TownCounter] == 22
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel4
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 345 and TownInfluence[TownCounter] == 22 //23
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel4
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 345) and TownInfluence[TownCounter] == 23
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel4
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 360 and TownInfluence[TownCounter] == 23 //24
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel4
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 360) and TownInfluence[TownCounter] == 24
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel4
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 375 and TownInfluence[TownCounter] == 24 //25
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel4
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 375) and TownInfluence[TownCounter] == 25
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel4
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 390 and TownInfluence[TownCounter] == 25 //26
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel4
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 390) and TownInfluence[TownCounter] == 26
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel4
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 405 and TownInfluence[TownCounter] == 26 //27
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel4
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 405) and TownInfluence[TownCounter] == 27
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel4
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 420 and TownInfluence[TownCounter] == 27 //28
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel4
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 420) and TownInfluence[TownCounter] == 28
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel4
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 435 and TownInfluence[TownCounter] == 28 //29
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel4
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 435) and TownInfluence[TownCounter] == 29
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel4
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 450 and TownInfluence[TownCounter] == 29 //30
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel5
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 450) and TownInfluence[TownCounter] == 30
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel5
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 465 and TownInfluence[TownCounter] == 30 //31
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel5
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 465) and TownInfluence[TownCounter] == 31
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel5
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 480 and TownInfluence[TownCounter] == 31 //32
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel5
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 480) and TownInfluence[TownCounter] == 32
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel5
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 495 and TownInfluence[TownCounter] == 32 //33
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel5
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 495) and TownInfluence[TownCounter] == 33
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel5
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 510 and TownInfluence[TownCounter] == 33 //34
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel5
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 510) and TownInfluence[TownCounter] == 34
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel5
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 525 and TownInfluence[TownCounter] == 34 //35
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel5
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 525) and TownInfluence[TownCounter] == 35
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel5
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 540 and TownInfluence[TownCounter] == 35 //36
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel5
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 540) and TownInfluence[TownCounter] == 36
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel5
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 555 and TownInfluence[TownCounter] == 36 //37
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel5
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 555) and TownInfluence[TownCounter] == 37
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel5
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 570 and TownInfluence[TownCounter] == 37 //38
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel5
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 570) and TownInfluence[TownCounter] == 38
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel5
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 585 and TownInfluence[TownCounter] == 38 //39
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel5
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 585) and TownInfluence[TownCounter] == 39
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel5
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 600 and TownInfluence[TownCounter] == 39 //40
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel5
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 600) and TownInfluence[TownCounter] == 40
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel5
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 615 and TownInfluence[TownCounter] == 40 //41
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel5
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 615) and TownInfluence[TownCounter] == 41
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel5
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 630 and TownInfluence[TownCounter] == 41 //42
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel5
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 630) and TownInfluence[TownCounter] == 42
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel5
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 645 and TownInfluence[TownCounter] == 42 //43
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel5
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 645) and TownInfluence[TownCounter] == 43
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel5
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 660 and TownInfluence[TownCounter] == 43 //44
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel5
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 660) and TownInfluence[TownCounter] == 44
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel5
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 675 and TownInfluence[TownCounter] == 44 //45
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel5
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 675) and TownInfluence[TownCounter] == 45
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel5
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 690 and TownInfluence[TownCounter] == 45 //46
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel5
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 690) and TownInfluence[TownCounter] == 46
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel5
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if size of Town[TownCounter] >= 705 and TownInfluence[TownCounter] == 46 //47
             TownInfluence[TownCounter] += 1
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel5
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 705) and TownInfluence[TownCounter] == 47
             TownInfluence[TownCounter] -= 1
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel5
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
 
         if (size of Town[TownCounter] >= 720 and TownInfluence[TownCounter] == 47) //48
             TownInfluence[TownCounter] = 48
             InfluenceMultiplicator[TownCounter] += InfluenceBonusLevel5
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         elsif (size of Town[TownCounter] < 720) and TownInfluence[TownCounter] == 48
             TownInfluence[TownCounter] = 47
             InfluenceMultiplicator[TownCounter] -= InfluenceBonusLevel5
-            extend town Town[TownCounter] influence by (InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / 1
+            extend town Town[TownCounter] influence by ((InfluenceBaseValue * InfluenceMultiplicator[TownCounter]) / InfluenceDivider) / 1
 
         end if
     else //Reset if town has been captured
